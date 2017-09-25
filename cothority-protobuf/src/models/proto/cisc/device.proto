@@ -1,0 +1,8 @@
+syntax = "proto2";
+
+option java_package = "ch.epfl.dedis.proto";
+option java_outer_classname = "DeviceProto";
+
+message Device {
+    required bytes point = 1;
+}

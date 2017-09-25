@@ -1,0 +1,38 @@
+syntax = "proto2";
+
+import "final-statement.proto";
+import "pop-desc.proto";
+
+option java_package = "ch.epfl.dedis.proto";
+option java_outer_classname = "ConfigProto";
+
+message CheckConfig {
+    required bytes pop_hash = 1;
+    required bytes attendees = 2;
+}
+
+message CheckConfigReply {
+    required sint32 pop_status = 1;
+    required bytes pop_hash = 2;
+    required bytes attendees = 3;
+}
+
+message MergeConfig {
+    required FinalStatement final = 1;
+    required bytes id = 2;
+}
+
+message MergeConfigReply {
+    required sint32 pop_status = 1;
+    required bytes pop_hash = 2;
+    required FinalStatement final = 3;
+}
+
+message StoreConfig {
+    required PopDesc desc = 1;
+    optional bytes signature = 2;
+}
+
+message StoreConfigReply {
+    required bytes id = 1;
+}

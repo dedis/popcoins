@@ -1,0 +1,9 @@
+syntax = "proto2";
+
+option java_package = "ch.epfl.dedis.proto";
+option java_outer_classname = "SchnorrSigProto";
+
+message SchnorrSig {
+    required bytes challenge = 1;
+    required bytes response = 2;
+}

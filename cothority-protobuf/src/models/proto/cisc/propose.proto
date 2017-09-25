@@ -1,0 +1,26 @@
+syntax = "proto2";
+
+import "config.proto";
+import "schnorr-sig.proto";
+
+option java_package = "ch.epfl.dedis.proto";
+option java_outer_classname = "ProposeProto";
+
+message ProposeVote {
+    required bytes id = 1;
+    required string signer = 2;
+    required SchnorrSig signature = 3;
+}
+
+message ProposeSend {
+    required bytes id = 1;
+    required Config config = 2;
+}
+
+message ProposeUpdate {
+    required bytes id = 1;
+}
+
+message ProposeUpdateReply {
+    required Config propose = 1;
+}
