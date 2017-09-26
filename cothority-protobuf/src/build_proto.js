@@ -7,16 +7,21 @@ const ROOT = new Protobuf.Root();
 
 ROOT.define("cothority");
 
-function filesRollUp(error, path, dirs, items) {
-  items.forEach(file => {
-    console.log(file);
+Files.walk("src/models/proto", (error, path, dirs, files) => {
+  console.log("#Path:");
+  console.log(path);
+  console.log("#Dirs:");
+  console.log(dirs);
+  console.log("#Files:");
+  console.log(files);
 
+  files.forEach(file => {
     if (REGEX.test(file)) {
       ROOT.loadSync(file);
     }
   });
 
-  FileSystem.writeFileSync("../build/skeleton.js", `export default '${JSON.stringify(ROOT.toJSON())}';`);
-}
-
-Files.walk("models/proto", filesRollUp());
+  FileSystem.writeFileSync("build/skeleton.js", `export default '${JSON.stringify(ROOT.toJSON())}';`);
+  console.log("##############################");
+  console.log("##############################");
+});
