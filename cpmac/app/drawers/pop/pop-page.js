@@ -1,6 +1,6 @@
 const frameModule = require("ui/frame");
 
-const BrowseViewModel = require("./pop-view-model");
+const PopViewModel = require("./pop-view-model");
 
 /* ***********************************************************
 * Use the "onNavigatingTo" handler to initialize the page binding context.
@@ -16,7 +16,7 @@ function onNavigatingTo(args) {
     }
 
     const page = args.object;
-    page.bindingContext = new BrowseViewModel();
+    page.bindingContext = new PopViewModel();
 }
 
 /* ***********************************************************

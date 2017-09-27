@@ -1,6 +1,6 @@
 const observableModule = require("data/observable");
 
-function BrowseViewModel() {
+function PopViewModel() {
     const viewModel = observableModule.fromObject({
 
     });
@@ -8,4 +8,4 @@ function BrowseViewModel() {
     return viewModel;
 }
 
-module.exports = BrowseViewModel;
+module.exports = PopViewModel;
