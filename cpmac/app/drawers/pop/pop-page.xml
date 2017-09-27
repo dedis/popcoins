@@ -58,7 +58,7 @@
         -->
         <nsDrawer:RadSideDrawer.mainContent>
             <GridLayout class="page-content">
-                <Label class="page-icon fa" text="&#xf1ea;"></Label>
+                <Label class="page-icon fa" text="&#xf0a1;"></Label>
                 <Label class="page-placeholder" text="<!-- Page content goes here -->"></Label>
             </GridLayout>
         </nsDrawer:RadSideDrawer.mainContent>
