@@ -7,6 +7,9 @@
     "id": "org.nativescript.cpmac",
     "tns-ios": {
       "version": "3.2.0"
+    },
+    "tns-android": {
+      "version": "3.2.0"
     }
   },
   "scripts": {
@@ -18,7 +21,11 @@
     "tns-core-modules": "3.1.1"
   },
   "devDependencies": {
+    "babel-traverse": "6.26.0",
+    "babel-types": "6.26.0",
+    "babylon": "6.18.0",
     "eslint": "4.4.1",
+    "lazy": "1.0.11",
     "nativescript-dev-sass": "1.3.0",
     "node-sass": "4.5.3"
   }
