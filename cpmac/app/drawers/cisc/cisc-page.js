@@ -1,6 +1,6 @@
 const frameModule = require("ui/frame");
 
-const SearchViewModel = require("./cisc-view-model");
+const CiscPageViewModel = require("./cisc-view-model");
 
 /* ***********************************************************
 * Use the "onNavigatingTo" handler to initialize the page binding context.
@@ -16,7 +16,7 @@ function onNavigatingTo(args) {
     }
 
     const page = args.object;
-    page.bindingContext = new SearchViewModel();
+    page.bindingContext = new CiscPageViewModel();
 }
 
 /* ***********************************************************

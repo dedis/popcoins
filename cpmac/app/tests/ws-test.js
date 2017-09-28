@@ -1,7 +1,7 @@
 const WS = require("~/shared/lib/ws/ws");
 
 QUnit.test("WebSocket Test", assert => {
-  assert.equal("Hello!!!!!!!!!!!!!!!! Send this back to meeeeeee!", WS.testMyWebSocket(message => message),
+  assert.equal("Hello!!!!!!!!!!!!!!!! Send this back to meeeeeee!", WS.testMyWebSocket((message) => message),
                "Echo was equal to sent message.");
 });
 
