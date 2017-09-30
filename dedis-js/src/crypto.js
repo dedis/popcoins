@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /** @module crypto */
 
@@ -12,27 +12,27 @@ exports.extractDataFromPoint = extractDataFromPoint;
 exports.schnorrSign = schnorrSign;
 exports.schnorrVerify = schnorrVerify;
 
-const EC = require('elliptic').ec
-const curve = new EC('ed25519');
-const hash = require('hash.js');
-const BN = require('bn.js');
+const EC = require("elliptic").ec;
+const curve = new EC("ed25519");
+const hash = require("hash.js");
+const BN = require("bn.js");
 
-const misc = require('./misc');
+const misc = require("./misc");
 
 /**
  * Convert a ed25519 curve point into a byte representation.
- * {@link github.com/dedis/kyber/blob/master/group/edwards25519/ge.go#L99}. 
+ * {@link github.com/dedis/kyber/blob/master/group/edwards25519/ge.go#L99}.
  * @param {object} point elliptic.js curve point
  *
  * @return {Uint8Array} byte representation
  */
 function marshal(point) {
-    point.normalize();
+  point.normalize();
 
-    const buffer = misc.hexToUint8Array(point.y.toString(16, 2));
-    buffer[0] ^= (point.x.isOdd() ? 1 : 0) << 7;
+  const buffer = misc.hexToUint8Array(point.y.toString(16, 2));
+  buffer[0] ^= (point.x.isOdd() ? 1 : 0) << 7;
 
-    return buffer.reverse();
+  return buffer.reverse();
 }
 
 /**
@@ -42,17 +42,19 @@ function marshal(point) {
  *
  * @throws {TypeError} when bytes is not Uint8Array
  * @throws {Error} when bytes does not correspond to a valid point
- * @return {object} elliptic.js curve point 
+ * @return {object} elliptic.js curve point
  */
 function unmarshal(bytes) {
-    if (bytes.constructor !== Uint8Array)
-	throw new TypeError;
-    
-    const odd = (bytes[31] >> 7) === 1;
-    if (odd)
-	bytes[0] -= 19;
+  if (bytes.constructor !== Uint8Array) {
+    throw new TypeError;
+  }
 
-    return curve.curve.pointFromY(bytes.reverse(), odd);
+  const odd = (bytes[31] >> 7) === 1;
+  if (odd) {
+    bytes[0] -= 19;
+  }
+
+  return curve.curve.pointFromY(bytes.reverse(), odd);
 }
 
 /**
@@ -66,27 +68,30 @@ function unmarshal(bytes) {
  * @returns {object} elliptic.js curve point
  */
 function embed(data) {
-    if (data.constructor !== Uint8Array)
-	throw new TypeError;
-    if (data.length < 1 || data.length > 29)
-	throw new Error("Invalid data size");
+  if (data.constructor !== Uint8Array) {
+    throw new TypeError;
+  }
+  if (data.length < 1 || data.length > 29) {
+    throw new Error("Invalid data size");
+  }
 
-    const size = data.length;
-    
-    for (;;) {
-	let random = curve.genKeyPair().getPublic();
-	let bytes = misc.hexToUint8Array(random.y.toString(16, 2)).reverse();
-	bytes[0] = size;
-	bytes.set(data, 1);
+  const size = data.length;
 
-	try {
-	    let key = unmarshal(bytes);
-	    if (key.validate() && key.mul(curve.n).isInfinity())
-		return key;
-	} catch(err) {}
+  for (; ;) {
+    let random = curve.genKeyPair().getPublic();
+    let bytes = misc.hexToUint8Array(random.y.toString(16, 2)).reverse();
+    bytes[0] = size;
+    bytes.set(data, 1);
+
+    try {
+      let key = unmarshal(bytes);
+      if (key.validate() && key.mul(curve.n).isInfinity()) {
+        return key;
+      }
+    } catch (err) {
     }
+  }
 }
-
 
 /**
  * ElGamal encryption algorithm.
@@ -98,18 +103,22 @@ function embed(data) {
  * @returns {object} ElGamal elliptic.js keypair
  */
 function elgamalEncrypt(key, message) {
-    if (message.constructor !== Uint8Array)
-	throw new TypeError;
-    
-    let point = embed(message);
+  if (message.constructor !== Uint8Array) {
+    throw new TypeError;
+  }
 
-    const k = curve.genKeyPair().getPrivate();
-    const K = curve.g.mul(k);
-    const S = key.mul(k);
-    const C = S.add(point);
+  let point = embed(message);
 
-    // return { Alpha: marshal(K), Beta: marshal(C) };
-    return { Alpha: K, Beta: C };
+  const k = curve.genKeyPair().getPrivate();
+  const K = curve.g.mul(k);
+  const S = key.mul(k);
+  const C = S.add(point);
+
+  // return { Alpha: marshal(K), Beta: marshal(C) };
+  return {
+    Alpha: K,
+    Beta: C
+  };
 }
 
 /**
@@ -122,9 +131,9 @@ function elgamalEncrypt(key, message) {
  * @returns {object} elliptic.js point
  */
 function elgamalDecrypt(secret, K, C) {
-    const S = K.mul(secret);
+  const S = K.mul(secret);
 
-    return C.add(S.neg());
+  return C.add(S.neg());
 }
 
 /**
@@ -134,9 +143,9 @@ function elgamalDecrypt(secret, K, C) {
  * @returns {Uint8Array} data
  */
 function extractDataFromPoint(point) {
-    const buffer = marshal(point);
-    
-    return buffer.slice(1, 1 + buffer[0]);
+  const buffer = marshal(point);
+
+  return buffer.slice(1, 1 + buffer[0]);
 }
 
 /**
@@ -145,18 +154,18 @@ function extractDataFromPoint(point) {
  * @returns {object} elliptic.js key pair
  */
 function generateRandomKeyPair() {
-    return curve.genKeyPair();
+  return curve.genKeyPair();
 }
 
 // Private Schnorr hashing algorithm.
 // https://github.com/dedis/kyber/blob/v0/sign/schnorr.go
 function schnorrHash(pub, r, message) {
-    const h = hash.sha512();
-    h.update(marshal(r));
-    h.update(marshal(pub));
-    h.update(message);
+  const h = hash.sha512();
+  h.update(marshal(r));
+  h.update(marshal(pub));
+  h.update(message);
 
-    return new BN(h.digest('hex'), 16);
+  return new BN(h.digest("hex"), 16);
 }
 
 /**
@@ -168,23 +177,23 @@ function schnorrHash(pub, r, message) {
  * @returns {Uint8Array} signature
  */
 function schnorrSign(secret, message) {
-    const k = curve.genKeyPair().getPrivate();
-    const R = curve.g.mul(k);
+  const k = curve.genKeyPair().getPrivate();
+  const R = curve.g.mul(k);
 
-    const pub = curve.g.mul(secret);
-    const h = schnorrHash(pub, R, message);
+  const pub = curve.g.mul(secret);
+  const h = schnorrHash(pub, R, message);
 
-    const xh = secret.mul(h);
-    const s = k.add(xh);
+  const xh = secret.mul(h);
+  const s = k.add(xh);
 
-    const left = marshal(R);
-    const right = misc.hexToUint8Array(s.toString(16, 2));
+  const left = marshal(R);
+  const right = misc.hexToUint8Array(s.toString(16, 2));
 
-    const concat = new Uint8Array(left.length + right.length);
-    concat.set(left);
-    concat.set(right, left.length);
+  const concat = new Uint8Array(left.length + right.length);
+  concat.set(left);
+  concat.set(right, left.length);
 
-    return concat;
+  return concat;
 }
 
 /**
@@ -197,16 +206,16 @@ function schnorrSign(secret, message) {
  * @returns {boolean}
  */
 function schnorrVerify(pub, message, signature) {
-    const size = marshal(pub).length;
+  const size = marshal(pub).length;
 
-    const R = unmarshal(signature.slice(0, size));
-    const s = new BN(signature.slice(size, signature.length));
+  const R = unmarshal(signature.slice(0, size));
+  const s = new BN(signature.slice(size, signature.length));
 
-    const h = schnorrHash(pub, R, message);
+  const h = schnorrHash(pub, R, message);
 
-    const S = curve.g.mul(s);
-    const Ah = pub.mul(h);
-    const RAs = R.add(Ah);
+  const S = curve.g.mul(s);
+  const Ah = pub.mul(h);
+  const RAs = R.add(Ah);
 
-    return S.eq(RAs);
+  return S.eq(RAs);
 }

@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /** @module misc */
 
@@ -14,12 +14,13 @@ exports.reverseHex = reverseHex;
  * @returns {string} hexadecimal representation
  */
 function uint8ArrayToHex(buffer) {
-    if (buffer.constructor !== Uint8Array)
-	throw new TypeError;
-    
-    return Array.from(buffer).map((element, index) => {
-	return ('00' + element.toString(16)).slice(-2);
-    }).join('');
+  if (buffer.constructor !== Uint8Array) {
+    throw new TypeError;
+  }
+
+  return Array.from(buffer).map((element, index) => {
+    return ("00" + element.toString(16)).slice(-2);
+  }).join("");
 }
 
 /**
@@ -30,12 +31,13 @@ function uint8ArrayToHex(buffer) {
  * @return {Uint8Array} byte buffer
  */
 function hexToUint8Array(hex) {
-    if (typeof hex !== 'string')
-	throw new TypeError;
-    
-    return new Uint8Array(Math.ceil(hex.length / 2)).map((element, index) => {
-	return parseInt(hex.substr(index * 2, 2), 16);
-    });
+  if (typeof hex !== "string") {
+    throw new TypeError;
+  }
+
+  return new Uint8Array(Math.ceil(hex.length / 2)).map((element, index) => {
+    return parseInt(hex.substr(index * 2, 2), 16);
+  });
 }
 
 /**
@@ -46,15 +48,18 @@ function hexToUint8Array(hex) {
  * @return {string} reversed hex string
  */
 function reverseHex(hex) {
-    if (typeof hex !== 'string')
-	throw new TypeError;
+  if (typeof hex !== "string") {
+    throw new TypeError;
+  }
 
-    let reversed = '';
-    for (let i = 0; i < hex.length-1; i += 2)
-	reversed = hex.substring(i, i+2) + reversed;
+  let reversed = "";
+  for (let i = 0; i < hex.length - 1; i += 2) {
+    reversed = hex.substring(i, i + 2) + reversed;
+  }
 
-    if (hex.length % 2 === 1)
-	reversed = hex[hex.length-1] + reversed;
-    
-    return reversed;
+  if (hex.length % 2 === 1) {
+    reversed = hex[hex.length - 1] + reversed;
+  }
+
+  return reversed;
 }

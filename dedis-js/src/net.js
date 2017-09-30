@@ -1,14 +1,14 @@
-'use strict';
+"use strict";
 
 /** @module net */
 
 exports.parseCothorityRoster = parseCothorityRoster;
 exports.Socket = Socket;
 
-const topl = require('topl');
-const UUID = require('pure-uuid');
+const topl = require("topl");
+const UUID = require("pure-uuid");
 
-const misc = require('./misc.js');
+const misc = require("./misc.js");
 
 /**
  * Parse cothority roster toml string into a JavaScript object.
@@ -32,17 +32,18 @@ const misc = require('./misc.js');
  * @return {object} roster
  */
 function parseCothorityRoster(toml) {
-    if (typeof toml !== 'string')
-	throw new TypeError;
-    
-    const roster = topl.parse(toml);
-    roster.servers.forEach((server) => {
-        const pub = Uint8Array.from(atob(server.Public), c => c.charCodeAt(0));
-        const url = 'https://dedis.epfl.ch/id/' + misc.uint8ArrayToHex(pub);
-        server.Id = new UUID(5, 'ns:URL', url).export();
-    });
+  if (typeof toml !== "string") {
+    throw new TypeError;
+  }
 
-    return roster;
+  const roster = topl.parse(toml);
+  roster.servers.forEach((server) => {
+    const pub = Uint8Array.from(atob(server.Public), c => c.charCodeAt(0));
+    const url = "https://dedis.epfl.ch/id/" + misc.uint8ArrayToHex(pub);
+    server.Id = new UUID(5, "ns:URL", url).export();
+  });
+
+  return roster;
 }
 
 /**
@@ -51,11 +52,11 @@ function parseCothorityRoster(toml) {
  * @param {serverIdentity} object
  * @returns {string} websocket url
  */
-function convertServerIdentityToWebSocket(serverIdentity, path){
-    let parts = serverIdentity.Address.replace("tcp://", "").split(":");
-    parts[1] = parseInt(parts[1]) + 1;
+function convertServerIdentityToWebSocket(serverIdentity, path) {
+  let parts = serverIdentity.Address.replace("tcp://", "").split(":");
+  parts[1] = parseInt(parts[1]) + 1;
 
-    return "ws://" + parts.join(":") + path;
+  return "ws://" + parts.join(":") + path;
 }
 
 /**
@@ -67,53 +68,57 @@ function convertServerIdentityToWebSocket(serverIdentity, path){
  * @throws {TypeError} when url is not a string or protobuf is not an object
  */
 function Socket(node, protobuf) {
-    if (typeof protobuf !== 'object')
-	throw new TypeError;
+  if (typeof protobuf !== "object") {
+    throw new TypeError;
+  }
 
-   this.url = convertServerIdentityToWebSocket(node, '/nevv');
-   this.protobuf = protobuf;
+  this.url = convertServerIdentityToWebSocket(node, "/nevv");
+  this.protobuf = protobuf;
 
-   /**
-    * Send transmits data to a given url and parses the response.
-    * @param {string} request name of registered protobuf message
-    * @param {string} response name of registered protobuf message
-    * @param {object} data to be sent
-    *
-    * @returns {object} Promise with response message on success, and an error on failure
-    */
-   this.send = (request, response, data) => {
-       return new Promise((resolve, reject) => {
-	    const ws = new WebSocket(this.url + '/' + request);
-	    ws.binaryType = 'arraybuffer';
+  /**
+   * Send transmits data to a given url and parses the response.
+   * @param {string} request name of registered protobuf message
+   * @param {string} response name of registered protobuf message
+   * @param {object} data to be sent
+   *
+   * @returns {object} Promise with response message on success, and an error on failure
+   */
+  this.send = (request, response, data) => {
+    return new Promise((resolve, reject) => {
+      const ws = new WebSocket(this.url + "/" + request);
+      ws.binaryType = "arraybuffer";
 
-	    const requestModel = this.protobuf.lookup(request);
-	    if (requestModel === undefined)
-		reject(new Error('Model ' + request + ' not found'));
-	    const responseModel = this.protobuf.lookup(response);
-	    if (responseModel === undefined)
-		reject(new Error('Model ' + response + ' not found'));
+      const requestModel = this.protobuf.lookup(request);
+      if (requestModel === undefined) {
+        reject(new Error("Model " + request + " not found"));
+      }
+      const responseModel = this.protobuf.lookup(response);
+      if (responseModel === undefined) {
+        reject(new Error("Model " + response + " not found"));
+      }
 
-	    ws.onopen = () => {
-		const message = requestModel.create(data);
-		const marshal = requestModel.encode(message).finish();
-		ws.send(marshal);
-	    };
+      ws.onopen = () => {
+        const message = requestModel.create(data);
+        const marshal = requestModel.encode(message).finish();
+        ws.send(marshal);
+      };
 
-	    ws.onmessage = (event) => {
-		ws.close();
-		const buffer = new Uint8Array(event.data);
-		const unmarshal = responseModel.decode(buffer);
-		resolve(unmarshal);
-	    };
+      ws.onmessage = (event) => {
+        ws.close();
+        const buffer = new Uint8Array(event.data);
+        const unmarshal = responseModel.decode(buffer);
+        resolve(unmarshal);
+      };
 
-	    ws.onclose = (event) => {
-		if (!event.wasClean)
-		    reject(new Error(event.reason));
-	    };
+      ws.onclose = (event) => {
+        if (!event.wasClean) {
+          reject(new Error(event.reason));
+        }
+      };
 
-	    ws.onerror = (error) => {
-		reject(new Error('Could not connect to ' + this.url));
-	    };
-	});
-   };
+      ws.onerror = (error) => {
+        reject(new Error("Could not connect to " + this.url));
+      };
+    });
+  };
 }

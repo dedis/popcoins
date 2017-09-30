@@ -1,3 +1,3 @@
-const opn = require('opn');
+const opn = require("opn");
 
-opn('test/index.html', {wait: false});
+opn("test/index.html", {wait: false});
