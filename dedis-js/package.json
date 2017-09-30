@@ -4,8 +4,8 @@
   "description": "Library containing useful methods for the communication with Cothority (websockets, cryptographic functions, helper methods...).",
   "main": "build/dedis-js.js",
   "scripts": {
-    "build": "./node_modules/.bin/browserify index.js --s dedis | ./node_modules/.bin/uglifyjs -c -m -o build/dedis-js.js",
-    "doc": "./node_modules/.bin/jsdoc2md src/* > doc/doc.md",
+    "build": "browserify index.js --s dedis | uglifyjs -c -m -o build/dedis-js.js",
+    "doc": "jsdoc2md src/* > doc/doc.md",
     "test": "node test/index.js"
   },
   "keywords": [
