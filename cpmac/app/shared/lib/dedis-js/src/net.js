@@ -4,11 +4,17 @@
 
 exports.parseCothorityRoster = parseCothorityRoster;
 exports.Socket = Socket;
+exports.StandardSocket = StandardSocket;
+exports.CothoritySocket = CothoritySocket;
 
-const topl = require("topl");
+const Misc = require("./misc.js");
+const WebSocket = require("nativescript-websockets");
+const CothorityMessages = require("~/shared/lib/cothority-protobuf/build/cothority-messages");
+
+const TOPL = require("topl");
 const UUID = require("pure-uuid");
-
-const misc = require("./misc.js");
+const BASE64 = require("base-64");
+const UTF8 = require("utf8");
 
 /**
  * Parse cothority roster toml string into a JavaScript object.
@@ -36,14 +42,18 @@ function parseCothorityRoster(toml) {
     throw new TypeError;
   }
 
-  const roster = topl.parse(toml);
+  const roster = TOPL.parse(toml);
   roster.servers.forEach((server) => {
-    const pub = Uint8Array.from(atob(server.Public), c => c.charCodeAt(0));
-    const url = "https://dedis.epfl.ch/id/" + misc.uint8ArrayToHex(pub);
+    const pub = Uint8Array.from(ATOB(server.Public), c => c.charCodeAt(0));
+    const url = "https://dedis.epfl.ch/id/" + Misc.uint8ArrayToHex(pub);
     server.Id = new UUID(5, "ns:URL", url).export();
   });
 
   return roster;
+}
+
+function ATOB(string) {
+  return BASE64.encode(UTF8.encode(string));
 }
 
 /**
@@ -121,4 +131,78 @@ function Socket(node, protobuf) {
       };
     });
   };
+}
+
+function StandardSocket() {
+  this.send = (address, data) => new Promise((resolve, reject) => {
+    const socket = new WebSocket(address, {
+      allowCellular: true
+    });
+
+    socket.on("open", (socket) => {
+      console.log("Socket open...");
+      socket.send(data);
+    });
+
+    socket.on("close", (socket, code, reason) => {
+      console.log("Socket closed...");
+    });
+
+    socket.on("message", (socket, message) => {
+      console.log("Got message:");
+      console.dir(message);
+      socket.close();
+      resolve(message);
+    });
+
+    socket.on("error", (socket, error) => {
+      console.log("Socket error:");
+      console.dir(error);
+      socket.close();
+      reject(error);
+    });
+
+    socket.open();
+  });
+}
+
+function CothoritySocket() {
+  this.send = (node, path, message, typeToDecode) => new Promise((resolve, reject) => {
+    const url = convertServerIdentityToWebSocket(node, path);
+
+    const socket = new WebSocket(url, {
+      allowCellular: true
+    });
+    socket.binaryType = "arraybuffer";
+
+    socket.on("open", (socket) => {
+      console.log("Socket open...");
+      socket.send(message);
+    });
+
+    socket.on("close", (socket, code, reason) => {
+      console.log("Socket closed...");
+    });
+
+    socket.on("message", (socket, message) => {
+      console.log("Got message:");
+      console.dir(message);
+      socket.close();
+
+      if (typeToDecode.isUndefined) {
+        resolve(CothorityMessages.decodeResponse(typeToDecode, message));
+      } else {
+        resolve(message);
+      }
+    });
+
+    socket.on("error", (socket, error) => {
+      console.log("Socket error:");
+      console.dir(error);
+      socket.close();
+      reject(error);
+    });
+
+    socket.open();
+  });
 }

@@ -2,21 +2,33 @@ const frameModule = require("ui/frame");
 
 const HomeViewModel = require("./home-view-model");
 
-/* ***********************************************************
-* Use the "onNavigatingTo" handler to initialize the page binding context.
-*************************************************************/
-function onNavigatingTo(args) {
-    /* ***********************************************************
-    * The "onNavigatingTo" event handler lets you detect if the user navigated with a back button.
-    * Skipping the re-initialization on back navigation means the user will see the
-    * page in the same data state that he left it in before navigating.
-    *************************************************************/
-    if (args.isBackNavigation) {
-        return;
-    }
+const homeViewModel = new HomeViewModel();
 
-    const page = args.object;
-    page.bindingContext = new HomeViewModel();
+/* ***********************************************************
+ * Use the "onNavigatingTo" handler to initialize the page binding context.
+ *************************************************************/
+function onNavigatingTo(args) {
+  /* ***********************************************************
+   * The "onNavigatingTo" event handler lets you detect if the user navigated with a back button.
+   * Skipping the re-initialization on back navigation means the user will see the
+   * page in the same data state that he left it in before navigating.
+   *************************************************************/
+  if (args.isBackNavigation) {
+    return;
+  }
+
+  const page = args.object;
+  page.bindingContext = homeViewModel;
+
+  loadConodeList();
+}
+
+function loadConodeList() {
+  homeViewModel.set("isLoading", true);
+  const myConodeList = homeViewModel.conodeList;
+
+  myConodeList.empty();
+  myConodeList.load()//.then(x => homeViewModel.set("isLoading", false));
 }
 
 /* ***********************************************************
@@ -25,8 +37,8 @@ function onNavigatingTo(args) {
  * use the showDrawer() function to open the app drawer section.
  *************************************************************/
 function onDrawerButtonTap(args) {
-    const sideDrawer = frameModule.topmost().getViewById("sideDrawer");
-    sideDrawer.showDrawer();
+  const sideDrawer = frameModule.topmost().getViewById("sideDrawer");
+  sideDrawer.showDrawer();
 }
 
 exports.onNavigatingTo = onNavigatingTo;

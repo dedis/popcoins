@@ -1,8 +1,10 @@
 *.DS_Store
 .idea/
 node_modules/
+cpmac/.nsbuildinfo
 cpmac/platforms/
 cpmac/app/App_Resources/
+cpmac/app/shared/res/files/conodes.toml
 conode/co1/
 conode/co2/
 conode/co3/

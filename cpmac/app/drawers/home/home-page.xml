@@ -1,24 +1,24 @@
 <Page
-    class="page"
-    navigatingTo="onNavigatingTo"  
-    xmlns:nsDrawer="nativescript-telerik-ui/sidedrawer"
-    xmlns:myDrawer="shared/my-drawer"
-    xmlns="http://www.nativescript.org/tns.xsd">
+        class="page"
+        navigatingTo="onNavigatingTo"
+        xmlns:nsDrawer="nativescript-telerik-ui/sidedrawer"
+        xmlns:myDrawer="shared/my-drawer"
+        xmlns="http://www.nativescript.org/tns.xsd">
 
     <ActionBar class="action-bar">
-        <!-- 
+        <!--
         Use the NavigationButton as a side-drawer button in Android because ActionItems are shown on the right side of the ActionBar
         -->
-        <NavigationButton ios:visibility="collapsed" icon="res://menu" tap="onDrawerButtonTap"></NavigationButton>
-        <!-- 
+        <NavigationButton ios:visibility="collapsed" icon="res://menu" tap="onDrawerButtonTap"/>
+        <!--
         Use the ActionItem for IOS with position set to left. Using the NavigationButton as a side-drawer button in iOS is not possible, because its function is to always navigate back in the application.
         -->
-        <ActionItem icon="res://navigation/menu" 
-            android:visibility="collapsed" 
-            tap="onDrawerButtonTap"
-            ios.position="left">
+        <ActionItem icon="res://navigation/menu"
+                    android:visibility="collapsed"
+                    tap="onDrawerButtonTap"
+                    ios.position="left">
         </ActionItem>
-        <Label class="action-bar-title" text="Home"></Label>
+        <Label class="action-bar-title" text="Home"/>
     </ActionBar>
 
     <!--
@@ -57,9 +57,22 @@
         Always wrap content in a layout component.
         -->
         <nsDrawer:RadSideDrawer.mainContent>
-            <GridLayout class="page-content">
-                <Label class="page-icon fa" text="&#xf015;"></Label>
-                <Label class="page-placeholder" text="<!-- Page content goes here -->"></Label>
+            <GridLayout class="page-content" rows="*,auto" columns="*">
+                <!--
+                <Label class="page-icon fa" text="&#xf015;"/>
+                <Label class="page-placeholder" text="Page content goes here"></Label>
+                 -->
+                <ListView items="{{ conodeList }}" itemTap="conodeTapped" row="0">
+                    <ListView.itemTemplate>
+                        <GridLayout rows="*" columns="*">
+                            <Label text="{{ conode.server.description }}" textAlignment="center"/>
+                        </GridLayout>
+                    </ListView.itemTemplate>
+                </ListView>
+
+                <Button text="Reload" tap="loadConodeList" row="1" isEnabled="{{ !isLoading }}"/>
+
+                <ActivityIndicator busy="{{ isLoading }}" rowSpan="2" colSpan="1"/>
             </GridLayout>
         </nsDrawer:RadSideDrawer.mainContent>
     </nsDrawer:RadSideDrawer>

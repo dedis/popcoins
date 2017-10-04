@@ -1,22 +1,20 @@
-const observableModule = require("data/observable");
-const WS = require("~/shared/lib/ws/ws");
+const ObservableModule = require("data/observable");
+const DedisJsNet = require("~/shared/lib/dedis-js/src/net");
+const CothorityMessages = require("~/shared/lib/cothority-protobuf/build/cothority-messages");
 
 function CiscPageViewModel() {
-    // let returnedValue;
-    // WS.testMyWebSocket((message) => returnedValue = message);
-    // const viewModel = observableModule.fromObject({
-    //     myMessage: returnedValue
-    // });
-    // console.log("this should work ".concat(returnedValue))
-    const socket = new WS.Socket();
-    const returnedPromise = socket.send("test message");
-    let returnedValue;
-    returnedPromise.then((result) => returnedValue = result);
-    const viewModel = observableModule.fromObject({
-        myMessage: returnedValue
-    });
+  let returnedValue = ObservableModule.fromObject({
+                                                    myMessage: "TO_CHANGE"
+                                                  });
 
-    return viewModel;
+  const socket = new DedisJsNet.StandardSocket();
+
+  socket.send("wss://echo.websocket.org", "SEND DIS BAK 2 MI").then((result) => {
+    console.log(result);
+    returnedValue.myMessage = result;
+  }).catch((error) => console.dir(error));
+
+  return returnedValue;
 }
 
 module.exports = CiscPageViewModel;
