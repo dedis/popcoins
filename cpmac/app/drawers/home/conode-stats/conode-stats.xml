@@ -1,0 +1,18 @@
+<!--
+ * @file Conode stats XML file.
+ -->
+
+<Page class="page" navigatingTo="onNavigatingTo">
+    <GridLayout rows="*" columns="*">
+
+        <ListView items="{{ statsList, statsList }}">
+            <ListView.itemTemplate>
+                <GridLayout rows="auto,auto" columns="*">
+                    <Label text="{{ info.title }}" textAlignment="left" textWrap="true" row="0"/>
+                    <Label text="{{ info.info }}" textAlignment="left" textWrap="true" row="1"/>
+                </GridLayout>
+            </ListView.itemTemplate>
+        </ListView>
+
+    </GridLayout>
+</Page>

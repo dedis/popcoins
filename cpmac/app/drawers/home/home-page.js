@@ -1,4 +1,4 @@
-const frameModule = require("ui/frame");
+const Frame = require("ui/frame");
 
 const HomeViewModel = require("./home-view-model");
 
@@ -28,7 +28,15 @@ function loadConodeList() {
   const myConodeList = homeViewModel.conodeList;
 
   myConodeList.empty();
-  myConodeList.load()//.then(x => homeViewModel.set("isLoading", false));
+  myConodeList.load()
+              .then(x => homeViewModel.set("isLoading", false));
+}
+
+function conodeTapped(args) {
+  Frame.topmost().navigate({
+                             moduleName: "drawers/home/conode-stats/conode-stats",
+                             bindingContext: homeViewModel.conodeList.getItem(args.index).conode
+                           });
 }
 
 /* ***********************************************************
@@ -37,9 +45,11 @@ function loadConodeList() {
  * use the showDrawer() function to open the app drawer section.
  *************************************************************/
 function onDrawerButtonTap(args) {
-  const sideDrawer = frameModule.topmost().getViewById("sideDrawer");
+  const sideDrawer = Frame.topmost().getViewById("sideDrawer");
   sideDrawer.showDrawer();
 }
 
 exports.onNavigatingTo = onNavigatingTo;
 exports.onDrawerButtonTap = onDrawerButtonTap;
+exports.loadConodeList = loadConodeList;
+exports.conodeTapped = conodeTapped;

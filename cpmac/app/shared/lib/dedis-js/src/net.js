@@ -189,7 +189,7 @@ function CothoritySocket() {
       console.dir(message);
       socket.close();
 
-      if (typeToDecode.isUndefined) {
+      if (!typeToDecode.isUndefined) {
         resolve(CothorityMessages.decodeResponse(typeToDecode, message));
       } else {
         resolve(message);

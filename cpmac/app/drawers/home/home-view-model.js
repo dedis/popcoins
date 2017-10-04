@@ -19,13 +19,30 @@ function HomeViewModel() {
 
 function setUpConodeList() {
   const myConodeList = viewModel.conodeList;
+  const cothoritySocket = new DedisJsNet.CothoritySocket();
+  const statusRequestMessage = CothorityMessages.createStatusRequest();
 
   myConodeList.load = function () {
-    //const message = CothorityMessages.createStatusRequest();
-    const roster = tomlToServerList();
+    const getRosterPromise = tomlToServerList();
 
-    //return new DedisJsNet.CothoritySocket().send(node, CothorityPath.STATUS_REQUEST, message,
-                                                 //CothorityDecodeTypes.STATUS_RESPONSE);
+    return getRosterPromise.then((roster) => {
+      return roster.servers;
+    }).then((servers) => {
+      return servers.map((server) => {
+        return cothoritySocket.send(server, CothorityPath.STATUS_REQUEST, statusRequestMessage,
+                                    CothorityDecodeTypes.STATUS_RESPONSE)
+                              .then((response) => {
+                                viewModel.conodeList.push({
+                                                            conode: response
+                                                          });
+                              });
+      });
+    }).then((promises) => {
+      return Promise.all(promises);
+    }).catch((error) => {
+      console.log("ERROR: " + error);
+      console.dir(error);
+    });
   };
 
   myConodeList.empty = function () {
@@ -38,10 +55,8 @@ function setUpConodeList() {
     const documents = FileSystem.knownFolders.currentApp();
     const conodesToml = documents.getFile("shared/res/files/conodes.toml");
 
-    conodesToml.readText().then((tomlString) => {
-      console.log(tomlString);
-      const roster = DedisJsNet.parseCothorityRoster(tomlString);
-      console.log(JSON.stringify(roster));
+    return conodesToml.readText().then((tomlString) => {
+      return DedisJsNet.parseCothorityRoster(tomlString);
     }).catch((error) => {
       console.log("ERROR READING: " + conodesToml.name);
       console.dir(error);
