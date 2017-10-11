@@ -1,0 +1,34 @@
+<Page
+        class="page">
+
+    <ActionBar class="action-bar">
+        <Label class="action-bar-title" text="PoP - Settings"/>
+    </ActionBar>
+
+    <GridLayout class="page-content" rows="*,*,*,*" columns="*,auto,auto,*">
+        <Label class="label-text" text="Description Hash" row="0" col="0"/>
+        <Label class="label-space" text=" - " row="0" col="1" colSpan="2"/>
+        <TextField class="text-field" hint="description hash" autocorrect="false" autocapitalizationType="none"
+                   returnKeyType="done"
+                   row="0"
+                   col="3"/>
+
+        <Label class="label-text" text="Public Key" row="1" col="0"/>
+        <Label class="label-space" text=" - " row="1" col="1" colSpan="2"/>
+        <TextField class="text-field" hint="public key" autocorrect="false" autocapitalizationType="none"
+                   returnKeyType="done"
+                   row="1"
+                   col="3"/>
+
+        <Label class="label-text" text="final.toml" row="2" col="0"/>
+        <Label class="label-space" text=" - " row="2" col="1" colSpan="2"/>
+        <TextField class="text-field" hint="final.toml" autocorrect="false" autocapitalizationType="none"
+                   returnKeyType="done"
+                   row="2"
+                   col="3"/>
+
+        <Button text="Save" row="3" col="0" colSpan="2"/>
+        <Button text="Clear" row="3" col="2" colSpan="2"/>
+    </GridLayout>
+
+</Page>

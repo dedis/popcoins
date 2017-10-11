@@ -1,0 +1,8 @@
+<Page
+        class="page">
+
+    <ActionBar class="action-bar">
+        <Label class="action-bar-title" text="CISC - Settings"/>
+    </ActionBar>
+
+</Page>

@@ -40,7 +40,7 @@ function deblockConodeList() {
 
 function conodeTapped(args) {
   Frame.topmost().navigate({
-                             moduleName: "drawers/home/conode-stats/conode-stats",
+                             moduleName: "drawers/home/conode-stats/conode-stats-page",
                              bindingContext: homeViewModel.conodeList.getItem(args.index).conode
                            });
 }

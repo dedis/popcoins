@@ -1,0 +1,26 @@
+<Page
+        class="page">
+
+    <ActionBar class="action-bar">
+        <Label class="action-bar-title" text="Attendee"/>
+    </ActionBar>
+
+    <GridLayout class="page-content" rows="*,*,*,*,*" columns="*,auto,auto,*">
+        <Label class="label-title" text="Key Pair" row="0" colSpan="4"/>
+
+        <Button text="Generate" row="1" col="0" colSpan="2"/>
+        <Button text="Display" row="1" col="2" colSpan="2"/>
+
+        <Label class="label-title" text="PoP Token" row="2" colSpan="4"/>
+
+        <Label class="label-text" text="Private Key" row="3" col="0"/>
+        <Label class="label-space" text=" - " row="3" col="1" colSpan="2"/>
+        <TextField class="text-field" hint="private key" autocorrect="false" autocapitalizationType="none"
+                   returnKeyType="done"
+                   row="3"
+                   col="3"/>
+
+        <Button text="Generate" row="4" colSpan="4"/>
+    </GridLayout>
+
+</Page>

@@ -1,0 +1,15 @@
+<Page
+        class="page">
+
+    <ActionBar class="action-bar">
+        <Label class="action-bar-title" text="Organizer"/>
+    </ActionBar>
+
+    <GridLayout class="page-content" rows="*,*,*,*" columns="*">
+        <Button text="Link to Conode" row="0"/>
+        <Button text="Configuration" tap="configButtonTapped" row="1"/>
+        <Button text="Register Attendees" tap="registerButtonTapped" row="2"/>
+        <Button text="Finalize PoP Party" row="3"/>
+    </GridLayout>
+
+</Page>

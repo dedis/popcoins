@@ -1,0 +1,18 @@
+<Page
+        class="page">
+
+    <ActionBar class="action-bar">
+        <Label class="action-bar-title" text="Configuration"/>
+    </ActionBar>
+
+    <GridLayout class="page-content" rows="auto,*,auto" columns="*">
+        <Label class="label-title" text="Description" row="0"/>
+
+        <TextField class="text-field" hint="description" autocorrect="false" autocapitalizationType="none"
+                   returnKeyType="done"
+                   row="1"/>
+
+        <Button text="Hash &amp; Save" row="2"/>
+    </GridLayout>
+
+</Page>

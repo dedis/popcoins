@@ -3,6 +3,10 @@
  -->
 
 <Page class="page" navigatingTo="onNavigatingTo">
+    <ActionBar class="action-bar">
+        <Label class="action-bar-title" text="Conode Stats"/>
+    </ActionBar>
+
     <GridLayout rows="*" columns="*">
 
         <ListView items="{{ statsList, statsList }}">

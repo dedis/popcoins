@@ -1,0 +1,56 @@
+<Page
+        class="page">
+
+    <ActionBar class="action-bar">
+        <Label class="action-bar-title" text="Home"/>
+    </ActionBar>
+
+    <GridLayout class="page-content" rows="*,*,*,*,*,*,*,*,*,*" columns="*,auto,*">
+        <Label class="label-title" text="Sign" row="0" colSpan="3"/>
+
+        <Label class="label-text" text="Message" row="1" col="0"/>
+        <Label class="label-space" text=" - " row="1" col="1"/>
+        <TextField class="text-field" hint="message" autocorrect="false" autocapitalizationType="none"
+                   returnKeyType="done"
+                   row="1"
+                   col="2"/>
+        <Label class="label-text" text="Context" row="2" col="0"/>
+        <Label class="label-space" text=" - " row="2" col="1"/>
+        <TextField class="text-field" hint="context" autocorrect="false" autocapitalizationType="none"
+                   returnKeyType="done"
+                   row="2"
+                   col="2"/>
+
+        <Button text="Sign" row="3" colSpan="3"/>
+
+        <Label class="label-title" text="Verify" row="4" colSpan="3"/>
+
+        <Label class="label-text" text="Message" row="5" col="0"/>
+        <Label class="label-space" text=" - " row="5" col="1"/>
+        <TextField class="text-field" hint="message" autocorrect="false" autocapitalizationType="none"
+                   returnKeyType="done"
+                   row="5"
+                   col="2"/>
+        <Label class="label-text" text="Context" row="6" col="0"/>
+        <Label class="label-space" text=" - " row="6" col="1"/>
+        <TextField class="text-field" hint="context" autocorrect="false" autocapitalizationType="none"
+                   returnKeyType="done"
+                   row="6"
+                   col="2"/>
+        <Label class="label-text" text="Signature" row="7" col="0"/>
+        <Label class="label-space" text=" - " row="7" col="1"/>
+        <TextField class="text-field" hint="signature" autocorrect="false" autocapitalizationType="none"
+                   returnKeyType="done"
+                   row="7"
+                   col="2"/>
+        <Label class="label-text" text="Tag" row="8" col="0"/>
+        <Label class="label-space" text=" - " row="8" col="1"/>
+        <TextField class="text-field" hint="tag" autocorrect="false" autocapitalizationType="none"
+                   returnKeyType="done"
+                   row="8"
+                   col="2"/>
+
+        <Button text="Verify" row="9" colSpan="3"/>
+    </GridLayout>
+
+</Page>

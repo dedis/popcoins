@@ -65,7 +65,7 @@
                 <ListView items="{{ conodeList }}" itemTap="conodeTapped" row="0" colSpan="2">
                     <ListView.itemTemplate>
                         <GridLayout rows="*" columns="*">
-                            <Label text="{{ conode.server.description }}" textAlignment="center"/>
+                            <Label text="{{ conode.server.description }}" textAlignment="center" textWrap="true"/>
                         </GridLayout>
                     </ListView.itemTemplate>
                 </ListView>
