@@ -32,6 +32,12 @@ function loadConodeList() {
               .then(x => homeViewModel.set("isLoading", false));
 }
 
+function deblockConodeList() {
+  Frame.topmost().navigate({
+                             moduleName: "drawers/home/home-page"
+                           });
+}
+
 function conodeTapped(args) {
   Frame.topmost().navigate({
                              moduleName: "drawers/home/conode-stats/conode-stats",
@@ -52,4 +58,5 @@ function onDrawerButtonTap(args) {
 exports.onNavigatingTo = onNavigatingTo;
 exports.onDrawerButtonTap = onDrawerButtonTap;
 exports.loadConodeList = loadConodeList;
+exports.deblockConodeList = deblockConodeList;
 exports.conodeTapped = conodeTapped;

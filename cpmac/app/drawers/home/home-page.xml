@@ -57,12 +57,12 @@
         Always wrap content in a layout component.
         -->
         <nsDrawer:RadSideDrawer.mainContent>
-            <GridLayout class="page-content" rows="*,auto" columns="*">
+            <GridLayout class="page-content" rows="*,auto" columns="*,*">
                 <!--
                 <Label class="page-icon fa" text="&#xf015;"/>
                 <Label class="page-placeholder" text="Page content goes here"></Label>
                  -->
-                <ListView items="{{ conodeList }}" itemTap="conodeTapped" row="0">
+                <ListView items="{{ conodeList }}" itemTap="conodeTapped" row="0" colSpan="2">
                     <ListView.itemTemplate>
                         <GridLayout rows="*" columns="*">
                             <Label text="{{ conode.server.description }}" textAlignment="center"/>
@@ -70,9 +70,11 @@
                     </ListView.itemTemplate>
                 </ListView>
 
-                <Button text="Reload" tap="loadConodeList" row="1" isEnabled="{{ !isLoading }}"/>
+                <Button text="Reload" tap="loadConodeList" row="1" col="0" isEnabled="{{ !isLoading }}"/>
 
-                <ActivityIndicator busy="{{ isLoading }}" rowSpan="2" colSpan="1"/>
+                <Button text="Deblock" tap="deblockConodeList" row="1" col="1" isEnabled="{{ isLoading }}"/>
+
+                <ActivityIndicator busy="{{ isLoading }}" rowSpan="1" colSpan="2"/>
             </GridLayout>
         </nsDrawer:RadSideDrawer.mainContent>
     </nsDrawer:RadSideDrawer>
