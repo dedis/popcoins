@@ -7,9 +7,9 @@
         <Label class="action-bar-title" text="Conode Stats"/>
     </ActionBar>
 
-    <GridLayout rows="*" columns="*">
+    <GridLayout rows="*,auto" columns="*">
 
-        <ListView items="{{ statsList, statsList }}">
+        <ListView items="{{ statsList, statsList }}" row="0">
             <ListView.itemTemplate>
                 <GridLayout rows="auto,auto" columns="*">
                     <Label text="{{ info.title }}" textAlignment="left" textWrap="true" row="0"/>
@@ -17,6 +17,8 @@
                 </GridLayout>
             </ListView.itemTemplate>
         </ListView>
+
+        <Button text="Link to Conode" row="1"/>
 
     </GridLayout>
 </Page>
