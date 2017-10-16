@@ -1,0 +1,16 @@
+<Page
+        class="page">
+
+    <ActionBar class="action-bar">
+        <Label class="action-bar-title" text="Organizer"/>
+    </ActionBar>
+
+    <ListView items="{{ deviceList }}" orientation="vertical">
+        <ListView.itemTemplate>
+            <GridLayout rows="*" columns="*">
+                <Label text="device1" textAlignment="center" textWrap="true"/>
+            </GridLayout>
+        </ListView.itemTemplate>
+    </ListView>
+
+</Page>

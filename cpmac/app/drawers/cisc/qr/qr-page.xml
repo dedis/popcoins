@@ -1,0 +1,12 @@
+<Page
+        class="page">
+
+    <ActionBar class="action-bar">
+        <Label class="action-bar-title" text="Organizer"/>
+    </ActionBar>
+
+    <StackLayout class="page-content" orientation="vertical">
+        <Button text="Connect to ID" tap="configButtonTapped" row="0"/>
+    </StackLayout>
+
+</Page>

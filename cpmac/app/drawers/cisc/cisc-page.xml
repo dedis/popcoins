@@ -2,6 +2,10 @@
     navigatingTo="onNavigatingTo"  
     xmlns:nsDrawer="nativescript-telerik-ui/sidedrawer"
     xmlns:myDrawer="shared/my-drawer"
+    xmlns:qr="drawers/cisc/qr"
+    xmlns:home="drawers/cisc/home"
+    xmlns:data="drawers/cisc/data"
+    xmlns:devices="drawers/cisc/devices"
     xmlns="http://www.nativescript.org/tns.xsd">
 
     <ActionBar class="action-bar">
@@ -17,7 +21,7 @@
             tap="onDrawerButtonTap"
             ios.position="left">
         </ActionItem>
-        <Label class="action-bar-title" text="Search"></Label>
+        <Label class="action-bar-title" text="Cisc"></Label>
     </ActionBar>
 
     <!--
@@ -47,7 +51,7 @@
                 Learn more about custom components and how they can be used in this documentation article:
                 http://docs.nativescript.org/ui/basics#custom-components
                 -->
-                <myDrawer:MyDrawer selectedPage="Search"/>
+                <myDrawer:MyDrawer selectedPage="Cisc"/>
             </StackLayout>
         </nsDrawer:RadSideDrawer.drawerContent>
 
@@ -56,10 +60,35 @@
         Always wrap content in a layout component.
         -->
         <nsDrawer:RadSideDrawer.mainContent>
-            <GridLayout class="page-content">
-                <Label class="page-icon fa" text="&#xf0c1;"></Label>
-                <Label class="page-placeholder" text="{{ myMessage }}"></Label>
-            </GridLayout>
+            <TabView class="page-content" selectedIndex="1" selectedTabTextColor="black">
+                <TabView.items>
+
+                    <TabViewItem title="QR">
+                        <TabViewItem.view>
+                            <qr:qr-page/>
+                        </TabViewItem.view>
+                    </TabViewItem>
+
+                    <TabViewItem title="Home">
+                        <TabViewItem.view>
+                            <home:home-page/>
+                        </TabViewItem.view>
+                    </TabViewItem>
+
+                    <TabViewItem title="Data">
+                        <TabViewItem.view>
+                            <data:data-page/>
+                        </TabViewItem.view>
+                    </TabViewItem>
+
+                    <TabViewItem title="Devices">
+                        <TabViewItem.view>
+                            <devices:devices-page/>
+                        </TabViewItem.view>
+                    </TabViewItem>
+
+                </TabView.items>
+            </TabView>
         </nsDrawer:RadSideDrawer.mainContent>
     </nsDrawer:RadSideDrawer>
 </Page>
