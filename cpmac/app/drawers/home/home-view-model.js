@@ -33,7 +33,6 @@ function setUpConodeList() {
                  })
                  .then((servers) => {
                    return servers.map((server) => {
-                     console.log(server);
                      return cothoritySocket.send(server, CothorityPath.STATUS_REQUEST, statusRequestMessage,
                                                  CothorityDecodeTypes.STATUS_RESPONSE)
                                            .then((response) => {
