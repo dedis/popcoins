@@ -1,6 +1,5 @@
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
-const FileSystem = require("tns-core-modules/file-system");
 const DedisJsNet = require("~/shared/lib/dedis-js/src/net");
 const CothorityMessages = require("~/shared/lib/cothority-protobuf/build/cothority-messages");
 const CothorityDecodeTypes = require("~/shared/res/cothority-decode-types/cothority-decode-types");
