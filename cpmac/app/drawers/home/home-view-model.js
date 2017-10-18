@@ -5,6 +5,7 @@ const DedisJsNet = require("~/shared/lib/dedis-js/src/net");
 const CothorityMessages = require("~/shared/lib/cothority-protobuf/build/cothority-messages");
 const CothorityDecodeTypes = require("~/shared/res/cothority-decode-types/cothority-decode-types");
 const CothorityPath = require("~/shared/res/cothority-path/cothority-path");
+const FilesPath = require("~/shared/res/files/files-path");
 
 const viewModel = ObservableModule.fromObject({
                                                 isLoading: true,
@@ -29,7 +30,7 @@ function setUpConodeList() {
       return roster.servers;
     }).then((servers) => {
       return servers.map((server) => {
-        console.log(server)
+        console.log(server);
         return cothoritySocket.send(server, CothorityPath.STATUS_REQUEST, statusRequestMessage,
                                     CothorityDecodeTypes.STATUS_RESPONSE)
                               .then((response) => {
@@ -54,7 +55,7 @@ function setUpConodeList() {
 
   function tomlToServerList() {
     const documents = FileSystem.knownFolders.currentApp();
-    const conodesToml = documents.getFile("shared/res/files/conodes.toml");
+    const conodesToml = documents.getFile(FilesPath.CONODES_TOML);
 
     return conodesToml.readText().then((tomlString) => {
       return DedisJsNet.parseCothorityRoster(tomlString);

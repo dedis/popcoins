@@ -1,6 +1,5 @@
 /**
  * @file File containing the different available paths for the Cothority.
- * @author Cedric Maire <mairecedric@netplus.ch>
  */
 
 const STATUS = "/Status";
