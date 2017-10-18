@@ -6,6 +6,7 @@ const CothorityMessages = require("~/shared/lib/cothority-protobuf/build/cothori
 const CothorityDecodeTypes = require("~/shared/res/cothority-decode-types/cothority-decode-types");
 const CothorityPath = require("~/shared/res/cothority-path/cothority-path");
 const FilesPath = require("~/shared/res/files/files-path");
+const FileIO = require("~/shared/lib/file-io/file-io");
 
 const viewModel = ObservableModule.fromObject({
                                                 isLoading: true,
@@ -24,27 +25,33 @@ function setUpConodeList() {
   const statusRequestMessage = CothorityMessages.createStatusRequest();
 
   myConodeList.load = function () {
-    const getRosterPromise = tomlToServerList();
-
-    return getRosterPromise.then((roster) => {
-      return roster.servers;
-    }).then((servers) => {
-      return servers.map((server) => {
-        console.log(server);
-        return cothoritySocket.send(server, CothorityPath.STATUS_REQUEST, statusRequestMessage,
-                                    CothorityDecodeTypes.STATUS_RESPONSE)
-                              .then((response) => {
-                                viewModel.conodeList.push({
-                                                            conode: response
-                                                          });
-                              });
-      });
-    }).then((promises) => {
-      return Promise.all(promises);
-    }).catch((error) => {
-      console.log("ERROR: " + error);
-      console.dir(error);
-    });
+    return FileIO.getContentOf(FilesPath.CONODES_TOML)
+                 .then((tomlString) => {
+                   return DedisJsNet.parseCothorityRoster(tomlString);
+                 })
+                 .then((roster) => {
+                   return roster.servers;
+                 })
+                 .then((servers) => {
+                   return servers.map((server) => {
+                     console.log(server);
+                     return cothoritySocket.send(server, CothorityPath.STATUS_REQUEST, statusRequestMessage,
+                                                 CothorityDecodeTypes.STATUS_RESPONSE)
+                                           .then((response) => {
+                                             viewModel.conodeList
+                                                      .push({
+                                                              conode: response
+                                                            });
+                                           });
+                   });
+                 })
+                 .then((promises) => {
+                   return Promise.all(promises);
+                 })
+                 .catch((error) => {
+                   console.log("ERROR: " + error);
+                   console.dir(error);
+                 });
   };
 
   myConodeList.empty = function () {
@@ -52,18 +59,6 @@ function setUpConodeList() {
       myConodeList.pop();
     }
   };
-
-  function tomlToServerList() {
-    const documents = FileSystem.knownFolders.currentApp();
-    const conodesToml = documents.getFile(FilesPath.CONODES_TOML);
-
-    return conodesToml.readText().then((tomlString) => {
-      return DedisJsNet.parseCothorityRoster(tomlString);
-    }).catch((error) => {
-      console.log("ERROR READING: " + conodesToml.name);
-      console.dir(error);
-    });
-  }
 }
 
 module.exports = HomeViewModel;
