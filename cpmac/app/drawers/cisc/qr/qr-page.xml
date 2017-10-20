@@ -6,7 +6,7 @@
     </ActionBar>
 
     <StackLayout class="page-content" orientation="vertical">
-        <Button text="Connect to ID" tap="configButtonTapped" row="0"/>
+        <Button text="Connect to ID" tap="connectButtonTapped" row="0"/>
     </StackLayout>
 
 </Page>
