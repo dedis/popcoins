@@ -1,23 +1,28 @@
 <Page
-        class="page">
+        class="page"
+        loaded="onLoaded">
 
     <ActionBar class="action-bar">
         <Label class="action-bar-title" text="Register"/>
+
+        <ActionItem tap="empty"
+                    ios.systemIcon="16" ios.position="right"
+                    text="Empty" android.position="popup"/>
     </ActionBar>
 
     <GridLayout class="page-content" rows="auto,*,auto" columns="*,*">
         <Label class="label-title" text="Registered Public Keys" row="0" colSpan="2"/>
 
-        <ListView items="{{ ??? }}" row="1" colSpan="2">
+        <ListView items="{{ registeredKeys }}" id="list-view-registered-keys" row="1" colSpan="2">
             <ListView.itemTemplate>
                 <GridLayout rows="*" columns="*">
-                    <Label text="{{ ??? }}" textAlignment="center" textWrap="true"/>
+                    <Label text="{{ key }}" textAlignment="center" textWrap="true"/>
                 </GridLayout>
             </ListView.itemTemplate>
         </ListView>
 
-        <Button text="Manual" row="2" col="0"/>
-        <Button text="Scan" row="2" col="1"/>
+        <Button text="Manual" tap="addManual" row="2" col="0"/>
+        <Button text="Scan" tap="addScan" row="2" col="1"/>
     </GridLayout>
 
 </Page>
