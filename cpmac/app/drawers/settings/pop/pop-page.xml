@@ -1,6 +1,6 @@
 <Page
         class="page"
-        loaded="loaded">
+        loaded="onLoaded">
 
     <ActionBar class="action-bar">
         <Label class="action-bar-title" text="PoP - Settings"/>

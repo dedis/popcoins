@@ -34,7 +34,12 @@ function loadConodeList() {
 
 function deblockConodeList() {
   Frame.topmost().navigate({
-                             moduleName: "drawers/home/home-page"
+                             clearHistory: true,
+                             moduleName: "drawers/home/home-page",
+                             transition: {
+                               name: "fade",
+                               duration: 0
+                             }
                            });
 }
 

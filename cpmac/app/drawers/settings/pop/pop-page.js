@@ -6,7 +6,7 @@ const PopViewModel = require("./pop-view-model");
 const files = [FilesPath.POP_DESC_HASH, FilesPath.POP_PUBLIC_KEY, FilesPath.POP_FINAL_TOML];
 const textFields = [];
 
-function loaded(args) {
+function onLoaded(args) {
   if (args.isBackNavigation) {
     return;
   }
@@ -89,6 +89,6 @@ function emptyFields() {
   });
 }
 
-exports.loaded = loaded;
+exports.onLoaded = onLoaded;
 exports.saveFields = saveFields;
 exports.emptyFields = emptyFields;
