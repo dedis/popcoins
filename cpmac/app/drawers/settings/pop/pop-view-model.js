@@ -1,8 +1,8 @@
 const ObservableModule = require("data/observable");
 
-function PopViewModel() {
-  const viewModel = ObservableModule.fromObject({});
+const viewModel = ObservableModule.fromObject({});
 
+function PopViewModel() {
   return viewModel;
 }
 
