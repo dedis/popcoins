@@ -1,8 +1,8 @@
 const ObservableModule = require("data/observable");
 
-function ConfigViewModel() {
-  const viewModel = ObservableModule.fromObject({});
+const viewModel = ObservableModule.fromObject({});
 
+function ConfigViewModel() {
   return viewModel;
 }
 

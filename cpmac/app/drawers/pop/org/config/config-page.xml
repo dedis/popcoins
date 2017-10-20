@@ -1,5 +1,6 @@
 <Page
-        class="page">
+        class="page"
+        loaded="onLoaded">
 
     <ActionBar class="action-bar">
         <Label class="action-bar-title" text="Configuration"/>
@@ -10,9 +11,10 @@
 
         <TextField class="text-field" hint="description" autocorrect="false" autocapitalizationType="none"
                    returnKeyType="done"
-                   row="1"/>
+                   row="1"
+                   id="text-field-description"/>
 
-        <Button text="Hash &amp; Save" row="2"/>
+        <Button text="Hash &amp; Save" tap="hashAndSave" row="2"/>
     </GridLayout>
 
 </Page>
