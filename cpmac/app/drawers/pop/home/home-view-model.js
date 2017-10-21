@@ -1,8 +1,8 @@
 const ObservableModule = require("data/observable");
 
-function HomeViewModel() {
-  const viewModel = ObservableModule.fromObject({});
+const viewModel = ObservableModule.fromObject({});
 
+function HomeViewModel() {
   return viewModel;
 }
 

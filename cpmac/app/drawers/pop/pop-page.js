@@ -15,6 +15,8 @@ function onNavigatingTo(args) {
     return;
   }
 
+  // TODO: general qr scan that copies to clipboard
+
   const page = args.object;
   page.bindingContext = new PopViewModel();
 }

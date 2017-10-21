@@ -1,5 +1,6 @@
 <Page
-        class="page">
+        class="page"
+        loaded="onLoaded">
 
     <ActionBar class="action-bar">
         <Label class="action-bar-title" text="Home"/>
@@ -13,15 +14,17 @@
         <TextField class="text-field" hint="message" autocorrect="false" autocapitalizationType="none"
                    returnKeyType="done"
                    row="1"
-                   col="2"/>
+                   col="2"
+                   id="text-field-sign-message"/>
         <Label class="label-text" text="Context" row="2" col="0"/>
         <Label class="label-space" text=" - " row="2" col="1"/>
         <TextField class="text-field" hint="context" autocorrect="false" autocapitalizationType="none"
                    returnKeyType="done"
                    row="2"
-                   col="2"/>
+                   col="2"
+                   id="text-field-sign-context"/>
 
-        <Button text="Sign" row="3" colSpan="3"/>
+        <Button text="Sign" tap="signButtonTapped" row="3" colSpan="3"/>
 
         <Label class="label-title" text="Verify" row="4" colSpan="3"/>
 
@@ -30,27 +33,31 @@
         <TextField class="text-field" hint="message" autocorrect="false" autocapitalizationType="none"
                    returnKeyType="done"
                    row="5"
-                   col="2"/>
+                   col="2"
+                   id="text-field-verify-message"/>
         <Label class="label-text" text="Context" row="6" col="0"/>
         <Label class="label-space" text=" - " row="6" col="1"/>
         <TextField class="text-field" hint="context" autocorrect="false" autocapitalizationType="none"
                    returnKeyType="done"
                    row="6"
-                   col="2"/>
+                   col="2"
+                   id="text-field-verify-context"/>
         <Label class="label-text" text="Signature" row="7" col="0"/>
         <Label class="label-space" text=" - " row="7" col="1"/>
         <TextField class="text-field" hint="signature" autocorrect="false" autocapitalizationType="none"
                    returnKeyType="done"
                    row="7"
-                   col="2"/>
+                   col="2"
+                   id="text-field-verify-signature"/>
         <Label class="label-text" text="Tag" row="8" col="0"/>
         <Label class="label-space" text=" - " row="8" col="1"/>
         <TextField class="text-field" hint="tag" autocorrect="false" autocapitalizationType="none"
                    returnKeyType="done"
                    row="8"
-                   col="2"/>
+                   col="2"
+                   id="text-field-verify-tag"/>
 
-        <Button text="Verify" row="9" colSpan="3"/>
+        <Button text="Verify" tap="verifyButtonTapped" row="9" colSpan="3"/>
     </GridLayout>
 
 </Page>
