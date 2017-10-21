@@ -1,10 +1,10 @@
+const Dialog = require("ui/dialogs");
 const FilesPath = require("~/shared/res/files/files-path");
 const FileIO = require("~/shared/lib/file-io/file-io");
 
 const ConfigViewModel = require("./config-view-model");
 
-const files = [FilesPath.POP_DESC_HASH];
-const textFields = [];
+let textFieldDescription = undefined;
 
 function onLoaded(args) {
   if (args.isBackNavigation) {
@@ -14,19 +14,19 @@ function onLoaded(args) {
   const page = args.object;
 
   loadViews(page);
-  if (files.length !== textFields.length) {
-    throw new Error("files array and textFields array do not have the same length");
+  if (textFieldDescription === undefined) {
+    throw new Error("a field is undefined, but it shouldn't");
   }
 
   page.bindingContext = new ConfigViewModel();
 }
 
+/**
+ * Loads the needed views into their variables.
+ * @param page - the current page object
+ */
 function loadViews(page) {
-  while (textFields.length) {
-    textFields.pop();
-  }
-
-  textFields.push(page.getViewById("text-field-description"));
+  textFieldDescription = page.getViewById("text-field-description");
 }
 
 /**
@@ -34,22 +34,72 @@ function loadViews(page) {
  * @returns {Promise.<*[]>}
  */
 function hashAndSave() {
-  const filesToSave = Array.from(files);
+  let description = textFieldDescription.text;
 
-  for (let i = 0; i < filesToSave.length; ++i) {
-    // TODO: compute hash
-    let hash = textFields[i].text;
+  /**
+   * Hashes the description and stores it permanently.
+   * @returns {*|Promise.<any>}
+   */
+  function hashAndStore() {
+    // TODO: actually compute hash
+    let descriptionHash = description + "(hashed)";
 
-    filesToSave[i] = FileIO.writeContentTo(filesToSave[i], hash);
+    return FileIO.writeContentTo(FilesPath.POP_DESC_HASH, descriptionHash)
+                 .then(() => {
+                   return Dialog.alert({
+                                         title: "Successfully Hashed",
+                                         message: "The hash of you description is accessible in your" +
+                                                  " settings.\n\nHash:\n" + descriptionHash,
+                                         okButtonText: "Ok"
+                                       });
+                 });
   }
 
-  return Promise.all(filesToSave).then(() => {
-    for (let i = 0; i < textFields.length; ++i) {
-      textFields[i].text = "";
-    }
-
-    return Promise.resolve();
-  });
+  if (description.length > 0) {
+    return FileIO.getContentOf(FilesPath.POP_DESC_HASH)
+                 .then(storedHash => {
+                   if (storedHash.length > 0) {
+                     return Dialog.confirm({
+                                             title: "Old Description Hash Overwriting",
+                                             message: "You already have a description hash stored in your settings." +
+                                                      " Do you really want to overwrite it?",
+                                             okButtonText: "Yes",
+                                             cancelButtonText: "Cancel"
+                                           })
+                                  .then(result => {
+                                    if (result) {
+                                      return hashAndStore();
+                                    } else {
+                                      return Promise.resolve();
+                                    }
+                                  })
+                                  .catch(() => {
+                                    return Dialog.alert({
+                                                          title: "Error During Hashing Process",
+                                                          message: "An unexpected error occurred during the hashing" +
+                                                                   " process. Please try again.",
+                                                          okButtonText: "Ok"
+                                                        });
+                                  });
+                   } else {
+                     return hashAndStore();
+                   }
+                 })
+                 .catch(() => {
+                   return Dialog.alert({
+                                         title: "Error During Hashing Process",
+                                         message: "An unexpected error occurred during the hashing" +
+                                                  " process. Please try again.",
+                                         okButtonText: "Ok"
+                                       });
+                 });
+  } else {
+    return Dialog.alert({
+                          title: "Missing Description",
+                          message: "Please provide the description of you PoP Party.",
+                          okButtonText: "Ok"
+                        });
+  }
 }
 
 exports.onLoaded = onLoaded;
