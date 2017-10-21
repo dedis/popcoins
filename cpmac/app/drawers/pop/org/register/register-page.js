@@ -15,7 +15,7 @@ function onLoaded(args) {
 
   const page = args.object;
 
-// TODO: implement item delete for Android + display public key as QR
+// TODO: implement item delete for Android
   if (page.ios) {
     let listView = page.getViewById("list-view-registered-keys");
 
