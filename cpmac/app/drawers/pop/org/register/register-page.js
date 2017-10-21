@@ -15,7 +15,7 @@ function onLoaded(args) {
 
   const page = args.object;
 
-  // TODO: implement item delete for Android
+// TODO: implement item delete for Android + display public key as QR
   if (page.ios) {
     let listView = page.getViewById("list-view-registered-keys");
 
@@ -153,7 +153,26 @@ function addScan() {
  * Function that gets called when the user wants to delete the whole list of registered keys.
  */
 function empty() {
-  myRegisteredKeys.empty();
+  return Dialog.confirm({
+                          title: "Please Confirm",
+                          message: "Do you really want to delete all the registered public keys?",
+                          okButtonText: "Yes",
+                          cancelButtonText: "No"
+                        })
+               .then(function (result) {
+                 if (result) {
+                   return myRegisteredKeys.empty();
+                 } else {
+                   return Promise.reject();
+                 }
+               })
+               .catch(() => {
+                 return Dialog.alert({
+                                       title: "Deletion Aborted",
+                                       message: "The deletion process has been aborted, either by you or by an error.",
+                                       okButtonText: "Ok"
+                                     });
+               });
 }
 
 exports.onLoaded = onLoaded;
