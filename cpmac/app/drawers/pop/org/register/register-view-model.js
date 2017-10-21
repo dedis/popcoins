@@ -47,12 +47,20 @@ function setUpRegisteredKeys() {
    * @returns {*|Promise.<any>}
    */
   myRegisteredKeys.addKey = function (key) {
-    // TODO: check if the key has a valid format, do not add same key twice
-    myRegisteredKeys.push({
-                            key: key
-                          });
+    // TODO: check if the key has a valid format
+    const arrayOfKeys = myRegisteredKeys.map(keyObject => {
+      return keyObject.key;
+    });
 
-    return saveKeysToFile();
+    if (arrayOfKeys.includes(key)) {
+      return Promise.reject();
+    } else {
+      myRegisteredKeys.push({
+                              key: key
+                            });
+
+      return saveKeysToFile();
+    }
   };
 
   /**

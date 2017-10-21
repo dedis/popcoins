@@ -41,29 +41,39 @@ function loadRegisteredKeys() {
  * Function that gets called when the user wants to register a public key manually.
  */
 function addManual() {
-  Dialog.prompt({
-                  title: "Public Key",
-                  message: "Please enter the public key of an attendee.",
-                  okButtonText: "Register",
-                  cancelButtonText: "Cancel",
-                  inputType: Dialog.inputType.text
-                })
-        .then(args => {
-          if (args.result && args.text !== undefined && args.text.length > 0) {
-            return myRegisteredKeys.addKey(args.text);
-          }
-        });
+  return Dialog.prompt({
+                         title: "Public Key",
+                         message: "Please enter the public key of an attendee.",
+                         okButtonText: "Register",
+                         cancelButtonText: "Cancel",
+                         inputType: Dialog.inputType.text
+                       })
+               .then(args => {
+                 if (args.result && args.text !== undefined && args.text.length > 0) {
+                   return myRegisteredKeys.addKey(args.text);
+                 } else {
+                   return Promise.reject();
+                 }
+               })
+               .catch(() => {
+                 return Dialog.alert({
+                                       title: "Error",
+                                       message: "This public key has not been added to the list. It may be duplicate" +
+                                                " or does not have the right format.",
+                                       okButtonText: "Ok"
+                                     });
+               });
 }
 
 /**
  * Function that gets called when the user wants to register a public key by scanning it.
  */
 function addScan() {
-  BarCodeScanner.available().then(function (available) {
+  return BarCodeScanner.available().then(function (available) {
     if (available) {
-      availableFunction();
+      return availableFunction();
     } else {
-      notAvailableFunction();
+      return notAvailableFunction();
     }
   });
 
@@ -77,10 +87,21 @@ function addScan() {
      * @returns {*|Promise.<any>}
      */
     const continuousCallback = function (scanResult) {
-      // TODO: catch error when not added
       return myRegisteredKeys.addKey(scanResult.text)
                              .then(() => {
                                return BarCodeScanner.stop();
+                             })
+                             .catch(() => {
+                               return BarCodeScanner.stop()
+                                                    .then(() => {
+                                                      Dialog.alert({
+                                                                     title: "Error",
+                                                                     message: "This public key has not been added to the" +
+                                                                              "list. It may be duplicate or does not" +
+                                                                              " have the right format.",
+                                                                     okButtonText: "Ok"
+                                                                   });
+                                                    });
                              });
     };
 
@@ -91,40 +112,40 @@ function addScan() {
       // Unused
     };
 
-    BarCodeScanner.scan({
-                          message: "Scan the public keys of the attendees.",
-                          showFlipCameraButton: true,
-                          showTorchButton: true,
-                          resultDisplayDuration: 1000,
-                          openSettingsIfPermissionWasPreviouslyDenied: true,
-                          beepOnScan: true,
-                          continuousScanCallback: continuousCallback,
-                          closeCallback: closeCallback
-                        })
-                  .then(function () {
-                    // Unused
-                  }, function (error) {
-                    /*
-                     Dialog.alert({
-                     title: "Please try again!",
-                     message: "An error occurred.",
-                     okButtonText: "Ok"
-                     });
-                     */
+    return BarCodeScanner.scan({
+                                 message: "Scan the public keys of the attendees.",
+                                 showFlipCameraButton: true,
+                                 showTorchButton: true,
+                                 resultDisplayDuration: 1000,
+                                 openSettingsIfPermissionWasPreviouslyDenied: true,
+                                 beepOnScan: true,
+                                 continuousScanCallback: continuousCallback,
+                                 closeCallback: closeCallback
+                               })
+                         .then(function () {
+                           // Unused
+                         }, function (error) {
+                           /*
+                            Dialog.alert({
+                            title: "Please try again!",
+                            message: "An error occurred.",
+                            okButtonText: "Ok"
+                            });
+                            */
 
-                    console.dir(error);
-                  });
+                           console.dir(error);
+                         });
   }
 
   /**
    * Function that gets executed when there is no camera available on the users phone.
    */
   function notAvailableFunction() {
-    Dialog.alert({
-                   title: "Where is your camera?",
-                   message: "There is no camera available on your phone.",
-                   okButtonText: "Ok"
-                 });
+    return Dialog.alert({
+                          title: "Where is your camera?",
+                          message: "There is no camera available on your phone.",
+                          okButtonText: "Ok"
+                        });
   }
 }
 
