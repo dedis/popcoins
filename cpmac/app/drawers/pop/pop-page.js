@@ -1,4 +1,5 @@
 const FrameModule = require("ui/frame");
+const ScanToClip = require("~/shared/lib/scan-to-clip/scan-to-clip");
 
 const PopViewModel = require("./pop-view-model");
 
@@ -15,8 +16,6 @@ function onNavigatingTo(args) {
     return;
   }
 
-  // TODO: general qr scan that copies to clipboard
-
   const page = args.object;
   page.bindingContext = new PopViewModel();
 }
@@ -31,5 +30,14 @@ function onDrawerButtonTap(args) {
   sideDrawer.showDrawer();
 }
 
+/**
+ * Global button to "scan to clip" in the PoP drawer.
+ * @returns {Promise.<any>}
+ */
+function scanToClip() {
+  return ScanToClip.scanToClip();
+}
+
 exports.onNavigatingTo = onNavigatingTo;
 exports.onDrawerButtonTap = onDrawerButtonTap;
+exports.scanToClip = scanToClip;

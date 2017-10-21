@@ -22,6 +22,9 @@
                     ios.position="left">
         </ActionItem>
         <Label class="action-bar-title" text="PoP"/>
+        <ActionItem tap="scanToClip"
+                    ios.systemIcon="15" ios.position="right"
+                    text="ScanToClip" android.position="popup"/>
     </ActionBar>
 
     <!--
