@@ -21,6 +21,7 @@ function RegisterViewModel() {
  * Sets up the the registeredKeys list with all the needed functions to manage it.
  */
 function setUpRegisteredKeys() {
+  // TODO: register myself automatically, add in head of list?
 
   /**
    * Loads the list of registered keys.

@@ -1,8 +1,8 @@
 const ObservableModule = require("data/observable");
 
-function OrgViewModel() {
-  const viewModel = ObservableModule.fromObject({});
+const viewModel = ObservableModule.fromObject({});
 
+function OrgViewModel() {
   return viewModel;
 }
 
