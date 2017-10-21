@@ -1,0 +1,14 @@
+<Page
+        class="page"
+        loaded="onLoaded">
+
+    <ActionBar class="action-bar">
+        <Label class="action-bar-title" text="Public Key QR Code"/>
+    </ActionBar>
+
+    <GridLayout class="page-content" rows="*,auto" columns="*">
+        <Image id="image-public-key" stretch="aspectFit" row="0"/>
+        <Label class="label-title" id="label-public-key" row="1" textWrap="true"/>
+    </GridLayout>
+
+</Page>

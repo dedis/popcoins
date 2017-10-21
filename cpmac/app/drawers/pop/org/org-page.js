@@ -11,13 +11,13 @@ function onNavigatingTo(args) {
   page.bindingContext = new OrgViewModel();
 }
 
-function configButtonTapped(args) {
+function configButtonTapped() {
   Frame.topmost().navigate({
                              moduleName: "drawers/pop/org/config/config-page"
                            });
 }
 
-function registerButtonTapped(args) {
+function registerButtonTapped() {
   Frame.topmost().navigate({
                              moduleName: "drawers/pop/org/register/register-page"
                            });

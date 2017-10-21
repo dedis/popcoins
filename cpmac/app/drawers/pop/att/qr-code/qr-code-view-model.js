@@ -2,8 +2,8 @@ const ObservableModule = require("data/observable");
 
 const viewModel = ObservableModule.fromObject({});
 
-function AttViewModel() {
+function QrCodeViewModel() {
   return viewModel;
 }
 
-module.exports = AttViewModel;
+module.exports = QrCodeViewModel;
