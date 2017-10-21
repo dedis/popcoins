@@ -1,3 +1,4 @@
+const Dialog = require("ui/dialogs");
 const FilesPath = require("~/shared/res/files/files-path");
 const FileIO = require("~/shared/lib/file-io/file-io");
 
@@ -78,15 +79,58 @@ function saveFields() {
  * @returns {Promise.<*[]>}
  */
 function emptyFields() {
-  const filesToEmpty = Array.from(files);
 
-  filesToEmpty.map(filePath => {
-    return FileIO.writeContentTo(filePath, "");
-  });
+  /**
+   * Clears the stored information in the settings.
+   * @returns {Promise.<any>}
+   */
+  function clearSettings() {
+    const filesToEmpty = Array.from(files);
 
-  return Promise.all(filesToEmpty).then(() => {
-    return loadFields();
-  });
+    filesToEmpty.map(filePath => {
+      return FileIO.writeContentTo(filePath, "");
+    });
+
+    return Promise.all(filesToEmpty).then(() => {
+      return loadFields();
+    });
+  }
+
+  /**
+   * Clears the list of registered public keys.
+   * @returns {Promise.<any>}
+   */
+  function clearRegisteredPublicKeys() {
+    return FileIO.writeContentTo(FilesPath.POP_REGISTERED_KEYS, "");
+  }
+
+  return Dialog.confirm({
+                          title: "Delete Stored Settings",
+                          message: "You are about to delete your stored information, are you sure?",
+                          okButtonText: "Delete ^ & 'Registered Public Keys (only ORG)'",
+                          cancelButtonText: "Cancel",
+                          neutralButtonText: "Delete 'Description Hash', 'Public Key' & 'final.toml'"
+                        })
+               .then(result => {
+                 if (result) {
+                   return clearSettings()
+                     .then(() => {
+                       return clearRegisteredPublicKeys();
+                     });
+                 } else if (result === undefined) {
+                   return clearSettings();
+                 } else {
+                   return Promise.resolve();
+                 }
+               })
+               .catch(() => {
+                 return Dialog.alert({
+                                       title: "Deletion Error",
+                                       message: "An unexpected error occurred during the deletion process. Please" +
+                                                " try again.",
+                                       okButtonText: "Ok"
+                                     });
+               });
 }
 
 exports.onLoaded = onLoaded;
