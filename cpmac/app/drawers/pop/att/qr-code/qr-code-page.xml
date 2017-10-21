@@ -7,7 +7,7 @@
     </ActionBar>
 
     <GridLayout class="page-content" rows="*,auto" columns="*">
-        <Image id="image-public-key" stretch="aspectFit" row="0"/>
+        <Image id="image-public-key" stretch="aspectFit" row="0" tap="copyToClipboard"/>
         <Label class="label-title" id="label-public-key" row="1" textWrap="true"/>
     </GridLayout>
 

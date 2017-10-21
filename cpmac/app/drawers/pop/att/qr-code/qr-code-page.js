@@ -1,6 +1,8 @@
 const PlatformModule = require("tns-core-modules/platform");
 const ZXing = require("nativescript-zxing");
 const ImageSource = require("image-source");
+const Clipboard = require("nativescript-clipboard");
+const Dialog = require("ui/dialogs");
 
 const QrCodeViewModel = require("./qr-code-view-model");
 
@@ -58,4 +60,29 @@ function loadFields() {
   imagePublicKey.imageSource = ImageSource.fromNativeSource(QR_CODE);
 }
 
+/**
+ * Function called when the user clicks on the QR code, the public key gets stored in the clipboard.
+ * @returns {Promise.<any>}
+ */
+function copyToClipboard() {
+  return Clipboard.setText(publicKey)
+                  .then(() => {
+                    return Dialog.alert({
+                                          title: "Copied to Clipboard",
+                                          message: "Your public key has been copied to the clipboard. Paste it where" +
+                                                   " you want.",
+                                          okButtonText: "Ok"
+                                        });
+                  })
+                  .catch(() => {
+                    return Dialog.alert({
+                                          title: "Clipboard Error",
+                                          message: "We encountered an error trying to copy your public key to the" +
+                                                   " clipboard. Please try again.",
+                                          okButtonText: "Ok"
+                                        });
+                  });
+}
+
 exports.onLoaded = onLoaded;
+exports.copyToClipboard = copyToClipboard;
