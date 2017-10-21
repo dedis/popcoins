@@ -15,7 +15,7 @@ function onLoaded(args) {
 
   const page = args.object;
 
-// TODO: implement item delete for Android
+  // TODO: implement item delete for Android
   if (page.ios) {
     let listView = page.getViewById("list-view-registered-keys");
 
@@ -125,6 +125,7 @@ function addScan() {
                          .then(function () {
                            // Unused
                          }, function (error) {
+                           // This error callback gets called even if there is no error.
                            /*
                             Dialog.alert({
                             title: "Please try again!",
@@ -147,6 +148,14 @@ function addScan() {
                           okButtonText: "Ok"
                         });
   }
+}
+
+/**
+ * Function called when the button "register" is clicked. It starts the registration process with the organizers conode.
+ * @returns {Promise.<any>}
+ */
+function registerKeys() {
+  return myRegisteredKeys.register();
 }
 
 /**
@@ -178,4 +187,5 @@ function empty() {
 exports.onLoaded = onLoaded;
 exports.addManual = addManual;
 exports.addScan = addScan;
+exports.registerKeys = registerKeys;
 exports.empty = empty;

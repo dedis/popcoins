@@ -10,10 +10,10 @@
                     text="Empty" android.position="popup"/>
     </ActionBar>
 
-    <GridLayout class="page-content" rows="auto,*,auto" columns="*,*">
-        <Label class="label-title" text="Registered Public Keys" row="0" colSpan="2"/>
+    <GridLayout class="page-content" rows="auto,*,auto" columns="*,*,*">
+        <Label class="label-title" text="Registered Public Keys" row="0" colSpan="3"/>
 
-        <ListView items="{{ registeredKeys }}" id="list-view-registered-keys" row="1" colSpan="2">
+        <ListView items="{{ registeredKeys }}" id="list-view-registered-keys" row="1" colSpan="3">
             <ListView.itemTemplate>
                 <GridLayout rows="*" columns="*">
                     <Label text="{{ key }}" textAlignment="center" textWrap="true"/>
@@ -22,7 +22,8 @@
         </ListView>
 
         <Button text="Manual" tap="addManual" row="2" col="0"/>
-        <Button text="Scan" tap="addScan" row="2" col="1"/>
+        <Button text="Register" tap="registerKeys" row="2" col="1"/>
+        <Button text="Scan" tap="addScan" row="2" col="2"/>
     </GridLayout>
 
 </Page>

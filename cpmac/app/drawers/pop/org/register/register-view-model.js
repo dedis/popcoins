@@ -1,5 +1,6 @@
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
+const Dialog = require("ui/dialogs");
 const FilesPath = require("~/shared/res/files/files-path");
 const FileIO = require("~/shared/lib/file-io/file-io");
 
@@ -32,9 +33,11 @@ function setUpRegisteredKeys() {
                  })
                  .then(keysArray => {
                    for (let i = 0; i < keysArray.length; ++i) {
-                     myRegisteredKeys.push({
-                                             key: keysArray[i]
-                                           });
+                     if (keysArray[i] !== "") {
+                       myRegisteredKeys.push({
+                                               key: keysArray[i]
+                                             });
+                     }
                    }
 
                    return Promise.resolve();
@@ -61,6 +64,61 @@ function setUpRegisteredKeys() {
 
       return saveKeysToFile();
     }
+  };
+
+  /**
+   * Function called when the organizer wants to register the public keys of the attendees on his conode.
+   * @returns {Promise.<any>}
+   */
+  myRegisteredKeys.register = function () {
+    return FileIO.getContentOf(FilesPath.POP_DESC_HASH)
+                 .then(descriptionHash => {
+                   const arrayOfKeys = myRegisteredKeys.map(keyObject => {
+                     return keyObject.key;
+                   });
+
+                   if (descriptionHash.length > 0 && arrayOfKeys.length > 0) {
+                     return Dialog.confirm({
+                                             title: "Register Public Keys",
+                                             message: "You are about to register the keys of the attendees on your" +
+                                                      " conode. Please confirm what follows.\n\nDescription Hash:\n" +
+                                                      descriptionHash + "\nPublic Keys to Register:\n" +
+                                                      arrayOfKeys.join("\n\n"),
+                                             okButtonText: "Register",
+                                             cancelButtonText: "Cancel"
+                                           })
+                                  .then(result => {
+                                    if (result) {
+                                      return sendKeysToConode(descriptionHash);
+                                    } else {
+                                      return Promise.resolve();
+                                    }
+                                  })
+                                  .catch(() => {
+                                    return Dialog.alert({
+                                                          title: "Registration Error",
+                                                          message: "An unexpected error occurred during the" +
+                                                                   " registration process. Please try again.",
+                                                          okButtonText: "Ok"
+                                                        });
+                                  });
+                   } else {
+                     return Dialog.alert({
+                                           title: "Missing Information",
+                                           message: "Please provide more information, we need the hash of your" +
+                                                    " description and the keys of the registered attendees.",
+                                           okButtonText: "Ok"
+                                         });
+                   }
+                 })
+                 .catch(() => {
+                   return Dialog.alert({
+                                         title: "Registration Error",
+                                         message: "An unexpected error occurred during the" +
+                                                  " registration process. Please try again.",
+                                         okButtonText: "Ok"
+                                       });
+                 });
   };
 
   /**
@@ -112,6 +170,16 @@ function saveKeysToFile() {
                                       .join("\n");
 
   return FileIO.writeContentTo(FilesPath.POP_REGISTERED_KEYS, linesOfKeys);
+}
+
+/**
+ * Function that sends the public keys of the registered attendees to the conode of the organizer.
+ * @param descriptionHash -  the hash of the PoP Party description
+ * @returns {Promise.<any>}
+ */
+function sendKeysToConode(descriptionHash) {
+  // TODO: actually register keys on conode
+  return Promise.resolve();
 }
 
 module.exports = RegisterViewModel;
