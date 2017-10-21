@@ -1,5 +1,6 @@
 <Page
-        class="page">
+        class="page"
+        loaded="onLoaded">
 
     <ActionBar class="action-bar">
         <Label class="action-bar-title" text="Attendee"/>
@@ -18,9 +19,10 @@
         <TextField class="text-field" hint="private key" autocorrect="false" autocapitalizationType="none"
                    returnKeyType="done"
                    row="3"
-                   col="3"/>
+                   col="3"
+                   id="text-field-private-key"/>
 
-        <Button text="Generate" row="4" colSpan="4"/>
+        <Button text="Generate" row="4" colSpan="4" tap="generatePopToken"/>
     </GridLayout>
 
 </Page>
