@@ -4,8 +4,7 @@ const FileIO = require("~/shared/lib/file-io/file-io");
 
 const ConfigViewModel = require("./config-view-model");
 
-let textFieldDescription = undefined;
-let labelDescription = undefined;
+let textViewDescription = undefined;
 
 function onLoaded(args) {
   if (args.isBackNavigation) {
@@ -15,7 +14,7 @@ function onLoaded(args) {
   const page = args.object;
 
   loadViews(page);
-  if (textFieldDescription === undefined || labelDescription === undefined) {
+  if (textViewDescription === undefined) {
     throw new Error("a field is undefined, but it shouldn't");
   }
 
@@ -27,15 +26,7 @@ function onLoaded(args) {
  * @param page - the current page object
  */
 function loadViews(page) {
-  textFieldDescription = page.getViewById("text-field-description");
-  labelDescription = page.getViewById("label-description");
-}
-
-/**
- * Updates the label text for the description. It is called when the user presses the return key on the keyboard.
- */
-function updateLabelText() {
-  labelDescription.text = textFieldDescription.text;
+  textViewDescription = page.getViewById("text-view-description");
 }
 
 /**
@@ -43,7 +34,7 @@ function updateLabelText() {
  * @returns {Promise.<*[]>}
  */
 function hashAndSave() {
-  let description = textFieldDescription.text;
+  let description = textViewDescription.text;
 
   /**
    * Hashes the description and stores it permanently.
@@ -112,5 +103,4 @@ function hashAndSave() {
 }
 
 exports.onLoaded = onLoaded;
-exports.updateLabelText = updateLabelText;
 exports.hashAndSave = hashAndSave;

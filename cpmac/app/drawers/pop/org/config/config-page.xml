@@ -6,20 +6,14 @@
         <Label class="action-bar-title" text="Configuration"/>
     </ActionBar>
 
-    <GridLayout class="page-content" rows="auto,*,auto,auto" columns="*">
+    <GridLayout class="page-content" rows="auto,*,auto" columns="*">
         <Label class="label-title" text="Description" row="0"/>
+        <TextView class="text-field" hint="description" autocorrect="false" autocapitalizationType="none"
+                  returnKeyType="next"
+                  row="1"
+                  id="text-view-description"/>
 
-        <ScrollView row="1">
-            <Label id="label-description" textWrap="true" color="gray"/>
-        </ScrollView>
-
-        <TextField class="text-field" hint="description" autocorrect="false" autocapitalizationType="none"
-                   returnKeyType="done"
-                   returnPress="updateLabelText"
-                   row="2"
-                   id="text-field-description"/>
-
-        <Button text="Hash &amp; Save" tap="hashAndSave" row="3"/>
+        <Button text="Hash &amp; Save" tap="hashAndSave" row="2"/>
     </GridLayout>
 
 </Page>
