@@ -38,11 +38,15 @@ function scanToClip() {
                          }
                        })
                        .catch(() => {
-                         return Dialog.alert({
-                                               title: "Error",
-                                               message: "An unexpected error occurred during the scan to clip process.",
-                                               okButtonText: "Ok"
-                                             });
+                         // This error callback gets called even if there is no error. It gets called when no scan
+                         // has been made.
+                         /*
+                          return Dialog.alert({
+                          title: "Error",
+                          message: "An unexpected error occurred during the scan to clip process.",
+                          okButtonText: "Ok"
+                          });
+                          */
                        });
 }
 
@@ -68,7 +72,7 @@ const continuousCallback = function (scanResult) {
                     return Dialog.alert({
                                           title: "Error",
                                           message: "An unexpected error occurred during the scan to clip process.",
-                                          okButtonText: "Too Bad!"
+                                          okButtonText: "Ok"
                                         });
                   });
 };

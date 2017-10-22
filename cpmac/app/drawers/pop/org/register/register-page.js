@@ -125,7 +125,8 @@ function addScan() {
                          .then(function () {
                            // Unused
                          }, function (error) {
-                           // This error callback gets called even if there is no error.
+                           // This error callback gets called even if there is no error. It gets called when no scan
+                           // has been made.
                            /*
                             Dialog.alert({
                             title: "Please try again!",
