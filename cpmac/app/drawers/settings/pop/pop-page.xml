@@ -23,8 +23,8 @@
                    col="3"
                    id="text-field-public-key"/>
 
-        <Label class="label-title" text="final.toml" row="2" colSpan="4"/>
-        <Label class="label-space" text=" - " row="3" col="0" colSpan="4"/>
+        <Label class="label-space" text="final.toml" row="2" colSpan="4"/>
+        <Label class="label-space" text=" - " row="3" colSpan="4"/>
         <TextView class="text-field" hint="final.toml" autocorrect="false" autocapitalizationType="none"
                   returnKeyType="next"
                   row="4"

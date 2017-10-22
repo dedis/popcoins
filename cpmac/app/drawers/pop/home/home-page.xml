@@ -6,58 +6,59 @@
         <Label class="action-bar-title" text="Home"/>
     </ActionBar>
 
-    <GridLayout class="page-content" rows="*,*,*,*,*,*,*,*,*,*" columns="*,auto,*">
+    <GridLayout class="page-content" rows="auto,auto,auto,*,auto,auto,auto,auto,auto,*,auto,auto,auto,auto"
+                columns="*,auto,*">
         <Label class="label-title" text="Sign" row="0" colSpan="3"/>
 
-        <Label class="label-text" text="Message" row="1" col="0"/>
-        <Label class="label-space" text=" - " row="1" col="1"/>
-        <TextField class="text-field" hint="message" autocorrect="false" autocapitalizationType="none"
-                   returnKeyType="done"
-                   row="1"
-                   col="2"
-                   id="text-field-sign-message"/>
-        <Label class="label-text" text="Context" row="2" col="0"/>
-        <Label class="label-space" text=" - " row="2" col="1"/>
+        <Label class="label-space" text="Message" row="1" colSpan="3"/>
+        <Label class="label-space" text=" - " row="2" colSpan="3"/>
+        <TextView class="text-field" hint="message" autocorrect="false" autocapitalizationType="none"
+                  returnKeyType="next"
+                  row="3"
+                  colSpan="3"
+                  id="text-view-sign-message"/>
+        <Label class="label-text" text="Context" row="4" col="0"/>
+        <Label class="label-space" text=" - " row="4" col="1"/>
         <TextField class="text-field" hint="context" autocorrect="false" autocapitalizationType="none"
                    returnKeyType="done"
-                   row="2"
+                   row="4"
                    col="2"
                    id="text-field-sign-context"/>
 
-        <Button text="Sign" tap="signButtonTapped" row="3" colSpan="3"/>
+        <Button text="Sign" tap="signButtonTapped" row="5" colSpan="3"/>
 
-        <Label class="label-title" text="Verify" row="4" colSpan="3"/>
+        <Label class="label-title" text="Verify" row="6" colSpan="3"/>
 
-        <Label class="label-text" text="Message" row="5" col="0"/>
-        <Label class="label-space" text=" - " row="5" col="1"/>
-        <TextField class="text-field" hint="message" autocorrect="false" autocapitalizationType="none"
-                   returnKeyType="done"
-                   row="5"
-                   col="2"
-                   id="text-field-verify-message"/>
-        <Label class="label-text" text="Context" row="6" col="0"/>
-        <Label class="label-space" text=" - " row="6" col="1"/>
+        <Label class="label-space" text="Message" row="7" colSpan="3"/>
+        <Label class="label-space" text=" - " row="8" colSpan="3"/>
+        <TextView class="text-field" hint="message" autocorrect="false" autocapitalizationType="none"
+                  returnKeyType="next"
+                  row="9"
+                  colSpan="3"
+                  id="text-view-verify-message"/>
+        <Label class="label-text" text="Context" row="10" col="0"/>
+        <Label class="label-space" text=" - " row="10" col="1"/>
         <TextField class="text-field" hint="context" autocorrect="false" autocapitalizationType="none"
                    returnKeyType="done"
-                   row="6"
+                   row="10"
                    col="2"
                    id="text-field-verify-context"/>
-        <Label class="label-text" text="Signature" row="7" col="0"/>
-        <Label class="label-space" text=" - " row="7" col="1"/>
+        <Label class="label-text" text="Signature" row="11" col="0"/>
+        <Label class="label-space" text=" - " row="11" col="1"/>
         <TextField class="text-field" hint="signature" autocorrect="false" autocapitalizationType="none"
                    returnKeyType="done"
-                   row="7"
+                   row="11"
                    col="2"
                    id="text-field-verify-signature"/>
-        <Label class="label-text" text="Tag" row="8" col="0"/>
-        <Label class="label-space" text=" - " row="8" col="1"/>
+        <Label class="label-text" text="Tag" row="12" col="0"/>
+        <Label class="label-space" text=" - " row="12" col="1"/>
         <TextField class="text-field" hint="tag" autocorrect="false" autocapitalizationType="none"
                    returnKeyType="done"
-                   row="8"
+                   row="12"
                    col="2"
                    id="text-field-verify-tag"/>
 
-        <Button text="Verify" tap="verifyButtonTapped" row="9" colSpan="3"/>
+        <Button text="Verify" tap="verifyButtonTapped" row="13" colSpan="3"/>
     </GridLayout>
 
 </Page>

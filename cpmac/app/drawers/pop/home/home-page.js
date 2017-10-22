@@ -1,10 +1,10 @@
 const Dialog = require("ui/dialogs");
 const HomeViewModel = require("./home-view-model");
 
-let textFieldSignMessage = undefined;
+let textViewSignMessage = undefined;
 let textFieldSignContext = undefined;
 
-let textFieldVerifyMessage = undefined;
+let textViewVerifyMessage = undefined;
 let textFieldVerifyContext = undefined;
 let textFieldVerifySignature = undefined;
 let textFieldVerifyTag = undefined;
@@ -17,9 +17,9 @@ function onLoaded(args) {
   const page = args.object;
 
   loadViews(page);
-  if (textFieldSignMessage === undefined || textFieldSignContext === undefined ||
-      textFieldVerifyMessage === undefined || textFieldVerifyContext === undefined ||
-      textFieldVerifySignature === undefined || textFieldVerifyTag === undefined) {
+  if (textViewSignMessage === undefined || textFieldSignContext === undefined || textViewVerifyMessage === undefined ||
+      textFieldVerifyContext === undefined || textFieldVerifySignature === undefined ||
+      textFieldVerifyTag === undefined) {
     throw new Error("one of the fields is undefined, but it shouldn't");
   }
 
@@ -32,11 +32,11 @@ function onLoaded(args) {
  */
 function loadViews(page) {
   // Sign
-  textFieldSignMessage = page.getViewById("text-field-sign-message");
+  textViewSignMessage = page.getViewById("text-view-sign-message");
   textFieldSignContext = page.getViewById("text-field-sign-context");
 
   // Verify
-  textFieldVerifyMessage = page.getViewById("text-field-verify-message");
+  textViewVerifyMessage = page.getViewById("text-view-verify-message");
   textFieldVerifyContext = page.getViewById("text-field-verify-context");
   textFieldVerifySignature = page.getViewById("text-field-verify-signature");
   textFieldVerifyTag = page.getViewById("text-field-verify-tag");
@@ -47,7 +47,7 @@ function loadViews(page) {
  * @returns {Promise.<any>}
  */
 function signButtonTapped() {
-  const message = textFieldSignMessage.text;
+  const message = textViewSignMessage.text;
   const context = textFieldSignContext.text;
 
   if (message.length > 0 && context.length > 0) {
@@ -67,7 +67,7 @@ function signButtonTapped() {
  * @returns {Promise.<any>}
  */
 function verifyButtonTapped() {
-  const message = textFieldVerifyMessage.text;
+  const message = textViewVerifyMessage.text;
   const context = textFieldVerifyContext.text;
   const signature = textFieldVerifySignature.text;
   const tag = textFieldVerifyTag.text;
