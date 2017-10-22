@@ -35,7 +35,7 @@ function loadViews(page) {
 
   textFields.push(page.getViewById("text-field-description"));
   textFields.push(page.getViewById("text-field-public-key"));
-  textFields.push(page.getViewById("text-field-final-toml"));
+  textFields.push(page.getViewById("text-view-final-toml"));
 }
 
 /**
