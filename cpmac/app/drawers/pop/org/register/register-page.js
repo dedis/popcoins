@@ -46,11 +46,14 @@ function addManual() {
                          message: "Please enter the public key of an attendee.",
                          okButtonText: "Register",
                          cancelButtonText: "Cancel",
+                         neutralButtonText: "Add Myself",
                          inputType: Dialog.inputType.text
                        })
                .then(args => {
                  if (args.result && args.text !== undefined && args.text.length > 0) {
                    return myRegisteredKeys.addKey(args.text);
+                 } else if (args.result === undefined) {
+                   return myRegisteredKeys.addMyself();
                  } else {
                    return Promise.reject();
                  }
