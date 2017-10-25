@@ -5,11 +5,14 @@
 const STATUS = "/Status";
 const STATUS_REQUEST = `${STATUS}/Request`;
 
+const IDENTITY = "Identity";
+const IDENTITY_PIN_REQUEST = `${IDENTITY}/PinRequest`;
+
 const SKIPCHAIN = "/Skipchain";
 const SKIPCHAIN_GET_UPDATE_CHAIN = `${SKIPCHAIN}/GetUpdateChain`;
 const SKIPCHAIN_GET_ALL_SKIPCHAINS = `${SKIPCHAIN}/GetAllSkipchains`;
 
-const POP = "/Pop";
+const POP = "/PoPServer";
 const POP_CHECK_CONFIG = `${POP}/CheckConfig`;
 const POP_MERGE_CONFIG = `${POP}/MergeConfig`;
 const POP_STORE_CONFIG = `${POP}/StoreConfig`;
@@ -36,9 +39,10 @@ const CISC_PROPOSE_SEND = `${CISC}/ProposeSend`;
 const CISC_PROPOSE_UPDATE = `${CISC}/ProposeUpdate`;
 const CISC_SCHNORR_SIG = `${CISC}/SchnorrSig`;
 
-
 // Exports --------------------------------------------------------------------
 exports.STATUS_REQUEST = STATUS_REQUEST;
+
+exports.IDENTITY_PIN_REQUEST = IDENTITY_PIN_REQUEST;
 
 exports.SKIPCHAIN_GET_UPDATE_CHAIN = SKIPCHAIN_GET_UPDATE_CHAIN;
 exports.SKIPCHAIN_GET_ALL_SKIPCHAINS = SKIPCHAIN_GET_ALL_SKIPCHAINS;

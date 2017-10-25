@@ -40,6 +40,8 @@ function setUpConodeList() {
                                                       .push({
                                                               conode: response
                                                             });
+
+                                             return Promise.resolve();
                                            });
                    });
                  })

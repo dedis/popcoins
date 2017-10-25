@@ -3,6 +3,11 @@
  */
 
 /**
+ * No response expected.
+ */
+const NO_RESPONSE = "NO_RESPONSE";
+
+/**
  * Server response types.
  */
 const STATUS_RESPONSE = "Response";
@@ -35,6 +40,7 @@ const CONFIG_UPDATE_REPLY = "ConfigUpdateReply";
 const PROPOSE_UPDATE_REPLY = "ProposeUpdateReply";
 
 // Exports --------------------------------------------------------------------
+exports.NO_RESPONSE = NO_RESPONSE;
 exports.STATUS_RESPONSE = STATUS_RESPONSE;
 exports.RANDOM_RESPONSE = RANDOM_RESPONSE;
 exports.SIGNATURE_RESPONSE = SIGNATURE_RESPONSE;

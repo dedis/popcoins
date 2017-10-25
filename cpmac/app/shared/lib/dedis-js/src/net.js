@@ -3,6 +3,7 @@
 /** @module net */
 
 exports.parseCothorityRoster = parseCothorityRoster;
+exports.getConodeFromRoster = getConodeFromRoster;
 exports.Socket = Socket;
 exports.StandardSocket = StandardSocket;
 exports.CothoritySocket = CothoritySocket;
@@ -10,6 +11,7 @@ exports.CothoritySocket = CothoritySocket;
 const Misc = require("./misc.js");
 const WebSocket = require("nativescript-websockets");
 const CothorityMessages = require("~/shared/lib/cothority-protobuf/build/cothority-messages");
+const CothorityDecodeTypes = require("~/shared/res/cothority-decode-types/cothority-decode-types");
 
 const TOPL = require("topl");
 const UUID = require("pure-uuid");
@@ -50,6 +52,25 @@ function parseCothorityRoster(toml) {
   });
 
   return roster;
+}
+
+/**
+ * Gets a single conode from a roster toml string as a JavaScript object.
+ * @param toml - the toml string
+ * @param address - the address string
+ * @returns {object} - the conode object or undefined if not found
+ */
+function getConodeFromRoster(toml, address) {
+  let roster = parseCothorityRoster(toml);
+  let wantedConode = undefined;
+
+  roster.servers.forEach((conode) => {
+    if (conode.Address === address) {
+      wantedConode = conode;
+    }
+  });
+
+  return wantedConode;
 }
 
 function ATOB(string) {
@@ -178,6 +199,11 @@ function CothoritySocket() {
     socket.on("open", (socket) => {
       console.log("Socket open...");
       socket.send(message);
+
+      if (typeToDecode === CothorityDecodeTypes.NO_RESPONSE) {
+        socket.close();
+        resolve();
+      }
     });
 
     socket.on("close", (socket, code, reason) => {
