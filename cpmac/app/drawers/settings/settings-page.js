@@ -7,6 +7,9 @@ const SettingsViewModel = require("./settings-view-model");
  * Use the "onNavigatingTo" handler to initialize the page binding context.
  *************************************************************/
 function onNavigatingTo(args) {
+
+  // TODO: export - import settings
+
   /* ***********************************************************
    * The "onNavigatingTo" event handler lets you detect if the user navigated with a back button.
    * Skipping the re-initialization on back navigation means the user will see the

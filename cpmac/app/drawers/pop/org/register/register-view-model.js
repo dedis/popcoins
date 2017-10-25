@@ -23,6 +23,28 @@ function RegisterViewModel() {
 function setUpRegisteredKeys() {
 
   /**
+   * Gets the key at index given as parameter.
+   * @param index - the wanted index
+   * @returns {Promise.<string>}
+   */
+  myRegisteredKeys.get = function (index) {
+    return FileIO.getContentOf(FilesPath.POP_REGISTERED_KEYS)
+                 .then(content => {
+                   return content.split(EOL_REGEX);
+                 })
+                 .then(keysArray => {
+                   return keysArray[index];
+                 })
+                 .catch(() => {
+                   return Dialog.alert({
+                                         title: "Error",
+                                         message: "An unexpected error occurred. Please try again.",
+                                         okButtonText: "Ok"
+                                       });
+                 });
+  };
+
+  /**
    * Loads the list of registered keys.
    * @returns {*|Promise.<any>}
    */
