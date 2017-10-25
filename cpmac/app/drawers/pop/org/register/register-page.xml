@@ -13,7 +13,9 @@
     <GridLayout class="page-content" rows="auto,*,auto" columns="*,*,*">
         <Label class="label-title" text="Registered Public Keys" row="0" colSpan="3"/>
 
-        <ListView items="{{ registeredKeys }}" id="list-view-registered-keys" row="1" colSpan="3">
+        <ListView items="{{ registeredKeys }}" id="list-view-registered-keys" android:itemTap="deleteByIndex"
+                  row="1"
+                  colSpan="3">
             <ListView.itemTemplate>
                 <GridLayout rows="*" columns="*">
                     <Label text="{{ key }}" textAlignment="center" textWrap="true"/>

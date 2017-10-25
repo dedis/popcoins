@@ -18,7 +18,7 @@
             </ListView.itemTemplate>
         </ListView>
 
-        <Button text="Link to Conode" row="1"/>
+        <Button text="Link to Conode" tap="linkToConode" row="1"/>
 
     </GridLayout>
 </Page>

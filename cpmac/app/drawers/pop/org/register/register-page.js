@@ -15,12 +15,11 @@ function onLoaded(args) {
 
   const page = args.object;
 
-  // TODO: implement item delete for Android
   if (page.ios) {
     let listView = page.getViewById("list-view-registered-keys");
 
     SwipeToDelete.enable(listView, function (index) {
-      myRegisteredKeys.deleteByIndex(index);
+      return myRegisteredKeys.deleteByIndex(index);
     });
   }
 
@@ -46,13 +45,16 @@ function addManual() {
                          message: "Please enter the public key of an attendee.",
                          okButtonText: "Register",
                          cancelButtonText: "Cancel",
+                         neutralButtonText: "Add Myself",
                          inputType: Dialog.inputType.text
                        })
                .then(args => {
                  if (args.result && args.text !== undefined && args.text.length > 0) {
                    return myRegisteredKeys.addKey(args.text);
+                 } else if (args.result === undefined) {
+                   return myRegisteredKeys.addMyself();
                  } else {
-                   return Promise.reject();
+                   return Promise.resolve();
                  }
                })
                .catch(() => {
@@ -160,6 +162,41 @@ function registerKeys() {
 }
 
 /**
+ * Deletes an item by the its index. This function is only used in Android, since iOS uses swipe-to-delete.
+ * @param args - the item clicked
+ * @returns {*|Promise.<any>}
+ */
+function deleteByIndex(args) {
+  let indexToDelete = args.index;
+
+  return myRegisteredKeys.get(indexToDelete)
+                         .then(keyToDelete => {
+                           return Dialog.confirm({
+                                                   title: "Please Confirm",
+                                                   message: "Do you really want to delete the following public" +
+                                                            "key?\n\n" + keyToDelete,
+                                                   okButtonText: "Yes",
+                                                   cancelButtonText: "No"
+                                                 })
+                                        .then(function (result) {
+                                          if (result) {
+                                            return myRegisteredKeys.deleteByIndex(indexToDelete);
+                                          } else {
+                                            return Promise.resolve();
+                                          }
+                                        })
+                                        .catch(() => {
+                                          return Dialog.alert({
+                                                                title: "Deletion Aborted",
+                                                                message: "The deletion process has been aborted," +
+                                                                         "either by you or by an error.",
+                                                                okButtonText: "Ok"
+                                                              });
+                                        });
+                         });
+}
+
+/**
  * Function that gets called when the user wants to delete the whole list of registered keys.
  */
 function empty() {
@@ -173,7 +210,7 @@ function empty() {
                  if (result) {
                    return myRegisteredKeys.empty();
                  } else {
-                   return Promise.reject();
+                   return Promise.resolve();
                  }
                })
                .catch(() => {
@@ -189,4 +226,5 @@ exports.onLoaded = onLoaded;
 exports.addManual = addManual;
 exports.addScan = addScan;
 exports.registerKeys = registerKeys;
+exports.deleteByIndex = deleteByIndex;
 exports.empty = empty;

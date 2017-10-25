@@ -21,7 +21,28 @@ function RegisterViewModel() {
  * Sets up the the registeredKeys list with all the needed functions to manage it.
  */
 function setUpRegisteredKeys() {
-  // TODO: register myself automatically, add in head of list?
+
+  /**
+   * Gets the key at index given as parameter.
+   * @param index - the wanted index
+   * @returns {Promise.<string>}
+   */
+  myRegisteredKeys.get = function (index) {
+    return FileIO.getContentOf(FilesPath.POP_REGISTERED_KEYS)
+                 .then(content => {
+                   return content.split(EOL_REGEX);
+                 })
+                 .then(keysArray => {
+                   return keysArray[index];
+                 })
+                 .catch(() => {
+                   return Dialog.alert({
+                                         title: "Error",
+                                         message: "An unexpected error occurred. Please try again.",
+                                         okButtonText: "Ok"
+                                       });
+                 });
+  };
 
   /**
    * Loads the list of registered keys.
@@ -51,20 +72,31 @@ function setUpRegisteredKeys() {
    * @returns {*|Promise.<any>}
    */
   myRegisteredKeys.addKey = function (key) {
-    // TODO: check if the key has a valid format
     const arrayOfKeys = myRegisteredKeys.map(keyObject => {
       return keyObject.key;
     });
 
-    if (arrayOfKeys.includes(key)) {
+    if (arrayOfKeys.includes(key) || key.length === 0) {
       return Promise.reject();
     } else {
-      myRegisteredKeys.push({
-                              key: key
-                            });
+      // TODO: check if the key has a valid format
+      myRegisteredKeys.unshift({
+                                 key: key
+                               });
 
       return saveKeysToFile();
     }
+  };
+
+  /**
+   * Adds the key of the organizer to the list of registered keys.
+   * @returns {Promise.<any>}
+   */
+  myRegisteredKeys.addMyself = function () {
+    return FileIO.getContentOf(FilesPath.POP_PUBLIC_KEY)
+                 .then(myOwnPublicKey => {
+                   return myRegisteredKeys.addKey(myOwnPublicKey);
+                 });
   };
 
   /**
