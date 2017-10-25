@@ -1,8 +1,7 @@
 const ObservableModule = require("data/observable");
 
+const viewModel = ObservableModule.fromObject({});
 function QRViewModel() {
-    const viewModel = ObservableModule.fromObject({});
-
     return viewModel;
 }
 

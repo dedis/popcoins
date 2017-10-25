@@ -22,9 +22,9 @@ message ID {
 
 message Data {
     required sint32 threshold = 1;
-    map<string,Device> device = 2;
-    map<string,string> storage = 3;
-    map<string,SchnorrSig> votes = 4;
+    map<string, Device> device = 2;
+    map<string, string> storage = 3;
+    map<string, SchnorrSig> votes = 4;
 }
 
 message StoreKeys {
@@ -58,16 +58,16 @@ message DataUpdateReply {
 }
 
 message ProposeSend {
-required ID id = 1;
-optional Data data = 2;
+    required ID id = 1;
+    optional Data data = 2;
 }
 
 message ProposeUpdate {
-required ID id = 1;
+    required ID id = 1;
 }
 
 message ProposeUpdateReply {
-optional Data data = 1;
+    optional Data data = 1;
 }
 
 message ProposeVote {

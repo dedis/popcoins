@@ -926,12 +926,12 @@ class CothorityMessages extends CothorityProtobuf {
    * @param id
    * @returns {*|Buffer|Uint8Array}
    */
-  createConfigUpdate(id) {
+  createProposeUpdate(id) {
     const fields = {
       id: id
     };
 
-    return this.encodeMessage("ConfigUpdate", fields);
+    return this.encodeMessage("ProposeUpdate", fields);
   }
 
   /**
@@ -939,10 +939,10 @@ class CothorityMessages extends CothorityProtobuf {
    * @param response
    * @returns {*}
    */
-  decodeConfigUpdateReply(response) {
+  decodeProposeUpdateReply(response) {
     response = new Uint8Array(response);
 
-    return this.decodeMessage("ConfigUpdateReply", response);
+    return this.decodeMessage("ProposeUpdateReply", response);
   }
 
   /**
