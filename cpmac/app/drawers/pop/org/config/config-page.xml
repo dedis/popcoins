@@ -6,14 +6,50 @@
         <Label class="action-bar-title" text="Configuration"/>
     </ActionBar>
 
-    <GridLayout class="page-content" rows="auto,*,auto" columns="*">
-        <Label class="label-title" text="Description" row="0"/>
-        <TextView class="text-field" hint="description" autocorrect="false" autocapitalizationType="none"
-                  returnKeyType="next"
-                  row="1"
-                  id="text-view-description"/>
+    <GridLayout class="page-content" rows="auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,*,auto"
+                columns="*,auto,*">
+        <Label class="label-space" text="Name" row="0" col="0" colSpan="3"/>
+        <Label class="label-title" text=" - " row="1" col="0" colSpan="3"/>
+        <TextField class="text-field" hint="name" autocorrect="true" autocapitalizationType="words"
+                   returnKeyType="done"
+                   row="2"
+                   col="0"
+                   colSpan="3"
+                   id="text-field-name"/>
 
-        <Button text="Hash &amp; Save" tap="hashAndSave" row="2"/>
+        <Label class="label-space" text="Date" row="3" col="0" colSpan="3"/>
+        <Label class="label-title" text=" - " row="4" col="0" colSpan="3"/>
+        <Label text="click me" tap="setDate" row="5" col="0" colSpan="3" id="label-date"/>
+
+        <Label class="label-space" text="Time" row="6" col="0" colSpan="3"/>
+        <Label class="label-title" text=" - " row="7" col="0" colSpan="3"/>
+        <Label text="click me" tap="setTime" row="8" col="0" colSpan="3" id="label-time"/>
+
+        <Label class="label-space" text="Location" row="9" col="0" colSpan="3"/>
+        <Label class="label-title" text=" - " row="10" col="0" colSpan="3"/>
+        <TextField class="text-field" hint="location" autocorrect="true" autocapitalizationType="words"
+                   returnKeyType="done"
+                   row="11"
+                   col="0"
+                   colSpan="3"
+                   id="text-field-location"/>
+
+        <Label class="label-title" text="Conodes" row="12" col="0" colSpan="3"/>
+
+        <ListView items="{{ conodes }}" id="list-view-conodes" android:itemTap="deleteByIndex"
+                  row="13"
+                  col="0"
+                  colSpan="3">
+            <ListView.itemTemplate>
+                <GridLayout rows="*" columns="*">
+                    <Label text="{{ key }}" textAlignment="center" textWrap="true"/>
+                </GridLayout>
+            </ListView.itemTemplate>
+        </ListView>
+
+        <Button text="Manual" tap="addManual" row="14" col="0"/>
+        <Button text="Hash &amp; Save" tap="hashAndSave" row="14" col="1"/>
+        <Button text="Scan" tap="addScan" row="14" col="2"/>
     </GridLayout>
 
 </Page>

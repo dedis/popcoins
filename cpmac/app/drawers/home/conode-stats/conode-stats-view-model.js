@@ -108,7 +108,7 @@ function setUpConodeStatsList() {
   myStatsList.linkToConode = function (conode, pin, publicKey, cothorityPath) {
     const wantedConodeAddress = StatusExtractor.getAddress(conode);
 
-    return FileIO.getContentOf(FilesPath.CONODES_TOML)
+    return FileIO.getStringOf(FilesPath.CONODES_TOML)
                  .then((tomlString) => {
                    return DedisJsNet.getConodeFromRoster(tomlString, wantedConodeAddress);
                  })

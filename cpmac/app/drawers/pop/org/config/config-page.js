@@ -1,10 +1,18 @@
 const Dialog = require("ui/dialogs");
 const FilesPath = require("~/shared/res/files/files-path");
 const FileIO = require("~/shared/lib/file-io/file-io");
+const ModalPicker = require("nativescript-modal-datetimepicker").ModalDatetimepicker;
 
 const ConfigViewModel = require("./config-view-model");
 
-let textViewDescription = undefined;
+const DateTimePicker = new ModalPicker();
+
+let textFieldName = undefined;
+let labelDate = undefined;
+let labelTime = undefined;
+let textFieldLocation = undefined;
+
+let chosenDateTime = new Date(0, 0, 0, 0, 0, 0, 0);
 
 function onLoaded(args) {
   if (args.isBackNavigation) {
@@ -14,7 +22,8 @@ function onLoaded(args) {
   const page = args.object;
 
   loadViews(page);
-  if (textViewDescription === undefined) {
+  if (textFieldName === undefined || labelDate === undefined || labelTime === undefined ||
+      textFieldLocation === undefined) {
     throw new Error("a field is undefined, but it shouldn't");
   }
 
@@ -26,7 +35,48 @@ function onLoaded(args) {
  * @param page - the current page object
  */
 function loadViews(page) {
-  textViewDescription = page.getViewById("text-view-description");
+  textFieldName = page.getViewById("text-field-name");
+  labelDate = page.getViewById("label-date");
+  labelTime = page.getViewById("label-time");
+  textFieldLocation = page.getViewById("text-field-location");
+}
+
+function setDate() {
+  return DateTimePicker.pickDate({
+                                   title: "Pick a Date for you PoP Party"
+                                 })
+                       .then((date) => {
+                         console.log(date.year);
+                         console.log(date.month - 1);
+                         console.log(date.day);
+                         const newDate = new Date(date.year, date.month - 1, date.day, 0, 0, 0, 0);
+
+                         if (newDate.toDateString() !== "Invalid Date") {
+                           chosenDateTime.setYear(date.year);
+                           chosenDateTime.setMonth(date.month - 1);
+                           chosenDateTime.setDate(date.day);
+
+                           labelDate.text = chosenDateTime.toDateString();
+                         }
+                       });
+}
+
+function setTime() {
+  return DateTimePicker.pickTime({
+                                   title: "Pick a Time for you PoP Party"
+                                 })
+                       .then((time) => {
+                         console.log(time.hour);
+                         console.log(time.minute);
+                         const newTime = new Date(0, 0, 0, time.hour, time.minute, 0, 0);
+
+                         if (newTime.toDateString() !== "Invalid Date") {
+                           chosenDateTime.setHours(time.hour);
+                           chosenDateTime.setMinutes(time.minute);
+
+                           labelTime.text = chosenDateTime.toTimeString();
+                         }
+                       });
 }
 
 /**
@@ -34,7 +84,10 @@ function loadViews(page) {
  * @returns {Promise.<*[]>}
  */
 function hashAndSave() {
-  let description = textViewDescription.text;
+  const name = textFieldName.text;
+  const date = labelDate.text;
+  const time = labelTime.text;
+  const location = textFieldLocation.text;
 
   /**
    * Hashes the description and stores it permanently.
@@ -42,9 +95,11 @@ function hashAndSave() {
    */
   function hashAndStore() {
     // TODO: actually compute hash
-    let descriptionHash = description + "(hashed)";
+    // let descriptionHash = name + date + time + location + "(hashed)";
+    let descriptionHash = chosenDateTime.toUTCString();
+    console.log(descriptionHash);
 
-    return FileIO.writeContentTo(FilesPath.POP_DESC_HASH, descriptionHash)
+    return FileIO.writeStringTo(FilesPath.POP_DESC_HASH, descriptionHash)
                  .then(() => {
                    return Dialog.alert({
                                          title: "Successfully Hashed",
@@ -55,8 +110,8 @@ function hashAndSave() {
                  });
   }
 
-  if (description.length > 0) {
-    return FileIO.getContentOf(FilesPath.POP_DESC_HASH)
+  if (name.length > 0 && date.length > 0 && time.length > 0 && location.length > 0) {
+    return FileIO.getStringOf(FilesPath.POP_DESC_HASH)
                  .then(storedHash => {
                    if (storedHash.length > 0) {
                      return Dialog.confirm({
@@ -95,12 +150,15 @@ function hashAndSave() {
                  });
   } else {
     return Dialog.alert({
-                          title: "Missing Description",
-                          message: "Please provide the description of you PoP Party.",
+                          title: "Missing Information",
+                          message: "Please provide a name, date, time, location and a list of public keys of the" +
+                                   " organizers conodes for your PoP Party.",
                           okButtonText: "Ok"
                         });
   }
 }
 
 exports.onLoaded = onLoaded;
+exports.setDate = setDate;
+exports.setTime = setTime;
 exports.hashAndSave = hashAndSave;

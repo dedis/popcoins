@@ -24,6 +24,7 @@
     "nativescript-barcodescanner": "^2.7.0",
     "nativescript-clipboard": "^1.1.7",
     "nativescript-iqkeyboardmanager": "^1.1.0",
+    "nativescript-modal-datetimepicker": "^1.0.3",
     "nativescript-telerik-ui": "3.0.4",
     "nativescript-theme-core": "1.0.4",
     "nativescript-unit-test-runner": "^0.3.4",

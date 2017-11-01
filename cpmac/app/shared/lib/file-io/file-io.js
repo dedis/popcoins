@@ -9,34 +9,36 @@ const Documents = FileSystem.knownFolders.currentApp();
 // Functions ------------------------------------------------------------------
 
 /**
- * Gets the content of the file at filePath and return a promise with the content.
+ * Gets the string of the file at filePath and return a promise with the content.
  * @param filePath - the path to the file
  * @returns {Promise.<string>}
  */
-function getContentOf(filePath) {
+function getStringOf(filePath) {
   return Documents.getFile(filePath)
                   .readText()
                   .catch((error) => {
                     console.log("READING ERROR:");
+                    console.log(error);
                     console.dir(error);
                   });
 }
 
 /**
- * Writes the content to the file at filePath and returns a promise of any. This method overwrites the file completely.
+ * Writes the string to the file at filePath and returns a promise of any. This method overwrites the file completely.
  * @param filePath - the path to the file
- * @param content - the content to write
+ * @param string - the string to write
  * @returns {Promise.<any>}
  */
-function writeContentTo(filePath, content) {
+function writeStringTo(filePath, string) {
   return Documents.getFile(filePath)
-                  .writeText(content)
+                  .writeText(string)
                   .catch((error) => {
                     console.log("WRITING ERROR:");
+                    console.log(error);
                     console.dir(error);
                   });
 }
 
 // Exports --------------------------------------------------------------------
-exports.getContentOf = getContentOf;
-exports.writeContentTo = writeContentTo;
+exports.getStringOf = getStringOf;
+exports.writeStringTo = writeStringTo;

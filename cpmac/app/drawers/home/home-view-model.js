@@ -24,7 +24,7 @@ function setUpConodeList() {
   const statusRequestMessage = CothorityMessages.createStatusRequest();
 
   myConodeList.load = function () {
-    return FileIO.getContentOf(FilesPath.CONODES_TOML)
+    return FileIO.getStringOf(FilesPath.CONODES_TOML)
                  .then((tomlString) => {
                    return DedisJsNet.parseCothorityRoster(tomlString);
                  })

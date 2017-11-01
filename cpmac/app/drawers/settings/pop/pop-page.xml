@@ -6,7 +6,7 @@
         <Label class="action-bar-title" text="PoP - Settings"/>
     </ActionBar>
 
-    <GridLayout class="page-content" rows="auto,auto,auto,auto,*,auto" columns="*,auto,auto,*">
+    <GridLayout class="page-content" rows="auto,auto,auto,auto,auto,*,auto" columns="*,auto,auto,*">
         <Label class="label-text" text="Description Hash" row="0" col="0"/>
         <Label class="label-space" text=" - " row="0" col="1" colSpan="2"/>
         <TextField class="text-field" hint="description hash" autocorrect="false" autocapitalizationType="none"
@@ -23,16 +23,24 @@
                    col="3"
                    id="text-field-public-key"/>
 
-        <Label class="label-space" text="final.toml" row="2" colSpan="4"/>
-        <Label class="label-space" text=" - " row="3" colSpan="4"/>
+        <Label class="label-text" text="Private Key" row="2" col="0"/>
+        <Label class="label-space" text=" - " row="2" col="1" colSpan="2"/>
+        <TextField class="text-field" hint="private key" autocorrect="false" autocapitalizationType="none"
+                   returnKeyType="done"
+                   row="2"
+                   col="3"
+                   id="text-field-private-key"/>
+
+        <Label class="label-space" text="final.toml" row="3" colSpan="4"/>
+        <Label class="label-space" text=" - " row="4" colSpan="4"/>
         <TextView class="text-field" hint="final.toml" autocorrect="false" autocapitalizationType="none"
                   returnKeyType="next"
-                  row="4"
+                  row="5"
                   colSpan="4"
                   id="text-view-final-toml"/>
 
-        <Button text="Save" tap="saveFields" row="5" col="0" colSpan="2"/>
-        <Button text="Clear" tap="emptyFields" row="5" col="2" colSpan="2"/>
+        <Button text="Save" tap="saveFields" row="6" col="0" colSpan="2"/>
+        <Button text="Clear" tap="emptyFields" row="6" col="2" colSpan="2"/>
     </GridLayout>
 
 </Page>

@@ -3,6 +3,7 @@ const CothorityPath = require("~/shared/res/cothority-path/cothority-path");
 const FilesPath = require("~/shared/res/files/files-path");
 const FileIO = require("~/shared/lib/file-io/file-io");
 const ConodeStatsViewModel = require("./conode-stats-view-model");
+const Crypto = require("~/shared/lib/dedis-js/src/crypto");
 
 const conodeStatsViewModel = new ConodeStatsViewModel();
 
@@ -43,8 +44,12 @@ function linkToConode() {
                        })
                .then(result => {
                  if (result.result) {
-                   return FileIO.getContentOf(FilesPath.POP_PUBLIC_KEY)
+                   return FileIO.getStringOf(FilesPath.PUBLIC_KEY)
                                 .then(publicKey => {
+                                  const pair = Crypto.generateRandomKeyPair();
+                                  publicKey = Crypto.marshal(pair.getPublic());
+                                  console.log("ICIIIIIIIIIIIIIIII" + publicKey.length);
+                                  console.log("ICIIIIIIIIIIIIIIIIawdawdwa" + result.text);
                                   // TODO: if no public key?
                                   return myStatsList.linkToConode(selectedConode, result.text, publicKey,
                                                                   CothorityPath.POP_PIN_REQUEST);

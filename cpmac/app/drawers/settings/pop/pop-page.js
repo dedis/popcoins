@@ -4,7 +4,7 @@ const FileIO = require("~/shared/lib/file-io/file-io");
 
 const PopViewModel = require("./pop-view-model");
 
-const files = [FilesPath.POP_DESC_HASH, FilesPath.POP_PUBLIC_KEY, FilesPath.POP_FINAL_TOML];
+const files = [FilesPath.POP_DESC_HASH, FilesPath.PUBLIC_KEY, FilesPath.PRIVATE_KEY, FilesPath.POP_FINAL_TOML];
 const textFields = [];
 
 function onLoaded(args) {
@@ -35,6 +35,7 @@ function loadViews(page) {
 
   textFields.push(page.getViewById("text-field-description"));
   textFields.push(page.getViewById("text-field-public-key"));
+  textFields.push(page.getViewById("text-field-private-key"));
   textFields.push(page.getViewById("text-view-final-toml"));
 }
 
@@ -47,7 +48,7 @@ function loadFields() {
   const filesToLoad = Array.from(files);
 
   for (let i = 0; i < filesToLoad.length; ++i) {
-    filesToLoad[i] = FileIO.getContentOf(filesToLoad[i])
+    filesToLoad[i] = FileIO.getStringOf(filesToLoad[i])
                            .then(content => {
                              textFields[i].text = content;
 
@@ -67,7 +68,7 @@ function saveFields() {
   const filesToSave = Array.from(files);
 
   for (let i = 0; i < filesToSave.length; ++i) {
-    filesToSave[i] = FileIO.writeContentTo(filesToSave[i], textFields[i].text);
+    filesToSave[i] = FileIO.writeStringTo(filesToSave[i], textFields[i].text);
   }
 
   return Promise.all(filesToSave);
@@ -88,7 +89,7 @@ function emptyFields() {
     const filesToEmpty = Array.from(files);
 
     filesToEmpty.map(filePath => {
-      return FileIO.writeContentTo(filePath, "");
+      return FileIO.writeStringTo(filePath, "");
     });
 
     return Promise.all(filesToEmpty).then(() => {
@@ -101,7 +102,7 @@ function emptyFields() {
    * @returns {Promise.<any>}
    */
   function clearRegisteredPublicKeys() {
-    return FileIO.writeContentTo(FilesPath.POP_REGISTERED_KEYS, "");
+    return FileIO.writeStringTo(FilesPath.POP_REGISTERED_KEYS, "");
   }
 
   return Dialog.confirm({
@@ -109,7 +110,7 @@ function emptyFields() {
                           message: "You are about to delete your stored information, are you sure?",
                           okButtonText: "Delete ^ & 'Registered Public Keys (only ORG)'",
                           cancelButtonText: "Cancel",
-                          neutralButtonText: "Delete 'Description Hash', 'Public Key' & 'final.toml'"
+                          neutralButtonText: "Delete 'Description Hash', 'Key Pair' & 'final.toml'"
                         })
                .then(result => {
                  if (result) {

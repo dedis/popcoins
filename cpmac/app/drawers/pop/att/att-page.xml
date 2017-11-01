@@ -6,7 +6,7 @@
         <Label class="action-bar-title" text="Attendee"/>
     </ActionBar>
 
-    <GridLayout class="page-content" rows="*,*,*,*,*" columns="*,auto,auto,*">
+    <GridLayout class="page-content" rows="*,*,*,*" columns="*,auto,auto,*">
         <Label class="label-title" text="Key Pair" row="0" colSpan="4"/>
 
         <Button text="Generate" row="1" col="0" colSpan="2" tap="generateKeyPair"/>
@@ -14,15 +14,7 @@
 
         <Label class="label-title" text="PoP Token" row="2" colSpan="4"/>
 
-        <Label class="label-text" text="Private Key" row="3" col="0"/>
-        <Label class="label-space" text=" - " row="3" col="1" colSpan="2"/>
-        <TextField class="text-field" hint="private key" autocorrect="false" autocapitalizationType="none"
-                   returnKeyType="done"
-                   row="3"
-                   col="3"
-                   id="text-field-private-key"/>
-
-        <Button text="Generate" row="4" colSpan="4" tap="generatePopToken"/>
+        <Button text="Generate" row="3" colSpan="4" tap="generatePopToken"/>
     </GridLayout>
 
 </Page>

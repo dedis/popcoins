@@ -201,8 +201,10 @@ function CothoritySocket() {
       socket.send(message);
 
       if (typeToDecode === CothorityDecodeTypes.NO_RESPONSE) {
-        socket.close();
-        resolve();
+        setTimeout(() => {
+          socket.close();
+          resolve();
+        }, 1000);
       }
     });
 

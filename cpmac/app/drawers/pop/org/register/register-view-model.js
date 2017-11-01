@@ -28,7 +28,7 @@ function setUpRegisteredKeys() {
    * @returns {Promise.<string>}
    */
   myRegisteredKeys.get = function (index) {
-    return FileIO.getContentOf(FilesPath.POP_REGISTERED_KEYS)
+    return FileIO.getStringOf(FilesPath.POP_REGISTERED_KEYS)
                  .then(content => {
                    return content.split(EOL_REGEX);
                  })
@@ -49,7 +49,7 @@ function setUpRegisteredKeys() {
    * @returns {*|Promise.<any>}
    */
   myRegisteredKeys.load = function () {
-    return FileIO.getContentOf(FilesPath.POP_REGISTERED_KEYS)
+    return FileIO.getStringOf(FilesPath.POP_REGISTERED_KEYS)
                  .then(content => {
                    return content.split(EOL_REGEX);
                  })
@@ -93,7 +93,7 @@ function setUpRegisteredKeys() {
    * @returns {Promise.<any>}
    */
   myRegisteredKeys.addMyself = function () {
-    return FileIO.getContentOf(FilesPath.POP_PUBLIC_KEY)
+    return FileIO.getStringOf(FilesPath.PUBLIC_KEY)
                  .then(myOwnPublicKey => {
                    return myRegisteredKeys.addKey(myOwnPublicKey);
                  });
@@ -104,7 +104,7 @@ function setUpRegisteredKeys() {
    * @returns {Promise.<any>}
    */
   myRegisteredKeys.register = function () {
-    return FileIO.getContentOf(FilesPath.POP_DESC_HASH)
+    return FileIO.getStringOf(FilesPath.POP_DESC_HASH)
                  .then(descriptionHash => {
                    const arrayOfKeys = myRegisteredKeys.map(keyObject => {
                      return keyObject.key;
@@ -163,7 +163,7 @@ function setUpRegisteredKeys() {
       myRegisteredKeys.pop();
     }
 
-    return FileIO.writeContentTo(FilesPath.POP_REGISTERED_KEYS, "");
+    return FileIO.writeStringTo(FilesPath.POP_REGISTERED_KEYS, "");
   };
 
   /**
@@ -202,7 +202,7 @@ function saveKeysToFile() {
                                       })
                                       .join("\n");
 
-  return FileIO.writeContentTo(FilesPath.POP_REGISTERED_KEYS, linesOfKeys);
+  return FileIO.writeStringTo(FilesPath.POP_REGISTERED_KEYS, linesOfKeys);
 }
 
 /**

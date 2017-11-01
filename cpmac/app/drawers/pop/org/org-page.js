@@ -49,7 +49,7 @@ function finalizeButtonTapped() {
     return Promise.resolve();
   }
 
-  return FileIO.getContentOf(FilesPath.POP_DESC_HASH)
+  return FileIO.getStringOf(FilesPath.POP_DESC_HASH)
                .then(descriptionHash => {
                  if (descriptionHash.length > 0) {
                    return Dialog.confirm({

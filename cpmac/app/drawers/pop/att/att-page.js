@@ -3,10 +3,10 @@ const FilesPath = require("~/shared/res/files/files-path");
 const FileIO = require("~/shared/lib/file-io/file-io");
 const Frame = require("ui/frame");
 const Clipboard = require("nativescript-clipboard");
+const Crypto = require("~/shared/lib/dedis-js/src/crypto");
+const Misc = require("~/shared/lib/dedis-js/src/misc");
 
 const AttViewModel = require("./att-view-model");
-
-let textFieldPrivateKey = undefined;
 
 function onLoaded(args) {
   if (args.isBackNavigation) {
@@ -15,20 +15,7 @@ function onLoaded(args) {
 
   const page = args.object;
 
-  loadViews(page);
-  if (textFieldPrivateKey === undefined) {
-    throw new Error("a field is undefined, but it shouldn't");
-  }
-
   page.bindingContext = new AttViewModel();
-}
-
-/**
- * Loads the needed views of the text fields.
- * @param page - the current page object
- */
-function loadViews(page) {
-  textFieldPrivateKey = page.getViewById("text-field-private-key");
 }
 
 /**
@@ -42,38 +29,39 @@ function generateKeyPair() {
    * @returns {Promise.<any>}
    */
   function generateKeyPair() {
-    // TODO: actually generate the key pair
-    const newPublicKey = "public.key";
-    const newPrivateKey = "private.key";
+    const pair = Crypto.generateRandomKeyPair();
+    const newPublicKey = Misc.uint8ArrayToHex(Crypto.marshal(pair.getPublic()));
+    const newPrivateKey = pair.getPrivate("hex");
 
-    return FileIO.writeContentTo(FilesPath.POP_PUBLIC_KEY, newPublicKey)
+    return FileIO.writeStringTo(FilesPath.PUBLIC_KEY, newPublicKey)
+                 .then(() => {
+                   return FileIO.writeStringTo(FilesPath.PRIVATE_KEY, newPrivateKey);
+                 })
                  .then(() => {
                    return Dialog.confirm({
                                            title: "New Key Pair",
-                                           message: "The public key has been stored in your settings. Please store" +
-                                                    " your private key securely, after dismissing this message you" +
-                                                    " won't be able to retrieve the private key through the" +
-                                                    " app.\n\nPublic Key:\n" + newPublicKey + "\nPrivate Key:\n" +
+                                           message: "The public and private keys have been stored in your settings." +
+                                                    "\n\nPublic Key:\n" + newPublicKey + "\nPrivate Key:\n" +
                                                     newPrivateKey,
                                            okButtonText: "Dismiss",
-                                           cancelButtonText: "Copy Private Key to Clipboard & Dismiss"
+                                           cancelButtonText: "Copy Keys to Clipboard & Dismiss"
                                          })
                                 .then(result => {
                                   if (result) {
                                     return Promise.resolve();
                                   } else {
-                                    return Clipboard.setText(newPrivateKey);
+                                    return Clipboard.setText("Public:" + newPublicKey + "\nPrivate:" + newPrivateKey);
                                   }
                                 });
                  });
   }
 
-  return FileIO.getContentOf(FilesPath.POP_PUBLIC_KEY)
+  return FileIO.getStringOf(FilesPath.PUBLIC_KEY)
                .then(storedPublicKey => {
                  if (storedPublicKey.length > 0) {
                    return Dialog.confirm({
                                            title: "Old Key Pair Overwriting",
-                                           message: "There is already a public key stored in you settings. Do you" +
+                                           message: "There is already a key pair stored in you settings. Do you" +
                                                     " want to overwrite it and generate a new key pair?",
                                            okButtonText: "New",
                                            cancelButtonText: "Cancel"
@@ -110,7 +98,7 @@ function generateKeyPair() {
  * @returns {Promise.<any>}
  */
 function displayQrOfPublicKey() {
-  return FileIO.getContentOf(FilesPath.POP_PUBLIC_KEY)
+  return FileIO.getStringOf(FilesPath.PUBLIC_KEY)
                .then(publicKey => {
                  if (publicKey !== undefined && publicKey.length > 0) {
                    Frame.topmost().navigate({
@@ -139,23 +127,28 @@ function displayQrOfPublicKey() {
  * @returns {Promise.<any>}
  */
 function generatePopToken() {
-  const privateKey = textFieldPrivateKey.text;
-
-  return FileIO.getContentOf(FilesPath.POP_FINAL_TOML)
-               .then(finalToml => {
-                 if (privateKey.length > 0 && finalToml.length > 0) {
-                   return Dialog.confirm({
-                                           title: "PoP Token Generation",
-                                           message: "Private Key:\n" + privateKey + "\nFinal Toml:\n" + finalToml,
-                                           okButtonText: "Generate",
-                                           cancelButtonText: "Cancel"
-                                         })
-                                .then(result => {
-                                  if (result) {
-                                    textFieldPrivateKey.text = "";
-                                    // TODO: generate the PoP Token
+  return FileIO.getStringOf(FilesPath.PRIVATE_KEY)
+               .then(privateKey => {
+                 if (privateKey.length > 0) {
+                   return FileIO.getStringOf(FilesPath.POP_FINAL_TOML)
+                                .then((finalToml) => {
+                                  if (finalToml.length > 0) {
+                                    return Dialog.confirm({
+                                                            title: "PoP Token Generation",
+                                                            message: "Private Key:\n" + privateKey + "\nFinal Toml:\n" +
+                                                                     finalToml,
+                                                            okButtonText: "Generate",
+                                                            cancelButtonText: "Cancel"
+                                                          })
+                                                 .then(result => {
+                                                   if (result) {
+                                                     // TODO: generate the PoP Token
+                                                   } else {
+                                                     return Promise.resolve();
+                                                   }
+                                                 });
                                   } else {
-                                    return Promise.resolve();
+                                    return Promise.reject();
                                   }
                                 });
                  } else {
@@ -165,8 +158,8 @@ function generatePopToken() {
                .catch(() => {
                  return Dialog.alert({
                                        title: "Provide More Information",
-                                       message: "Please provide a private key and store the text of your final.toml" +
-                                                " in the settings.",
+                                       message: "Please store your private key in the settings and store the text of" +
+                                                " your final.toml in the settings.",
                                        okButtonText: "Ok"
                                      });
                });
