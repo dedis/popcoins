@@ -29,7 +29,7 @@ function loadDeviceList() {
 
     myDeviceList.empty();
     myDeviceList.load()
-        .then((x) => devicesViewModel.set("isLoading", false));
+        .then(() => devicesViewModel.set("isLoading", false));
 }
 
 /* ***********************************************************

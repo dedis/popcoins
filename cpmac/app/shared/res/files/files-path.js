@@ -10,6 +10,8 @@ const POP_DESC_HASH = "shared/res/files/pop/description.hash";
 const POP_FINAL_TOML = "shared/res/files/pop/final.toml";
 const POP_REGISTERED_KEYS = "shared/res/files/pop/registered_keys.txt";
 
+const CISC_IDENTITY_LINK = "shared/res/files/cisc/identity_link.txt";
+
 // Exports --------------------------------------------------------------------
 exports.CONODES_TOML = CONODES_TOML;
 exports.PUBLIC_KEY = PUBLIC_KEY;
@@ -18,3 +20,4 @@ exports.PRIVATE_KEY = PRIVATE_KEY;
 exports.POP_DESC_HASH = POP_DESC_HASH;
 exports.POP_FINAL_TOML = POP_FINAL_TOML;
 exports.POP_REGISTERED_KEYS = POP_REGISTERED_KEYS;
+exports.CISC_IDENTITY_LINK = CISC_IDENTITY_LINK;
