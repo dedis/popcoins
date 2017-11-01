@@ -12,7 +12,7 @@ let labelDate = undefined;
 let labelTime = undefined;
 let textFieldLocation = undefined;
 
-let chosenDateTime = new Date(0, 0, 0, 0, 0, 0, 0);
+let chosenDateTime = undefined;
 
 function onLoaded(args) {
   if (args.isBackNavigation) {
@@ -28,6 +28,8 @@ function onLoaded(args) {
   }
 
   page.bindingContext = new ConfigViewModel();
+
+  setUpDate();
 }
 
 /**
@@ -39,6 +41,15 @@ function loadViews(page) {
   labelDate = page.getViewById("label-date");
   labelTime = page.getViewById("label-time");
   textFieldLocation = page.getViewById("text-field-location");
+}
+
+function setUpDate() {
+  chosenDateTime = new Date(Date.now());
+  chosenDateTime.setMilliseconds(0);
+  chosenDateTime.setSeconds(0);
+
+  labelDate.text = chosenDateTime.toDateString();
+  labelTime.text = chosenDateTime.toTimeString();
 }
 
 function setDate() {
