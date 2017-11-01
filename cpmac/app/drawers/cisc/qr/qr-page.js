@@ -5,9 +5,19 @@ const CothorityPath = require("~/shared/res/cothority-path/cothority-path");
 const CothorityMessages = require("~/shared/lib/cothority-protobuf/build/cothority-messages");
 const CothorityDecodeTypes = require("~/shared/res/cothority-decode-types/cothority-decode-types");
 const DedisJsNet = require("~/shared/lib/dedis-js/src/net");
-const DedisMisc = require("~/shared/lib/dedis-js/src/misc")
+const DedisMisc = require("~/shared/lib/dedis-js/src/misc");
+const FileIO = require("~/shared/lib/file-io/file-io");
+const FilePaths = require("~/shared/res/files/files-path");
+const ZXing = require("nativescript-zxing");
+const ImageSource = require("image-source");
+const PlatformModule = require("tns-core-modules/platform");
 
-const PopViewModel = require("./qr-view-model");
+const QRViewModel = require("./qr-view-model");
+const QRGenerator = new ZXing();
+
+const viewModel = new QRViewModel();
+let label;
+let image;
 
 //Hardcoded value of the public ip of the computer
 //TODO: change this so that it take the value from the TOML
@@ -16,7 +26,7 @@ const IP = "//128.179.185.4";
 /* ***********************************************************
  * Use the "onNavigatingTo" handler to initialize the page binding context.
  *************************************************************/
-function onNavigatingTo(args) {
+function onLoaded(args) {
     /* ***********************************************************
      * The "onNavigatingTo" event handler lets you detect if the user navigated with a back button.
      * Skipping the re-initialization on back navigation means the user will see the
@@ -25,9 +35,48 @@ function onNavigatingTo(args) {
     if (args.isBackNavigation) {
         return;
     }
-
     const page = args.object;
-    page.bindingContext = new PopViewModel();
+    loadViews(page);
+    page.bindingContext = viewModel;
+    const cothoritySocket = new DedisJsNet.CothoritySocket();
+
+    FileIO.getContentOf(FilePaths.CISC_IDENTITY_LINK)
+        .then((result) => {
+        const dataUpdateMessage = CothorityMessages.createDataUpdate(DedisMisc.hexToUint8Array(result.split("/")[3]));
+        label.text = `cisc://${result.split("/")[2]}/${result.split("/")[3]}`;
+        cothoritySocket.send({ Address: `tcp://${result.split("/")[2]}` }, CothorityPath.IDENTITY_DATA_UPDATE, dataUpdateMessage, CothorityDecodeTypes.DATA_UPDATE_REPLY)
+            .then((response) => {
+                viewModel.isConnected = true;
+                updateImage();
+                console.log("received response: ");
+                console.log(response);
+                console.dir(response);
+            })
+            .catch((error) => {
+                viewModel.isConnected = false;
+                updateImage();
+                console.log("Error: ");
+                console.log(error);
+            });
+        })
+        .catch((error) => console.log(`error while getting content: ${error}`));
+}
+
+function updateImage() {
+    const sideLength = PlatformModule.screen.mainScreen.widthPixels;
+    const QR_CODE = QRGenerator.createBarcode({
+        encode: label.text,
+        format: ZXing.QR_CODE,
+        height: sideLength,
+        width: sideLength
+    });
+
+    image.imageSource = ImageSource.fromNativeSource(QR_CODE);
+}
+
+function loadViews(page) {
+    label = page.getViewById("label");
+    image = page.getViewById("image");
 }
 
 /* ***********************************************************
@@ -42,18 +91,25 @@ function onDrawerButtonTap(args) {
 
 function sendDataUpdate(Address, ID) {
     Dialog.alert({
-        title:"Scan Succesfull",
+        title:"Scan Successful",
         message:`connection to ${Address}`,
         okButtonText: "Ok"
     });
+
     const cothoritySocket = new DedisJsNet.CothoritySocket();
     const dataUpdateMessage = CothorityMessages.createDataUpdate(DedisMisc.hexToUint8Array(ID));
 
     return cothoritySocket.send({ Address: Address }, CothorityPath.IDENTITY_DATA_UPDATE, dataUpdateMessage, CothorityDecodeTypes.DATA_UPDATE_REPLY)
         .then((response) => {
-        console.log("received response:");
+        viewModel.isConnected = true;
+        console.log("received response: ");
         console.log(response);
         console.dir(response);
+        })
+        .catch((error) => {
+        viewModel.isConnected = false;
+        console.log("Error: ");
+        console.log(error);
         });
 }
 
@@ -84,7 +140,11 @@ function connectButtonTapped(args) {
             const splitSlash = splitColon[2].split("/");
             const goodURL = `tcp:${IP}:${splitSlash[0]}`;
             console.log(goodURL);
-            setTimeout(() => sendDataUpdate(goodURL, splitSlash[1]), 100);
+            setTimeout(() => {
+                const toWrite = `${goodURL}/${splitSlash[1]}`;
+                FileIO.writeContentTo(FilePaths.CISC_IDENTITY_LINK, toWrite).then(() => console.log(`saved ${toWrite} in ${FilePaths.CISC_IDENTITY_LINK}`));
+                sendDataUpdate(goodURL, splitSlash[1]);
+            }, 100);
         },
         (error) => setTimeout(() => Dialog.alert({
             title: "Scanner Error",
@@ -94,6 +154,6 @@ function connectButtonTapped(args) {
     );
 }
 
-exports.onNavigatingTo = onNavigatingTo;
+exports.onLoaded = onLoaded;
 exports.onDrawerButtonTap = onDrawerButtonTap;
 exports.connectButtonTapped = connectButtonTapped;
