@@ -1,8 +1,17 @@
 const Frame = require("ui/frame");
 const Dialog = require("ui/dialogs");
 const BarcodeScanner = require("nativescript-barcodescanner").BarcodeScanner;
+const CothorityPath = require("~/shared/res/cothority-path/cothority-path");
+const CothorityMessages = require("~/shared/lib/cothority-protobuf/build/cothority-messages");
+const CothorityDecodeTypes = require("~/shared/res/cothority-decode-types/cothority-decode-types");
+const DedisJsNet = require("~/shared/lib/dedis-js/src/net");
+const DedisMisc = require("~/shared/lib/dedis-js/src/misc")
 
 const PopViewModel = require("./qr-view-model");
+
+//Hardcoded value of the public ip of the computer
+//TODO: change this so that it take the value from the TOML
+const IP = "//128.179.185.4";
 
 /* ***********************************************************
  * Use the "onNavigatingTo" handler to initialize the page binding context.
@@ -31,12 +40,21 @@ function onDrawerButtonTap(args) {
     sideDrawer.showDrawer();
 }
 
-function sendProposeUpdate(result) {
+function sendDataUpdate(Address, ID) {
     Dialog.alert({
         title:"Scan Succesfull",
-        message:`connection to ${result.text}`,
+        message:`connection to ${Address}`,
         okButtonText: "Ok"
     });
+    const cothoritySocket = new DedisJsNet.CothoritySocket();
+    const dataUpdateMessage = CothorityMessages.createDataUpdate(DedisMisc.hexToUint8Array(ID));
+
+    return cothoritySocket.send({ Address: Address }, CothorityPath.IDENTITY_DATA_UPDATE, dataUpdateMessage, CothorityDecodeTypes.DATA_UPDATE_REPLY)
+        .then((response) => {
+        console.log("received response:");
+        console.log(response);
+        console.dir(response);
+        });
 }
 
 function connectButtonTapped(args) {
@@ -62,7 +80,11 @@ function connectButtonTapped(args) {
         (result) => {
             console.log(`Scan format: ${result.format}`);
             console.log(`Scan text: ${result.text}`);
-            setTimeout(() => sendProposeUpdate(result), 100);
+            const splitColon = result.text.split(":");
+            const splitSlash = splitColon[2].split("/");
+            const goodURL = `tcp:${IP}:${splitSlash[0]}`;
+            console.log(goodURL);
+            setTimeout(() => sendDataUpdate(goodURL, splitSlash[1]), 100);
         },
         (error) => setTimeout(() => Dialog.alert({
             title: "Scanner Error",

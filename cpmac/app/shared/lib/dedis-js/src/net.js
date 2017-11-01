@@ -201,6 +201,7 @@ function CothoritySocket() {
       socket.send(message);
 
       if (typeToDecode === CothorityDecodeTypes.NO_RESPONSE) {
+        console.log("closing socket")
         socket.close();
         resolve();
       }
@@ -224,7 +225,8 @@ function CothoritySocket() {
 
     socket.on("error", (socket, error) => {
       console.log("Socket error:");
-      console.dir(error);
+      console.log(error);
+      //console.dir(error);
       socket.close();
       reject(error);
     });

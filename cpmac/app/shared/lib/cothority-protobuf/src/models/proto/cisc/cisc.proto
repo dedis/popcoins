@@ -50,7 +50,7 @@ message CreateIdentityReply {
 }
 
 message DataUpdate {
-    required ID id = 1;
+    required bytes id = 1;
 }
 
 message DataUpdateReply {
