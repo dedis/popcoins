@@ -40,7 +40,7 @@ function onLoaded(args) {
     page.bindingContext = viewModel;
     const cothoritySocket = new DedisJsNet.CothoritySocket();
 
-    FileIO.getContentOf(FilePaths.CISC_IDENTITY_LINK)
+    FileIO.getStringOf(FilePaths.CISC_IDENTITY_LINK)
         .then((result) => {
         const dataUpdateMessage = CothorityMessages.createDataUpdate(DedisMisc.hexToUint8Array(result.split("/")[3]));
         label.text = `cisc://${result.split("/")[2]}/${result.split("/")[3]}`;
@@ -142,7 +142,7 @@ function connectButtonTapped(args) {
             console.log(goodURL);
             setTimeout(() => {
                 const toWrite = `${goodURL}/${splitSlash[1]}`;
-                FileIO.writeContentTo(FilePaths.CISC_IDENTITY_LINK, toWrite).then(() => console.log(`saved ${toWrite} in ${FilePaths.CISC_IDENTITY_LINK}`));
+                FileIO.writeStringTo(FilePaths.CISC_IDENTITY_LINK, toWrite).then(() => console.log(`saved ${toWrite} in ${FilePaths.CISC_IDENTITY_LINK}`));
                 sendDataUpdate(goodURL, splitSlash[1]);
             }, 100);
         },
