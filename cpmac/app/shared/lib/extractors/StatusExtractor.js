@@ -1,3 +1,5 @@
+const Misc = require("~/shared/lib/dedis-js/src/misc");
+
 /**
  * @file Library to extract stats from a status response.
  */
@@ -12,11 +14,11 @@ function getAddress(conode) {
 }
 
 function getID(conode) {
-  return conode.server.id.toString();
+  return Misc.uint8ArrayToHex(conode.server.id);
 }
 
 function getPublicKey(conode) {
-  return conode.server.public.toString();
+  return Misc.uint8ArrayToHex(conode.server.public);
 }
 
 function getServices(conode) {
