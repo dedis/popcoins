@@ -2,6 +2,7 @@
 .idea/
 node_modules/
 cpmac/.nsbuildinfo
+cpmac/hooks/
 cpmac/platforms/
 cpmac/app/App_Resources/
 cpmac/app/shared/res/files/conodes.toml
