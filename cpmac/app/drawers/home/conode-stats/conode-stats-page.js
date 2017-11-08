@@ -1,9 +1,11 @@
 const Dialog = require("ui/dialogs");
+const Frame = require("ui/frame");
 const CothorityPath = require("~/shared/res/cothority-path/cothority-path");
 const FilesPath = require("~/shared/res/files/files-path");
 const FileIO = require("~/shared/lib/file-io/file-io");
-const ConodeStatsViewModel = require("./conode-stats-view-model");
 const Crypto = require("~/shared/lib/dedis-js/src/crypto");
+const Misc = require("~/shared/lib/dedis-js/src/misc");
+const ConodeStatsViewModel = require("./conode-stats-view-model");
 
 const conodeStatsViewModel = new ConodeStatsViewModel();
 
@@ -32,6 +34,24 @@ function loadFunction(conode) {
   myStatsList.load(conode);
 }
 
+function displayQrOfConodeStats() {
+  const statsString = "[[servers]]\n" +
+                      "  Address = \"" + selectedConode.server.address + "\"\n" +
+                      "  Public = \"" + Misc.uint8ArrayToHex(selectedConode.server.public) + "\"\n" +
+                      "  Description = \"" + selectedConode.server.description + "\"\n";
+
+  Frame.topmost().navigate({
+                             moduleName: "drawers/home/conode-stats/qr-code/qr-code-page",
+                             bindingContext: {
+                               statsString: statsString
+                             }
+                           });
+}
+
+/**
+ * Function called when the user wants to link to his conode.
+ * @returns {Promise.<any>}
+ */
 function linkToConode() {
   return Dialog.prompt({
                          title: "Link to Conode",
@@ -72,4 +92,5 @@ function linkToConode() {
 }
 
 exports.onNavigatingTo = onNavigatingTo;
+exports.displayQrOfConodeStats = displayQrOfConodeStats;
 exports.linkToConode = linkToConode;

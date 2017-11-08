@@ -5,6 +5,10 @@
 <Page class="page" navigatingTo="onNavigatingTo">
     <ActionBar class="action-bar">
         <Label class="action-bar-title" text="Conode Stats"/>
+
+        <ActionItem tap="displayQrOfConodeStats"
+                    ios.systemIcon="9" ios.position="right"
+                    text="QR" android.position="popup"/>
     </ActionBar>
 
     <GridLayout rows="*,auto" columns="*">
