@@ -9,7 +9,7 @@
         <ListView items="{{ deviceList }}" orientation="vertical" row="0">
             <ListView.itemTemplate>
                 <GridLayout rows="*" columns="*">
-                    <Label text="{{ device.id }}" textAlignment="center" textWrap="true"/>
+                    <Label text="{{ device.id }}" textAlignment="center" textWrap="true" tap="{{ device.showPub }}"/>
                 </GridLayout>
             </ListView.itemTemplate>
         </ListView>
