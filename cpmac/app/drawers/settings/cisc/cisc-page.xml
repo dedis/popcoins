@@ -1,8 +1,17 @@
 <Page
-        class="page">
+        class="page"
+        loaded="onLoaded">
 
     <ActionBar class="action-bar">
-        <Label class="action-bar-title" text="CISC - Settings"/>
+        <Label class="action-bar-title" text="Attendee"/>
     </ActionBar>
+    <StackLayout class="page-content" orientation="vertical">
+
+        <Label class="label-title" text="Key Pair" row="0" colSpan="4"/>
+
+        <Button text="Generate" tap="generateKeyPair"/>
+        <Button text="Display" tap="displayQrOfPublicKey"/>
+
+    </StackLayout>
 
 </Page>
