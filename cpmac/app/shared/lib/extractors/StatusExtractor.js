@@ -1,4 +1,5 @@
 const Misc = require("~/shared/lib/dedis-js/src/misc");
+const Base64 = require("base64-coder-node")();
 
 /**
  * @file Library to extract stats from a status response.
@@ -18,7 +19,7 @@ function getID(conode) {
 }
 
 function getPublicKey(conode) {
-  return Misc.uint8ArrayToHex(conode.server.public);
+  return Base64.encode(Misc.uint8ArrayToHex(conode.server.public), "hex");
 }
 
 function getServices(conode) {
@@ -57,6 +58,13 @@ function getUptime(conode) {
   return conode.system.Status.field.Uptime;
 }
 
+function getToml(conode) {
+  return "[[servers]]\n" +
+         "  Address = \"" + getAddress(conode) + "\"\n" +
+         "  Public = \"" + getPublicKey(conode) + "\"\n" +
+         "  Description = \"" + getDescription(conode) + "\"";
+}
+
 // Exports --------------------------------------------------------------------
 exports.getDescription = getDescription;
 exports.getAddress = getAddress;
@@ -71,3 +79,4 @@ exports.getVersion = getVersion;
 exports.getTXBytes = getTXBytes;
 exports.getRXBytes = getRXBytes;
 exports.getUptime = getUptime;
+exports.getToml = getToml;

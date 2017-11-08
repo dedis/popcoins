@@ -19,11 +19,11 @@
 
         <Label class="label-space" text="Date" row="3" col="0" colSpan="3"/>
         <Label class="label-title" text=" - " row="4" col="0" colSpan="3"/>
-        <Label text="click me" tap="setDate" row="5" col="0" colSpan="3" id="label-date"/>
+        <Label tap="setDate" row="5" col="0" colSpan="3" id="label-date"/>
 
         <Label class="label-space" text="Time" row="6" col="0" colSpan="3"/>
         <Label class="label-title" text=" - " row="7" col="0" colSpan="3"/>
-        <Label text="click me" tap="setTime" row="8" col="0" colSpan="3" id="label-time"/>
+        <Label tap="setTime" row="8" col="0" colSpan="3" id="label-time"/>
 
         <Label class="label-space" text="Location" row="9" col="0" colSpan="3"/>
         <Label class="label-title" text=" - " row="10" col="0" colSpan="3"/>
@@ -36,13 +36,13 @@
 
         <Label class="label-title" text="Conodes" row="12" col="0" colSpan="3"/>
 
-        <ListView items="{{ conodes }}" id="list-view-conodes" android:itemTap="deleteByIndex"
+        <ListView items="{{ partyConodes }}" id="list-view-conodes" android:itemTap="deleteByIndex"
                   row="13"
                   col="0"
                   colSpan="3">
             <ListView.itemTemplate>
                 <GridLayout rows="*" columns="*">
-                    <Label text="{{ key }}" textAlignment="center" textWrap="true"/>
+                    <Label text="{{ conode.Description }}" textAlignment="center" textWrap="true"/>
                 </GridLayout>
             </ListView.itemTemplate>
         </ListView>

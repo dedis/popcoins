@@ -1,0 +1,18 @@
+<Page
+        class="page"
+        loaded="onLoaded">
+
+    <ActionBar class="action-bar">
+        <Label class="action-bar-title" text="Add Conode Manually"/>
+    </ActionBar>
+
+    <GridLayout class="page-content" rows="auto,*,auto">
+        <Label class="label-title" text="Conode Toml" row="0"/>
+        <TextView class="text-field" hint="toml" autocorrect="false" autocapitalizationType="none"
+                  returnKeyType="done"
+                  row="1"
+                  id="text-view-conode-toml"/>
+        <Button text="Add" tap="addManual" row="2"/>
+    </GridLayout>
+
+</Page>

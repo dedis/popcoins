@@ -2,6 +2,7 @@ const Dialog = require("ui/dialogs");
 const FilesPath = require("~/shared/res/files/files-path");
 const FileIO = require("~/shared/lib/file-io/file-io");
 const ModalPicker = require("nativescript-modal-datetimepicker").ModalDatetimepicker;
+const Frame = require("ui/frame");
 
 const ConfigViewModel = require("./config-view-model");
 
@@ -91,6 +92,15 @@ function setTime() {
 }
 
 /**
+ * Changes the frame to be able to add a conode manually.
+ */
+function addManual() {
+  Frame.topmost().navigate({
+                             moduleName: "drawers/pop/org/config/add-manual/add-manual-page"
+                           });
+}
+
+/**
  * Hashes and saves the config/description entered by the organizer of the PoP party.
  * @returns {Promise.<*[]>}
  */
@@ -173,3 +183,4 @@ exports.onLoaded = onLoaded;
 exports.setDate = setDate;
 exports.setTime = setTime;
 exports.hashAndSave = hashAndSave;
+exports.addManual = addManual;

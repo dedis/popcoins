@@ -5,8 +5,7 @@ const CothorityPath = require("~/shared/res/cothority-path/cothority-path");
 const FilesPath = require("~/shared/res/files/files-path");
 const FileIO = require("~/shared/lib/file-io/file-io");
 const Crypto = require("~/shared/lib/dedis-js/src/crypto");
-const Misc = require("~/shared/lib/dedis-js/src/misc");
-const Base64 = require("base64-coder-node")();
+const StatusExtractor = require("~/shared/lib/extractors/StatusExtractor");
 const ConodeStatsViewModel = require("./conode-stats-view-model");
 
 const conodeStatsViewModel = new ConodeStatsViewModel();
@@ -36,20 +35,14 @@ function loadFunction(conode) {
   myStatsList.load(conode);
 }
 
+/**
+ * Changes the frame to the QR displaying of the conodes toml string.
+ */
 function displayQrOfConodeStats() {
-  const uInt8publicKey = selectedConode.server.public;
-  const hexPublicKey = Misc.uint8ArrayToHex(uInt8publicKey);
-  const base64publicKey = Base64.encode(hexPublicKey, "hex");
-
-  const statsString = "[[servers]]\n" +
-                      "  Address = \"" + selectedConode.server.address + "\"\n" +
-                      "  Public = \"" + base64publicKey + "\"\n" +
-                      "  Description = \"" + selectedConode.server.description + "\"\n";
-
   Frame.topmost().navigate({
                              moduleName: "drawers/home/conode-stats/qr-code/qr-code-page",
                              bindingContext: {
-                               statsString: statsString
+                               statsString: StatusExtractor.getToml(selectedConode)
                              }
                            });
 }
