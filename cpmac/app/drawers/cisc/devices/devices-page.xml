@@ -5,13 +5,17 @@
     <ActionBar class="action-bar">
         <Label class="action-bar-title" text="Organizer"/>
     </ActionBar>
+    <GridLayout rows="*,auto" columns="*">
+        <ListView items="{{ deviceList }}" orientation="vertical" row="0">
+            <ListView.itemTemplate>
+                <GridLayout rows="*" columns="*">
+                    <Label text="{{ device.id }}" textAlignment="center" textWrap="true"/>
+                </GridLayout>
+            </ListView.itemTemplate>
+        </ListView>
+        <Button text="Reload" tap="loadDeviceList" row="1"/>
 
-    <ListView items="{{ deviceList }}" orientation="vertical">
-        <ListView.itemTemplate>
-            <GridLayout rows="*" columns="*">
-                <Label text="{{ device.id }}" textAlignment="center" textWrap="true"/>
-            </GridLayout>
-        </ListView.itemTemplate>
-    </ListView>
+    </GridLayout>
+
 
 </Page>

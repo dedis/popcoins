@@ -43,4 +43,5 @@ function onDrawerButtonTap(args) {
 }
 
 exports.onLoaded = onLoaded;
+exports.loadDeviceList = loadDeviceList;
 exports.onDrawerButtonTap = onDrawerButtonTap;
