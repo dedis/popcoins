@@ -7,6 +7,7 @@ const Crypto = require("~/shared/lib/dedis-js/src/crypto");
 const Misc = require("~/shared/lib/dedis-js/src/misc");
 
 const CiscViewModel = require("./cisc-view-model");
+const viewModel =  new CiscViewModel();
 
 function onLoaded(args) {
   if (args.isBackNavigation) {
@@ -14,7 +15,7 @@ function onLoaded(args) {
   }
 
   const page = args.object;
-  page.bindingContext = new CiscViewModel();
+  page.bindingContext = viewModel;
 }
 
 /**
@@ -121,6 +122,33 @@ function displayQrOfPublicKey() {
         });
 }
 
+function chooseName() {
+    console.log(viewModel.name);
+    if (viewModel.name === "") {
+        return Dialog.alert({
+            title: "Error",
+            message: "Name can't be empty",
+            okButtonText: "OK"
+        });
+    }
+    FileIO.writeStringTo(FilesPath.CISC_NAME, viewModel.name)
+        .then(() => Dialog.alert({
+            title: "Name successfully changed",
+            message: `Your're name has been set to "${viewModel.name}"`,
+            okButtonText: "OK"
+        }))
+        .catch((error) => {
+        console.log(error);
+        Dialog.alert({
+            title: "Error",
+            message: "An error occured please try again",
+            okButtonText:"OK"
+        });
+    });
+}
+
+
 exports.onLoaded = onLoaded;
+exports.chooseName = chooseName;
 exports.generateKeyPair = generateKeyPair;
 exports.displayQrOfPublicKey = displayQrOfPublicKey;

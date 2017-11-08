@@ -7,10 +7,14 @@
     </ActionBar>
     <StackLayout class="page-content" orientation="vertical">
 
-        <Label class="label-title" text="Key Pair" row="0" colSpan="4"/>
+        <Label class="label-title" text="Key Pair"/>
 
         <Button text="Generate" tap="generateKeyPair"/>
         <Button text="Display" tap="displayQrOfPublicKey"/>
+
+        <Label class="label-title" text="Device Name" />
+        <TextField text="{{ name }}"/>
+        <Button text="Change Name" tap="chooseName"/>
 
     </StackLayout>
 
