@@ -21,7 +21,7 @@ let image;
 
 //Hardcoded value of the public ip of the computer
 //TODO: change this so that it take the value from the TOML
-const IP = "//128.179.185.4";
+const IP = "//128.179.188.221";
 
 /* ***********************************************************
  * Use the "onNavigatingTo" handler to initialize the page binding context.
@@ -116,42 +116,60 @@ function sendDataUpdate(Address, ID) {
 function connectButtonTapped(args) {
     const barcodescanner = new BarcodeScanner();
 
-    barcodescanner.scan({
-        formats: "QR_CODE", // Pass in of you want to restrict scanning to certain types
-        cancelLabel: "EXIT. Also, try the volume buttons!", // iOS only, default 'Close'
-        cancelLabelBackgroundColor: "#333333", // iOS only, default '#000000' (black)
-        message: "Use the volume buttons for extra light", // Android only, default is 'Place a barcode inside the viewfinder rectangle to scan it.'
-        showFlipCameraButton: true, // default false
-        preferFrontCamera: false, // default false
-        showTorchButton: true, // default false
-        beepOnScan: true, // Play or Suppress beep on scan (default true)
-        torchOn: false, // launch with the flashlight on (default false)
-        closeCallback: function () {
-            console.log("Scanner closed");
-        }, // invoked when the scanner was closed (success or abort)
-        resultDisplayDuration: 500, // Android only, default 1500 (ms), set to 0 to disable echoing the scanned text
-        orientation: "landscape", // Android only, optionally lock the orientation to either "portrait" or "landscape"
-        openSettingsIfPermissionWasPreviouslyDenied: true // On iOS you can send the user to the settings app if access was previously denied
-    }).then(
-        (result) => {
-            console.log(`Scan format: ${result.format}`);
-            console.log(`Scan text: ${result.text}`);
-            const splitColon = result.text.split(":");
-            const splitSlash = splitColon[2].split("/");
-            const goodURL = `tcp:${IP}:${splitSlash[0]}`;
-            console.log(goodURL);
-            setTimeout(() => {
-                const toWrite = `${goodURL}/${splitSlash[1]}`;
-                FileIO.writeStringTo(FilePaths.CISC_IDENTITY_LINK, toWrite).then(() => console.log(`saved ${toWrite} in ${FilePaths.CISC_IDENTITY_LINK}`));
-                sendDataUpdate(goodURL, splitSlash[1]);
-            }, 100);
-        },
-        (error) => setTimeout(() => Dialog.alert({
-            title: "Scanner Error",
-            message: error,
+    return barcodescanner.available().then(function (available) {
+        if (available) {
+            return availableFunction();
+        } else {
+            return notAvailableFunction();
+        }
+    });
+
+    function availableFunction () {
+        barcodescanner.scan({
+            formats: "QR_CODE", // Pass in of you want to restrict scanning to certain types
+            cancelLabel: "EXIT. Also, try the volume buttons!", // iOS only, default 'Close'
+            cancelLabelBackgroundColor: "#333333", // iOS only, default '#000000' (black)
+            message: "Use the volume buttons for extra light", // Android only, default is 'Place a barcode inside the viewfinder rectangle to scan it.'
+            showFlipCameraButton: true, // default false
+            preferFrontCamera: false, // default false
+            showTorchButton: true, // default false
+            beepOnScan: true, // Play or Suppress beep on scan (default true)
+            torchOn: false, // launch with the flashlight on (default false)
+            closeCallback: function () {
+                console.log("Scanner closed");
+            }, // invoked when the scanner was closed (success or abort)
+            resultDisplayDuration: 500, // Android only, default 1500 (ms), set to 0 to disable echoing the scanned text
+            orientation: "landscape", // Android only, optionally lock the orientation to either "portrait" or "landscape"
+            openSettingsIfPermissionWasPreviouslyDenied: true // On iOS you can send the user to the settings app if access was previously denied
+        }).then(
+            (result) => {
+                console.log(`Scan format: ${result.format}`);
+                console.log(`Scan text: ${result.text}`);
+                const splitColon = result.text.split(":");
+                const splitSlash = splitColon[2].split("/");
+                const goodURL = `tcp:${IP}:${splitSlash[0]}`;
+                console.log(goodURL);
+                setTimeout(() => {
+                    const toWrite = `${goodURL}/${splitSlash[1]}`;
+                    FileIO.writeStringTo(FilePaths.CISC_IDENTITY_LINK, toWrite).then(() => console.log(`saved ${toWrite} in ${FilePaths.CISC_IDENTITY_LINK}`));
+                    sendDataUpdate(goodURL, splitSlash[1]);
+                }, 100);
+            },
+            (error) => setTimeout(() => Dialog.alert({
+                title: "Scanner Error",
+                message: error,
+                okButtonText: "Ok"
+            }), 100)
+        );
+    }
+
+    function notAvailableFunction() {
+        return Dialog.alert({
+            title: "Where is your camera?",
+            message: "There is no camera available on your phone.",
             okButtonText: "Ok"
-        }), 100)
-    );
+        });
+    }
 }
 
 exports.onLoaded = onLoaded;

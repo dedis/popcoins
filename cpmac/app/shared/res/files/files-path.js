@@ -16,6 +16,7 @@ const POP_PARTY_LOCATION = "shared/res/files/pop/org/party/party.location";
 const POP_PARTY_CONODES = "shared/res/files/pop/org/party/party_conodes.toml";
 
 const CISC_IDENTITY_LINK = "shared/res/files/cisc/identity_link.txt";
+const CISC_NAME = "shared/res/files/cisc/name.txt";
 
 // Exports --------------------------------------------------------------------
 exports.CONODES_TOML = CONODES_TOML;
@@ -32,3 +33,4 @@ exports.POP_PARTY_LOCATION = POP_PARTY_LOCATION;
 exports.POP_PARTY_CONODES = POP_PARTY_CONODES;
 
 exports.CISC_IDENTITY_LINK = CISC_IDENTITY_LINK;
+exports.CISC_NAME = CISC_NAME;
