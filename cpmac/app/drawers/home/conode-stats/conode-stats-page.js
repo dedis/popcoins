@@ -42,7 +42,7 @@ function displayQrOfConodeStats() {
   Frame.topmost().navigate({
                              moduleName: "drawers/home/conode-stats/qr-code/qr-code-page",
                              bindingContext: {
-                               statsString: StatusExtractor.getToml(selectedConode)
+                               statsString: StatusExtractor.getTomlFromConode(selectedConode)
                              }
                            });
 }

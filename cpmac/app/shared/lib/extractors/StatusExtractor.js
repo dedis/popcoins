@@ -58,12 +58,20 @@ function getUptime(conode) {
   return conode.system.Status.field.Uptime;
 }
 
-function getToml(conode) {
+function getTomlFromConode(conode) {
   return "[[servers]]\n" +
          "  Address = \"" + getAddress(conode) + "\"\n" +
          "  Public = \"" + getPublicKey(conode) + "\"\n" +
          "  Description = \"" + getDescription(conode) + "\"";
 }
+
+function getToml(address, publicKey, description) {
+  return "[[servers]]\n" +
+         "  Address = \"" + address + "\"\n" +
+         "  Public = \"" + publicKey + "\"\n" +
+         "  Description = \"" + description + "\"";
+}
+
 
 // Exports --------------------------------------------------------------------
 exports.getDescription = getDescription;
@@ -79,4 +87,5 @@ exports.getVersion = getVersion;
 exports.getTXBytes = getTXBytes;
 exports.getRXBytes = getRXBytes;
 exports.getUptime = getUptime;
+exports.getTomlFromConode = getTomlFromConode;
 exports.getToml = getToml;

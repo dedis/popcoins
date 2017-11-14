@@ -77,26 +77,37 @@ function setUpPartyConodes() {
    * @param conodeToml - the conode toml string to add
    * @returns {*|Promise.<any>}
    */
-  myPartyConodes.addConode = function (conodeToml) {
-    const arrayOfPublicKeys = myPartyConodes.map(conode => {
-      return conode.Public;
+  myPartyConodes.addConodeByTomlString = function (conodeToml) {
+    const arrayOfPublicKeys = myPartyConodes.map(obj => {
+      return obj.conode.Address;
     });
 
-    if (conodeToml === undefined || conodeToml.length === 0) {
-      return Promise.reject();
-    } else {
-      const conode = DedisJsNet.parseCothorityRoster(tomlString).servers[0];
+    if (!(conodeToml === undefined || conodeToml.length === 0)) {
+      let conode = undefined;
 
-      if (arrayOfPublicKeys.includes(conode.Public)) {
+      try {
+        conode = DedisJsNet.parseCothorityRoster(conodeToml).servers[0];
+      } catch (error) {
+        console.log(error);
         return Promise.reject();
       }
 
-      myPartyConodes.unshift({
-                               conode: DeepCopy.copy(conode)
-                             });
+      if (!arrayOfPublicKeys.includes(conode.Address)) {
+        myPartyConodes.unshift({
+                                 conode: DeepCopy.copy(conode)
+                               });
 
-      return saveConodesToFile();
+        return saveConodesToFile();
+      }
     }
+
+    return Promise.reject();
+  };
+
+  myPartyConodes.addConode = function (conode) {
+    const conodeToml = StatusExtractor.getToml(conode.Address, conode.Public, conode.Description);
+
+    return myPartyConodes.addConodeByTomlString(conodeToml);
   };
 
   /**
@@ -155,12 +166,10 @@ function setUpPartyConodes() {
  * @returns {*|Promise.<any>}
  */
 function saveConodesToFile() {
-  const tomlOfConodes = myPartyConodes.map(conodeObject => {
-                                        return StatusExtractor.getToml(conodeObject);
+  const tomlOfConodes = myPartyConodes.map(obj => {
+                                        return StatusExtractor.getToml(obj.conode.Address, obj.conode.Public, obj.conode.Description);
                                       })
                                       .join("\n");
-
-  console.log(tomlOfConodes);
 
   return FileIO.writeStringTo(FilesPath.POP_PARTY_CONODES, tomlOfConodes + "\n");
 }

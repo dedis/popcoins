@@ -61,6 +61,10 @@ function parseCothorityRoster(toml) {
  * @returns {object} - the conode object or undefined if not found
  */
 function getConodeFromRoster(toml, address) {
+  if (typeof toml !== "string" || typeof address !== "string") {
+    throw new TypeError;
+  }
+
   let roster = parseCothorityRoster(toml);
   let wantedConode = undefined;
 
