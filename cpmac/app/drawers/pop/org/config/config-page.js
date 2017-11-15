@@ -1,9 +1,14 @@
+require("nativescript-nodeify");
 const Dialog = require("ui/dialogs");
+const Base64 = require("base64-coder-node")();
+const Misc = require("~/shared/lib/dedis-js/src/misc");
 const FilesPath = require("~/shared/res/files/files-path");
 const FileIO = require("~/shared/lib/file-io/file-io");
 const SwipeToDelete = require("~/shared/lib/ios-swipe-delete/ios-swipe-delete");
 const BCScanner = require("nativescript-barcodescanner").BarcodeScanner;
 const ModalPicker = require("nativescript-modal-datetimepicker").ModalDatetimepicker;
+const HASH = require("hash.js");
+const Crypto = require("~/shared/lib/dedis-js/src/crypto");
 
 const BarCodeScanner = new BCScanner();
 
@@ -283,19 +288,29 @@ function addScan() {
  */
 function hashAndSave() {
   const name = textFieldName.text;
-  const date = labelDate.text;
-  const time = labelTime.text;
+  const dateTime = chosenDateTime.toUTCString();
   const location = textFieldLocation.text;
+  let aggregateKey = undefined;
+
+  try {
+    aggregateKey = Crypto.aggregatePublicKeys(myPartyConodes.map(obj => {
+      return Crypto.unmarshal(Misc.hexToUint8Array(Base64.decode(obj.conode.Public, "hex")));
+    }));
+  } catch (error) {
+    console.log(error);
+  }
 
   /**
    * Hashes the description and stores it permanently.
    * @returns {*|Promise.<any>}
    */
   function hashAndStore() {
-    // TODO: actually compute hash
-    // let descriptionHash = name + date + time + location + "(hashed)";
-    let descriptionHash = chosenDateTime.toUTCString();
-    console.log(descriptionHash);
+    const descriptionHash = Base64.encode(HASH.sha256()
+                                              .update(name)
+                                              .update(dateTime)
+                                              .update(location)
+                                              .update(aggregateKey)
+                                              .digest("hex"), "hex");
 
     return FileIO.writeStringTo(FilesPath.POP_DESC_HASH, descriptionHash)
                  .then(() => {
@@ -308,7 +323,13 @@ function hashAndSave() {
                  });
   }
 
-  if (name.length > 0 && date.length > 0 && time.length > 0 && location.length > 0) {
+  if (aggregateKey !== undefined) {
+    return Dialog.alert({
+                          title: "Error",
+                          message: "One of the keys of your provided conodes does not have a valid key.",
+                          okButtonText: "Ok"
+                        });
+  } else if (name.length > 0 && dateTime.length > 0 && location.length > 0 && aggregateKey.length >= 2) {
     return FileIO.getStringOf(FilesPath.POP_DESC_HASH)
                  .then(storedHash => {
                    if (storedHash.length > 0) {
@@ -325,20 +346,13 @@ function hashAndSave() {
                                     } else {
                                       return Promise.resolve();
                                     }
-                                  })
-                                  .catch(() => {
-                                    return Dialog.alert({
-                                                          title: "Error During Hashing Process",
-                                                          message: "An unexpected error occurred during the hashing" +
-                                                                   " process. Please try again.",
-                                                          okButtonText: "Ok"
-                                                        });
                                   });
                    } else {
                      return hashAndStore();
                    }
                  })
-                 .catch(() => {
+                 .catch((error) => {
+                   console.log(error);
                    return Dialog.alert({
                                          title: "Error During Hashing Process",
                                          message: "An unexpected error occurred during the hashing" +
@@ -349,8 +363,8 @@ function hashAndSave() {
   } else {
     return Dialog.alert({
                           title: "Missing Information",
-                          message: "Please provide a name, date, time, location and a list of public keys of the" +
-                                   " organizers conodes for your PoP Party.",
+                          message: "Please provide a name, date, time, location and the list (min 3) of conodes" +
+                                   " of the organizers of your PoP Party.",
                           okButtonText: "Ok"
                         });
   }

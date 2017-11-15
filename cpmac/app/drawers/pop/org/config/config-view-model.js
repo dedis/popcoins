@@ -78,6 +78,7 @@ function setUpPartyConodes() {
    * @returns {*|Promise.<any>}
    */
   myPartyConodes.addConodeByTomlString = function (conodeToml) {
+    // TODO: implement for promise using
     const arrayOfPublicKeys = myPartyConodes.map(obj => {
       return obj.conode.Address;
     });
@@ -167,7 +168,8 @@ function setUpPartyConodes() {
  */
 function saveConodesToFile() {
   const tomlOfConodes = myPartyConodes.map(obj => {
-                                        return StatusExtractor.getToml(obj.conode.Address, obj.conode.Public, obj.conode.Description);
+                                        const conode = obj.conode;
+                                        return StatusExtractor.getToml(conode.Address, conode.Public, conode.Description);
                                       })
                                       .join("\n");
 

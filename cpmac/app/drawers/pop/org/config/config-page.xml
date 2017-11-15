@@ -37,7 +37,7 @@
         <Label class="label-title" text="Conodes" row="12" col="0" colSpan="3"/>
         <Button text="Empty" tap="emptyList" row="12" col="3"/>
 
-        <ListView items="{{ partyConodes }}" id="list-view-conodes" itemTap="deleteByIndex"
+        <ListView items="{{ partyConodes }}" id="list-view-conodes" android:itemTap="deleteByIndex"
                   row="13"
                   col="0"
                   colSpan="3">

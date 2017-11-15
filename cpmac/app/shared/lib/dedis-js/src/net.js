@@ -202,15 +202,19 @@ function CothoritySocket() {
 
     socket.on("open", (socket) => {
       console.log("Socket open...");
+      console.log(message);
+      console.dir(message);
       socket.send(message);
 
+      /*
       if (typeToDecode === CothorityDecodeTypes.NO_RESPONSE) {
-        console.log("Closing socket...");
         setTimeout(() => {
+          console.log("Closing socket...");
           socket.close();
           resolve();
         }, 1000);
       }
+      */
     });
 
     socket.on("close", (socket, code, reason) => {

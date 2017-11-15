@@ -1,3 +1,4 @@
+require("nativescript-nodeify");
 const Misc = require("~/shared/lib/dedis-js/src/misc");
 const Base64 = require("base64-coder-node")();
 

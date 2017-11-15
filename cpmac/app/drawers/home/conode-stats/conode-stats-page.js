@@ -1,4 +1,3 @@
-require("nativescript-nodeify");
 const Dialog = require("ui/dialogs");
 const Frame = require("ui/frame");
 const CothorityPath = require("~/shared/res/cothority-path/cothority-path");
