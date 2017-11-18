@@ -1,4 +1,3 @@
-require("nativescript-nodeify");
 const Dialog = require("ui/dialogs");
 const Frame = require("ui/frame");
 const CothorityPath = require("~/shared/res/cothority-path/cothority-path");
@@ -42,7 +41,7 @@ function displayQrOfConodeStats() {
   Frame.topmost().navigate({
                              moduleName: "drawers/home/conode-stats/qr-code/qr-code-page",
                              bindingContext: {
-                               statsString: StatusExtractor.getToml(selectedConode)
+                               statsString: StatusExtractor.getTomlFromConode(selectedConode)
                              }
                            });
 }
@@ -65,13 +64,12 @@ function linkToConode() {
                  if (result.result) {
                    return FileIO.getStringOf(FilesPath.PUBLIC_KEY)
                                 .then(publicKey => {
-                                  const pair = Crypto.generateRandomKeyPair();
-                                  publicKey = Crypto.marshal(pair.getPublic());
-                                  console.log("ICIIIIIIIIIIIIIIII" + publicKey.length);
-                                  console.log("ICIIIIIIIIIIIIIIIIawdawdwa" + result.text);
-                                  // TODO: if no public key?
-                                  return myStatsList.linkToConode(selectedConode, result.text, publicKey,
-                                                                  CothorityPath.POP_PIN_REQUEST);
+                                  if (publicKey === "") {
+                                    return Promise.reject();
+                                  } else {
+                                    return myStatsList.linkToConode(selectedConode, result.text, publicKey,
+                                                                    CothorityPath.POP_PIN_REQUEST);
+                                  }
                                 });
                  } else if (result.result === undefined) {
                    // TODO: Case CISC - Use your own public key and path
@@ -84,7 +82,7 @@ function linkToConode() {
                  return Dialog.alert({
                                        title: "Error",
                                        message: "An unexpected error occurred during the linking" +
-                                                " process. Please try again.",
+                                                " process. Please try again. Do you have a key pair in your settings?",
                                        okButtonText: "Ok"
                                      });
                });

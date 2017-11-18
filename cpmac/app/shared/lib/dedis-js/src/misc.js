@@ -25,7 +25,7 @@ function uint8ArrayToHex(buffer) {
 
 /**
  * Convert a hexadecimal string to a Uint8Array.
- * @param {string} string
+ * @param {string} hex
  *
  * @throws {TypeError} when hex is not a string
  * @return {Uint8Array} byte buffer

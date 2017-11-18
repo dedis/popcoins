@@ -61,6 +61,10 @@ function parseCothorityRoster(toml) {
  * @returns {object} - the conode object or undefined if not found
  */
 function getConodeFromRoster(toml, address) {
+  if (typeof toml !== "string" || typeof address !== "string") {
+    throw new TypeError;
+  }
+
   let roster = parseCothorityRoster(toml);
   let wantedConode = undefined;
 
@@ -198,15 +202,19 @@ function CothoritySocket() {
 
     socket.on("open", (socket) => {
       console.log("Socket open...");
+      console.log(message);
+      console.dir(message);
       socket.send(message);
 
+      /*
       if (typeToDecode === CothorityDecodeTypes.NO_RESPONSE) {
-        console.log("Closing socket...");
         setTimeout(() => {
+          console.log("Closing socket...");
           socket.close();
           resolve();
         }, 1000);
       }
+      */
     });
 
     socket.on("close", (socket, code, reason) => {

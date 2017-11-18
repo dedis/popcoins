@@ -97,18 +97,26 @@ function emptyFields() {
     });
   }
 
-  /**
-   * Clears the list of registered public keys.
-   * @returns {Promise.<any>}
-   */
-  function clearRegisteredPublicKeys() {
-    return FileIO.writeStringTo(FilesPath.POP_REGISTERED_KEYS, "");
+  function clearOrgConfigRegisteredPublicKeys() {
+    return FileIO.writeStringTo(FilesPath.POP_PARTY_DATETIME, "")
+                 .then(() => {
+                   return FileIO.writeStringTo(FilesPath.POP_PARTY_LOCATION, "");
+                 })
+                 .then(() => {
+                   return FileIO.writeStringTo(FilesPath.POP_PARTY_NAME, "");
+                 })
+                 .then(() => {
+                   return FileIO.writeStringTo(FilesPath.POP_PARTY_CONODES, "");
+                 })
+                 .then(() => {
+                   return FileIO.writeStringTo(FilesPath.POP_REGISTERED_KEYS, "");
+                 });
   }
 
   return Dialog.confirm({
                           title: "Delete Stored Settings",
                           message: "You are about to delete your stored information, are you sure?",
-                          okButtonText: "Delete ^ & 'Registered Public Keys (only ORG)'",
+                          okButtonText: "Delete ^ & 'ORG Config + Registered Keys'",
                           cancelButtonText: "Cancel",
                           neutralButtonText: "Delete 'Description Hash', 'Key Pair' & 'final.toml'"
                         })
@@ -116,7 +124,7 @@ function emptyFields() {
                  if (result) {
                    return clearSettings()
                      .then(() => {
-                       return clearRegisteredPublicKeys();
+                       return clearOrgConfigRegisteredPublicKeys();
                      });
                  } else if (result === undefined) {
                    return clearSettings();

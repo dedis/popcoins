@@ -13,7 +13,6 @@
                 </GridLayout>
             </ListView.itemTemplate>
         </ListView>
-        <Button text="Reload" tap="loadDeviceList" row="1"/>
 
     </GridLayout>
 

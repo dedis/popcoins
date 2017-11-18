@@ -1,9 +1,6 @@
 const FrameModule = require("ui/frame");
 
-const DevicesViewModel = require("./devices-view-model");
-
-const devicesViewModel = new DevicesViewModel();
-
+let viewModel;
 /* ***********************************************************
  * Use the "onNavigatingTo" handler to initialize the page binding context.
  *************************************************************/
@@ -18,18 +15,15 @@ function onLoaded(args) {
     }
 
     const page = args.object;
-    page.bindingContext = devicesViewModel;
-
-    loadDeviceList();
+    page.bindingContext = page.page.bindingContext;
+    viewModel = page.bindingContext;
 }
 
 function loadDeviceList() {
-    devicesViewModel.set("isLoading", true);
-    const myDeviceList = devicesViewModel.deviceList;
+    const myDeviceList = viewModel.deviceList;
 
     myDeviceList.empty();
-    myDeviceList.load()
-        .then(() => devicesViewModel.set("isLoading", false));
+    myDeviceList.load();
 }
 
 /* ***********************************************************
