@@ -6,8 +6,8 @@ const FilesPath = require("~/shared/res/files/files-path");
 const FileIO = require("~/shared/lib/file-io/file-io");
 const DedisJsNet = require("~/shared/lib/dedis-js/src/net");
 const CothorityMessages = require("~/shared/lib/cothority-protobuf/build/cothority-messages");
-const CothorityDecodeTypes = require("~/shared/res/cothority-decode-types/cothority-decode-types");
 const Dialog = require("ui/dialogs");
+const Misc = require("~/shared/lib/dedis-js/src/misc");
 
 const viewModel = ObservableModule.fromObject({
                                                 statsList: new ObservableArray()
@@ -151,9 +151,9 @@ function pushStat(list, statToAdd) {
  */
 function link(conode, pin, publicKey, cothorityPath) {
   const cothoritySocket = new DedisJsNet.CothoritySocket();
-  const pinRequestMessage = CothorityMessages.createPinRequest(pin, publicKey);
+  const pinRequestMessage = CothorityMessages.createPinRequest(pin, Misc.hexToUint8Array(publicKey));
 
-  return cothoritySocket.send(conode, cothorityPath, pinRequestMessage, CothorityDecodeTypes.NO_RESPONSE);
+  return cothoritySocket.send(conode, cothorityPath, pinRequestMessage, undefined);
 }
 
 module.exports = ConodeStatsViewModel;
