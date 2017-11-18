@@ -6,6 +6,7 @@ cpmac/hooks/
 cpmac/platforms/
 cpmac/app/App_Resources/
 cpmac/app/shared/res/files/conodes.toml
+cpmac/package-lock.json
 conode/co1/
 conode/co2/
 conode/co3/
