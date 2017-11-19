@@ -28,69 +28,72 @@ function generateKeyPair() {
    * Generates the new key pair and informs the user.
    * @returns {Promise.<any>}
    */
-  function generateKeyPair() {
+  function createKeyPair() {
     const pair = Crypto.generateRandomKeyPair();
     const newPublicKey = Misc.uint8ArrayToHex(Crypto.marshal(pair.getPublic()));
     const newPrivateKey = pair.getPrivate("hex");
 
     return FileIO.writeStringTo(FilesPath.PUBLIC_KEY, newPublicKey)
-                 .then(() => {
-                   return FileIO.writeStringTo(FilesPath.PRIVATE_KEY, newPrivateKey);
-                 })
-                 .then(() => {
-                   return Dialog.confirm({
-                                           title: "New Key Pair",
-                                           message: "The public and private keys have been stored in your settings." +
-                                                    "\n\nPublic Key:\n" + newPublicKey + "\nPrivate Key:\n" +
-                                                    newPrivateKey,
-                                           okButtonText: "Dismiss",
-                                           cancelButtonText: "Copy Keys to Clipboard & Dismiss"
-                                         })
-                                .then(result => {
-                                  if (result) {
-                                    return Promise.resolve();
-                                  } else {
-                                    return Clipboard.setText("Public:" + newPublicKey + "\nPrivate:" + newPrivateKey);
-                                  }
-                                });
-                 });
+      .then(() => {
+        return FileIO.writeStringTo(FilesPath.PRIVATE_KEY, newPrivateKey);
+      })
+      .then(() => {
+        return FileIO.writeStringTo(FilesPath.POP_LINKED_CONODE, "");
+      })
+      .then(() => {
+        return Dialog.confirm({
+          title: "New Key Pair",
+          message: "The public and private keys have been stored in your settings." +
+            "\n\nPublic Key:\n" + newPublicKey + "\nPrivate Key:\n" +
+            newPrivateKey,
+          okButtonText: "Dismiss",
+          cancelButtonText: "Copy Keys to Clipboard & Dismiss"
+        })
+          .then(result => {
+            if (result) {
+              return Promise.resolve();
+            } else {
+              return Clipboard.setText("Public:" + newPublicKey + "\nPrivate:" + newPrivateKey);
+            }
+          });
+      });
   }
 
   return FileIO.getStringOf(FilesPath.PUBLIC_KEY)
-               .then(storedPublicKey => {
-                 if (storedPublicKey.length > 0) {
-                   return Dialog.confirm({
-                                           title: "Old Key Pair Overwriting",
-                                           message: "There is already a key pair stored in you settings. Do you" +
-                                                    " want to overwrite it and generate a new key pair?",
-                                           okButtonText: "New",
-                                           cancelButtonText: "Cancel"
-                                         })
-                                .then(result => {
-                                  if (result) {
-                                    return generateKeyPair();
-                                  } else {
-                                    return Promise.resolve();
-                                  }
-                                })
-                                .catch(() => {
-                                  return Dialog.alert({
-                                                        title: "Key Pair Generation Error",
-                                                        message: "An unexpected error occurred. Please try again.",
-                                                        okButtonText: "Ok"
-                                                      });
-                                });
-                 } else {
-                   return generateKeyPair();
-                 }
-               })
-               .catch(() => {
-                 return Dialog.alert({
-                                       title: "Key Pair Generation Error",
-                                       message: "An unexpected error occurred. Please try again.",
-                                       okButtonText: "Ok"
-                                     });
-               });
+    .then(storedPublicKey => {
+      if (storedPublicKey.length > 0) {
+        return Dialog.confirm({
+          title: "Old Key Pair Overwriting",
+          message: "There is already a key pair stored in you settings. Do you" +
+            " want to overwrite it and generate a new key pair?",
+          okButtonText: "New",
+          cancelButtonText: "Cancel"
+        })
+          .then(result => {
+            if (result) {
+              return createKeyPair();
+            } else {
+              return Promise.resolve();
+            }
+          })
+          .catch(() => {
+            return Dialog.alert({
+              title: "Key Pair Generation Error",
+              message: "An unexpected error occurred. Please try again.",
+              okButtonText: "Ok"
+            });
+          });
+      } else {
+        return createKeyPair();
+      }
+    })
+    .catch(() => {
+      return Dialog.alert({
+        title: "Key Pair Generation Error",
+        message: "An unexpected error occurred. Please try again.",
+        okButtonText: "Ok"
+      });
+    });
 }
 
 /**
@@ -99,26 +102,26 @@ function generateKeyPair() {
  */
 function displayQrOfPublicKey() {
   return FileIO.getStringOf(FilesPath.PUBLIC_KEY)
-               .then(publicKey => {
-                 if (publicKey !== undefined && publicKey.length > 0) {
-                   Frame.topmost().navigate({
-                                              moduleName: "drawers/pop/att/qr-code/qr-code-page",
-                                              bindingContext: {
-                                                publicKey: publicKey
-                                              }
-                                            });
-                 } else {
-                   return Promise.reject();
-                 }
-               })
-               .catch(() => {
-                 return Dialog.alert({
-                                       title: "Please Generate a Key Pair",
-                                       message: "Either generate a key pair within the app or enter an already" +
-                                                " owned public key (in the settings).",
-                                       okButtonText: "Ok"
-                                     });
-               });
+    .then(publicKey => {
+      if (publicKey !== undefined && publicKey.length > 0) {
+        Frame.topmost().navigate({
+          moduleName: "drawers/pop/att/qr-code/qr-code-page",
+          bindingContext: {
+            publicKey: publicKey
+          }
+        });
+      } else {
+        return Promise.reject();
+      }
+    })
+    .catch(() => {
+      return Dialog.alert({
+        title: "Please Generate a Key Pair",
+        message: "Either generate a key pair within the app or enter an already" +
+          " owned public key (in the settings).",
+        okButtonText: "Ok"
+      });
+    });
 }
 
 /**
@@ -128,41 +131,41 @@ function displayQrOfPublicKey() {
  */
 function generatePopToken() {
   return FileIO.getStringOf(FilesPath.PRIVATE_KEY)
-               .then(privateKey => {
-                 if (privateKey.length > 0) {
-                   return FileIO.getStringOf(FilesPath.POP_FINAL_TOML)
-                                .then((finalToml) => {
-                                  if (finalToml.length > 0) {
-                                    return Dialog.confirm({
-                                                            title: "PoP Token Generation",
-                                                            message: "Private Key:\n" + privateKey + "\nFinal Toml:\n" +
-                                                                     finalToml,
-                                                            okButtonText: "Generate",
-                                                            cancelButtonText: "Cancel"
-                                                          })
-                                                 .then(result => {
-                                                   if (result) {
-                                                     // TODO: generate the PoP Token
-                                                   } else {
-                                                     return Promise.resolve();
-                                                   }
-                                                 });
-                                  } else {
-                                    return Promise.reject();
-                                  }
-                                });
-                 } else {
-                   return Promise.reject();
-                 }
-               })
-               .catch(() => {
-                 return Dialog.alert({
-                                       title: "Provide More Information",
-                                       message: "Please store your private key in the settings and store the text of" +
-                                                " your final.toml in the settings.",
-                                       okButtonText: "Ok"
-                                     });
-               });
+    .then(privateKey => {
+      if (privateKey.length > 0) {
+        return FileIO.getStringOf(FilesPath.POP_FINAL_TOML)
+          .then((finalToml) => {
+            if (finalToml.length > 0) {
+              return Dialog.confirm({
+                title: "PoP Token Generation",
+                message: "Private Key:\n" + privateKey + "\nFinal Toml:\n" +
+                  finalToml,
+                okButtonText: "Generate",
+                cancelButtonText: "Cancel"
+              })
+                .then(result => {
+                  if (result) {
+                    // TODO: generate the PoP Token
+                  } else {
+                    return Promise.resolve();
+                  }
+                });
+            } else {
+              return Promise.reject();
+            }
+          });
+      } else {
+        return Promise.reject();
+      }
+    })
+    .catch(() => {
+      return Dialog.alert({
+        title: "Provide More Information",
+        message: "Please store your private key in the settings and store the text of" +
+          " your final.toml in the settings.",
+        okButtonText: "Ok"
+      });
+    });
 }
 
 exports.onLoaded = onLoaded;

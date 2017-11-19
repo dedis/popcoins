@@ -49,15 +49,15 @@ function addManual() {
 
   if (address.length > 0 && publicKey.length > 0 && description.length > 0) {
     const conodesTomlString = StatusExtractor.getToml(address, publicKey, description);
-    let conode = DedisJsNet.getConodeFromRoster(conodesTomlString, address);
+    let conode = DedisJsNet.getConodeFromRoster(conodesTomlString, publicKey);
 
     closeCallBackFunction(conode);
   } else {
     Dialog.alert({
-                   title: "Provide More Information",
-                   message: "To be able to add this conode to the list we need more information.",
-                   okButtonText: "Ok"
-                 });
+      title: "Provide More Information",
+      message: "To be able to add this conode to the list we need more information.",
+      okButtonText: "Ok"
+    });
   }
 }
 

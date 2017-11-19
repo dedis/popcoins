@@ -10,8 +10,8 @@ const Dialog = require("ui/dialogs");
 const Misc = require("~/shared/lib/dedis-js/src/misc");
 
 const viewModel = ObservableModule.fromObject({
-                                                statsList: new ObservableArray()
-                                              });
+  statsList: new ObservableArray()
+});
 
 function ConodeStatsViewModel() {
   setUpConodeStatsList();
@@ -106,28 +106,28 @@ function setUpConodeStatsList() {
    * @returns {Promise.<any>}
    */
   myStatsList.linkToConode = function (conode, pin, publicKey, cothorityPath) {
-    const wantedConodeAddress = StatusExtractor.getAddress(conode);
+    const wantedConodeKey = StatusExtractor.getPublicKey(conode);
 
     return FileIO.getStringOf(FilesPath.CONODES_TOML)
-                 .then((tomlString) => {
-                   return DedisJsNet.getConodeFromRoster(tomlString, wantedConodeAddress);
-                 })
-                 .then(parsedConode => {
-                   if (parsedConode !== undefined) {
-                     return link(parsedConode, pin, publicKey, cothorityPath);
-                   } else {
-                     return Promise.reject();
-                   }
-                 })
-                 .catch((error) => {
-                   console.dir(error);
-                   return Dialog.alert({
-                                         title: "Error",
-                                         message: "An unexpected error occurred during the linking" +
-                                                  " process. Please try again.",
-                                         okButtonText: "Ok"
-                                       });
-                 });
+      .then((tomlString) => {
+        return DedisJsNet.getConodeFromRoster(tomlString, wantedConodeKey);
+      })
+      .then(parsedConode => {
+        if (parsedConode !== undefined) {
+          return link(parsedConode, pin, publicKey, cothorityPath);
+        } else {
+          return Promise.reject();
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        return Dialog.alert({
+          title: "Error",
+          message: "An unexpected error occurred during the linking" +
+            " process. Please try again.",
+          okButtonText: "Ok"
+        });
+      });
   };
 }
 
@@ -138,8 +138,8 @@ function setUpConodeStatsList() {
  */
 function pushStat(list, statToAdd) {
   list.push({
-              info: statToAdd
-            });
+    info: statToAdd
+  });
 }
 
 /**
@@ -153,7 +153,36 @@ function link(conode, pin, publicKey, cothorityPath) {
   const cothoritySocket = new DedisJsNet.CothoritySocket();
   const pinRequestMessage = CothorityMessages.createPinRequest(pin, Misc.hexToUint8Array(publicKey));
 
-  return cothoritySocket.send(conode, cothorityPath, pinRequestMessage, undefined);
+  return cothoritySocket.send(conode, cothorityPath, pinRequestMessage, undefined)
+    .then(response => {
+      if (response instanceof ArrayBuffer) {
+        return FileIO.writeStringTo(FilesPath.POP_LINKED_CONODE, StatusExtractor.getToml(conode.Address, conode.Public, conode.Description))
+          .then(() => {
+            return Dialog.alert({
+              title: "Conode Response",
+              message: "PIN Accepted",
+              okButtonText: "Ok"
+            });
+          });
+      } else if (typeof response === "string") {
+        return Dialog.alert({
+          title: "Conode Response",
+          message: response,
+          okButtonText: "Ok"
+        });
+      } else {
+        return Promise.reject();
+      }
+    })
+    .catch(error => {
+      console.log(error);
+      return Dialog.alert({
+        title: "Error",
+        message: "An unexpected error occurred during the linking" +
+          " process. Please try again.",
+        okButtonText: "Ok"
+      });
+    });
 }
 
 module.exports = ConodeStatsViewModel;

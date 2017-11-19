@@ -23,6 +23,10 @@ function getPublicKey(conode) {
   return Base64.encode(Misc.uint8ArrayToHex(conode.server.public), "hex");
 }
 
+function getHexPublicKey(conode) {
+  return Misc.uint8ArrayToHex(conode.server.public);
+}
+
 function getServices(conode) {
   return conode.system.Status.field.Available_Services;
 }
@@ -61,16 +65,16 @@ function getUptime(conode) {
 
 function getTomlFromConode(conode) {
   return "[[servers]]\n" +
-         "  Address = \"" + getAddress(conode) + "\"\n" +
-         "  Public = \"" + getPublicKey(conode) + "\"\n" +
-         "  Description = \"" + getDescription(conode) + "\"";
+    "  Address = \"" + getAddress(conode) + "\"\n" +
+    "  Public = \"" + getPublicKey(conode) + "\"\n" +
+    "  Description = \"" + getDescription(conode) + "\"";
 }
 
 function getToml(address, publicKey, description) {
   return "[[servers]]\n" +
-         "  Address = \"" + address + "\"\n" +
-         "  Public = \"" + publicKey + "\"\n" +
-         "  Description = \"" + description + "\"";
+    "  Address = \"" + address + "\"\n" +
+    "  Public = \"" + publicKey + "\"\n" +
+    "  Description = \"" + description + "\"";
 }
 
 
@@ -79,6 +83,7 @@ exports.getDescription = getDescription;
 exports.getAddress = getAddress;
 exports.getID = getID;
 exports.getPublicKey = getPublicKey;
+exports.getHexPublicKey = getHexPublicKey;
 exports.getServices = getServices;
 exports.getSystem = getSystem;
 exports.getHost = getHost;
