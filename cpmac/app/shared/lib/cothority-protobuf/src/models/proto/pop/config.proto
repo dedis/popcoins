@@ -7,13 +7,13 @@ option java_package = "ch.epfl.dedis.proto";
 option java_outer_classname = "ConfigProto";
 
 message CheckConfig {
-    required bytes pop_hash = 1;
+    required bytes popHash = 1;
     required bytes attendees = 2;
 }
 
 message CheckConfigReply {
-    required sint32 pop_status = 1;
-    required bytes pop_hash = 2;
+    required sint32 popStatus = 1;
+    required bytes popHash = 2;
     required bytes attendees = 3;
 }
 
@@ -23,8 +23,8 @@ message MergeConfig {
 }
 
 message MergeConfigReply {
-    required sint32 pop_status = 1;
-    required bytes pop_hash = 2;
+    required sint32 popStatus = 1;
+    required bytes popHash = 2;
     required FinalStatement final = 3;
 }
 

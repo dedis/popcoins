@@ -6,7 +6,7 @@ option java_package = "ch.epfl.dedis.proto";
 option java_outer_classname = "FinalizeProto";
 
 message FinalizeRequest {
-    required bytes desc_id = 1;
+    required bytes descId = 1;
     required bytes attendees = 2;
     optional bytes signature = 3;
 }

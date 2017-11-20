@@ -35,16 +35,14 @@ class CothorityMessages extends CothorityProtobuf {
 
   /**
    * Creates a Roster object.
-   * @param id
    * @param {Array} list of ServerIdentity
    * @param aggregate
    * @returns {object} Roster
    */
-  createRoster(id, list, aggregate) {
+  createRoster(list, aggregate) {
     const model = this.getModel("Roster");
 
     const fields = {
-      id: id,
       list: list,
       aggregate: aggregate
     };
@@ -94,20 +92,17 @@ class CothorityMessages extends CothorityProtobuf {
    * Create an encoded message to make a sign request to a cothority node.
    * @param {Uint8Array} message - Message to sign stored in a Uint8Array
    * @param {Array} servers - list of ServerIdentity
+   * @param {Uint8Array} aggregate - aggregate of the servers
    * @returns {*|Buffer|Uint8Array}
    */
-  createSignatureRequest(message, servers) {
+  createSignatureRequest(message, servers, aggregate) {
     if (!(message instanceof Uint8Array)) {
       throw new Error("message must be a instance of Uint8Array");
     }
 
     const fields = {
       message,
-      roster: {
-        // TODO: id: id
-        list: servers
-        // TODO: aggregate: aggregate
-      }
+      roster: this.createRoster(servers, aggregate)
     };
 
     return this.encodeMessage("SignatureRequest", fields);
@@ -127,15 +122,12 @@ class CothorityMessages extends CothorityProtobuf {
   /**
    * Create an encoded message to make a ClockRequest to a cothority node.
    * @param {Array} servers - list of ServerIdentity
+   * @param {Uint8Array} aggregate - aggregate of the servers
    * @returns {*|Buffer|Uint8Array}
    */
-  createClockRequest(servers) {
+  createClockRequest(servers, aggregate) {
     const fields = {
-      roster: {
-        // TODO: id: id
-        list: servers
-        // TODO: aggregate: aggregate
-      }
+      roster: this.createRoster(servers, aggregate)
     };
 
     return this.encodeMessage("ClockRequest", fields);
@@ -193,7 +185,7 @@ class CothorityMessages extends CothorityProtobuf {
    * @returns {object} SkipBlock
    */
   createSkipBlock(index, height, max_height, base_height, backlinks, verifiers, parent, genesis, data, roster, hash,
-                  forward, children) {
+    forward, children) {
     const model = this.getModel("SkipBlock");
 
     const fields = {
@@ -507,21 +499,19 @@ class CothorityMessages extends CothorityProtobuf {
   /**
    * Creates a PopDesc description using the information given as parameters.
    * @param {string} name
-   * @param {string} date_time
+   * @param {string} dateTime
    * @param {string} location
    * @param {object} roster
-   * @param {Array} parties a list of ShortDesc objects
    * @returns {object} PopDesc
    */
-  createPopDesc(name, date_time, location, roster, parties) {
+  createPopDesc(name, dateTime, location, roster) {
     const model = this.getModel("PopDesc");
 
     const fields = {
       name: name,
-      date_time: date_time,
+      dateTime: dateTime,
       location: location,
-      roster: roster,
-      parties: parties
+      roster: roster
     };
 
     return model.create(fields);
@@ -530,21 +520,19 @@ class CothorityMessages extends CothorityProtobuf {
   /**
    * Creates a PopDescToml description using the information given as parameters.
    * @param {string} name
-   * @param {string} date_time
+   * @param {string} dateTime
    * @param {string} location
    * @param {string} roster
-   * @param {Array} parties
    * @returns {object} PopDescToml
    */
-  createPopDescToml(name, date_time, location, roster, parties) {
+  createPopDescToml(name, dateTime, location, roster) {
     const model = this.getModel("PopDescToml");
 
     const fields = {
       name: name,
-      date_time: date_time,
+      dateTime: dateTime,
       location: location,
-      roster: roster,
-      parties: parties
+      roster: roster
     };
 
     return model.create(fields);
@@ -624,13 +612,13 @@ class CothorityMessages extends CothorityProtobuf {
 
   /**
    * Creates and encodes a CheckConfig request for the Cothority.
-   * @param pop_hash
+   * @param popHash
    * @param attendees
    * @returns {*|Buffer|Uint8Array}
    */
-  createCheckConfigRequest(pop_hash, attendees) {
+  createCheckConfigRequest(popHash, attendees) {
     const fields = {
-      pop_hash: pop_hash,
+      popHash: popHash,
       attendees: attendees
     };
 
@@ -679,32 +667,13 @@ class CothorityMessages extends CothorityProtobuf {
    * @param name
    * @param date
    * @param location
-   * @param id
    * @param servers
    * @param aggregate
    * @returns {*|Buffer|Uint8Array}
    */
-  createStoreConfig(name, date, location, id, servers, aggregate) {
+  createStoreConfig(name, date, location, servers, aggregate) {
     const fields = {
-      desc: {
-        name: name,
-        date_time: date,
-        location: location,
-        roster: {
-          id: id,
-          list: servers,
-          aggregate: aggregate
-        }
-        // TODO: parties: {
-        // TODO:  location: location
-        // TODO:  roster: {
-        // TODO:    id: id
-        // TODO:    list: servers
-        // TODO:    aggregate: aggregate
-        // TODO:  }
-        // TODO: }
-      }
-      // TODO: signature: signature
+      desc: this.createPopDesc(name, date, location, this.createRoster(servers, aggregate))
     };
 
     return this.encodeMessage("StoreConfig", fields);
@@ -765,13 +734,13 @@ class CothorityMessages extends CothorityProtobuf {
 
   /**
    * Create an encoded message to finalize on the given descId-popconfig.
-   * @param desc_id
+   * @param descId
    * @param attendees
    * @returns {*|Buffer|Uint8Array}
    */
-  createFinalizeRequest(desc_id, attendees) {
+  createFinalizeRequest(descId, attendees) {
     const fields = {
-      desc_id: desc_id,
+      descId: descId,
       attendees: attendees
       // TODO: signature: signature
     };
