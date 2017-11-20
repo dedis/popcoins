@@ -57,15 +57,19 @@ function parseCothorityRoster(toml) {
 /**
  * Gets a single conode from a roster toml string as a JavaScript object.
  * @param toml - the toml string
- * @param address - the address string
+ * @param hexKey - the key string (hex)
  * @returns {object} - the conode object or undefined if not found
  */
-function getConodeFromRoster(toml, address) {
+function getConodeFromRoster(toml, hexKey) {
+  if (typeof toml !== "string" || typeof hexKey !== "string") {
+    throw new TypeError;
+  }
+
   let roster = parseCothorityRoster(toml);
   let wantedConode = undefined;
 
   roster.servers.forEach((conode) => {
-    if (conode.Address === address) {
+    if (conode.Public === hexKey) {
       wantedConode = conode;
     }
   });
@@ -199,26 +203,20 @@ function CothoritySocket() {
     socket.on("open", (socket) => {
       console.log("Socket open...");
       socket.send(message);
-
-      if (typeToDecode === CothorityDecodeTypes.NO_RESPONSE) {
-        console.log("Closing socket...");
-        setTimeout(() => {
-          socket.close();
-          resolve();
-        }, 1000);
-      }
     });
 
     socket.on("close", (socket, code, reason) => {
+      if (code === 4100) {
+        resolve(reason);
+      }
       console.log("Socket closed...");
     });
 
     socket.on("message", (socket, message) => {
-      console.log("Got message:");
-      console.dir(message);
+      console.log("Got message...");
       socket.close();
 
-      if (!typeToDecode.isUndefined) {
+      if (typeToDecode !== undefined) {
         resolve(CothorityMessages.decodeResponse(typeToDecode, message));
       } else {
         resolve(message);
@@ -228,7 +226,7 @@ function CothoritySocket() {
     socket.on("error", (socket, error) => {
       console.log("Socket error:");
       console.log(error);
-      //console.dir(error);
+
       socket.close();
       reject(error);
     });

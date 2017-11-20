@@ -1,3 +1,4 @@
+require("nativescript-nodeify");
 const Misc = require("~/shared/lib/dedis-js/src/misc");
 const Base64 = require("base64-coder-node")();
 
@@ -20,6 +21,10 @@ function getID(conode) {
 
 function getPublicKey(conode) {
   return Base64.encode(Misc.uint8ArrayToHex(conode.server.public), "hex");
+}
+
+function getHexPublicKey(conode) {
+  return Misc.uint8ArrayToHex(conode.server.public);
 }
 
 function getServices(conode) {
@@ -58,18 +63,27 @@ function getUptime(conode) {
   return conode.system.Status.field.Uptime;
 }
 
-function getToml(conode) {
+function getTomlFromConode(conode) {
   return "[[servers]]\n" +
-         "  Address = \"" + getAddress(conode) + "\"\n" +
-         "  Public = \"" + getPublicKey(conode) + "\"\n" +
-         "  Description = \"" + getDescription(conode) + "\"";
+    "  Address = \"" + getAddress(conode) + "\"\n" +
+    "  Public = \"" + getPublicKey(conode) + "\"\n" +
+    "  Description = \"" + getDescription(conode) + "\"";
 }
+
+function getToml(address, publicKey, description) {
+  return "[[servers]]\n" +
+    "  Address = \"" + address + "\"\n" +
+    "  Public = \"" + publicKey + "\"\n" +
+    "  Description = \"" + description + "\"";
+}
+
 
 // Exports --------------------------------------------------------------------
 exports.getDescription = getDescription;
 exports.getAddress = getAddress;
 exports.getID = getID;
 exports.getPublicKey = getPublicKey;
+exports.getHexPublicKey = getHexPublicKey;
 exports.getServices = getServices;
 exports.getSystem = getSystem;
 exports.getHost = getHost;
@@ -79,4 +93,5 @@ exports.getVersion = getVersion;
 exports.getTXBytes = getTXBytes;
 exports.getRXBytes = getRXBytes;
 exports.getUptime = getUptime;
+exports.getTomlFromConode = getTomlFromConode;
 exports.getToml = getToml;

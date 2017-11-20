@@ -2,6 +2,7 @@
 
 /** @module crypto */
 
+exports.aggregatePublicKeys = aggregatePublicKeys;
 exports.marshal = marshal;
 exports.unmarshal = unmarshal;
 exports.embed = embed;
@@ -18,6 +19,22 @@ const hash = require("hash.js");
 const BN = require("bn.js");
 
 const misc = require("./misc");
+
+/**
+ * Computes the aggregate of a list of public keys (elliptic.js curve points).
+ * @param points - array of public keys to aggregate (elliptic.js curve points)
+ * @returns {Uint8Array} - the aggregate point as Uint8Array format
+ */
+function aggregatePublicKeys(points) {
+  const [head, ...tail] = points;
+
+  let addition = head;
+  for (let point of tail) {
+    addition = addition.add(point);
+  }
+
+  return marshal(addition);
+}
 
 /**
  * Convert a ed25519 curve point into a byte representation.

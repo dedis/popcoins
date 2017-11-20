@@ -1,18 +1,43 @@
 <Page
         class="page"
-        loaded="onLoaded">
+        loaded="onLoaded"
+        shownModally="onShownModally">
 
     <ActionBar class="action-bar">
         <Label class="action-bar-title" text="Add Conode Manually"/>
     </ActionBar>
 
-    <GridLayout class="page-content" rows="auto,*,auto">
-        <Label class="label-title" text="Conode Toml" row="0"/>
-        <TextView class="text-field" hint="toml" autocorrect="false" autocapitalizationType="none"
-                  returnKeyType="done"
-                  row="1"
-                  id="text-view-conode-toml"/>
-        <Button text="Add" tap="addManual" row="2"/>
+    <GridLayout class="page-content" rows="*,auto,auto,auto,auto,auto,auto,*,auto" columns="*,*">
+        <Label row="0" colSpan="2"/>
+
+        <Label class="label-title" text="Conode Address" row="1" colSpan="2"/>
+        <TextField class="text-field" hint="tcp://127.0.0.1:7002" autocorrect="false"
+                   autocapitalizationType="none"
+                   returnKeyType="done"
+                   row="2"
+                   colSpan="2"
+                   id="text-view-conode-address"/>
+
+        <Label class="label-title" text="Conode Public Key" row="3" colSpan="2"/>
+        <TextField class="text-field" hint="base64" autocorrect="false"
+                   autocapitalizationType="none"
+                   returnKeyType="done"
+                   row="4"
+                   colSpan="2"
+                   id="text-view-conode-public-key"/>
+
+        <Label class="label-title" text="Conode Description" row="5" colSpan="2"/>
+        <TextField class="text-field" hint="description" autocorrect="false"
+                   autocapitalizationType="none"
+                   returnKeyType="done"
+                   row="6"
+                   colSpan="2"
+                   id="text-view-conode-description"/>
+
+        <Label row="7" colSpan="2"/>
+
+        <Button text="Add" tap="addManual" row="8" col="0"/>
+        <Button text="Cancel" tap="onCancel" row="8" col="1"/>
     </GridLayout>
 
 </Page>

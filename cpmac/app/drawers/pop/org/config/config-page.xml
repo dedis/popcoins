@@ -35,14 +35,17 @@
                    id="text-field-location"/>
 
         <Label class="label-title" text="Conodes" row="12" col="0" colSpan="3"/>
+        <Button text="Empty" tap="emptyList" row="12" col="3"/>
 
         <ListView items="{{ partyConodes }}" id="list-view-conodes" android:itemTap="deleteByIndex"
                   row="13"
                   col="0"
                   colSpan="3">
             <ListView.itemTemplate>
-                <GridLayout rows="*" columns="*">
-                    <Label text="{{ conode.Description }}" textAlignment="center" textWrap="true"/>
+                <GridLayout rows="*,*,*" columns="*">
+                    <Label text="{{ conode.Description }}" row="0" textAlignment="left" textWrap="true"/>
+                    <Label text="{{ conode.Address }}" row="1" textAlignment="left" textWrap="true"/>
+                    <Label text="{{ conode.Public }}" row="2" textAlignment="left" textWrap="true"/>
                 </GridLayout>
             </ListView.itemTemplate>
         </ListView>
