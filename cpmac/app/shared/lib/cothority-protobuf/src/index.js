@@ -939,14 +939,10 @@ class CothorityMessages extends CothorityProtobuf {
    * @param config
    * @returns {*|Buffer|Uint8Array}
    */
-  createProposeSend(id, config) {
+  createProposeSend(id, data) {
     const fields = {
       id: id,
-      config: {
-        threshold: config.threshold,
-        device: config.device,
-        data: config.data
-      }
+      data: data
     };
 
     return this.encodeMessage("ProposeSend", fields);
