@@ -309,12 +309,13 @@ function hashAndSave() {
    * @returns {*|Promise.<any>}
    */
   function hashAndStore() {
-    const descriptionHash = Base64.encode(HASH.sha256()
+    let descriptionHash = HASH.sha256()
       .update(name)
       .update(dateTime)
       .update(location)
       .update(aggregateKey)
-      .digest("hex"), "hex");
+      .digest("hex");
+    descriptionHash = Base64.encode(descriptionHash, "hex");
 
     return FileIO.getStringOf(FilesPath.POP_PARTY_CONODES)
       .then(tomlString => {
@@ -327,13 +328,22 @@ function hashAndSave() {
         });
 
         const cothoritySocket = new DedisJsNet.CothoritySocket();
-        const storeConfigMessage = CothorityMessages.createStoreConfig(name, dateTime, location, /*undefined, */serverIdentities/*, undefined*/);
+        const roster = CothorityMessages.createRoster(serverIdentities, aggregateKey);
+        const encodedDesc = CothorityMessages.createPopDescEncoded(name, dateTime, location, roster);
+        let signature = undefined;
 
-        return FileIO.getStringOf(FilesPath.POP_LINKED_CONODE)
+        return FileIO.getStringOf(FilesPath.PRIVATE_KEY)
+          .then(privateKey => {
+            const privatePoint = Crypto.unmarshal(Misc.hexToUint8Array(privateKey)).y;
+            signature = Crypto.schnorrSign(privatePoint, encodedDesc);
+
+            return FileIO.getStringOf(FilesPath.POP_LINKED_CONODE)
+          })
           .then(toml => {
             return DedisJsNet.parseCothorityRoster(toml).servers[0];
           })
           .then(conode => {
+            const storeConfigMessage = CothorityMessages.createStoreConfig(name, dateTime, location, roster, signature);
             return cothoritySocket.send(conode, CothorityPath.POP_STORE_CONFIG, storeConfigMessage, CothorityDecodeTypes.STORE_CONFIG_REPLY);
           });
       })

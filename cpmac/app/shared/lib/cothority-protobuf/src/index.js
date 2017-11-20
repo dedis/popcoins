@@ -502,7 +502,7 @@ class CothorityMessages extends CothorityProtobuf {
    * @param {string} dateTime
    * @param {string} location
    * @param {object} roster
-   * @returns {object} PopDesc
+   * @returns {*}
    */
   createPopDesc(name, dateTime, location, roster) {
     const model = this.getModel("PopDesc");
@@ -515,6 +515,24 @@ class CothorityMessages extends CothorityProtobuf {
     };
 
     return model.create(fields);
+  }
+
+  /**
+   * Creates a PopDesc encoded as a Uint8Array, this way it can easily be signed.
+   * @param {string} name
+   * @param {string} dateTime
+   * @param {string} location
+   * @param {object} roster
+   */
+  createPopDescEncoded(name, dateTime, location, roster) {
+    const fields = {
+      name: name,
+      dateTime: dateTime,
+      location: location,
+      roster: roster
+    };
+
+    return this.encodeMessage("PopDesc", fields);
   }
 
   /**
@@ -667,13 +685,18 @@ class CothorityMessages extends CothorityProtobuf {
    * @param name
    * @param date
    * @param location
-   * @param servers
-   * @param aggregate
+   * @param roster
+   * @param signature
    * @returns {*|Buffer|Uint8Array}
    */
-  createStoreConfig(name, date, location, servers, aggregate) {
+  createStoreConfig(name, date, location, roster, signature) {
+    if (!(signature instanceof Uint8Array)) {
+      throw new Error("signature must be a instance of Uint8Array");
+    }
+
     const fields = {
-      desc: this.createPopDesc(name, date, location, this.createRoster(servers, aggregate))
+      desc: this.createPopDesc(name, date, location, roster),
+      signature: signature
     };
 
     return this.encodeMessage("StoreConfig", fields);

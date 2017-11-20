@@ -30,7 +30,7 @@ message MergeConfigReply {
 
 message StoreConfig {
     required PopDesc desc = 1;
-    optional bytes signature = 2;
+    required bytes signature = 2;
 }
 
 message StoreConfigReply {
