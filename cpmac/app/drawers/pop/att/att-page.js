@@ -63,7 +63,7 @@ function generateKeyPair() {
       });
   }
 
-  return FileIO.getStringOf(FilesPath.PUBLIC_KEY)
+  return FileIO.getStringOf(FilesPath.PUBLIC_KEY_COTHORITY)
     .then(storedPublicKey => {
       if (storedPublicKey.length > 0) {
         return Dialog.confirm({
@@ -105,7 +105,7 @@ function generateKeyPair() {
  * @returns {Promise.<any>}
  */
 function displayQrOfPublicKey() {
-  return FileIO.getStringOf(FilesPath.PUBLIC_KEY)
+  return FileIO.getStringOf(FilesPath.PUBLIC_KEY_COTHORITY)
     .then(publicKey => {
       if (publicKey !== undefined && publicKey.length > 0) {
         Frame.topmost().navigate({

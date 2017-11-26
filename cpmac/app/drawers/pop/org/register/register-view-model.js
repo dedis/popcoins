@@ -93,7 +93,7 @@ function setUpRegisteredKeys() {
    * @returns {Promise.<any>}
    */
   myRegisteredKeys.addMyself = function () {
-    return FileIO.getStringOf(FilesPath.PUBLIC_KEY)
+    return FileIO.getStringOf(FilesPath.PUBLIC_KEY_COTHORITY)
                  .then(myOwnPublicKey => {
                    return myRegisteredKeys.addKey(myOwnPublicKey);
                  });
