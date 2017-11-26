@@ -3,6 +3,10 @@
 /** @module crypto */
 
 exports.aggregatePublicKeys = aggregatePublicKeys;
+exports.getKeyPairFromPrivate = getKeyPairFromPrivate;
+exports.getKeyFromSecret = getKeyFromSecret;
+exports.getKeyFromPublic = getKeyFromPublic;
+exports.toRed = toRed;
 exports.marshal = marshal;
 exports.unmarshal = unmarshal;
 exports.embed = embed;
@@ -17,6 +21,7 @@ const EC = require("elliptic").ec;
 const curve = new EC("ed25519");
 const hash = require("hash.js");
 const BN = require("bn.js");
+const RED = BN.red(curve.n);
 
 const misc = require("./misc");
 
@@ -34,6 +39,43 @@ function aggregatePublicKeys(points) {
   }
 
   return marshal(addition);
+}
+
+/**
+ * Returns the key pair formed using the private key given as parameter, the private key must be a string in hex format.
+ * @param {string} priv - the hex string representation for the private key
+ */
+function getKeyPairFromPrivate(priv) {
+  const keyPair = getKeyFromSecret(priv);
+  const pubPoint = curve.g.mul(keyPair.getPrivate());
+
+  keyPair.pub = pubPoint;
+
+  return keyPair;
+}
+
+/**
+ * Returns the key formed used the secret given as parameter.
+ * @param {string} secret - hex string of the private key
+ */
+function getKeyFromSecret(secret) {
+  return curve.keyFromPrivate(secret, "hex");
+}
+
+/**
+ * Returns the key formed used the secret given as parameter.
+ * @param {string} pub - hex string of the public key
+ */
+function getKeyFromPublic(pub) {
+  return curve.keyFromPublic(pub, "hex");
+}
+
+/**
+ * Returns the reduced bn.js number given as parameter. ("p25519" reduction)
+ * @param {bn.js} bn - the reduced bn.js number given as parameter.
+ */
+function toRed(bn) {
+  return bn.toRed(RED);
 }
 
 /**
@@ -178,11 +220,18 @@ function generateRandomKeyPair() {
 // https://github.com/dedis/kyber/blob/v0/sign/schnorr.go
 function schnorrHash(pub, r, message) {
   const h = hash.sha512();
+
   h.update(marshal(r));
   h.update(marshal(pub));
   h.update(message);
 
-  return new BN(h.digest("hex"), 16);
+  // Could be done in one line, but this way we can exactly see what we are actually doing.
+  const hex = h.digest("hex");
+  const uInt8Array = misc.hexToUint8Array(hex);
+  const reversed = uInt8Array.reverse();
+  const hexReversed = misc.uint8ArrayToHex(reversed);
+
+  return toRed(new BN(hexReversed, 16));
 }
 
 /**
@@ -194,17 +243,17 @@ function schnorrHash(pub, r, message) {
  * @returns {Uint8Array} signature
  */
 function schnorrSign(secret, message) {
-  const k = curve.genKeyPair().getPrivate();
+  const k = toRed(curve.genKeyPair().getPrivate());
   const R = curve.g.mul(k);
 
   const pub = curve.g.mul(secret);
-  const h = schnorrHash(pub, R, message);
+  let h = schnorrHash(pub, R, message);
 
-  const xh = secret.mul(h);
-  const s = k.add(xh);
+  const xh = secret.redMul(h);
+  const s = k.redAdd(xh);
 
   const left = marshal(R);
-  const right = misc.hexToUint8Array(s.toString(16, 2));
+  const right = misc.hexToUint8Array(s.toString(16, 2)).reverse();
 
   const concat = new Uint8Array(left.length + right.length);
   concat.set(left);
@@ -226,7 +275,7 @@ function schnorrVerify(pub, message, signature) {
   const size = marshal(pub).length;
 
   const R = unmarshal(signature.slice(0, size));
-  const s = new BN(signature.slice(size, signature.length));
+  const s = toRed(new BN(signature.slice(size, signature.length).reverse()));
 
   const h = schnorrHash(pub, R, message);
 

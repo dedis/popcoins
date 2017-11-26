@@ -4,7 +4,7 @@ const FileIO = require("~/shared/lib/file-io/file-io");
 
 const PopViewModel = require("./pop-view-model");
 
-const files = [FilesPath.POP_DESC_HASH, FilesPath.PUBLIC_KEY, FilesPath.PRIVATE_KEY, FilesPath.POP_FINAL_TOML];
+const files = [FilesPath.POP_DESC_HASH, FilesPath.PUBLIC_KEY_COTHORITY, FilesPath.PRIVATE_KEY, FilesPath.POP_FINAL_TOML];
 const textFields = [];
 
 function onLoaded(args) {

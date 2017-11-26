@@ -8,3 +8,4 @@ rm -R hooks/after-prepare/
 rm -R hooks/before-watch/
 rm -R hooks/before-prepare/nativescript-dev-sass.js
 rm -R node_modules/nativescript-zxing/platforms/android/
+cp brorand-fix/index.js node_modules/brorand/index.js

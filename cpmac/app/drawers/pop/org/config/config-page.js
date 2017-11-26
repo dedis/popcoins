@@ -309,13 +309,13 @@ function hashAndSave() {
    * @returns {*|Promise.<any>}
    */
   function hashAndStore() {
-    let descriptionHash = HASH.sha256()
+    const descriptionHashHex = HASH.sha256()
       .update(name)
       .update(dateTime)
       .update(location)
       .update(aggregateKey)
       .digest("hex");
-    descriptionHash = Base64.encode(descriptionHash, "hex");
+    const descriptionHash = Base64.encode(descriptionHashHex, "hex");
 
     return FileIO.getStringOf(FilesPath.POP_PARTY_CONODES)
       .then(tomlString => {
@@ -334,10 +334,10 @@ function hashAndSave() {
 
         return FileIO.getStringOf(FilesPath.PRIVATE_KEY)
           .then(privateKey => {
-            const privatePoint = Crypto.unmarshal(Misc.hexToUint8Array(privateKey)).y;
-            signature = Crypto.schnorrSign(privatePoint, encodedDesc);
+            const staticKeyPair = Crypto.getKeyPairFromPrivate(privateKey);
+            signature = Crypto.schnorrSign(Crypto.toRed(staticKeyPair.getPrivate()), Misc.hexToUint8Array(descriptionHashHex));
 
-            return FileIO.getStringOf(FilesPath.POP_LINKED_CONODE)
+            return FileIO.getStringOf(FilesPath.POP_LINKED_CONODE);
           })
           .then(toml => {
             return DedisJsNet.parseCothorityRoster(toml).servers[0];
@@ -348,12 +348,11 @@ function hashAndSave() {
           });
       })
       .then(response => {
-        console.log("HAHAHAHAHAHAHAHAHAHAHAHAHHAHAHAHAHAHAHAHAHAHA");
-        console.log(response);
-        console.dir(response);
-        console.log("AHAHAHAHAHAHAHHAHAHAHAHAHAHAHAHHAHAHAHAHHAHAHAH");
-
-        return FileIO.writeStringTo(FilesPath.POP_DESC_HASH, descriptionHash);
+        if (Base64.encode(Misc.uint8ArrayToHex(response.id), "hex") === descriptionHash) {
+          return FileIO.writeStringTo(FilesPath.POP_DESC_HASH, descriptionHash);
+        } else {
+          return Promise.reject();
+        }
       })
       .then(() => {
         return Dialog.alert({

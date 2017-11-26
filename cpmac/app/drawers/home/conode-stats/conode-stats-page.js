@@ -39,11 +39,11 @@ function loadFunction(conode) {
  */
 function displayQrOfConodeStats() {
   Frame.topmost().navigate({
-                             moduleName: "drawers/home/conode-stats/qr-code/qr-code-page",
-                             bindingContext: {
-                               statsString: StatusExtractor.getTomlFromConode(selectedConode)
-                             }
-                           });
+    moduleName: "drawers/home/conode-stats/qr-code/qr-code-page",
+    bindingContext: {
+      statsString: StatusExtractor.getTomlFromConode(selectedConode)
+    }
+  });
 }
 
 /**
@@ -52,40 +52,40 @@ function displayQrOfConodeStats() {
  */
 function linkToConode() {
   return Dialog.prompt({
-                         title: "Link to Conode",
-                         message: "Leave blank if you are requesting the PIN from your conode.",
-                         okButtonText: "Link PoP",
-                         cancelButtonText: "Cancel",
-                         neutralButtonText: "Link CISC",
-                         defaultText: "",
-                         inputType: Dialog.inputType.text
-                       })
-               .then(result => {
-                 if (result.result) {
-                   return FileIO.getStringOf(FilesPath.PUBLIC_KEY)
-                                .then(publicKey => {
-                                  if (publicKey === "") {
-                                    return Promise.reject();
-                                  } else {
-                                    return myStatsList.linkToConode(selectedConode, result.text, publicKey,
-                                                                    CothorityPath.POP_PIN_REQUEST);
-                                  }
-                                });
-                 } else if (result.result === undefined) {
-                   // TODO: Case CISC - Use your own public key and path
-                   return Promise.resolve();
-                 } else {
-                   return Promise.resolve();
-                 }
-               })
-               .catch(() => {
-                 return Dialog.alert({
-                                       title: "Error",
-                                       message: "An unexpected error occurred during the linking" +
-                                                " process. Please try again. Do you have a key pair in your settings?",
-                                       okButtonText: "Ok"
-                                     });
-               });
+    title: "Link to Conode",
+    message: "Leave blank if you are requesting the PIN from your conode.",
+    okButtonText: "Link PoP",
+    cancelButtonText: "Cancel",
+    neutralButtonText: "Link CISC",
+    defaultText: "",
+    inputType: Dialog.inputType.text
+  })
+    .then(result => {
+      if (result.result) {
+        return FileIO.getStringOf(FilesPath.PUBLIC_KEY_COTHORITY)
+          .then(publicKey => {
+            if (publicKey === "") {
+              return Promise.reject();
+            } else {
+              return myStatsList.linkToConode(selectedConode, result.text, publicKey,
+                CothorityPath.POP_PIN_REQUEST);
+            }
+          });
+      } else if (result.result === undefined) {
+        // TODO: Case CISC - Use your own public key and path
+        return Promise.resolve();
+      } else {
+        return Promise.resolve();
+      }
+    })
+    .catch(() => {
+      return Dialog.alert({
+        title: "Error",
+        message: "An unexpected error occurred during the linking" +
+          " process. Please try again. Do you have a key pair in your settings?",
+        okButtonText: "Ok"
+      });
+    });
 }
 
 exports.onNavigatingTo = onNavigatingTo;

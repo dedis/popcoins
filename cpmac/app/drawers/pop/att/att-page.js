@@ -30,10 +30,14 @@ function generateKeyPair() {
    */
   function createKeyPair() {
     const pair = Crypto.generateRandomKeyPair();
-    const newPublicKey = Misc.uint8ArrayToHex(Crypto.marshal(pair.getPublic()));
+    const newPublicKeyCothority = Misc.uint8ArrayToHex(Crypto.marshal(pair.getPublic()));
+    const newPublicKey = pair.getPublic("hex");
     const newPrivateKey = pair.getPrivate("hex");
 
     return FileIO.writeStringTo(FilesPath.PUBLIC_KEY, newPublicKey)
+      .then(() => {
+        return FileIO.writeStringTo(FilesPath.PUBLIC_KEY_COTHORITY, newPublicKeyCothority);
+      })
       .then(() => {
         return FileIO.writeStringTo(FilesPath.PRIVATE_KEY, newPrivateKey);
       })

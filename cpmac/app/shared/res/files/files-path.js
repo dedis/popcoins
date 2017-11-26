@@ -4,6 +4,7 @@
 
 const CONODES_TOML = "shared/res/files/conodes.toml";
 const PUBLIC_KEY = "shared/res/files/public.key";
+const PUBLIC_KEY_COTHORITY = "shared/res/files/public_cothority.key";
 const PRIVATE_KEY = "shared/res/files/private.key";
 
 const POP_DESC_HASH = "shared/res/files/pop/description.hash";
@@ -21,6 +22,7 @@ const CISC_NAME = "shared/res/files/cisc/name.txt";
 // Exports --------------------------------------------------------------------
 exports.CONODES_TOML = CONODES_TOML;
 exports.PUBLIC_KEY = PUBLIC_KEY;
+exports.PUBLIC_KEY_COTHORITY = PUBLIC_KEY_COTHORITY;
 exports.PRIVATE_KEY = PRIVATE_KEY;
 
 exports.POP_DESC_HASH = POP_DESC_HASH;
