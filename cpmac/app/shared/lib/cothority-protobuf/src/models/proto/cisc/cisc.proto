@@ -1,7 +1,7 @@
 syntax = "proto2";
 
 //imports
-import "../pop/final-statement.proto";
+import "../pop/final.proto";
 import "../skip/skipblock.proto";
 
 option java_package = "ch.epfl.dedis.proto";
@@ -58,12 +58,12 @@ message DataUpdateReply {
 }
 
 message ProposeSend {
-    required ID id = 1;
+    required bytes id = 1;
     optional Data data = 2;
 }
 
 message ProposeUpdate {
-    required ID id = 1;
+    required bytes id = 1;
 }
 
 message ProposeUpdateReply {
@@ -71,7 +71,7 @@ message ProposeUpdateReply {
 }
 
 message ProposeVote {
-    required ID id = 1;
+    required bytes id = 1;
     required string signer = 2;
     optional SchnorrSig signature = 3;
 }
