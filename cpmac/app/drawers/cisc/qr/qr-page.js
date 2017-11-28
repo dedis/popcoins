@@ -102,15 +102,20 @@ function connectButtonTapped(args) {
                 console.log(goodURL);
                 setTimeout(() => {
                     const toWrite = `${goodURL}/${splitSlash[1]}`;
-                    FileIO.writeStringTo(FilePaths.CISC_IDENTITY_LINK, toWrite).then(() => console.log(`saved ${toWrite} in ${FilePaths.CISC_IDENTITY_LINK}`));
+                    FileIO.writeStringTo(FilePaths.CISC_IDENTITY_LINK, toWrite)
+                        .then(() => {
+                            setTimeout(()=> {
+                                viewModel.update();
+                                updateImage();
+                            },100);
+                            console.log(`saved ${toWrite} in ${FilePaths.CISC_IDENTITY_LINK}`);
+                    });
                     Dialog.alert({
                         title:"Scan Successful",
                         message:`connection to ${goodURL}`,
                         okButtonText: "Ok"
                     });
                 }, 100);
-                viewModel.update();
-                updateImage();
             },
             (error) => setTimeout(() => Dialog.alert({
                 title: "Scanner Error",
