@@ -1,4 +1,4 @@
-//require("nativescript-nodeify");
+require("nativescript-nodeify");
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const Dialog = require("ui/dialogs");
@@ -11,6 +11,7 @@ const DedisJsNet = require("~/shared/lib/dedis-js/src/net");
 const CothorityMessages = require("~/shared/lib/cothority-protobuf/build/cothority-messages");
 const CothorityDecodeTypes = require("~/shared/res/cothority-decode-types/cothority-decode-types");
 const CothorityPath = require("~/shared/res/cothority-path/cothority-path");
+const HASH = require("hash.js");
 
 const viewModel = ObservableModule.fromObject({
   registeredKeys: new ObservableArray()
@@ -123,7 +124,7 @@ function setUpRegisteredKeys() {
             title: "Register Public Keys",
             message: "You are about to register the keys of the attendees on your" +
               " conode. Please confirm what follows.\n\nDescription Hash:\n" +
-              descriptionHash + "\nPublic Keys to Register:\n" +
+              descriptionHash + "\n\n\nPublic Keys to Register:\n" +
               arrayOfKeys.join("\n\n"),
             okButtonText: "Register",
             cancelButtonText: "Cancel"
@@ -134,14 +135,6 @@ function setUpRegisteredKeys() {
               } else {
                 return Promise.resolve();
               }
-            })
-            .catch(() => {
-              return Dialog.alert({
-                title: "Registration Error",
-                message: "An unexpected error occurred during the" +
-                  " registration process. Please try again.",
-                okButtonText: "Ok"
-              });
             });
         } else {
           return Dialog.alert({
@@ -151,7 +144,9 @@ function setUpRegisteredKeys() {
           });
         }
       })
-      .catch(() => {
+      .catch((error) => {
+        console.log(error);
+        console.dir(error);
         return Dialog.alert({
           title: "Registration Error",
           message: "An unexpected error occurred during the" +
@@ -221,29 +216,36 @@ function sendKeysToConode(descriptionHash, arrayOfKeys) {
   const descId = Misc.hexToUint8Array(Base64.decode(descriptionHash, "hex"));
 
   let totalLength = 0;
-  const attendeesTemp = arrayOfKeys.map(key => {
+  const attendeesArray = arrayOfKeys.map(key => {
     const uInt8ArrayOfKey = Misc.hexToUint8Array(key);
     totalLength += uInt8ArrayOfKey.length;
 
     return uInt8ArrayOfKey;
   });
 
-  const attendees = new Uint8Array(totalLength);
+  const attendeesConcat = new Uint8Array(totalLength);
 
   let offset = 0;
-  for (let uInt8Array of attendeesTemp) {
-    attendees.set(uInt8Array, offset);
+  for (let uInt8Array of attendeesArray) {
+    attendeesConcat.set(uInt8Array, offset);
     offset += uInt8Array.length;
   }
 
-  const toBeSigned = new Uint8Array(descId.length + attendees.length);
+  let toBeSigned = new Uint8Array(descId.length + attendeesConcat.length);
   toBeSigned.set(descId);
-  toBeSigned.set(attendees, descId.length);
+  toBeSigned.set(attendeesConcat, descId.length);
+
+  toBeSigned = HASH.sha256()
+    .update(toBeSigned)
+    .digest("hex");
+  console.log(toBeSigned);
+
+  let signature = undefined;
 
   return FileIO.getStringOf(FilesPath.PRIVATE_KEY)
     .then(privateKey => {
       const keyPair = Crypto.getKeyPairFromPrivate(privateKey);
-      const signature = Crypto.schnorrSign(Crypto.toRed(keyPair.getPrivate()), toBeSigned);
+      signature = Crypto.schnorrSign(Crypto.toRed(keyPair.getPrivate()), Misc.hexToUint8Array(toBeSigned));
 
       return FileIO.getStringOf(FilesPath.POP_LINKED_CONODE);
     })
@@ -252,7 +254,7 @@ function sendKeysToConode(descriptionHash, arrayOfKeys) {
     })
     .then(conode => {
       const cothoritySocket = new DedisJsNet.CothoritySocket();
-      const finalizeRequestMessage = CothorityMessages.createFinalizeRequest(descId, attendees, signature);
+      const finalizeRequestMessage = CothorityMessages.createFinalizeRequest(descId, attendeesArray, signature);
 
       return cothoritySocket.send(conode, CothorityPath.POP_FINALIZE_REQUEST, finalizeRequestMessage, CothorityDecodeTypes.FINALIZE_RESPONSE);
     })

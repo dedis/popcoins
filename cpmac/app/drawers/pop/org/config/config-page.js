@@ -329,7 +329,6 @@ function hashAndSave() {
 
         const cothoritySocket = new DedisJsNet.CothoritySocket();
         const roster = CothorityMessages.createRoster(serverIdentities, aggregateKey);
-        const encodedDesc = CothorityMessages.createPopDescEncoded(name, dateTime, location, roster);
         let signature = undefined;
 
         return FileIO.getStringOf(FilesPath.PRIVATE_KEY)

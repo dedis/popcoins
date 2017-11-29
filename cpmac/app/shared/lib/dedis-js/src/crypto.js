@@ -255,7 +255,11 @@ function schnorrSign(secret, message) {
   const left = marshal(R);
   const right = misc.hexToUint8Array(s.toString(16, 2)).reverse();
 
-  const concat = new Uint8Array(left.length + right.length);
+  if (left.length + right.length > 64) {
+    throw new Error("signature length to long: " + left.length + right.length);
+  }
+
+  const concat = new Uint8Array(64);
   concat.set(left);
   concat.set(right, left.length);
 

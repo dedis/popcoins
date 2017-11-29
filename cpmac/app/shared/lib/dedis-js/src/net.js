@@ -8,6 +8,7 @@ exports.Socket = Socket;
 exports.StandardSocket = StandardSocket;
 exports.CothoritySocket = CothoritySocket;
 
+require("nativescript-nodeify");
 const Misc = require("./misc.js");
 const WebSocket = require("nativescript-websockets");
 const CothorityMessages = require("~/shared/lib/cothority-protobuf/build/cothority-messages");
@@ -15,8 +16,7 @@ const CothorityDecodeTypes = require("~/shared/res/cothority-decode-types/cothor
 
 const TOPL = require("topl");
 const UUID = require("pure-uuid");
-const BASE64 = require("base-64");
-const UTF8 = require("utf8");
+const Base64 = require("base64-coder-node")();
 
 /**
  * Parse cothority roster toml string into a JavaScript object.
@@ -46,9 +46,8 @@ function parseCothorityRoster(toml) {
 
   const roster = TOPL.parse(toml);
   roster.servers.forEach((server) => {
-    const pub = Uint8Array.from(ATOB(server.Public), c => c.charCodeAt(0));
-    const url = "https://dedis.epfl.ch/id/" + Misc.uint8ArrayToHex(pub);
-    server.Id = new UUID(5, "ns:URL", url).export();
+    const url = "https://dedis.epfl.ch/id/" + Base64.decode(server.Public, "hex");
+    server.Id = new Uint8Array(new UUID(5, "ns:URL", url).export());
   });
 
   return roster;
@@ -75,10 +74,6 @@ function getConodeFromRoster(toml, hexKey) {
   });
 
   return wantedConode;
-}
-
-function ATOB(string) {
-  return BASE64.encode(UTF8.encode(string));
 }
 
 /**
