@@ -18,7 +18,8 @@ function CiscPageViewModel() {
         deviceList: new ObservableArray(),
         label: "",
         id:undefined,
-        data: undefined
+        data: undefined,
+        proposedData:undefined
     });
     setupViewModel();
     return viewModel;

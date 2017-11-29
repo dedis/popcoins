@@ -5,9 +5,10 @@ const CothorityMessages = require("~/shared/lib/cothority-protobuf/build/cothori
 const CothorityDecodeTypes = require("~/shared/res/cothority-decode-types/cothority-decode-types");
 const DedisJsNet = require("~/shared/lib/dedis-js/src/net");
 const DedisMisc = require("~/shared/lib/dedis-js/src/misc");
+const DedisCrypto = require("~/shared/lib/dedis-js/src/crypto");
 const FileIO = require("~/shared/lib/file-io/file-io");
 const FilePaths = require("~/shared/res/files/files-path");
-
+const HASH = require("hash.js");
 
 let viewmodel;
 
@@ -38,6 +39,7 @@ function proposeUpdateTaped() {
             cothoritySocket.send({Address: `tcp://${result.split("/")[2]}`}, CothorityPath.IDENTITY_PROPOSE_UPDATE, proposeUpdateMessage, CothorityDecodeTypes.DATA_UPDATE_REPLY)
                 .then((response) => {
                     console.log("received response: ");
+                    viewmodel.proposedData = response.data;
                     console.dir(response);
                 })
                 .catch((error) => {
@@ -113,6 +115,62 @@ function addDeviceTaped() {
         .catch((error) => console.log(`There was an error: ${error}`));
 }
 
+function voteButtonTaped(){
+    try{
+        let hashedData = hashData(viewmodel.proposedData);
+        console.log(hashedData);
+    } catch (error) {
+        console.log(error);
+    }
+
+}
+
+function hashData(data){
+    let tab = new Uint8Array(4);
+    tab[3] = data.threshold / Math.pow(2,24);
+    tab[2] = (data.threshold % Math.pow(2,24)) / Math.pow(2,16);
+    tab[1] = (data.threshold % Math.pow(2,16)) / Math.pow(2,8);
+    tab[0] = (data.threshold % Math.pow(2,8));
+    const dataHash = HASH.sha256()
+        .update(tab);
+
+    let devices = [];
+    for (let device in data.device){
+        if (data.device.hasOwnProperty(device)){
+            devices.push(device);
+        }
+    }
+    devices.sort();
+    for (let i in devices){
+        console.log(`device: ${devices[i]}`);
+        console.log(`point: ${DedisMisc.uint8ArrayToHex(data.device[devices[i]].point)}`);
+        dataHash.update(GetByteArrayFromString(devices[i]));
+        dataHash.update(data.device[devices[i]].point);
+    }
+
+    let storageKeys = [];
+    for (let key in data.storage){
+        if (data.storage.hasOwnProperty(key)){
+            storageKeys.push(key);
+        }
+    }
+    storageKeys.sort();
+    for (let i in storageKeys) {
+        dataHash.update(GetByteArrayFromString(data.storage[storageKeys[i]]));
+    }
+    return dataHash.digest("hex");
+
+}
+
+function GetByteArrayFromString(parameter) {
+    let mainbytesArray = [];
+    for (let i = 0; i < parameter.length; i++)
+        mainbytesArray.push(parameter.charCodeAt(i));
+
+    return mainbytesArray;
+
+}
+
 function checkIfDeviceIsInData(deviceName) {
     return viewmodel.data.device.hasOwnProperty(deviceName);
 }
@@ -133,3 +191,4 @@ exports.dataUpdateTaped = dataUpdateTaped;
 exports.proposeUpdateTaped = proposeUpdateTaped;
 exports.checkForDeviceTaped = checkForDeviceTaped;
 exports.addDeviceTaped = addDeviceTaped;
+exports.voteButtonTaped = voteButtonTaped;

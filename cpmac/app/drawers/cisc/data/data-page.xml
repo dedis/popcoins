@@ -18,6 +18,9 @@
 
         <Label class="label-title" text="Add device to the id"/>
         <Button text="Add to id" tap="addDeviceTaped"/>
+
+        <Label class="label-title" text="Vote for the proposed block"/>
+        <Button text="Vote for the proposed block" tap="voteButtonTaped"/>
     </StackLayout>
 
 </Page>
