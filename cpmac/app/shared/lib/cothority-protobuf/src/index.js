@@ -518,24 +518,6 @@ class CothorityMessages extends CothorityProtobuf {
   }
 
   /**
-   * Creates a PopDesc encoded as a Uint8Array, this way it can easily be signed.
-   * @param {string} name
-   * @param {string} dateTime
-   * @param {string} location
-   * @param {object} roster
-   */
-  createPopDescEncoded(name, dateTime, location, roster) {
-    const fields = {
-      name: name,
-      dateTime: dateTime,
-      location: location,
-      roster: roster
-    };
-
-    return this.encodeMessage("PopDesc", fields);
-  }
-
-  /**
    * Creates a PopDescToml description using the information given as parameters.
    * @param {string} name
    * @param {string} dateTime
@@ -722,6 +704,13 @@ class CothorityMessages extends CothorityProtobuf {
    * @returns {fields}
    */
   createFinalStatement(desc, attendees, signature, merged) {
+    if (!(attendees instanceof Uint8Array)) {
+      throw new Error("attendees must be a instance of Uint8Array");
+    }
+    if (!(signature instanceof Uint8Array)) {
+      throw new Error("signature must be a instance of Uint8Array");
+    }
+
     const model = this.getModel("FinalStatement");
 
     const fields = {
@@ -757,15 +746,26 @@ class CothorityMessages extends CothorityProtobuf {
 
   /**
    * Create an encoded message to finalize on the given descId-popconfig.
-   * @param descId
-   * @param attendees
+   * @param descId - the id of the config (Uint8Array)
+   * @param attendees - the array containing all the public keys of the attendees (as Uint8Array)
+   * @param signature - the signature of the message (Uint8Array)
    * @returns {*|Buffer|Uint8Array}
    */
-  createFinalizeRequest(descId, attendees) {
+  createFinalizeRequest(descId, attendees, signature) {
+    if (!(descId instanceof Uint8Array)) {
+      throw new Error("descId must be a instance of Uint8Array");
+    }
+    if (!(attendees instanceof Array && attendees[0] instanceof Uint8Array)) {
+      throw new Error("attendees must be a instance of Array[Uint8Array]");
+    }
+    if (!(signature instanceof Uint8Array)) {
+      throw new Error("signature must be a instance of Uint8Array");
+    }
+
     const fields = {
       descId: descId,
-      attendees: attendees
-      // TODO: signature: signature
+      attendees: attendees,
+      signature: signature
     };
 
     return this.encodeMessage("FinalizeRequest", fields);
@@ -799,15 +799,28 @@ class CothorityMessages extends CothorityProtobuf {
 
   /**
    * Creates and encodes a FetchRequest for the Cothority.
-   * @param id
+   * @param id - the id of the config (Uint8Array)
    * @returns {*|Buffer|Uint8Array}
    */
   createFetchRequest(id) {
+    if (!(id instanceof Uint8Array)) {
+      throw new Error("id must be a instance of Uint8Array");
+    }
+
     const fields = {
       id: id
     };
 
     return this.encodeMessage("FetchRequest", fields);
+  }
+
+  /**
+   * Return the decoded response of a FetchRequest.
+   * @param response
+   * @returns {*}
+   */
+  decodeFetchRequest(response) {
+    return decodeFinalizeResponse(response);
   }
 
   /**
@@ -970,12 +983,11 @@ class CothorityMessages extends CothorityProtobuf {
 
   /**
    * Decodes and returns the response of a request.
-   * @param {string} messageType the type of the message or type of the response of a request.
+   * @param {string} messageType the type of the message / type of the response of a request.
    * @param response
    * @returns {*}
    */
   decodeResponse(messageType, response) {
-    // TODO: remove the other ones?
     return this.decodeMessage(messageType, new Uint8Array(response));
   }
 

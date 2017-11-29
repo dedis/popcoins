@@ -1,12 +1,20 @@
+//require("nativescript-nodeify");
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const Dialog = require("ui/dialogs");
 const FilesPath = require("~/shared/res/files/files-path");
 const FileIO = require("~/shared/lib/file-io/file-io");
+const Base64 = require("base64-coder-node")();
+const Misc = require("~/shared/lib/dedis-js/src/misc");
+const Crypto = require("~/shared/lib/dedis-js/src/crypto");
+const DedisJsNet = require("~/shared/lib/dedis-js/src/net");
+const CothorityMessages = require("~/shared/lib/cothority-protobuf/build/cothority-messages");
+const CothorityDecodeTypes = require("~/shared/res/cothority-decode-types/cothority-decode-types");
+const CothorityPath = require("~/shared/res/cothority-path/cothority-path");
 
 const viewModel = ObservableModule.fromObject({
-                                                registeredKeys: new ObservableArray()
-                                              });
+  registeredKeys: new ObservableArray()
+});
 
 const myRegisteredKeys = viewModel.registeredKeys;
 const EOL_REGEX = /[\r\n]+/;
@@ -29,19 +37,19 @@ function setUpRegisteredKeys() {
    */
   myRegisteredKeys.get = function (index) {
     return FileIO.getStringOf(FilesPath.POP_REGISTERED_KEYS)
-                 .then(content => {
-                   return content.split(EOL_REGEX);
-                 })
-                 .then(keysArray => {
-                   return keysArray[index];
-                 })
-                 .catch(() => {
-                   return Dialog.alert({
-                                         title: "Error",
-                                         message: "An unexpected error occurred. Please try again.",
-                                         okButtonText: "Ok"
-                                       });
-                 });
+      .then(content => {
+        return content.split(EOL_REGEX);
+      })
+      .then(keysArray => {
+        return keysArray[index];
+      })
+      .catch(() => {
+        return Dialog.alert({
+          title: "Error",
+          message: "An unexpected error occurred. Please try again.",
+          okButtonText: "Ok"
+        });
+      });
   };
 
   /**
@@ -50,25 +58,25 @@ function setUpRegisteredKeys() {
    */
   myRegisteredKeys.load = function () {
     return FileIO.getStringOf(FilesPath.POP_REGISTERED_KEYS)
-                 .then(content => {
-                   return content.split(EOL_REGEX);
-                 })
-                 .then(keysArray => {
-                   for (let i = 0; i < keysArray.length; ++i) {
-                     if (keysArray[i] !== "") {
-                       myRegisteredKeys.push({
-                                               key: keysArray[i]
-                                             });
-                     }
-                   }
+      .then(content => {
+        return content.split(EOL_REGEX);
+      })
+      .then(keysArray => {
+        for (let i = 0; i < keysArray.length; ++i) {
+          if (keysArray[i] !== "") {
+            myRegisteredKeys.push({
+              key: keysArray[i]
+            });
+          }
+        }
 
-                   return Promise.resolve();
-                 });
+        return Promise.resolve();
+      });
   };
 
   /**
    * Adds a new key to the list of registered keys.
-   * @param key - the string of the public key
+   * @param key - the hex string of the public key
    * @returns {*|Promise.<any>}
    */
   myRegisteredKeys.addKey = function (key) {
@@ -81,8 +89,8 @@ function setUpRegisteredKeys() {
     } else {
       // TODO: check if the key has a valid format
       myRegisteredKeys.unshift({
-                                 key: key
-                               });
+        key: key
+      });
 
       return saveKeysToFile();
     }
@@ -94,9 +102,9 @@ function setUpRegisteredKeys() {
    */
   myRegisteredKeys.addMyself = function () {
     return FileIO.getStringOf(FilesPath.PUBLIC_KEY_COTHORITY)
-                 .then(myOwnPublicKey => {
-                   return myRegisteredKeys.addKey(myOwnPublicKey);
-                 });
+      .then(myOwnPublicKey => {
+        return myRegisteredKeys.addKey(myOwnPublicKey);
+      });
   };
 
   /**
@@ -105,53 +113,52 @@ function setUpRegisteredKeys() {
    */
   myRegisteredKeys.register = function () {
     return FileIO.getStringOf(FilesPath.POP_DESC_HASH)
-                 .then(descriptionHash => {
-                   const arrayOfKeys = myRegisteredKeys.map(keyObject => {
-                     return keyObject.key;
-                   });
+      .then(descriptionHash => {
+        const arrayOfKeys = myRegisteredKeys.map(keyObject => {
+          return keyObject.key;
+        });
 
-                   if (descriptionHash.length > 0 && arrayOfKeys.length > 0) {
-                     return Dialog.confirm({
-                                             title: "Register Public Keys",
-                                             message: "You are about to register the keys of the attendees on your" +
-                                                      " conode. Please confirm what follows.\n\nDescription Hash:\n" +
-                                                      descriptionHash + "\nPublic Keys to Register:\n" +
-                                                      arrayOfKeys.join("\n\n"),
-                                             okButtonText: "Register",
-                                             cancelButtonText: "Cancel"
-                                           })
-                                  .then(result => {
-                                    if (result) {
-                                      return sendKeysToConode(descriptionHash);
-                                    } else {
-                                      return Promise.resolve();
-                                    }
-                                  })
-                                  .catch(() => {
-                                    return Dialog.alert({
-                                                          title: "Registration Error",
-                                                          message: "An unexpected error occurred during the" +
-                                                                   " registration process. Please try again.",
-                                                          okButtonText: "Ok"
-                                                        });
-                                  });
-                   } else {
-                     return Dialog.alert({
-                                           title: "Missing Information",
-                                           message: "Please provide more information, we need the hash of your" +
-                                                    " description and the keys of the registered attendees.",
-                                           okButtonText: "Ok"
-                                         });
-                   }
-                 })
-                 .catch(() => {
-                   return Dialog.alert({
-                                         title: "Registration Error",
-                                         message: "An unexpected error occurred during the" +
-                                                  " registration process. Please try again.",
-                                         okButtonText: "Ok"
-                                       });
-                 });
+        if (descriptionHash.length > 0 && arrayOfKeys.length > 0) {
+          return Dialog.confirm({
+            title: "Register Public Keys",
+            message: "You are about to register the keys of the attendees on your" +
+              " conode. Please confirm what follows.\n\nDescription Hash:\n" +
+              descriptionHash + "\nPublic Keys to Register:\n" +
+              arrayOfKeys.join("\n\n"),
+            okButtonText: "Register",
+            cancelButtonText: "Cancel"
+          })
+            .then(result => {
+              if (result) {
+                return sendKeysToConode(descriptionHash, arrayOfKeys);
+              } else {
+                return Promise.resolve();
+              }
+            })
+            .catch(() => {
+              return Dialog.alert({
+                title: "Registration Error",
+                message: "An unexpected error occurred during the" +
+                  " registration process. Please try again.",
+                okButtonText: "Ok"
+              });
+            });
+        } else {
+          return Dialog.alert({
+            title: "Missing Information",
+            message: "Please provide more information, we need the keys of the registered attendees.",
+            okButtonText: "Ok"
+          });
+        }
+      })
+      .catch(() => {
+        return Dialog.alert({
+          title: "Registration Error",
+          message: "An unexpected error occurred during the" +
+            " registration process. Please try again.",
+          okButtonText: "Ok"
+        });
+      });
   };
 
   /**
@@ -198,21 +205,65 @@ function setUpRegisteredKeys() {
  */
 function saveKeysToFile() {
   const linesOfKeys = myRegisteredKeys.map(keyObject => {
-                                        return keyObject.key;
-                                      })
-                                      .join("\n");
+    return keyObject.key;
+  }).join("\n");
 
   return FileIO.writeStringTo(FilesPath.POP_REGISTERED_KEYS, linesOfKeys);
 }
 
 /**
  * Function that sends the public keys of the registered attendees to the conode of the organizer.
- * @param descriptionHash -  the hash of the PoP Party description
+ * @param descriptionHash - the hash of the PoP Party description (in base64-string format)
+ * @param arrayOfKeys - an array containing the public keys to register (in hex-string format)
  * @returns {Promise.<any>}
  */
-function sendKeysToConode(descriptionHash) {
-  // TODO: actually register keys on conode
-  return Promise.resolve();
+function sendKeysToConode(descriptionHash, arrayOfKeys) {
+  const descId = Misc.hexToUint8Array(Base64.decode(descriptionHash, "hex"));
+
+  let totalLength = 0;
+  const attendeesTemp = arrayOfKeys.map(key => {
+    const uInt8ArrayOfKey = Misc.hexToUint8Array(key);
+    totalLength += uInt8ArrayOfKey.length;
+
+    return uInt8ArrayOfKey;
+  });
+
+  const attendees = new Uint8Array(totalLength);
+
+  let offset = 0;
+  for (let uInt8Array of attendeesTemp) {
+    attendees.set(uInt8Array, offset);
+    offset += uInt8Array.length;
+  }
+
+  const toBeSigned = new Uint8Array(descId.length + attendees.length);
+  toBeSigned.set(descId);
+  toBeSigned.set(attendees, descId.length);
+
+  return FileIO.getStringOf(FilesPath.PRIVATE_KEY)
+    .then(privateKey => {
+      const keyPair = Crypto.getKeyPairFromPrivate(privateKey);
+      const signature = Crypto.schnorrSign(Crypto.toRed(keyPair.getPrivate()), toBeSigned);
+
+      return FileIO.getStringOf(FilesPath.POP_LINKED_CONODE);
+    })
+    .then(toml => {
+      return DedisJsNet.parseCothorityRoster(toml).servers[0];
+    })
+    .then(conode => {
+      const cothoritySocket = new DedisJsNet.CothoritySocket();
+      const finalizeRequestMessage = CothorityMessages.createFinalizeRequest(descId, attendees, signature);
+
+      return cothoritySocket.send(conode, CothorityPath.POP_FINALIZE_REQUEST, finalizeRequestMessage, CothorityDecodeTypes.FINALIZE_RESPONSE);
+    })
+    .then(response => {
+      console.log(response);
+      console.dir(response);
+    })
+    .catch(error => {
+      console.log(error);
+      console.dir(error);
+    });
 }
 
 module.exports = RegisterViewModel;

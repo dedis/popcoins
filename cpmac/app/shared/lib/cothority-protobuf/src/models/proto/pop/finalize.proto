@@ -7,12 +7,12 @@ option java_outer_classname = "FinalizeProto";
 
 message FinalizeRequest {
     required bytes descId = 1;
-    required bytes attendees = 2;
-    optional bytes signature = 3;
+    repeated bytes attendees = 2;
+    required bytes signature = 3;
 }
 
 message FinalizeResponse {
-    required FinalStatement final = 1;
+    optional FinalStatement final = 1;
 }
 
 message FetchRequest {

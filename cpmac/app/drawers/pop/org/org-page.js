@@ -29,7 +29,7 @@ function configButtonTapped() {
       } else {
         return Dialog.alert({
           title: "Please Link to a Conode",
-          message: "Before you can use the organizers functionalities you will have to link yourself to your conode. You can do the in the" +
+          message: "Before you can use the organizers functionalities you will have to link yourself to your conode. You can do this in the" +
             "home drawer.",
           okButtonText: "Ok"
         });
@@ -44,19 +44,35 @@ function registerButtonTapped() {
   return FileIO.getStringOf(FilesPath.POP_LINKED_CONODE)
     .then(linkedConodeToml => {
       if (linkedConodeToml.length > 0) {
-        Frame.topmost().navigate({
-          moduleName: "drawers/pop/org/register/register-page"
-        });
+        return FileIO.getStringOf(FilesPath.POP_DESC_HASH)
+          .then(descriptionHash => {
+            if (descriptionHash.length > 0) {
+              Frame.topmost().navigate({
+                moduleName: "drawers/pop/org/register/register-page"
+              });
 
-        return Promise.resolve();
+              return Promise.resolve();
+            } else {
+              return Promise.reject({
+                title: "Please Create A Config",
+                message: "Before you can register attendees you have to create a configuration for your PoP Party."
+              });
+            }
+          });
       } else {
-        return Dialog.alert({
+        return Promise.reject({
           title: "Please Link to a Conode",
-          message: "Before you can use the organizers functionalities you will have to link yourself to your conode. You can do the in the" +
-            "home drawer.",
-          okButtonText: "Ok"
+          message: "Before you can use the organizers functionalities you will have to link yourself to your conode. You can do this in the" +
+            "home drawer."
         });
       }
+    })
+    .catch(error => {
+      return Dialog.alert({
+        title: error.title,
+        message: error.message,
+        okButtonText: "Ok"
+      });
     });
 }
 
