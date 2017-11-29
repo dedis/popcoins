@@ -17,6 +17,7 @@ function CiscPageViewModel() {
         isConnectedAtBeginning: false,
         deviceList: new ObservableArray(),
         label: "",
+        id:undefined,
         data: undefined
     });
     setupViewModel();
@@ -31,16 +32,17 @@ function setupViewModel() {
 
         FileIO.getStringOf(FilePaths.CISC_IDENTITY_LINK)
             .then((result) => {
-                const dataUpdateMessage = CothorityMessages.createDataUpdate(DedisMisc.hexToUint8Array(result.split("/")[3]));
+                viewModel.id = DedisMisc.hexToUint8Array(result.split("/")[3]);
+                const dataUpdateMessage = CothorityMessages.createDataUpdate(viewModel.id);
                 viewModel.label = `cisc://${result.split("/")[2]}/${result.split("/")[3]}`;
                 cothoritySocket.send({Address: `tcp://${result.split("/")[2]}`}, CothorityPath.IDENTITY_DATA_UPDATE, dataUpdateMessage, CothorityDecodeTypes.DATA_UPDATE_REPLY)
                     .then((response) => {
-                        viewModel.isConnected = true;
-                        updateViewModel(response);
-                        viewModel.data = response.data;
                         console.log("received response: ");
                         console.log(response);
                         console.dir(response);
+                        viewModel.isConnected = true;
+                        viewModel.data = response.data;
+                        updateViewModel(response);
                     })
                     .catch((error) => {
                         viewModel.isConnected = false;
@@ -79,7 +81,8 @@ function setupViewModel() {
 
     FileIO.getStringOf(FilePaths.CISC_IDENTITY_LINK)
         .then((result) => {
-            const dataUpdateMessage = CothorityMessages.createDataUpdate(DedisMisc.hexToUint8Array(result.split("/")[3]));
+            viewModel.id = DedisMisc.hexToUint8Array(result.split("/")[3]);
+            const dataUpdateMessage = CothorityMessages.createDataUpdate(viewModel.id);
             viewModel.label = `cisc://${result.split("/")[2]}/${result.split("/")[3]}`;
             cothoritySocket.send({Address: `tcp://${result.split("/")[2]}`}, CothorityPath.IDENTITY_DATA_UPDATE, dataUpdateMessage, CothorityDecodeTypes.DATA_UPDATE_REPLY)
                 .then((response) => {
