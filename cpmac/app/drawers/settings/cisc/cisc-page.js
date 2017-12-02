@@ -28,14 +28,21 @@ function generateKeyPair() {
      * Generates the new key pair and informs the user.
      * @returns {Promise.<any>}
      */
-    function generateKeyPair() {
+    function createKeyPair() {
         const pair = Crypto.generateRandomKeyPair();
-        const newPublicKey = Misc.uint8ArrayToHex(Crypto.marshal(pair.getPublic()));
+        const newPublicKeyCothority = Misc.uint8ArrayToHex(Crypto.marshal(pair.getPublic()));
         const newPrivateKey = pair.getPrivate("hex");
+        const newPublicKey = pair.getPublic("hex");
 
         return FileIO.writeStringTo(FilesPath.PUBLIC_KEY, newPublicKey)
             .then(() => {
+                return FileIO.writeStringTo(FilesPath.PUBLIC_KEY_COTHORITY, newPublicKeyCothority);
+            })
+            .then(() => {
                 return FileIO.writeStringTo(FilesPath.PRIVATE_KEY, newPrivateKey);
+            })
+            .then(() => {
+                return FileIO.writeStringTo(FilesPath.POP_LINKED_CONODE, "");
             })
             .then(() => {
                 return Dialog.confirm({
@@ -56,7 +63,7 @@ function generateKeyPair() {
             });
     }
 
-    return FileIO.getStringOf(FilesPath.PUBLIC_KEY)
+    return FileIO.getStringOf(FilesPath.PUBLIC_KEY_COTHORITY)
         .then(storedPublicKey => {
             if (storedPublicKey.length > 0) {
                 return Dialog.confirm({
@@ -68,7 +75,7 @@ function generateKeyPair() {
                 })
                     .then(result => {
                         if (result) {
-                            return generateKeyPair();
+                            return createKeyPair();
                         } else {
                             return Promise.resolve();
                         }
@@ -81,11 +88,10 @@ function generateKeyPair() {
                         });
                     });
             } else {
-                return generateKeyPair();
+                return createKeyPair();
             }
         })
-        .catch((error) => {
-            console.log(error);
+        .catch(() => {
             return Dialog.alert({
                 title: "Key Pair Generation Error",
                 message: "An unexpected error occurred. Please try again.",

@@ -12,33 +12,38 @@ const Dialog = require("ui/dialogs");
 let viewModel;
 
 function CiscPageViewModel() {
-  viewModel = ObservableModule.fromObject({
-                                                    isConnected:false,
-                                                    isConnectedAtBeginning:false,
-                                                    deviceList: new ObservableArray(),
-                                                    label: ""
-                                                  });
-  setupViewModel();
-  return viewModel;
+    viewModel = ObservableModule.fromObject({
+        isConnected: false,
+        isConnectedAtBeginning: false,
+        deviceList: new ObservableArray(),
+        label: "",
+        id:undefined,
+        data: undefined,
+        proposedData:undefined
+    });
+    setupViewModel();
+    return viewModel;
 }
 
 function setupViewModel() {
     const myDeviceList = viewModel.deviceList;
 
-    viewModel.update = function() {
+    viewModel.update = function () {
         const cothoritySocket = new DedisJsNet.CothoritySocket();
 
         FileIO.getStringOf(FilePaths.CISC_IDENTITY_LINK)
             .then((result) => {
-                const dataUpdateMessage = CothorityMessages.createDataUpdate(DedisMisc.hexToUint8Array(result.split("/")[3]));
+                viewModel.id = DedisMisc.hexToUint8Array(result.split("/")[3]);
+                const dataUpdateMessage = CothorityMessages.createDataUpdate(viewModel.id);
                 viewModel.label = `cisc://${result.split("/")[2]}/${result.split("/")[3]}`;
-                cothoritySocket.send({ Address: `tcp://${result.split("/")[2]}` }, CothorityPath.IDENTITY_DATA_UPDATE, dataUpdateMessage, CothorityDecodeTypes.DATA_UPDATE_REPLY)
+                cothoritySocket.send({Address: `tcp://${result.split("/")[2]}`}, CothorityPath.IDENTITY_DATA_UPDATE, dataUpdateMessage, CothorityDecodeTypes.DATA_UPDATE_REPLY)
                     .then((response) => {
-                        viewModel.isConnected = true;
-                        updateViewModel(response);
                         console.log("received response: ");
                         console.log(response);
                         console.dir(response);
+                        viewModel.isConnected = true;
+                        viewModel.data = response.data;
+                        updateViewModel(response);
                     })
                     .catch((error) => {
                         viewModel.isConnected = false;
@@ -49,12 +54,10 @@ function setupViewModel() {
             .catch((error) => console.log(`error while getting content: ${error}`));
     };
 
-    myDeviceList.update = function(response) {
-        console.log("received response: ");
-        console.dir(response);
-        for (const property in response.data.device) {
-            if (response.data.device.hasOwnProperty(property)) {
-                const point = response.data.device[property];
+    myDeviceList.update = function () {
+        for (const property in viewModel.data.device) {
+            if (viewModel.data.device.hasOwnProperty(property)) {
+                const point = viewModel.data.device[property];
                 viewModel.deviceList.push({
                     device: {
                         id: property,
@@ -79,12 +82,14 @@ function setupViewModel() {
 
     FileIO.getStringOf(FilePaths.CISC_IDENTITY_LINK)
         .then((result) => {
-            const dataUpdateMessage = CothorityMessages.createDataUpdate(DedisMisc.hexToUint8Array(result.split("/")[3]));
+            viewModel.id = DedisMisc.hexToUint8Array(result.split("/")[3]);
+            const dataUpdateMessage = CothorityMessages.createDataUpdate(viewModel.id);
             viewModel.label = `cisc://${result.split("/")[2]}/${result.split("/")[3]}`;
-            cothoritySocket.send({ Address: `tcp://${result.split("/")[2]}` }, CothorityPath.IDENTITY_DATA_UPDATE, dataUpdateMessage, CothorityDecodeTypes.DATA_UPDATE_REPLY)
+            cothoritySocket.send({Address: `tcp://${result.split("/")[2]}`}, CothorityPath.IDENTITY_DATA_UPDATE, dataUpdateMessage, CothorityDecodeTypes.DATA_UPDATE_REPLY)
                 .then((response) => {
                     viewModel.isConnectedAtBeginning = true;
                     viewModel.isConnected = true;
+                    viewModel.data = response.data;
                     updateViewModel(response);
                     console.log("received response: ");
                     console.log(response);
@@ -100,11 +105,11 @@ function setupViewModel() {
         .catch((error) => console.log(`error while getting content: ${error}`));
 }
 
-function updateViewModel(response) {
+function updateViewModel() {
     // update devices list
     // first empty the list
     viewModel.deviceList.empty();
-    viewModel.deviceList.update(response);
+    viewModel.deviceList.update();
 }
 
 module.exports = CiscPageViewModel;

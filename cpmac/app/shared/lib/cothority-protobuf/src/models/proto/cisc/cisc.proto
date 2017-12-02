@@ -1,7 +1,7 @@
 syntax = "proto2";
 
 //imports
-import "../pop/final-statement.proto";
+import "../pop/final.proto";
 import "../skip/skipblock.proto";
 
 option java_package = "ch.epfl.dedis.proto";
@@ -24,14 +24,14 @@ message Data {
     required sint32 threshold = 1;
     map<string, Device> device = 2;
     map<string, string> storage = 3;
-    map<string, SchnorrSig> votes = 4;
+    map<string, bytes> votes = 4;
 }
 
 message StoreKeys {
     required sint32 type = 1;
     optional FinalStatement final = 2;
     repeated bytes publics = 3;
-    required SchnorrSig sig = 4;
+    required bytes sig = 4;
 }
 
 message CreateIdentity {
@@ -39,7 +39,7 @@ message CreateIdentity {
     optional Roster roster = 2;
     required sint32 type = 3;
     required bytes public = 4;
-    required SchnorrSig schnorrSig = 5;
+    required bytes schnorrSig = 5;
     required bytes sig = 6;
     required bytes nonce = 7;
 }
@@ -58,12 +58,12 @@ message DataUpdateReply {
 }
 
 message ProposeSend {
-    required ID id = 1;
+    required bytes id = 1;
     optional Data data = 2;
 }
 
 message ProposeUpdate {
-    required ID id = 1;
+    required bytes id = 1;
 }
 
 message ProposeUpdateReply {
@@ -71,7 +71,7 @@ message ProposeUpdateReply {
 }
 
 message ProposeVote {
-    required ID id = 1;
+    required bytes id = 1;
     required string signer = 2;
     optional SchnorrSig signature = 3;
 }

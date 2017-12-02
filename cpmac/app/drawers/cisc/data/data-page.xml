@@ -1,17 +1,26 @@
 <Page
-        class="page">
+        class="page"
+        loaded="onLoaded">
 
     <ActionBar class="action-bar">
         <Label class="action-bar-title" text="Organizer"/>
     </ActionBar>
 
     <StackLayout class="page-content" orientation="vertical">
-        <Label class="label-title" text="Key Pairs"/>
+        <Label class="label-title" text="Fetch propose update"/>
+        <Button text="Fetch propose update" tap="proposeUpdateTaped"/>
 
-        <Button text="Create Key pair" tap="keyPairButtonTapped"/>
+        <Label class="label-title" text="Fetch data update"/>
+        <Button text="Fetch data update" tap="dataUpdateTaped"/>
 
-        <Label class="label-title" text="Propose vote" row="4" colSpan="3"/>
-        <Button text="Propose the new KeyPair" tap="proposeVoteButtonTapped"/>
+        <Label class="label-title" text="Check current device"/>
+        <Button text="Check if the device is in the id" tap="checkForDeviceTaped"/>
+
+        <Label class="label-title" text="Add device to the id"/>
+        <Button text="Add to id" tap="addDeviceTaped"/>
+
+        <Label class="label-title" text="Vote for the proposed block"/>
+        <Button text="Vote for the proposed block" tap="voteButtonTaped"/>
     </StackLayout>
 
 </Page>
