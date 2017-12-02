@@ -258,13 +258,24 @@ function sendKeysToConode(descriptionHash, arrayOfKeys) {
 
       return cothoritySocket.send(conode, CothorityPath.POP_FINALIZE_REQUEST, finalizeRequestMessage, CothorityDecodeTypes.FINALIZE_RESPONSE);
     })
-    .then(response => {
-      console.log(response);
-      console.dir(response);
+    .then(finalStatement => {
+      const jsonFinalStatement = JSON.stringify(finalStatement, undefined, 4);
+
+      return FileIO.writeStringTo(FilesPath.POP_FINAL_TOML, jsonFinalStatement);
     })
-    .catch(error => {
-      console.log(error);
-      console.dir(error);
+    .then(() => {
+      return Dialog.alert({
+        title: "Final Statement Saved",
+        message: "The final statement can be found in your settings.",
+        okButtonText: "Ok"
+      });
+    })
+    .catch(reason => {
+      return Dialog.alert({
+        title: "Conodes Not Ready Yet",
+        message: reason + " - If not all organizers hashed their config retry once they did. - If you were not the last one to register the public keys, you can fetch the finalstement once all the organizers registered the keys.",
+        okButtonText: "Ok"
+      });
     });
 }
 

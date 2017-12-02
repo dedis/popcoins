@@ -204,6 +204,9 @@ function CothoritySocket() {
       if (code === 4100) {
         resolve(reason);
       }
+      if (code === 4101 || code === 4102 || code === 4104) {
+        reject(reason);
+      }
       console.log("Socket closed...");
     });
 
