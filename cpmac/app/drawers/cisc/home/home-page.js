@@ -4,7 +4,7 @@ const FrameModule = require("ui/frame");
 /* ***********************************************************
  * Use the "onNavigatingTo" handler to initialize the page binding context.
  *************************************************************/
-function onNavigatingTo(args) {
+function onLoaded(args) {
   /* ***********************************************************
    * The "onNavigatingTo" event handler lets you detect if the user navigated with a back button.
    * Skipping the re-initialization on back navigation means the user will see the
@@ -28,5 +28,5 @@ function onDrawerButtonTap(args) {
     sideDrawer.showDrawer();
 }
 
-exports.onNavigatingTo = onNavigatingTo;
+exports.onLoaded = onLoaded;
 exports.onDrawerButtonTap = onDrawerButtonTap;

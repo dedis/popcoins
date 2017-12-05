@@ -1,22 +1,20 @@
 <Page
-        class="page">
+        class="page"
+        loaded="onLoaded">
 
     <ActionBar class="action-bar">
         <Label class="action-bar-title" text="Home"/>
     </ActionBar>
 
-    <StackLayout class="page-content" orientation="vertical">
-        <Label class="label-title" text="Latest blocks"/>
+    <StackLayout>
+        <ListView items="{{ storageList }}" orientation="vertical" row="0">
+            <ListView.itemTemplate>
+                <GridLayout rows="*" columns="*">
+                    <Label text="{{ keyValuePair.key }}" textAlignment="center" textWrap="true" tap="{{ keyValuePair.showValue }}"/>
+                </GridLayout>
+            </ListView.itemTemplate>
+        </ListView>
 
-        <Label class="label-text" text="Rotation of the keys"/>
-        <Button text="Vote for this update" tap="voteButtonTapped"/>
-
-        <Label class="label-title" text="Propose operation" row="4" colSpan="3"/>
-
-        <GridLayout class="page-content" rows="*" columns="*,*">
-            <Button text="Propose rotation" tap="configButtonTapped" col="0"/>
-            <Button text="Propose new key" tap="configButtonTapped" col="1"/>
-        </GridLayout>
     </StackLayout>
 
 </Page>

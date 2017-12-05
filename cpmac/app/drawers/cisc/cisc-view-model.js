@@ -16,6 +16,7 @@ function CiscPageViewModel() {
         isConnected: false,
         isConnectedAtBeginning: false,
         deviceList: new ObservableArray(),
+        storageList: new ObservableArray(),
         label: "",
         id:undefined,
         data: undefined,
@@ -27,6 +28,7 @@ function CiscPageViewModel() {
 
 function setupViewModel() {
     const myDeviceList = viewModel.deviceList;
+    const myStorageList = viewModel.storageList;
 
     viewModel.update = function () {
         const cothoritySocket = new DedisJsNet.CothoritySocket();
@@ -52,6 +54,31 @@ function setupViewModel() {
                     });
             })
             .catch((error) => console.log(`error while getting content: ${error}`));
+    };
+
+    myStorageList.update = function () {
+        for (const property in viewModel.data.storage) {
+            if (viewModel.data.storage.hasOwnProperty(property)) {
+                const value = viewModel.data.storage[property];
+                viewModel.storageList.push({
+                    keyValuePair: {
+                        key: property,
+                        value: value,
+                        showValue: () => Dialog.alert({
+                            title: property,
+                            message: value,
+                            okButtonText: "Ok"
+                        })
+                    }
+                });
+            }
+        }
+    };
+
+    myStorageList.empty = function () {
+        while (myStorageList.length) {
+            myStorageList.pop();
+        }
     };
 
     myDeviceList.update = function () {
@@ -110,6 +137,8 @@ function updateViewModel() {
     // first empty the list
     viewModel.deviceList.empty();
     viewModel.deviceList.update();
+    viewModel.storageList.empty;
+    viewModel.storageList.update();
 }
 
 module.exports = CiscPageViewModel;
