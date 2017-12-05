@@ -73,7 +73,7 @@ message ProposeUpdateReply {
 message ProposeVote {
     required bytes id = 1;
     required string signer = 2;
-    optional SchnorrSig signature = 3;
+    optional bytes signature = 3;
 }
 
 message ProposeVoteReply {

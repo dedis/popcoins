@@ -116,13 +116,30 @@ function addDeviceTaped() {
 }
 
 function voteButtonTaped(){
-    try{
-        let hashedData = hashData(viewmodel.proposedData);
-        console.log(hashedData);
-    } catch (error) {
-        console.log(error);
-    }
 
+    let hashedData = hashData(viewmodel.proposedData);
+    console.log(hashedData);
+    let signature;
+    let proposeVoteMessage;
+    const cothoritySocket = new DedisJsNet.CothoritySocket();
+    let name;
+    FileIO.getStringOf(FilePaths.CISC_NAME)
+        .then((result) => {
+            name = result;
+            return FileIO.getStringOf(FilePaths.PRIVATE_KEY)
+        })
+        .then(privateKey => {
+            const keyPair = DedisCrypto.getKeyPairFromPrivate(privateKey);
+            signature = DedisCrypto.schnorrSign(DedisCrypto.toRed(keyPair.getPrivate()), DedisMisc.hexToUint8Array(hashedData));
+
+            return FileIO.getStringOf(FilePaths.CISC_IDENTITY_LINK)
+        })
+        .then(((result) => {
+            proposeVoteMessage = CothorityMessages.createProposeVote(viewmodel.id, name, signature);
+            return cothoritySocket.send({Address: `tcp://${result.split("/")[2]}`}, CothorityPath.IDENTITY_PROPOSE_VOTE, proposeVoteMessage, CothorityDecodeTypes.PROPOSE_VOTE_REPLY)
+        }))
+        .then((response)=>console.dir(response))
+        .catch((error)=>console.log(error))
 }
 
 function hashData(data){
@@ -159,7 +176,6 @@ function hashData(data){
         dataHash.update(GetByteArrayFromString(data.storage[storageKeys[i]]));
     }
     return dataHash.digest("hex");
-
 }
 
 function GetByteArrayFromString(parameter) {

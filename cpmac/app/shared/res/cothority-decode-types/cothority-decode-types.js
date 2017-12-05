@@ -33,6 +33,7 @@ const FETCH_RESPONSE = FINALIZE_RESPONSE;
 const DATA_UPDATE_REPLY = "DataUpdateReply";
 const CONFIG_UPDATE_REPLY = "ConfigUpdateReply";
 const PROPOSE_UPDATE_REPLY = "ProposeUpdateReply";
+const PROPOSE_VOTE_REPLY = "ProposeVoteReply";
 
 // Exports --------------------------------------------------------------------
 exports.STATUS_RESPONSE = STATUS_RESPONSE;
@@ -54,3 +55,4 @@ exports.FETCH_RESPONSE = FETCH_RESPONSE;
 exports.DATA_UPDATE_REPLY = DATA_UPDATE_REPLY;
 exports.CONFIG_UPDATE_REPLY = CONFIG_UPDATE_REPLY;
 exports.PROPOSE_UPDATE_REPLY = PROPOSE_UPDATE_REPLY;
+exports.PROPOSE_VOTE_REPLY = PROPOSE_VOTE_REPLY;
