@@ -973,7 +973,7 @@ class CothorityMessages extends CothorityProtobuf {
    * @param id
    * @returns {*|Buffer|Uint8Array}
    */
-  createConfigUpdate(id) {
+  createDataUpdate(id) {
     const fields = {
       id: id
     };
@@ -1036,10 +1036,7 @@ class CothorityMessages extends CothorityProtobuf {
     const fields = {
       id: id,
       signer: signer,
-      signature: {
-        challenge: challenge,
-        response: response
-      }
+      signature: signature
     };
 
     return this.encodeMessage("ProposeVote", fields);

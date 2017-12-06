@@ -1,21 +1,53 @@
 <Page
-        class="page">
+        class="page"
+        loaded="onLoaded">
 
     <ActionBar class="action-bar">
         <Label class="action-bar-title" text="Home"/>
     </ActionBar>
 
-    <StackLayout class="page-content" orientation="vertical">
-        <Label class="label-title" text="Latest blocks"/>
+    <StackLayout>
+        <Label id="storageLabel" class="label-title" text="Actual Data" visibility="{{ isOnProposed ? 'collapsed' : 'visible' }}"/>
+        <ListView id="storage" items="{{ storageList }}" orientation="vertical" visibility="{{ isOnProposed ? 'collapsed' : 'visible' }}">
+            <ListView.itemTemplate>
+                <GridLayout>
+                    <Label text="{{ keyValuePair.key }}" textAlignment="center" textWrap="true" tap="{{ keyValuePair.showValue }}"/>
+                </GridLayout>
+            </ListView.itemTemplate>
+        </ListView>
 
-        <Label class="label-text" text="Rotation of the keys"/>
-        <Button text="Vote for this update" tap="voteButtonTapped"/>
+        <Label id="deviceLabel" class="label-title" text="Actual Devices" style="padding-top: 20px" visibility="{{ isOnProposed ? 'collapsed' : 'visible' }}"/>
+        <ListView id="device" items="{{ deviceList }}" orientation="vertical" visibility="{{ isOnProposed ? 'collapsed' : 'visible' }}">
+            <ListView.itemTemplate>
+                <GridLayout rows="*" columns="*">
+                    <Label text="{{ device.id }}" textAlignment="center" textWrap="true" tap="{{ device.showPub }}"/>
+                </GridLayout>
+            </ListView.itemTemplate>
+        </ListView>
 
-        <Label class="label-title" text="Propose operation" row="4" colSpan="3"/>
+        <Label id="proposedStorageLabel" class="label-title" text="Proposed Data" visibility="{{ isOnProposed ? 'visible' : 'collapsed' }}"/>
+        <ListView id="proposedStorage" items="{{ proposedStorageList }}" orientation="vertical" visibility="{{ isOnProposed ? 'visible' : 'collapsed' }}">
+            <ListView.itemTemplate>
+                <GridLayout>
+                    <Label class="{{ (keyValuePair.newOrChanged ? 'cisc-new-or-changed' : '') + (keyValuePair.deleted ? ' cisc-deleted' : '')}}" text="{{ keyValuePair.key }}" textAlignment="center" textWrap="true" tap="{{ keyValuePair.showValue }}"/>
+                </GridLayout>
+            </ListView.itemTemplate>
+        </ListView>
 
-        <GridLayout class="page-content" rows="*" columns="*,*">
-            <Button text="Propose rotation" tap="configButtonTapped" col="0"/>
-            <Button text="Propose new key" tap="configButtonTapped" col="1"/>
+        <Label id="proposedDeviceLabel" class="label-title" text="Proposed Devices" visibility="{{ isOnProposed ? 'visible' : 'collapsed' }}" style="padding-top: 20px"/>
+        <ListView id="proposedDevice" items="{{ proposedDeviceList }}" orientation="vertical" visibility="{{ isOnProposed ? 'visible' : 'collapsed' }}">
+            <ListView.itemTemplate>
+                <GridLayout>
+                    <Label class="{{ (device.newOrChanged ? 'cisc-new-or-changed' : '') + (device.deleted ? ' cisc-deleted' : '')}}" text="{{ device.id }}" textAlignment="center" textWrap="true" tap="{{ device.showPub }}" />
+                </GridLayout>
+            </ListView.itemTemplate>
+        </ListView>
+
+
+
+        <GridLayout columns="*,*" rows="auto">
+            <Button text="Toggle proposed/actual data" tap="toggleProposed" row="0" col="0"/>
+            <Button text="Vote for proposed data" tap="voteForProposed" row="0" col="1" isEnabled="{{ isOnProposed }}"/>
         </GridLayout>
     </StackLayout>
 
