@@ -81,12 +81,6 @@
                         </TabViewItem.view>
                     </TabViewItem>
 
-                    <TabViewItem title="Devices">
-                        <TabViewItem.view>
-                            <devices:devices-page/>
-                        </TabViewItem.view>
-                    </TabViewItem>
-
                 </TabView.items>
             </TabView>
         </nsDrawer:RadSideDrawer.mainContent>

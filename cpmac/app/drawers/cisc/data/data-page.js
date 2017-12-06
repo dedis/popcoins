@@ -184,7 +184,6 @@ function GetByteArrayFromString(parameter) {
         mainbytesArray.push(parameter.charCodeAt(i));
 
     return mainbytesArray;
-
 }
 
 function checkIfDeviceIsInData(deviceName) {
