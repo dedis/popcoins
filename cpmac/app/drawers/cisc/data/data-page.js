@@ -9,8 +9,10 @@ const DedisCrypto = require("~/shared/lib/dedis-js/src/crypto");
 const FileIO = require("~/shared/lib/file-io/file-io");
 const FilePaths = require("~/shared/res/files/files-path");
 const HASH = require("hash.js");
+const DeepCopy = require("~/shared/lib/deep-copy/DeepCopy");
 
 let viewmodel;
+let Page;
 
 /* ***********************************************************
  * Use the "onNavigatingTo" handler to initialize the page binding context.
@@ -26,6 +28,7 @@ function onLoaded(args) {
     }
 
     const page = args.object;
+    Page = page.page;
     page.bindingContext = page.page.bindingContext;
     viewmodel = page.bindingContext;
 }
@@ -92,26 +95,27 @@ function checkForDeviceTaped() {
 }
 
 function addDeviceTaped() {
-    let data =JSON.parse(JSON.stringify(viewmodel.data));
+    let data = DeepCopy.copy(viewmodel.data);
     let device;
-
+    let proposeSendMessage;
     FileIO.getStringOf(FilePaths.PUBLIC_KEY_COTHORITY)
         .then((point) => {
             device = CothorityMessages.createDevice(DedisMisc.hexToUint8Array(point));
             return FileIO.getStringOf(FilePaths.CISC_NAME);
         })
-        .then((name)=>data.device[name] = device)
-        .then(() => {
-            const proposeSendMessage = CothorityMessages.createProposeSend(viewmodel.id, data);
-            const cothoritySocket = new DedisJsNet.CothoritySocket();
-            FileIO.getStringOf(FilePaths.CISC_IDENTITY_LINK)
-                .then((result) => {
-                    cothoritySocket.send({Address: `tcp://${result.split("/")[2]}`}, CothorityPath.IDENTITY_PROPOSE_SEND, proposeSendMessage, CothorityDecodeTypes.DATA_UPDATE_REPLY)
-                        .then((response)=>console.dir(response))
-                        .catch((error)=>console.log(error))
-                })
-                .catch((error)=>console.log(error))
+        .then((name)=>{
+            data.device[name] = device;
+            return Promise.resolve();
         })
+        .then(() => {
+            proposeSendMessage = CothorityMessages.createProposeSend(viewmodel.id, data);
+            return FileIO.getStringOf(FilePaths.CISC_IDENTITY_LINK)
+        })
+        .then((result) => {
+            const cothoritySocket = new DedisJsNet.CothoritySocket();
+            return cothoritySocket.send({Address: `tcp://${result.split("/")[2]}`}, CothorityPath.IDENTITY_PROPOSE_SEND, proposeSendMessage, CothorityDecodeTypes.DATA_UPDATE_REPLY)
+        })
+        .then((response)=>console.dir(response))
         .catch((error) => console.log(`There was an error: ${error}`));
 }
 
@@ -190,6 +194,49 @@ function checkIfDeviceIsInData(deviceName) {
     return viewmodel.data.device.hasOwnProperty(deviceName);
 }
 
+function addKeyValue() {
+    let key;
+    let value;
+    let proposeSendMessage;
+    let edited;
+
+    return Dialog.prompt({
+        title: "Key",
+        message: "What is the key you want to add ?",
+        okButtonText: "Ok",
+        cancelButtonText: "Cancel",
+        inputType: Dialog.inputType.text
+    })
+        .then((response) => {
+            if (response.result) {
+                key = response.text;
+                return Dialog.prompt({
+                    title: "Value",
+                    message: `What is the value that goes with ${key}`,
+                    okButtonText: "Ok",
+                    cancelButtonText: "Cancel",
+                    inputType: Dialog.inputType.text
+                })
+            }
+        })
+        .then((response) => {
+            if (response.result) {
+                value = response.text;
+                edited = DeepCopy.copy(viewmodel.data);
+                edited.storage[key]=value;
+                edited.votes = null;
+                proposeSendMessage = CothorityMessages.createProposeSend(viewmodel.id, edited);
+                return FileIO.getStringOf(FilePaths.CISC_IDENTITY_LINK);
+            }
+        })
+        .then((result) => {
+            const cothoritySocket = new DedisJsNet.CothoritySocket();
+            return cothoritySocket.send({Address: `tcp://${result.split("/")[2]}`}, CothorityPath.IDENTITY_PROPOSE_SEND, proposeSendMessage, CothorityDecodeTypes.DATA_UPDATE_REPLY)
+        })
+        .then((response)=>console.dir(response))
+        .catch((error) => console.log(`There was an error: ${error}`));
+}
+
 /* ***********************************************************
  * According to guidelines, if you have a drawer on your page, you should always
  * have a button that opens it. Get a reference to the RadSideDrawer view and
@@ -207,3 +254,4 @@ exports.proposeUpdateTaped = proposeUpdateTaped;
 exports.checkForDeviceTaped = checkForDeviceTaped;
 exports.addDeviceTaped = addDeviceTaped;
 exports.voteButtonTaped = voteButtonTaped;
+exports.addKeyValue = addKeyValue;

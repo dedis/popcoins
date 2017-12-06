@@ -21,6 +21,9 @@
 
         <Label class="label-title" text="Vote for the proposed block"/>
         <Button text="Vote for the proposed block" tap="voteButtonTaped"/>
+
+        <Label class="label-title" text="Add a key value pair"/>
+        <Button text="Add a Key Value pair" tap="addKeyValue"/>
     </StackLayout>
 
 </Page>

@@ -60,7 +60,7 @@
         Always wrap content in a layout component.
         -->
         <nsDrawer:RadSideDrawer.mainContent>
-            <TabView class="page-content" selectedIndex="{{ isConnectedAtBeginning ? 1 : 0 }}" selectedTabTextColor="black">
+            <TabView class="page-content" selectedIndex="1" selectedTabTextColor="black">
                 <TabView.items>
 
                     <TabViewItem title="QR">
