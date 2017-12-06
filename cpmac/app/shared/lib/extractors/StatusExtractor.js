@@ -1,89 +1,111 @@
-require("nativescript-nodeify");
-const Misc = require("~/shared/lib/dedis-js/src/misc");
-const Base64 = require("base64-coder-node")();
+const Convert = require("~/shared/lib/dedjs/Convert");
+const ObjectType = require("~/shared/lib/dedjs/ObjectType");
+const Helper = require("~/shared/lib/dedjs/Helper");
 
 /**
  * @file Library to extract stats from a status response.
  */
 
-// Functions ------------------------------------------------------------------
-function getDescription(conode) {
-  return conode.server.description;
+function throwErrorIfTypeIsWrong(statusResponse) {
+  if (!Helper.isOfType(statusResponse, ObjectType.STATUS_RESPONSE)) {
+    throw new Error("statusResponse must be of type Response");
+  }
 }
 
-function getAddress(conode) {
-  return conode.server.address;
+function getDescription(statusResponse) {
+  throwErrorIfTypeIsWrong(statusResponse)
+  return statusResponse.server.description;
 }
 
-function getID(conode) {
-  return Misc.uint8ArrayToHex(conode.server.id);
+function getAddress(statusResponse) {
+  throwErrorIfTypeIsWrong(statusResponse)
+  return statusResponse.server.address;
 }
 
-function getPublicKey(conode) {
-  return Base64.encode(Misc.uint8ArrayToHex(conode.server.public), "hex");
+function getID(statusResponse) {
+  throwErrorIfTypeIsWrong(statusResponse)
+  return Convert.byteArrayToBase64(statusResponse.server.id);
 }
 
-function getHexPublicKey(conode) {
-  return Misc.uint8ArrayToHex(conode.server.public);
+function getPublicKey(statusResponse) {
+  throwErrorIfTypeIsWrong(statusResponse)
+  return Convert.byteArrayToBase64(statusResponse.server.public);
 }
 
-function getServices(conode) {
-  return conode.system.Status.field.Available_Services;
+function getServices(statusResponse) {
+  throwErrorIfTypeIsWrong(statusResponse)
+  return statusResponse.system.Status.field.Available_Services;
 }
 
-function getSystem(conode) {
-  return conode.system.Status.field.System;
+function getSystem(statusResponse) {
+  throwErrorIfTypeIsWrong(statusResponse)
+  return statusResponse.system.Status.field.System;
 }
 
-function getHost(conode) {
-  return conode.system.Status.field.Host;
+function getHost(statusResponse) {
+  throwErrorIfTypeIsWrong(statusResponse)
+  return statusResponse.system.Status.field.Host;
 }
 
-function getPort(conode) {
-  return conode.system.Status.field.Port;
+function getPort(statusResponse) {
+  throwErrorIfTypeIsWrong(statusResponse)
+  return statusResponse.system.Status.field.Port;
 }
 
-function getConnectionType(conode) {
-  return conode.system.Status.field.ConnType;
+function getConnectionType(statusResponse) {
+  throwErrorIfTypeIsWrong(statusResponse)
+  return statusResponse.system.Status.field.ConnType;
 }
 
-function getVersion(conode) {
-  return conode.system.Status.field.Version;
+function getVersion(statusResponse) {
+  throwErrorIfTypeIsWrong(statusResponse)
+  return statusResponse.system.Status.field.Version;
 }
 
-function getTXBytes(conode) {
-  return conode.system.Status.field.TX_bytes;
+function getTXBytes(statusResponse) {
+  throwErrorIfTypeIsWrong(statusResponse)
+  return statusResponse.system.Status.field.TX_bytes;
 }
 
-function getRXBytes(conode) {
-  return conode.system.Status.field.RX_bytes;
+function getRXBytes(statusResponse) {
+  throwErrorIfTypeIsWrong(statusResponse)
+  return statusResponse.system.Status.field.RX_bytes;
 }
 
-function getUptime(conode) {
-  return conode.system.Status.field.Uptime;
+function getUptime(statusResponse) {
+  throwErrorIfTypeIsWrong(statusResponse)
+  return statusResponse.system.Status.field.Uptime;
 }
 
-function getTomlFromConode(conode) {
+function getTomlFromStatusResponse(statusResponse) {
+  throwErrorIfTypeIsWrong(statusResponse)
   return "[[servers]]\n" +
-    "  Address = \"" + getAddress(conode) + "\"\n" +
-    "  Public = \"" + getPublicKey(conode) + "\"\n" +
-    "  Description = \"" + getDescription(conode) + "\"";
+    "  Address = \"" + getAddress(statusResponse) + "\"\n" +
+    "  Public = \"" + getPublicKey(statusResponse) + "\"\n" +
+    "  Description = \"" + getDescription(statusResponse) + "\"";
 }
 
 function getToml(address, publicKey, description) {
+  if (typeof address !== "string") {
+    throw new Error("address must be of type string");
+  }
+  if (typeof publicKey !== "string") {
+    throw new Error("publicKey must be of type string");
+  }
+  if (typeof description !== "string") {
+    throw new Error("description must be of type string");
+  }
+
   return "[[servers]]\n" +
     "  Address = \"" + address + "\"\n" +
     "  Public = \"" + publicKey + "\"\n" +
     "  Description = \"" + description + "\"";
 }
 
-
-// Exports --------------------------------------------------------------------
 exports.getDescription = getDescription;
 exports.getAddress = getAddress;
 exports.getID = getID;
 exports.getPublicKey = getPublicKey;
-exports.getHexPublicKey = getHexPublicKey;
 exports.getServices = getServices;
 exports.getSystem = getSystem;
 exports.getHost = getHost;
@@ -93,5 +115,5 @@ exports.getVersion = getVersion;
 exports.getTXBytes = getTXBytes;
 exports.getRXBytes = getRXBytes;
 exports.getUptime = getUptime;
-exports.getTomlFromConode = getTomlFromConode;
+exports.getTomlFromStatusResponse = getTomlFromStatusResponse;
 exports.getToml = getToml;

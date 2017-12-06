@@ -4,12 +4,12 @@ const Dialog = require("ui/dialogs");
 const FilesPath = require("~/shared/res/files/files-path");
 const FileIO = require("~/shared/lib/file-io/file-io");
 const DedisJsNet = require("~/shared/lib/dedis-js/src/net");
-const DeepCopy = require("~/shared/lib/deep-copy/DeepCopy");
+const Helper = require("~/shared/lib/dedjs/Helper");
 const StatusExtractor = require("~/shared/lib/extractors/StatusExtractor");
 
 const viewModel = ObservableModule.fromObject({
-                                                partyConodes: new ObservableArray()
-                                              });
+  partyConodes: new ObservableArray()
+});
 
 const myPartyConodes = viewModel.partyConodes;
 
@@ -31,19 +31,19 @@ function setUpPartyConodes() {
    */
   myPartyConodes.get = function (index) {
     return FileIO.getStringOf(FilesPath.POP_PARTY_CONODES)
-                 .then(tomlString => {
-                   return DedisJsNet.parseCothorityRoster(tomlString).servers;
-                 })
-                 .then(servers => {
-                   return servers[index];
-                 })
-                 .catch(() => {
-                   return Dialog.alert({
-                                         title: "Error",
-                                         message: "An unexpected error occurred. Please try again.",
-                                         okButtonText: "Ok"
-                                       });
-                 });
+      .then(tomlString => {
+        return DedisJsNet.parseCothorityRoster(tomlString).servers;
+      })
+      .then(servers => {
+        return servers[index];
+      })
+      .catch(() => {
+        return Dialog.alert({
+          title: "Error",
+          message: "An unexpected error occurred. Please try again.",
+          okButtonText: "Ok"
+        });
+      });
   };
 
   /**
@@ -52,24 +52,24 @@ function setUpPartyConodes() {
    */
   myPartyConodes.load = function () {
     return FileIO.getStringOf(FilesPath.POP_PARTY_CONODES)
-                 .then(tomlString => {
-                   if (tomlString.length === 0) {
-                     return [];
-                   } else {
-                     return DedisJsNet.parseCothorityRoster(tomlString).servers;
-                   }
-                 })
-                 .then(servers => {
-                   for (let i = 0; i < servers.length; ++i) {
-                     if (servers[i] !== undefined) {
-                       myPartyConodes.push({
-                                             conode: servers[i]
-                                           });
-                     }
-                   }
+      .then(tomlString => {
+        if (tomlString.length === 0) {
+          return [];
+        } else {
+          return DedisJsNet.parseCothorityRoster(tomlString).servers;
+        }
+      })
+      .then(servers => {
+        for (let i = 0; i < servers.length; ++i) {
+          if (servers[i] !== undefined) {
+            myPartyConodes.push({
+              conode: servers[i]
+            });
+          }
+        }
 
-                   return Promise.resolve();
-                 });
+        return Promise.resolve();
+      });
   };
 
   /**
@@ -95,8 +95,8 @@ function setUpPartyConodes() {
 
       if (!arrayOfPublicKeys.includes(conode.Address)) {
         myPartyConodes.unshift({
-                                 conode: DeepCopy.copy(conode)
-                               });
+          conode: Helper.deepCopy(conode)
+        });
 
         return saveConodesToFile();
       }
@@ -168,10 +168,10 @@ function setUpPartyConodes() {
  */
 function saveConodesToFile() {
   const tomlOfConodes = myPartyConodes.map(obj => {
-                                        const conode = obj.conode;
-                                        return StatusExtractor.getToml(conode.Address, conode.Public, conode.Description);
-                                      })
-                                      .join("\n");
+    const conode = obj.conode;
+    return StatusExtractor.getToml(conode.Address, conode.Public, conode.Description);
+  })
+    .join("\n");
 
   return FileIO.writeStringTo(FilesPath.POP_PARTY_CONODES, tomlOfConodes + "\n");
 }

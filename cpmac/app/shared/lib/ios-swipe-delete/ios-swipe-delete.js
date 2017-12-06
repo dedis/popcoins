@@ -1,5 +1,6 @@
 /**
- * This code is a direct copy-paste from the example app "Groceries" provided by NativeScript. We do not own this code.
+ * This code is a direct copy-paste from the example app "Groceries" provided by NativeScript. We do not own this code. All the
+ * credits go to NativeScript.
  *
  * https://docs.nativescript.org/tutorial/chapter-6#63-deleting-from-a-list---ios
  */

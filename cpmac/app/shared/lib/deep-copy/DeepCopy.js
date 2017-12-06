@@ -2,10 +2,12 @@
  * @file Library to deep copy an object.
  */
 
-// Functions ------------------------------------------------------------------
 function copy(object) { // Does not copy functions!
+  if (typeof object !== "object") {
+    throw new Error("object must be of type object");
+  }
+
   return JSON.parse(JSON.stringify(object));
 }
 
-// Exports --------------------------------------------------------------------
 exports.copy = copy;

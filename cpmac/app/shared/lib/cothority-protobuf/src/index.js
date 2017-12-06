@@ -1,4 +1,6 @@
 import CothorityProtobuf from "./cothority-protobuf";
+const Helper = require("~/shared/lib/dedjs/Helper");
+const Types = require("~/shared/lib/dedjs/ObjectType");
 
 /**
  * Helpers to encode and decode messages of the Cothority
@@ -14,13 +16,26 @@ class CothorityMessages extends CothorityProtobuf {
 
   /**
    * Creates a ServerIdentity object from the given parameters.
-   * @param publicKey
-   * @param id
-   * @param {string} address
-   * @param {string} desc
-   * @returns {object} ServerIdentity
+   * @param {Uint8Array} publicKey - the public key of the conode
+   * @param {Uint8Array} id - the id of the conode
+   * @param {string} address - the address of the conode
+   * @param {string} desc - the description of the conode
+   * @returns {ServerIdentity} - the server identity object created from the parameters
    */
   createServerIdentity(publicKey, id, address, desc) {
+    if (!(publicKey instanceof Uint8Array)) {
+      throw new Error("publicKey must be an instance of Uint8Array");
+    }
+    if (!(id instanceof Uint8Array)) {
+      throw new Error("id must be an instance of Uint8Array");
+    }
+    if (typeof address !== "string") {
+      throw new Error("address must be of type string");
+    }
+    if (typeof desc !== "string") {
+      throw new Error("desc must be of type string");
+    }
+
     const model = this.getModel("ServerIdentity");
 
     const fields = {
@@ -35,17 +50,35 @@ class CothorityMessages extends CothorityProtobuf {
 
   /**
    * Creates a Roster object.
-   * @param {Array} list of ServerIdentity
-   * @param aggregate
-   * @returns {object} Roster
+   * @param {Uint8Array} id - the id of the roster
+   * @param {Array} list - array of ServerIdentity
+   * @param {Uint8Array} aggregate - the aggregate of the conodes in list
+   * @returns {Roster} - the roster object created form the parameters
    */
-  createRoster(list, aggregate) {
+  createRoster(id, list, aggregate) {
+    if (!(id === undefined || id instanceof Uint8Array)) {
+      throw new Error("id must be an instance of Uint8Array or be undefined to skip it");
+    }
+    if (!(list instanceof Array)) {
+      throw new Error("list must be an instance of Array");
+    }
+    if (!Helper.isOfType(list[0], Types.SERVER_IDENTITY)) {
+      throw new Error("list[i] must be an instance of ServerIdentity");
+    }
+    if (!(aggregate instanceof Uint8Array)) {
+      throw new Error("id must be an instance of Uint8Array");
+    }
+
     const model = this.getModel("Roster");
 
     const fields = {
       list: list,
       aggregate: aggregate
     };
+
+    if (id !== undefined) {
+      fields.id = id;
+    }
 
     return model.create(fields);
   }
@@ -90,19 +123,28 @@ class CothorityMessages extends CothorityProtobuf {
 
   /**
    * Create an encoded message to make a sign request to a cothority node.
-   * @param {Uint8Array} message - Message to sign stored in a Uint8Array
+   * @param {Uint8Array} message - message to sign
    * @param {Array} servers - list of ServerIdentity
    * @param {Uint8Array} aggregate - aggregate of the servers
    * @returns {*|Buffer|Uint8Array}
    */
   createSignatureRequest(message, servers, aggregate) {
     if (!(message instanceof Uint8Array)) {
-      throw new Error("message must be a instance of Uint8Array");
+      throw new Error("message must be an instance of Uint8Array");
+    }
+    if (!(servers instanceof Array)) {
+      throw new Error("servers must be an instance of Array");
+    }
+    if (!Helper.isOfType(servers[0], Types.SERVER_IDENTITY)) {
+      throw new Error("servers[i] must be an instance of ServerIdentity");
+    }
+    if (!(aggregate instanceof Uint8Array)) {
+      throw new Error("aggregate must be an instance of Uint8Array");
     }
 
     const fields = {
       message,
-      roster: this.createRoster(servers, aggregate)
+      roster: this.createRoster(undefined, servers, aggregate)
     };
 
     return this.encodeMessage("SignatureRequest", fields);
@@ -127,7 +169,7 @@ class CothorityMessages extends CothorityProtobuf {
    */
   createClockRequest(servers, aggregate) {
     const fields = {
-      roster: this.createRoster(servers, aggregate)
+      roster: this.createRoster(undefined, servers, aggregate)
     };
 
     return this.encodeMessage("ClockRequest", fields);
@@ -330,7 +372,7 @@ class CothorityMessages extends CothorityProtobuf {
    */
   createLatestBlockRequest(id) {
     if (!(id instanceof Uint8Array)) {
-      throw new Error("message must be a instance of Uint8Array");
+      throw new Error("message must be an instance of Uint8Array");
     }
 
     const fields = {
@@ -359,7 +401,7 @@ class CothorityMessages extends CothorityProtobuf {
    */
   createStoreSkipBlockRequest(id, servers) {
     if (!(id instanceof Uint8Array)) {
-      throw new Error("message must be a instance of Uint8Array");
+      throw new Error("message must be an instance of Uint8Array");
     }
 
     const fields = {
@@ -498,13 +540,26 @@ class CothorityMessages extends CothorityProtobuf {
 
   /**
    * Creates a PopDesc description using the information given as parameters.
-   * @param {string} name
-   * @param {string} dateTime
-   * @param {string} location
-   * @param {object} roster
+   * @param {string} name - the name of the pop party
+   * @param {string} dateTime - the date and time of the pop party
+   * @param {string} location - the location of the pop party
+   * @param {Roster} roster - the roster used to host the pop party
    * @returns {*}
    */
   createPopDesc(name, dateTime, location, roster) {
+    if (typeof name !== "string") {
+      throw new Error("name must be of type string");
+    }
+    if (typeof dateTime !== "string") {
+      throw new Error("dateTime must be of type string");
+    }
+    if (typeof location !== "string") {
+      throw new Error("location must be of type string");
+    }
+    if (!Helper.isOfType(roster, Types.ROSTER)) {
+      throw new Error("roster must be an instance of Roster");
+    }
+
     const model = this.getModel("PopDesc");
 
     const fields = {
@@ -574,12 +629,22 @@ class CothorityMessages extends CothorityProtobuf {
 
   /**
    * Creates a PopToken given the parameters.
-   * @param {object} final a FinalStatement
-   * @param privateKey
-   * @param publicKey
-   * @returns {object} PopToken
+   * @param {FinalStatement} final - the FinalStatement of the pop party
+   * @param {Uint8Array} privateKey - the private key
+   * @param {Uint8Array} publicKey - the public key
+   * @returns {PopToken} - the pop token created using the given paramters
    */
   createPopToken(final, privateKey, publicKey) {
+    if (!Helper.isOfType(final, Types.FINAL_STATEMENT)) {
+      throw new Error("final must be an instance of FinalStatement");
+    }
+    if (!(privateKey instanceof Uint8Array)) {
+      throw new Error("privateKey must be an instance of Uint8Array");
+    }
+    if (!(publicKey instanceof Uint8Array)) {
+      throw new Error("publicKey must be an instance of Uint8Array");
+    }
+
     const model = this.getModel("PopToken");
 
     const fields = {
@@ -593,12 +658,22 @@ class CothorityMessages extends CothorityProtobuf {
 
   /**
    * Creates a PopTokenToml given the parameters.
-   * @param {object} final a FinalStatementToml
-   * @param {string} privateKey
-   * @param {string} publicKey
-   * @returns {object} PopTokenToml
+   * @param {FinalStatement} final - the FinalStatement of the pop party
+   * @param {string} privateKey - the private key
+   * @param {string} publicKey - the public key
+   * @returns {PopToken} - the pop token created using the given paramters
    */
   createPopTokenToml(final, privateKey, publicKey) {
+    if (!Helper.isOfType(final, Types.FINAL_STATEMENT)) {
+      throw new Error("final must be an instance of FinalStatement");
+    }
+    if (typeof privateKey !== "string") {
+      throw new Error("privateKey must be of type string");
+    }
+    if (typeof publicKey !== "string") {
+      throw new Error("publicKey must be of type string");
+    }
+
     const model = this.getModel("PopTokenToml");
 
     const fields = {
@@ -664,20 +739,20 @@ class CothorityMessages extends CothorityProtobuf {
 
   /**
    * Create an encoded message to store configuration information of a given PoP party.
-   * @param name
-   * @param date
-   * @param location
-   * @param roster
-   * @param signature
+   * @param {PopDesc} desc - the pop description
+   * @param {Uint8Array} signature - the signature of the message
    * @returns {*|Buffer|Uint8Array}
    */
-  createStoreConfig(name, date, location, roster, signature) {
+  createStoreConfig(desc, signature) {
+    if (!Helper.isOfType(desc, Types.POP_DESC)) {
+      throw new Error("desc must be an instance of PopDesc");
+    }
     if (!(signature instanceof Uint8Array)) {
-      throw new Error("signature must be a instance of Uint8Array");
+      throw new Error("signature must be an instance of Uint8Array");
     }
 
     const fields = {
-      desc: this.createPopDesc(name, date, location, roster),
+      desc: desc,
       signature: signature
     };
 
@@ -697,18 +772,27 @@ class CothorityMessages extends CothorityProtobuf {
 
   /**
    * Creates a FinalStatement given the parameters.
-   * @param {object} desc a PopDesc object
-   * @param attendees
-   * @param signature
-   * @param {boolean} merged
-   * @returns {fields}
+   * @param {PopDesc} desc - the description of the pop party
+   * @param {Array} attendees - all the attendees of the pop party
+   * @param {Uint8Array} signature - the collective signature for the pop party
+   * @param {boolean} merged - if the pop party has been merged
+   * @returns {FinalStatement} - the final statement created given the parameters
    */
   createFinalStatement(desc, attendees, signature, merged) {
-    if (!(attendees instanceof Uint8Array)) {
-      throw new Error("attendees must be a instance of Uint8Array");
+    if (!Helper.isOfType(desc, Types.POP_DESC)) {
+      throw new Error("desc must be an instance of PopDesc");
+    }
+    if (!(attendees instanceof Array)) {
+      throw new Error("attendees must be an instance of Array");
+    }
+    if (!(attendees[0] instanceof Uint8Array)) {
+      throw new Error("attendees[i] must be an instance of Uint8Array");
     }
     if (!(signature instanceof Uint8Array)) {
-      throw new Error("signature must be a instance of Uint8Array");
+      throw new Error("signature must be an instance of Uint8Array");
+    }
+    if (typeof merged !== "boolean") {
+      throw new Error("merged must be of type boolean");
     }
 
     const model = this.getModel("FinalStatement");
@@ -725,13 +809,29 @@ class CothorityMessages extends CothorityProtobuf {
 
   /**
    * Creates a FinalStatementToml given the parameters.
-   * @param {object} desc a PopDescToml object
-   * @param {string} attendees
-   * @param {string} signature
-   * @param {boolean} merged
-   * @returns {fields}
+   * @param {PopDesc} desc - the description of the pop party
+   * @param {Array} attendees - all the attendees of the pop party
+   * @param {string} signature - the collective signature for the pop party
+   * @param {boolean} merged - if the pop party has been merged
+   * @returns {FinalStatement} - the final statement created given the parameters
    */
   createFinalStatementToml(desc, attendees, signature, merged) {
+    if (!Helper.isOfType(desc, Types.POP_DESC)) {
+      throw new Error("desc must be an instance of PopDesc");
+    }
+    if (!(attendees instanceof Array)) {
+      throw new Error("attendees must be an instance of Array");
+    }
+    if (typeof attendees[0] !== "string") {
+      throw new Error("attendees[i] must be of type string");
+    }
+    if (typeof signature !== "string") {
+      throw new Error("signature must be of type string");
+    }
+    if (typeof merged !== "boolean") {
+      throw new Error("merged must be of type boolean");
+    }
+
     const model = this.getModel("FinalStatementToml");
 
     const fields = {
@@ -746,20 +846,20 @@ class CothorityMessages extends CothorityProtobuf {
 
   /**
    * Create an encoded message to finalize on the given descId-popconfig.
-   * @param descId - the id of the config (Uint8Array)
-   * @param attendees - the array containing all the public keys of the attendees (as Uint8Array)
-   * @param signature - the signature of the message (Uint8Array)
+   * @param {Uint8Array} descId - the id of the config
+   * @param {Array} attendees - the array containing all the public keys of the attendees
+   * @param {Uint8Array} signature - the signature of the message
    * @returns {*|Buffer|Uint8Array}
    */
   createFinalizeRequest(descId, attendees, signature) {
     if (!(descId instanceof Uint8Array)) {
-      throw new Error("descId must be a instance of Uint8Array");
+      throw new Error("descId must be an instance of Uint8Array");
     }
     if (!(attendees instanceof Array && attendees[0] instanceof Uint8Array)) {
-      throw new Error("attendees must be a instance of Array[Uint8Array]");
+      throw new Error("attendees must be an instance of Array[Uint8Array]");
     }
     if (!(signature instanceof Uint8Array)) {
-      throw new Error("signature must be a instance of Uint8Array");
+      throw new Error("signature must be an instance of Uint8Array");
     }
 
     const fields = {
@@ -784,11 +884,18 @@ class CothorityMessages extends CothorityProtobuf {
 
   /**
    * Create an encoded message to make a PinRequest to a cothority node.
-   * @param pin previously generated by the conode
-   * @param publicKey
+   * @param {string} pin - previously generated by the conode
+   * @param {Uint8Array} publicKey - the public key of the organizer
    * @returns {*|Buffer|Uint8Array}
    */
   createPinRequest(pin, publicKey) {
+    if (typeof pin !== "string") {
+      throw new Error("pin must be of type string");
+    }
+    if (!(publicKey instanceof Uint8Array)) {
+      throw new Error("publicKey must be an instance of Uint8Array");
+    }
+
     const fields = {
       pin: pin,
       public: publicKey
@@ -799,12 +906,12 @@ class CothorityMessages extends CothorityProtobuf {
 
   /**
    * Creates and encodes a FetchRequest for the Cothority.
-   * @param id - the id of the config (Uint8Array)
+   * @param {Uint8Array} id - the id of the config
    * @returns {*|Buffer|Uint8Array}
    */
   createFetchRequest(id) {
     if (!(id instanceof Uint8Array)) {
-      throw new Error("id must be a instance of Uint8Array");
+      throw new Error("id must be an instance of Uint8Array");
     }
 
     const fields = {
