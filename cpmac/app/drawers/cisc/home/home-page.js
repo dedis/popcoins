@@ -85,7 +85,22 @@ function voteForProposed(){
             return FileIO.getStringOf(FilePaths.PRIVATE_KEY)
         })
         .then(privateKey => {
+
             const keyPair = DedisCrypto.getKeyPairFromPrivate(privateKey);
+            let alreadySigned = false;
+            if (viewmodel.proposedData.votes[name] !== null && viewmodel.proposedData.votes[name] !== undefined){
+                alreadySigned = DedisCrypto.schnorrVerify(keyPair.getPublic(),DedisMisc.hexToUint8Array(hashedData),viewmodel.proposedData.votes[name])
+            }
+            if (alreadySigned) {
+                Dialog.alert({
+                    title: "Already signed",
+                    message: "You already signed this proposition",
+                    okButtonText: "Ok"
+                });
+                throw new Error("You already signed this message")
+            }
+
+
             signature = DedisCrypto.schnorrSign(DedisCrypto.toRed(keyPair.getPrivate()), DedisMisc.hexToUint8Array(hashedData));
 
             return FileIO.getStringOf(FilePaths.CISC_IDENTITY_LINK)
