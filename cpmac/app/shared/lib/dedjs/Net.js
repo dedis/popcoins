@@ -1,4 +1,6 @@
-const Convert = require("./Convert");
+const Convert = require("~/shared/lib/dedjs/Convert");
+const Helper = require("~/shared/lib/dedjs/Helper");
+const ObjectType = require("~/shared/lib/dedjs/ObjectType");
 const WebSocket = require("nativescript-websockets");
 const CothorityMessages = require("~/shared/lib/cothority-protobuf/build/cothority-messages");
 
@@ -56,7 +58,7 @@ function StandardSocket() {
  */
 function CothoritySocket() {
   this.send = (node, path, message, typeToDecode) => new Promise((resolve, reject) => {
-    if (!Helper.isOfType(node, Types.SERVER_IDENTITY)) {
+    if (!Helper.isOfType(node, ObjectType.SERVER_IDENTITY)) {
       reject("node must be of type ServerIdentity");
     }
     if (typeof path !== "string") {
@@ -116,7 +118,5 @@ function CothoritySocket() {
   });
 }
 
-module.exports = {
-  StandardSocket,
-  CothoritySocket
-}
+module.exports.StandardSocket = StandardSocket;
+module.exports.CothoritySocket = CothoritySocket;

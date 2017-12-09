@@ -62,7 +62,7 @@ class CothorityMessages extends CothorityProtobuf {
     if (!(list instanceof Array)) {
       throw new Error("list must be an instance of Array");
     }
-    if (!Helper.isOfType(list[0], Types.SERVER_IDENTITY)) {
+    if (list.length > 0 && !Helper.isOfType(list[0], Types.SERVER_IDENTITY)) {
       throw new Error("list[i] must be an instance of ServerIdentity");
     }
     if (!(aggregate instanceof Uint8Array)) {
@@ -135,7 +135,7 @@ class CothorityMessages extends CothorityProtobuf {
     if (!(servers instanceof Array)) {
       throw new Error("servers must be an instance of Array");
     }
-    if (!Helper.isOfType(servers[0], Types.SERVER_IDENTITY)) {
+    if (servers.length > 0 && !Helper.isOfType(servers[0], Types.SERVER_IDENTITY)) {
       throw new Error("servers[i] must be an instance of ServerIdentity");
     }
     if (!(aggregate instanceof Uint8Array)) {

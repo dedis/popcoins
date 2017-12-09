@@ -1,6 +1,6 @@
-const Convert = require("./Convert");
-const Helper = require("./Helper");
-const ObjectType = require("./ObjectType");
+const Helper = require("~/shared/lib/dedjs/Helper");
+const ObjectType = require("~/shared/lib/dedjs/ObjectType");
+const Convert = require("~/shared/lib/dedjs/Convert");
 const EllipticCurve = require("elliptic").ec;
 const Hash = require("hash.js");
 const BigNumber = require("bn.js");
@@ -76,7 +76,7 @@ function aggregatePublicKeys(points) {
   if (!(points instanceof Array)) {
     throw new Error("points must be an instance of Array");
   }
-  if (!Helper.isOfType(points[0], ObjectType.POINT)) {
+  if (points.length > 0 && !Helper.isOfType(points[0], ObjectType.POINT)) {
     throw new Error("points[i] must be of type Point");
   }
 
@@ -238,12 +238,10 @@ function schnorrVerify(pub, message, signature) {
   return S.eq(RAs);
 }
 
-module.exports = {
-  getKeyPairFromSecret,
-  aggregatePublicKeys,
-  marshal,
-  unmarshal,
-  generateRandomKeyPair,
-  schnorrSign,
-  schnorrVerify
-}
+module.exports.getKeyPairFromSecret = getKeyPairFromSecret;
+module.exports.aggregatePublicKeys = aggregatePublicKeys;
+module.exports.marshal = marshal;
+module.exports.unmarshal = unmarshal;
+module.exports.generateRandomKeyPair = generateRandomKeyPair;
+module.exports.schnorrSign = schnorrSign;
+module.exports.schnorrVerify = schnorrVerify;

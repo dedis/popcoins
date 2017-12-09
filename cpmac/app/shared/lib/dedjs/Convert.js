@@ -1,12 +1,12 @@
 require("nativescript-nodeify");
-const Helper = require("./Helper");
-const ObjectType = require("./ObjectType");
-const Crypto = require("./Crypto");
+const Helper = require("~/shared/lib/dedjs/Helper");
+const ObjectType = require("~/shared/lib/dedjs/ObjectType");
+const Crypto = require("~/shared/lib/dedjs/Crypto");
 const Base64 = require("base64-coder-node")();
 const TomlParser = require("toml");
 const Tomlify = require('tomlify-j0.4');
 const UUID = require("pure-uuid");
-const CothorityMessages = require("~/shared/lib/cothority-protobuf/build/cothority-messages");
+const CothorityMessages = require("~/shared/lib/dedjs/protobuf/build/cothority-messages");
 
 const HEX_KEYWORD = "hex";
 
@@ -196,7 +196,7 @@ function tcpToWebsocket(serverIdentity, path) {
     throw new Error("path must be of type string");
   }
 
-  const [url, port] = serverIdentity.address.replace(BASE_URL_TCP, "").split(URL_PORT_SPLITTER);
+  let [url, port] = serverIdentity.address.replace(BASE_URL_TCP, "").split(URL_PORT_SPLITTER);
   port = parseInt(port) + 1;
 
   return BASE_URL_WS + url + URL_PORT_SPLITTER + port + path;
@@ -224,14 +224,18 @@ function parseJsonRoster(jsonString) {
     if (id === undefined) {
       const url = BASE_URL_CONODE_ID + Base64.decode(server.public, HEX_KEYWORD);
       id = new Uint8Array(new UUID(5, NAME_SPACE_URL, url).export());
+    } else {
+      id = base64ToByteArray(server.id);
     }
 
-    return CothorityMessages.createServerIdentity(server.public, id, server.address, server.description);
+    return CothorityMessages.createServerIdentity(base64ToByteArray(server.public), id, server.address, server.description);
   });
 
-  const aggregate = roster.aggregate;
+  let aggregate = roster.aggregate;
   if (aggregate === undefined) {
     aggregate = Crypto.aggregatePublicKeys(points);
+  } else {
+    aggregate = base64ToByteArray(roster.aggregate);
   }
 
   return CothorityMessages.createRoster(id, list, aggregate);
@@ -283,23 +287,19 @@ function parseJsonKeyPair(jsonString) {
   return CothorityMessages.createKeyPair(base64ToByteArray(keyPair.public), base64ToByteArray(keyPair.private), publicComplete);
 }
 
-module.exports = {
-  byteArrayToHex,
-  hexToByteArray,
-  byteArrayToBase64,
-  base64ToByteArray,
-  hexToBase64,
-  base64ToHex,
-
-  objectToJson,
-  jsonToObject,
-  objectToToml,
-  tomlToObject,
-  jsonToToml,
-  tomlToJson,
-
-  tcpToWebsocket,
-  parseJsonRoster,
-  parseTomlRoster,
-  parseJsonKeyPair
-}
+module.exports.byteArrayToHex = byteArrayToHex;
+module.exports.hexToByteArray = hexToByteArray;
+module.exports.byteArrayToBase64 = byteArrayToBase64;
+module.exports.base64ToByteArray = base64ToByteArray;
+module.exports.hexToBase64 = hexToBase64;
+module.exports.base64ToHex = base64ToHex;
+module.exports.objectToJson = objectToJson;
+module.exports.jsonToObject = jsonToObject;
+module.exports.objectToToml = objectToToml;
+module.exports.tomlToObject = tomlToObject;
+module.exports.jsonToToml = jsonToToml;
+module.exports.tomlToJson = tomlToJson;
+module.exports.tcpToWebsocket = tcpToWebsocket;
+module.exports.parseJsonRoster = parseJsonRoster;
+module.exports.parseTomlRoster = parseTomlRoster;
+module.exports.parseJsonKeyPair = parseJsonKeyPair;

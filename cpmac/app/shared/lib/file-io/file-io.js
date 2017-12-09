@@ -47,7 +47,5 @@ function writeStringTo(filePath, string) {
     });
 }
 
-module.exports = {
-  getStringOf,
-  writeStringTo
-}
+module.exports.getStringOf = getStringOf;
+module.exports.writeStringTo = writeStringTo;

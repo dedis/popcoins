@@ -18,13 +18,11 @@ const FINAL_STATEMENT = "FinalStatement";
 const POP_DESC = "PopDesc";
 const KEY_PAIR = "KeyPair";
 
-module.exports = {
-  BIG_NUMBER,
-  POINT,
-  STATUS_RESPONSE,
-  SERVER_IDENTITY,
-  ROSTER,
-  FINAL_STATEMENT,
-  POP_DESC,
-  KEY_PAIR
-}
+module.exports.BIG_NUMBER = BIG_NUMBER;
+module.exports.POINT = POINT;
+module.exports.STATUS_RESPONSE = STATUS_RESPONSE;
+module.exports.SERVER_IDENTITY = SERVER_IDENTITY;
+module.exports.ROSTER = ROSTER;
+module.exports.FINAL_STATEMENT = FINAL_STATEMENT;
+module.exports.POP_DESC = POP_DESC;
+module.exports.KEY_PAIR = KEY_PAIR;

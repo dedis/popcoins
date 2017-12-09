@@ -19,6 +19,9 @@
                     ios.position="left">
         </ActionItem>
         <Label class="action-bar-title" text="Home"/>
+        <ActionItem tap="addConodeManual"
+                    ios.systemIcon="4" ios.position="right"
+                    text="Add Conode" android.position="popup"/>
     </ActionBar>
 
     <!--
@@ -62,15 +65,15 @@
                 <Label class="page-icon fa" text="&#xf015;"/>
                 <Label class="page-placeholder" text="Page content goes here"></Label>
                  -->
-                <ListView items="{{ conodeList }}" itemTap="conodeTapped" row="0" colSpan="2">
+                <ListView items="{{ statusList }}" itemTap="conodeTapped" row="0" colSpan="2">
                     <ListView.itemTemplate>
                         <GridLayout rows="*" columns="*">
-                            <Label text="{{ conode.server.description }}" textAlignment="center" textWrap="true"/>
+                            <Label text="{{ conodeStatus.server.description }}" textAlignment="center" textWrap="true"/>
                         </GridLayout>
                     </ListView.itemTemplate>
                 </ListView>
 
-                <Button text="Reload" tap="loadConodeList" row="1" col="0" isEnabled="{{ !isLoading }}"/>
+                <Button text="Reload" tap="loadConodeList" row="1" col="0" isEnabled="{{ !isLoading}}"/>
 
                 <Button text="Deblock" tap="deblockConodeList" row="1" col="1" isEnabled="{{ isLoading }}"/>
 

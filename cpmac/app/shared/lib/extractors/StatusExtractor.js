@@ -111,20 +111,18 @@ function getToml(address, publicKey, description) {
     "  Description = \"" + description + "\"";
 }
 
-module.exports = {
-  getDescription,
-  getAddress,
-  getID,
-  getPublicKey,
-  getServices,
-  getSystem,
-  getHost,
-  getPort,
-  getConnectionType,
-  getVersion,
-  getTXBytes,
-  getRXBytes,
-  getUptime,
-  getTomlFromStatusResponse,
-  getToml
-}
+module.exports.getDescription = getDescription;
+module.exports.getAddress = getAddress;
+module.exports.getID = getID;
+module.exports.getPublicKey = getPublicKey;
+module.exports.getServices = getServices;
+module.exports.getSystem = getSystem;
+module.exports.getHost = getHost;
+module.exports.getPort = getPort;
+module.exports.getConnectionType = getConnectionType;
+module.exports.getVersion = getVersion;
+module.exports.getTXBytes = getTXBytes;
+module.exports.getRXBytes = getRXBytes;
+module.exports.getUptime = getUptime;
+module.exports.getTomlFromStatusResponse = getTomlFromStatusResponse;
+module.exports.getToml = getToml;

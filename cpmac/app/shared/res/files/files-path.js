@@ -30,23 +30,19 @@ const POP_PARTY_CONODES = "shared/res/files/pop/org/party/party_conodes.toml";
 const CISC_IDENTITY_LINK = "shared/res/files/cisc/identity_link.txt";
 const CISC_NAME = "shared/res/files/cisc/name.txt";
 
-module.exports = {
-  CONODES_TOML,
-  CONODES_JSON,
-  PUBLIC_KEY,
-  PUBLIC_KEY_COTHORITY,
-  PRIVATE_KEY,
-  KEY_PAIR,
-
-  POP_DESC_HASH,
-  POP_FINAL_TOML,
-  POP_LINKED_CONODE,
-  POP_REGISTERED_KEYS,
-  POP_PARTY_NAME,
-  POP_PARTY_DATETIME,
-  POP_PARTY_LOCATION,
-  POP_PARTY_CONODES,
-
-  CISC_IDENTITY_LINK,
-  CISC_NAME
-}
+module.exports.CONODES_TOML = CONODES_TOML;
+module.exports.CONODES_JSON = CONODES_JSON;
+module.exports.PUBLIC_KEY = PUBLIC_KEY;
+module.exports.PUBLIC_KEY_COTHORITY = PUBLIC_KEY_COTHORITY;
+module.exports.PRIVATE_KEY = PRIVATE_KEY;
+module.exports.KEY_PAIR = KEY_PAIR;
+module.exports.POP_DESC_HASH = POP_DESC_HASH;
+module.exports.POP_FINAL_TOML = POP_FINAL_TOML;
+module.exports.POP_LINKED_CONODE = POP_LINKED_CONODE;
+module.exports.POP_REGISTERED_KEYS = POP_REGISTERED_KEYS;
+module.exports.POP_PARTY_NAME = POP_PARTY_NAME;
+module.exports.POP_PARTY_DATETIME = POP_PARTY_DATETIME;
+module.exports.POP_PARTY_LOCATION = POP_PARTY_LOCATION;
+module.exports.POP_PARTY_CONODES = POP_PARTY_CONODES;
+module.exports.CISC_IDENTITY_LINK = CISC_IDENTITY_LINK;
+module.exports.CISC_NAME = CISC_NAME;

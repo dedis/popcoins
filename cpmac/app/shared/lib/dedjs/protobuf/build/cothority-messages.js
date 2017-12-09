@@ -1,6 +1,6 @@
 'use strict';
 
-function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
+function _interopDefault(ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 var Protobuf = _interopDefault(require('protobufjs'));
 
@@ -41,7 +41,7 @@ class CothorityProtobuf {
     if (typeof name !== "string") {
       throw new Error("name must be of type string");
     }
-    if (!(fields !== undefined && typeof object === "object")) {
+    if (!(fields !== undefined && typeof fields === "object")) {
       throw new Error("fields must be of type object and not undefined");
     }
 
@@ -195,11 +195,11 @@ class CothorityMessages extends CothorityProtobuf {
     if (!(list instanceof Array)) {
       throw new Error("list must be an instance of Array");
     }
-    if (!Helper.isOfType(list[0], ObjectTypes.SERVER_IDENTITY)) {
+    if (list.length > 0 && !Helper.isOfType(list[0], ObjectTypes.SERVER_IDENTITY)) {
       throw new Error("list[i] must be an instance of ServerIdentity");
     }
     if (!(aggregate instanceof Uint8Array)) {
-      throw new Error("id must be an instance of Uint8Array");
+      throw new Error("aggregate must be an instance of Uint8Array");
     }
 
     const model = this.getModel("Roster");

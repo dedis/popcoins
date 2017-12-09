@@ -6,8 +6,9 @@ const Convert = require("~/shared/lib/dedjs/Convert");
 const ObjectType = require("~/shared/lib/dedjs/ObjectType");
 const Helper = require("~/shared/lib/dedjs/Helper");
 const Net = require("~/shared/lib/dedjs/Net");
+const Crypto = require("~/shared/lib/dedjs/Crypto");
 const RequestPath = require("~/shared/lib/dedjs/RequestPath");
-const DecodeTypes = require("~/shared/lib/dedjs/DecodeTypes");
+const DecodeType = require("~/shared/lib/dedjs/DecodeType");
 const CothorityMessages = require("~/shared/lib/dedjs/protobuf/build/cothority-messages");
 
 /**
@@ -31,7 +32,7 @@ class User {
       publicComplete: new Uint8Array()
     });
     this._roster = ObservableModule.fromObject({
-      isLoading: true,
+      isLoading: false,
       id: new Uint8Array(),
       list: new ObservableArray(),
       aggregate: new Uint8Array(),
@@ -78,7 +79,7 @@ class User {
       throw new Error("save must be of type boolean");
     }
 
-    const oldKeyPair = getKeyPair();
+    const oldKeyPair = this.getKeyPair();
 
     this._keyPair.public = keyPair.public;
     this._keyPair.private = keyPair.private;
@@ -89,7 +90,7 @@ class User {
       this._keyPair.publicComplete = new Uint8Array();
     }
 
-    const newKeyPair = getKeyPair();
+    const newKeyPair = this.getKeyPair();
 
     if (save) {
       return FileIO.writeStringTo(FilesPath.KEY_PAIR, Convert.objectToJson(newKeyPair))
@@ -97,7 +98,7 @@ class User {
           console.log(error);
           console.dir(error);
 
-          return setKeyPair(oldKeyPair, false)
+          return this.setKeyPair(oldKeyPair, false)
             .then(() => {
               return Promise.reject(error);
             });
@@ -110,6 +111,14 @@ class User {
   }
 
   /**
+   * Returns the observable roster module.
+   * @returns {ObservableModule} - the observable roster module
+   */
+  getRosterModule() {
+    return this._roster;
+  }
+
+  /**
    * Gets the users roster.
    * @returns {Roster} - a roster object containing the conodes of the user
    */
@@ -119,7 +128,12 @@ class User {
       id = this._roster.id;
     }
 
-    return CothorityMessages.createRoster(id, this._roster.list, this._roster.aggregate);
+    let list = new Array();
+    if (this._roster.list.length > 0) {
+      list = Array.from(this._roster.list);
+    }
+
+    return CothorityMessages.createRoster(id, list, this._roster.aggregate);
   }
 
   /**
@@ -136,13 +150,13 @@ class User {
       throw new Error("save must be of type boolean");
     }
 
-    const oldRoster = getRoster();
+    const oldRoster = this.getRoster();
 
     this._roster.id = roster.id;
-    this._roster.list.push(roster.list);
+    this._roster.list = roster.list;
     this._roster.aggregate = roster.aggregate;
 
-    const newRoster = getRoster();
+    const newRoster = this.getRoster();
 
     if (save) {
       return FileIO.writeStringTo(FilesPath.CONODES_JSON, Convert.objectToJson(newRoster))
@@ -150,7 +164,7 @@ class User {
           console.log(error);
           console.dir(error);
 
-          return setRoster(oldRoster, false)
+          return this.setRoster(oldRoster, false)
             .then(() => {
               return Promise.reject(error);
             });
@@ -166,11 +180,32 @@ class User {
    * Action functions.
    */
 
+  addRoster(roster) {
+    if (!Helper.isOfType(roster, ObjectType.ROSTER)) {
+      throw new Error("roster must be an instance of Roster");
+    }
+
+    if (this._roster.list.length === 0) {
+      return this.setRoster(roster, true);
+    } else if (roster.list === 0) {
+      return new Promise((resolve, reject) => {
+        resolve();
+      });
+    } else {
+      const newList = this._roster.list.concat(roster.list);
+      const newAggregate = Crypto.aggregatePublicKeys([Crypto.unmarshal(this._roster.aggregate), Crypto.unmarshal(roster.aggregate)]);
+
+      const newRoster = CothorityMessages.createRoster(undefined, newList, newAggregate);
+
+      return this.setRoster(newRoster, true);
+    }
+  }
+
   /**
    * Empties the roster status list.
    */
   emptyRosterStatusList() {
-    while (this._roster.statusList.length) {
+    while (this._roster.statusList.length > 0) {
       this._roster.statusList.pop();
     }
   }
@@ -180,16 +215,19 @@ class User {
    * @returns {Promise} - a promise that gets resolved once all the statuses of the conodes were received
    */
   getRosterStatus() {
-    emptyRosterStatusList();
+    this._roster.isLoading = true;
+    this.emptyRosterStatusList();
 
-    const conodes = Array.from(getRoster().list);
-    const cothoritySocket = new DedisJsNet.CothoritySocket();
+    const conodes = Array.from(this.getRoster().list);
+    const cothoritySocket = new Net.CothoritySocket();
     const statusRequestMessage = CothorityMessages.createStatusRequest();
 
     conodes.map((server) => {
-      return cothoritySocket.send(server, RequestPath.STATUS_REQUEST, statusRequestMessage, DecodeTypes.STATUS_RESPONSE)
+      return cothoritySocket.send(server, RequestPath.STATUS_REQUEST, statusRequestMessage, DecodeType.STATUS_RESPONSE)
         .then(statusResponse => {
-          this._roster.statusList.push(statusResponse);
+          this._roster.statusList.push({
+            conodeStatus: statusResponse
+          });
 
           return Promise.resolve();
         })
@@ -201,7 +239,10 @@ class User {
         });
     });
 
-    return Promise.all(conodes);
+    return Promise.all(conodes)
+      .then(() => {
+        this._roster.isLoading = false;
+      });
   }
 
   /**
@@ -215,7 +256,7 @@ class User {
   load() {
     this._isLoaded = false;
 
-    const promises = [loadKeyPair, loadRoster];
+    const promises = [this.loadKeyPair(), this.loadRoster()];
 
     return Promise.all(promises)
       .then(() => {
@@ -236,10 +277,14 @@ class User {
   loadKeyPair() {
     return FileIO.getStringOf(FilesPath.KEY_PAIR)
       .then(jsonKeyPair => {
-        return Convert.parseJsonKeyPair(jsonKeyPair);
+        if (jsonKeyPair.length > 0) {
+          return Convert.parseJsonKeyPair(jsonKeyPair);
+        } else {
+          return CothorityMessages.createKeyPair(new Uint8Array(), new Uint8Array(), new Uint8Array());
+        }
       })
       .then(keyPair => {
-        return setKeyPair(keyPair, false);
+        return this.setKeyPair(keyPair, false);
       })
       .catch(error => {
         console.log(error);
@@ -256,10 +301,14 @@ class User {
   loadRoster() {
     return FileIO.getStringOf(FilesPath.CONODES_JSON)
       .then(jsonRoster => {
-        return Convert.parseJsonRoster(jsonRoster);
+        if (jsonRoster.length > 0) {
+          return Convert.parseJsonRoster(jsonRoster);
+        } else {
+          return CothorityMessages.createRoster(new Uint8Array(), new Array(), new Uint8Array());
+        }
       })
       .then(roster => {
-        return setRoster(roster, false);
+        return this.setRoster(roster, false);
       })
       .catch(error => {
         console.log(error);
@@ -296,8 +345,6 @@ const USER = {};
 Object.defineProperty(USER, "get", {
   configurable: false,
   enumerable: false,
-  value: undefined,
-  writable: false,
   get: function () {
     return global[USER_PACKAGE_KEY];
   },

@@ -1,67 +1,75 @@
 const Frame = require("ui/frame");
+const Helper = require("~/shared/lib/dedjs/Helper");
+const ObjectType = require("~/shared/lib/dedjs/ObjectType");
+const User = require("~/shared/object/user/User").get;
 
-const HomeViewModel = require("./home-view-model");
+const viewModel = User.getRosterModule();
 
-const homeViewModel = new HomeViewModel();
+let pageObject = undefined;
 
-/* ***********************************************************
- * Use the "onNavigatingTo" handler to initialize the page binding context.
- *************************************************************/
 function onNavigatingTo(args) {
-  /* ***********************************************************
-   * The "onNavigatingTo" event handler lets you detect if the user navigated with a back button.
-   * Skipping the re-initialization on back navigation means the user will see the
-   * page in the same data state that he left it in before navigating.
-   *************************************************************/
   if (args.isBackNavigation) {
     return;
   }
 
   const page = args.object;
-  page.bindingContext = homeViewModel;
+  pageObject = page.page;
+  page.bindingContext = viewModel;
 
-  loadConodeList();
+  if (viewModel.statusList.length !== viewModel.list.length) {
+    loadConodeList();
+  }
 }
 
 function loadConodeList() {
-  homeViewModel.set("isLoading", true);
-  const myConodeList = homeViewModel.conodeList;
-
-  myConodeList.empty();
-  myConodeList.load()
-              .then(x => homeViewModel.set("isLoading", false));
+  return User.getRosterStatus();
 }
 
 function deblockConodeList() {
   Frame.topmost().navigate({
-                             clearHistory: true,
-                             moduleName: "drawers/home/home-page",
-                             transition: {
-                               name: "fade",
-                               duration: 0
-                             }
-                           });
+    clearHistory: true,
+    moduleName: "drawers/home/home-page",
+    transition: {
+      name: "fade",
+      duration: 0
+    }
+  });
 }
 
 function conodeTapped(args) {
   Frame.topmost().navigate({
-                             moduleName: "drawers/home/conode-stats/conode-stats-page",
-                             bindingContext: homeViewModel.conodeList.getItem(args.index).conode
-                           });
+    moduleName: "drawers/home/conode-stats/conode-stats-page",
+    bindingContext: args.index
+  });
 }
 
-/* ***********************************************************
- * According to guidelines, if you have a drawer on your page, you should always
- * have a button that opens it. Get a reference to the RadSideDrawer view and
- * use the showDrawer() function to open the app drawer section.
- *************************************************************/
+function addConodeManual() {
+  function addManualCallBack(roster) {
+    if (roster !== undefined && !Helper.isOfType(roster, ObjectType.ROSTER)) {
+      throw new Error("roster must be an instance of Roster or undefined to be skipped");
+    }
+
+    if (roster !== undefined) {
+      return User.addRoster(roster)
+        .then(() => {
+          return loadConodeList();
+        });
+    }
+  }
+
+  pageObject.showModal("drawers/home/add-conode-manual/add-conode-manual", undefined, addManualCallBack, true);
+}
+
 function onDrawerButtonTap(args) {
   const sideDrawer = Frame.topmost().getViewById("sideDrawer");
   sideDrawer.showDrawer();
 }
 
-exports.onNavigatingTo = onNavigatingTo;
-exports.onDrawerButtonTap = onDrawerButtonTap;
-exports.loadConodeList = loadConodeList;
-exports.deblockConodeList = deblockConodeList;
-exports.conodeTapped = conodeTapped;
+module.exports = {
+  onNavigatingTo,
+  onDrawerButtonTap,
+  loadConodeList,
+  deblockConodeList,
+  conodeTapped,
+  addConodeManual
+}
