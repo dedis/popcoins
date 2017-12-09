@@ -4,6 +4,8 @@ const Helper = require("~/shared/lib/dedjs/Helper");
 
 /**
  * @file Library to extract stats from a status response.
+ * @param {Response} statusResponse - a status response from a conode
+ * @returns {string} - the wanted stat of the conode
  */
 
 function throwErrorIfTypeIsWrong(statusResponse) {
@@ -85,6 +87,13 @@ function getTomlFromStatusResponse(statusResponse) {
     "  Description = \"" + getDescription(statusResponse) + "\"";
 }
 
+/**
+ * Generates the TOML string representing a conode with its address, its public key and its description.
+ * @param {string} address - the address of the conode
+ * @param {string} publicKey - the public key of the conode
+ * @param {string} description - the description of the conode
+ * @returns {string} - the TOML string representing the conode
+ */
 function getToml(address, publicKey, description) {
   if (typeof address !== "string") {
     throw new Error("address must be of type string");
@@ -102,18 +111,20 @@ function getToml(address, publicKey, description) {
     "  Description = \"" + description + "\"";
 }
 
-exports.getDescription = getDescription;
-exports.getAddress = getAddress;
-exports.getID = getID;
-exports.getPublicKey = getPublicKey;
-exports.getServices = getServices;
-exports.getSystem = getSystem;
-exports.getHost = getHost;
-exports.getPort = getPort;
-exports.getConnectionType = getConnectionType;
-exports.getVersion = getVersion;
-exports.getTXBytes = getTXBytes;
-exports.getRXBytes = getRXBytes;
-exports.getUptime = getUptime;
-exports.getTomlFromStatusResponse = getTomlFromStatusResponse;
-exports.getToml = getToml;
+module.exports = {
+  getDescription,
+  getAddress,
+  getID,
+  getPublicKey,
+  getServices,
+  getSystem,
+  getHost,
+  getPort,
+  getConnectionType,
+  getVersion,
+  getTXBytes,
+  getRXBytes,
+  getUptime,
+  getTomlFromStatusResponse,
+  getToml
+}

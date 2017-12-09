@@ -28,5 +28,7 @@ function deepCopy(object) {
   return JSON.parse(JSON.stringify(object));
 }
 
-exports.isOfType = isOfType;
-exports.deepCopy = deepCopy;
+module.exports = {
+  isOfType,
+  deepCopy
+}

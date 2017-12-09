@@ -5,7 +5,7 @@ const CothorityMessages = require("~/shared/lib/cothority-protobuf/build/cothori
 /**
  * Constructor for a standard socket. It can be used to communicate with standard web servers.
  * @param {string} address - the address where the data should be sent
- * @param {*} data - the data to be sent
+ * @param {any} data - the data to be sent
  * @returns {Promise} - a promise that gets resolved once a response is received
  */
 function StandardSocket() {
@@ -116,5 +116,7 @@ function CothoritySocket() {
   });
 }
 
-exports.StandardSocket = StandardSocket;
-exports.CothoritySocket = CothoritySocket;
+module.exports = {
+  StandardSocket,
+  CothoritySocket
+}

@@ -238,10 +238,12 @@ function schnorrVerify(pub, message, signature) {
   return S.eq(RAs);
 }
 
-exports.getKeyPairFromSecret = getKeyPairFromSecret;
-exports.aggregatePublicKeys = aggregatePublicKeys;
-exports.marshal = marshal;
-exports.unmarshal = unmarshal;
-exports.generateRandomKeyPair = generateRandomKeyPair;
-exports.schnorrSign = schnorrSign;
-exports.schnorrVerify = schnorrVerify;
+module.exports = {
+  getKeyPairFromSecret,
+  aggregatePublicKeys,
+  marshal,
+  unmarshal,
+  generateRandomKeyPair,
+  schnorrSign,
+  schnorrVerify
+}

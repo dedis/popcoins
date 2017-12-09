@@ -7,7 +7,7 @@ const Documents = FileSystem.knownFolders.currentApp();
 
 /**
  * Gets the string of the file at filePath and returns a promise with the content.
- * @param filePath - the path to the file
+ * @param {string} filePath - the path to the file
  * @returns {Promise} - a promise that gets resolved once the content of the file has been read
  */
 function getStringOf(filePath) {
@@ -26,8 +26,8 @@ function getStringOf(filePath) {
 
 /**
  * Writes the parameter string to the file at filePath. This method overwrites the file completely.
- * @param filePath - the path to the file
- * @param string - the string to write
+ * @param {string} filePath - the path to the file
+ * @param {string} string - the string to write
  * @returns {Promise} - a promise that gets resolved once the content has been written to the file
  */
 function writeStringTo(filePath, string) {
@@ -47,5 +47,7 @@ function writeStringTo(filePath, string) {
     });
 }
 
-exports.getStringOf = getStringOf;
-exports.writeStringTo = writeStringTo;
+module.exports = {
+  getStringOf,
+  writeStringTo
+}

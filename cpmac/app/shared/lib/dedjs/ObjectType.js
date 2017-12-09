@@ -16,12 +16,15 @@ const SERVER_IDENTITY = "ServerIdentity";
 const ROSTER = "Roster";
 const FINAL_STATEMENT = "FinalStatement";
 const POP_DESC = "PopDesc";
+const KEY_PAIR = "KeyPair";
 
-exports.BIG_NUMBER = BIG_NUMBER;
-exports.POINT = POINT;
-
-exports.STATUS_RESPONSE = STATUS_RESPONSE;
-exports.SERVER_IDENTITY = SERVER_IDENTITY;
-exports.ROSTER = ROSTER;
-exports.FINAL_STATEMENT = FINAL_STATEMENT;
-exports.POP_DESC = POP_DESC;
+module.exports = {
+  BIG_NUMBER,
+  POINT,
+  STATUS_RESPONSE,
+  SERVER_IDENTITY,
+  ROSTER,
+  FINAL_STATEMENT,
+  POP_DESC,
+  KEY_PAIR
+}

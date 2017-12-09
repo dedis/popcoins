@@ -8,9 +8,9 @@ const FilesPath = require("~/shared/res/files/files-path");
 const FileIO = require("~/shared/lib/file-io/file-io");
 
 const viewModel = ObservableModule.fromObject({
-                                                isLoading: true,
-                                                conodeList: new ObservableArray()
-                                              });
+  isLoading: true,
+  conodeList: new ObservableArray()
+});
 
 function HomeViewModel() {
   setUpConodeList();
@@ -25,33 +25,33 @@ function setUpConodeList() {
 
   myConodeList.load = function () {
     return FileIO.getStringOf(FilesPath.CONODES_TOML)
-                 .then((tomlString) => {
-                   return DedisJsNet.parseCothorityRoster(tomlString);
-                 })
-                 .then((roster) => {
-                   return roster.servers;
-                 })
-                 .then((servers) => {
-                   return servers.map((server) => {
-                     return cothoritySocket.send(server, CothorityPath.STATUS_REQUEST, statusRequestMessage,
-                                                 CothorityDecodeTypes.STATUS_RESPONSE)
-                                           .then((response) => {
-                                             viewModel.conodeList
-                                                      .push({
-                                                              conode: response
-                                                            });
+      .then((tomlString) => {
+        return DedisJsNet.parseCothorityRoster(tomlString);
+      })
+      .then((roster) => {
+        return roster.servers;
+      })
+      .then((servers) => {
+        return servers.map((server) => {
+          return cothoritySocket.send(server, CothorityPath.STATUS_REQUEST, statusRequestMessage,
+            CothorityDecodeTypes.STATUS_RESPONSE)
+            .then((response) => {
+              viewModel.conodeList
+                .push({
+                  conode: response
+                });
 
-                                             return Promise.resolve();
-                                           });
-                   });
-                 })
-                 .then((promises) => {
-                   return Promise.all(promises);
-                 })
-                 .catch((error) => {
-                   console.log("ERROR: " + error);
-                   console.dir(error);
-                 });
+              return Promise.resolve();
+            });
+        });
+      })
+      .then((promises) => {
+        return Promise.all(promises);
+      })
+      .catch((error) => {
+        console.log("ERROR: " + error);
+        console.dir(error);
+      });
   };
 
   myConodeList.empty = function () {

@@ -1,6 +1,6 @@
 import CothorityProtobuf from "./cothority-protobuf";
 const Helper = require("~/shared/lib/dedjs/Helper");
-const Types = require("~/shared/lib/dedjs/ObjectType");
+const ObjectTypes = require("~/shared/lib/dedjs/ObjectType");
 
 /**
  * Helpers to encode and decode messages of the Cothority
@@ -28,6 +28,38 @@ class CothorityMessages extends CothorityProtobuf {
   /**
    * Server related messages.
    */
+
+  /**
+  * Creates a KeyPair object from the given public and private keys.
+  * @param {Uint8Array} publicKey - the public key
+  * @param {Uint8Array} privateKey - the private key
+  * @param {Uint8Array} publicCompleteKey - the complete public key
+  * @returns {KeyPair} - the key pair created given the parameters
+  */
+  createKeyPair(publicKey, privateKey, publicCompleteKey) {
+    if (!(publicKey instanceof Uint8Array)) {
+      throw new Error("publicKey must be an instance of Uint8Array");
+    }
+    if (!(privateKey instanceof Uint8Array)) {
+      throw new Error("privateKey must be an instance of Uint8Array");
+    }
+    if (!(publicCompleteKey instanceof Uint8Array || publicCompleteKey === undefined)) {
+      throw new Error("publicCompleteKey must be an instance of Uint8Array or undefined to be skipped");
+    }
+
+    const model = this.getModel("KeyPair");
+
+    const fields = {
+      public: publicKey,
+      private: privateKey
+    };
+
+    if (publicCompleteKey !== undefined) {
+      fields.publicComplete = publicCompleteKey;
+    }
+
+    return model.create(fields);
+  }
 
   /**
    * Creates a ServerIdentity object from the given parameters.
@@ -77,7 +109,7 @@ class CothorityMessages extends CothorityProtobuf {
     if (!(list instanceof Array)) {
       throw new Error("list must be an instance of Array");
     }
-    if (!Helper.isOfType(list[0], Types.SERVER_IDENTITY)) {
+    if (!Helper.isOfType(list[0], ObjectTypes.SERVER_IDENTITY)) {
       throw new Error("list[i] must be an instance of ServerIdentity");
     }
     if (!(aggregate instanceof Uint8Array)) {
@@ -124,7 +156,7 @@ class CothorityMessages extends CothorityProtobuf {
     if (!(message instanceof Uint8Array)) {
       throw new Error("message must be an instance of Uint8Array");
     }
-    if (!Helper.isOfType(roster, Types.ROSTER)) {
+    if (!Helper.isOfType(roster, ObjectTypes.ROSTER)) {
       throw new Error("roster must be an instance of Roster");
     }
 
@@ -142,7 +174,7 @@ class CothorityMessages extends CothorityProtobuf {
    * @returns {*|Buffer|Uint8Array} - the encoded clock request
    */
   createClockRequest(roster) {
-    if (!Helper.isOfType(roster, Types.ROSTER)) {
+    if (!Helper.isOfType(roster, ObjectTypes.ROSTER)) {
       throw new Error("roster must be an instance of Roster");
     }
 
@@ -183,7 +215,7 @@ class CothorityMessages extends CothorityProtobuf {
     if (typeof location !== "string") {
       throw new Error("location must be of type string");
     }
-    if (!Helper.isOfType(roster, Types.ROSTER)) {
+    if (!Helper.isOfType(roster, ObjectTypes.ROSTER)) {
       throw new Error("roster must be an instance of Roster");
     }
 
@@ -207,7 +239,7 @@ class CothorityMessages extends CothorityProtobuf {
    * @returns {PopToken} - the pop token created using the given parameters
    */
   createPopToken(final, privateKey, publicKey) {
-    if (!Helper.isOfType(final, Types.FINAL_STATEMENT)) {
+    if (!Helper.isOfType(final, ObjectTypes.FINAL_STATEMENT)) {
       throw new Error("final must be an instance of FinalStatement");
     }
     if (!(privateKey instanceof Uint8Array)) {
@@ -235,7 +267,7 @@ class CothorityMessages extends CothorityProtobuf {
    * @returns {*|Buffer|Uint8Array} - the encoded store config request
    */
   createStoreConfig(desc, signature) {
-    if (!Helper.isOfType(desc, Types.POP_DESC)) {
+    if (!Helper.isOfType(desc, ObjectTypes.POP_DESC)) {
       throw new Error("desc must be an instance of PopDesc");
     }
     if (!(signature instanceof Uint8Array)) {
@@ -259,7 +291,7 @@ class CothorityMessages extends CothorityProtobuf {
    * @returns {FinalStatement} - the final statement created given the parameters
    */
   createFinalStatement(desc, attendees, signature, merged) {
-    if (!Helper.isOfType(desc, Types.POP_DESC)) {
+    if (!Helper.isOfType(desc, ObjectTypes.POP_DESC)) {
       throw new Error("desc must be an instance of PopDesc");
     }
     if (!(attendees instanceof Array)) {
@@ -351,15 +383,6 @@ class CothorityMessages extends CothorityProtobuf {
     };
 
     return this.encodeMessage("FetchRequest", fields);
-  }
-
-  /**
-   * Returns the decoded response of a FetchRequest.
-   * @param response - Response of the Cothority
-   * @returns {*}
-   */
-  decodeFetchRequest(response) {
-    return decodeFinalizeResponse(response);
   }
 
   /**

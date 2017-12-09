@@ -53,7 +53,7 @@ function scanToClip() {
 /**
  * Callback function called every time a code has been scanned. In our case we stop after the first success. It will
  * copy the result to the clipboard and stop the scanning process.
- * @param scanResult - the result of the scan
+ * @param {object} scanResult - the result of the scan
  * @returns {Promise} - a promise that gets resolved once the content of the scan has been set to the clipboard
  */
 const continuousCallback = function (scanResult) {
@@ -85,4 +85,4 @@ const closeCallback = function () {
 };
 
 // Exports --------------------------------------------------------------------
-exports.scanToClip = scanToClip;
+module.exports = scanToClip;

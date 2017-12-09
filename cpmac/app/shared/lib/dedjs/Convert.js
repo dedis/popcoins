@@ -212,8 +212,12 @@ function parseJsonRoster(jsonString) {
     throw new Error("jsonString must be of type string");
   }
 
+  const roster = jsonToObject(jsonString);
+
+  const id = roster.id;
+
   const points = [];
-  const list = jsonToObject(jsonString).servers.map((server) => {
+  const list = roster.list.map((server) => {
     points.push(Crypto.unmarshal(base64ToByteArray(server.public)));
 
     let id = server.id;
@@ -225,7 +229,12 @@ function parseJsonRoster(jsonString) {
     return CothorityMessages.createServerIdentity(server.public, id, server.address, server.description);
   });
 
-  return CothorityMessages.createRoster(undefined, list, Crypto.aggregatePublicKeys(points));
+  const aggregate = roster.aggregate;
+  if (aggregate === undefined) {
+    aggregate = Crypto.aggregatePublicKeys(points);
+  }
+
+  return CothorityMessages.createRoster(id, list, aggregate);
 }
 
 /**
@@ -254,20 +263,43 @@ function parseTomlRoster(tomlString) {
   return CothorityMessages.createRoster(undefined, list, Crypto.aggregatePublicKeys(points));
 }
 
-exports.byteArrayToHex = byteArrayToHex;
-exports.hexToByteArray = hexToByteArray;
-exports.byteArrayToBase64 = byteArrayToBase64;
-exports.base64ToByteArray = base64ToByteArray;
-exports.hexToBase64 = hexToBase64;
-exports.base64ToHex = base64ToHex;
+/**
+ * Parses a JSON string into a KeyPair object.
+ * @param {string} jsonString - the JSON string to parse into a KeyPair object
+ * @returns {KeyPair} - the parsed KeyPair object
+ */
+function parseJsonKeyPair(jsonString) {
+  if (typeof jsonString !== "string") {
+    throw new Error("jsonString must be of type string");
+  }
 
-exports.objectToJson = objectToJson;
-exports.jsonToObject = jsonToObject;
-exports.objectToToml = objectToToml;
-exports.tomlToObject = tomlToObject;
-exports.jsonToToml = jsonToToml;
-exports.tomlToJson = tomlToJson;
+  const keyPair = jsonToObject(jsonString);
 
-exports.tcpToWebsocket = tcpToWebsocket;
-exports.parseJsonRoster = parseJsonRoster;
-exports.parseTomlRoster = parseTomlRoster;
+  let publicComplete = undefined;
+  if (keyPair.publicComplete !== undefined) {
+    publicComplete = base64ToByteArray(keyPair.publicComplete);
+  }
+
+  return CothorityMessages.createKeyPair(base64ToByteArray(keyPair.public), base64ToByteArray(keyPair.private), publicComplete);
+}
+
+module.exports = {
+  byteArrayToHex,
+  hexToByteArray,
+  byteArrayToBase64,
+  base64ToByteArray,
+  hexToBase64,
+  base64ToHex,
+
+  objectToJson,
+  jsonToObject,
+  objectToToml,
+  tomlToObject,
+  jsonToToml,
+  tomlToJson,
+
+  tcpToWebsocket,
+  parseJsonRoster,
+  parseTomlRoster,
+  parseJsonKeyPair
+}
