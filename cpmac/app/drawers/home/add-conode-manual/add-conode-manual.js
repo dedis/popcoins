@@ -1,5 +1,7 @@
 const Dialog = require("ui/dialogs");
 const Convert = require("~/shared/lib/dedjs/Convert");
+const Helper = require("~/shared/lib/dedjs/Helper");
+const CothorityMessages = require("~/shared/lib/dedjs/protobuf/build/cothority-messages");
 
 let textFieldAddress = undefined;
 let textFieldPublicKey = undefined;
@@ -22,6 +24,11 @@ function onLoaded(args) {
   if (textFieldAddress === undefined || textFieldPublicKey === undefined || textFieldDescription === undefined) {
     throw new Error("a field is undefined, but it shouldn't");
   }
+
+  // TODO: remove
+  textFieldAddress.text = "tcp://10.0.2.2:7002";
+  textFieldPublicKey.text = "HkDzpR5Imd7WNx8kl2lJcIVRVn8gfDByJnmlfrYh/zU=";
+  textFieldDescription.text = "Conode_1";
 }
 
 /**
@@ -40,19 +47,26 @@ function loadViews(page) {
  */
 function addManual() {
   const address = textFieldAddress.text;
-  const publicKey = textFieldPublicKey.text;
+  let publicKey = textFieldPublicKey.text;
   const description = textFieldDescription.text;
 
   if (address.length > 0 && publicKey.length > 0 && description.length > 0) {
-    const roster = Convert.parseJsonRoster(JSON.stringify({
-      list: [{
-        address: address,
-        public: publicKey,
-        description: description
-      }]
-    }));
+    try {
+      publicKey = Convert.base64ToByteArray(publicKey);
+      const server = Convert.toServerIdentity(address, publicKey, description, undefined);
 
-    closeCallBackFunction(roster);
+      closeCallBackFunction(server);
+    } catch (error) {
+      console.log(error);
+      console.dir(error);
+      console.trace();
+
+      return Dialog.alert({
+        title: "Incorrect Input",
+        message: "Please double check your address and public key.",
+        okButtonText: "Ok"
+      });
+    }
   } else {
     return Dialog.alert({
       title: "Provide More Information",

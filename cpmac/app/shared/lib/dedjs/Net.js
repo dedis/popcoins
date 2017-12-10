@@ -38,7 +38,9 @@ function StandardSocket() {
 
     socket.on("error", (socket, error) => {
       console.log("Socket error:");
+      console.log(error);
       console.dir(error);
+      console.trace();
 
       socket.close();
       reject(error);
@@ -109,6 +111,8 @@ function CothoritySocket() {
     socket.on("error", (socket, error) => {
       console.log("Socket error:");
       console.log(error);
+      console.dir(error);
+      console.trace();
 
       socket.close();
       reject(error);

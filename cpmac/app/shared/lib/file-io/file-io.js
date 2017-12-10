@@ -21,6 +21,7 @@ function getStringOf(filePath) {
       console.log("READING ERROR:");
       console.log(error);
       console.dir(error);
+      console.trace();
     });
 }
 
@@ -44,6 +45,7 @@ function writeStringTo(filePath, string) {
       console.log("WRITING ERROR:");
       console.log(error);
       console.dir(error);
+      console.trace();
     });
 }
 

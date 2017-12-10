@@ -65,10 +65,13 @@
                 <Label class="page-icon fa" text="&#xf015;"/>
                 <Label class="page-placeholder" text="Page content goes here"></Label>
                  -->
-                <ListView items="{{ statusList }}" itemTap="conodeTapped" row="0" colSpan="2">
+                <ListView items="{{ list }}" itemTap="conodeTapped" row="0" colSpan="2">
                     <ListView.itemTemplate>
-                        <GridLayout rows="*" columns="*">
-                            <Label text="{{ conodeStatus.server.description }}" textAlignment="center" textWrap="true"/>
+                        <GridLayout id="grid-layout-conode-stats" rows="*,*,*,*" columns="*">
+                            <Label text="{{ description }}" row="0" textWrap="true"/>
+                            <Label text="{{ address }}" row="1" textWrap="true"/>
+                            <Label text="{{ toBase64(id) }}" row="2" textWrap="true"/>
+                            <Label text="{{ toBase64(public) }}" row="3" textWrap="true"/>
                         </GridLayout>
                     </ListView.itemTemplate>
                 </ListView>

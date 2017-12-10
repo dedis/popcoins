@@ -118,12 +118,14 @@ function unmarshal(bytes) {
     throw new Error("bytes must be an instance of Uint8Array");
   }
 
-  const odd = (bytes[31] >> 7) === 1;
+  const bytesCopy = Uint8Array.from(bytes);
+
+  const odd = (bytesCopy[31] >> 7) === 1;
   if (odd) {
-    bytes[0] -= 19;
+    bytesCopy[0] -= 19;
   }
 
-  return CURVE_ED25519.curve.pointFromY(bytes.reverse(), odd);
+  return CURVE_ED25519.curve.pointFromY(bytesCopy.reverse(), odd);
 }
 
 /**

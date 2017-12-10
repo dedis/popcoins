@@ -97,6 +97,7 @@ class User {
         .catch((error) => {
           console.log(error);
           console.dir(error);
+          console.trace();
 
           return this.setKeyPair(oldKeyPair, false)
             .then(() => {
@@ -128,9 +129,11 @@ class User {
       id = this._roster.id;
     }
 
-    let list = new Array();
+    let list = [];
     if (this._roster.list.length > 0) {
-      list = Array.from(this._roster.list);
+      this._roster.list.forEach(server => {
+        list.push(server);
+      });
     }
 
     return CothorityMessages.createRoster(id, list, this._roster.aggregate);
@@ -152,17 +155,30 @@ class User {
 
     const oldRoster = this.getRoster();
 
-    this._roster.id = roster.id;
-    this._roster.list = roster.list;
+    this._roster.id = new Uint8Array();
+    if (roster.id !== undefined) {
+      this._roster.id = roster.id;
+    }
+    this._roster.list = new ObservableArray();
+    roster.list.forEach((server) => {
+      server.toBase64 = Convert.byteArrayToBase64;
+      this._roster.list.push(server);
+    });
     this._roster.aggregate = roster.aggregate;
 
     const newRoster = this.getRoster();
 
     if (save) {
-      return FileIO.writeStringTo(FilesPath.CONODES_JSON, Convert.objectToJson(newRoster))
+      let toWrite = "";
+      if (newRoster.list.length > 0) {
+        toWrite = Convert.objectToJson(newRoster);
+      }
+
+      return FileIO.writeStringTo(FilesPath.CONODES_JSON, toWrite)
         .catch((error) => {
           console.log(error);
           console.dir(error);
+          console.trace();
 
           return this.setRoster(oldRoster, false)
             .then(() => {
@@ -180,6 +196,103 @@ class User {
    * Action functions.
    */
 
+  /**
+   * Substracts a server form the roster of the user by its index.
+   * @param {number} index - the index of the server to remove
+   * @returns {Promise} - a promise that gets returned once the server has been removed from the roster and saved
+   */
+  substractServerByIndex(index) {
+    if (typeof index !== "number" && index >= 0) {
+      throw new Error("index must be of type number and >= 0");
+    }
+
+    const server = this._roster.list.getItem(index);
+
+    return this.substractRoster(CothorityMessages.createRoster(undefined, [server], server.public));
+  }
+
+  /**
+   * Substracts the roster given as parameter from the users roster.
+   * @param {Roster} roster - the roster to substract
+   * @returns {Promise} - a promise that gets resolved once the roster has been substracted and saved
+   */
+  substractRoster(roster) {
+    if (!Helper.isOfType(roster, ObjectType.ROSTER)) {
+      throw new Error("roster must be an instance of Roster");
+    }
+
+    if (this._roster.list.length === 0) {
+      return new Promise((resolve, reject) => {
+        resolve();
+      });
+    } else if (roster.list === 0) {
+      return new Promise((resolve, reject) => {
+        resolve();
+      });
+    } else {
+      const idsToExclude = roster.list.map(server => {
+        return server.id;
+      });
+
+      const newList = [];
+      const points = [];
+      this._roster.list.forEach(server => {
+        if (!idsToExclude.includes(server.id)) {
+          newList.push(server);
+          points.push(Crypto.unmarshal(server.public));
+        }
+      });
+
+      let newRoster = undefined;
+      if (newList.length > 0) {
+        newRoster = CothorityMessages.createRoster(undefined, newList, Crypto.aggregatePublicKeys(points));
+      } else {
+        newRoster = CothorityMessages.createRoster(new Uint8Array(), [], new Uint8Array());
+      }
+
+      return this.setRoster(newRoster, true);
+    }
+  }
+
+  /**
+   * Adds a server to the roster of the user by constructing it from the given parameters.
+   * @param {string} address - the address of the server
+   * @param {Uint8Array} publicKey - the public key of the server
+   * @param {string} description - the description of the server
+   * @returns {Promise} - a promise that gets resolved once the server has been added to the roster and saved
+   */
+  addServerByInfo(address, publicKey, description) {
+    if (typeof address !== "string") {
+      throw new Error("address must be of type string");
+    }
+    if (!(publicKey instanceof Uint8Array)) {
+      throw new Error("publicKey must be an instance of Uint8Array");
+    }
+    if (typeof description !== "string") {
+      throw new Error("description must be of type string");
+    }
+
+    return this.addServer(Convert.toServerIdentity(address, publicKey, description, undefined));
+  }
+
+  /**
+   * Adds a server to the roster of the user.
+   * @param {ServerIdentity} server - the server to add to the roster
+   * @returns {Promise} - a promise that gets resolved once the server has been added to the roster and saved
+   */
+  addServer(server) {
+    if (!Helper.isOfType(server, ObjectType.SERVER_IDENTITY)) {
+      throw new Error("server must be of type ServerIdentity");
+    }
+
+    return this.addRoster(CothorityMessages.createRoster(undefined, [server], server.public));
+  }
+
+  /**
+   * Adds the roster given as parameter to the roster of the user.
+   * @param {Roster} roster - the roster to add
+   * @returns {Promise} - a promise that gets resolved once the roster has been added and saved
+   */
   addRoster(roster) {
     if (!Helper.isOfType(roster, ObjectType.ROSTER)) {
       throw new Error("roster must be an instance of Roster");
@@ -192,10 +305,24 @@ class User {
         resolve();
       });
     } else {
-      const newList = this._roster.list.concat(roster.list);
-      const newAggregate = Crypto.aggregatePublicKeys([Crypto.unmarshal(this._roster.aggregate), Crypto.unmarshal(roster.aggregate)]);
+      const newList = [];
+      const points = [];
+      const idsToExclude = [];
 
-      const newRoster = CothorityMessages.createRoster(undefined, newList, newAggregate);
+      this._roster.list.forEach(server => {
+        newList.push(server);
+        points.push(Crypto.unmarshal(server.public));
+        idsToExclude.push(Convert.byteArrayToBase64(server.id));
+      });
+
+      roster.list.forEach(server => {
+        if (!idsToExclude.includes(Convert.byteArrayToBase64(server.id))) {
+          newList.push(server);
+          points.push(Crypto.unmarshal(server.public));
+        }
+      });
+
+      const newRoster = CothorityMessages.createRoster(undefined, newList, Crypto.aggregatePublicKeys(points));
 
       return this.setRoster(newRoster, true);
     }
@@ -226,6 +353,7 @@ class User {
       return cothoritySocket.send(server, RequestPath.STATUS_REQUEST, statusRequestMessage, DecodeType.STATUS_RESPONSE)
         .then(statusResponse => {
           this._roster.statusList.push({
+            conode: server,
             conodeStatus: statusResponse
           });
 
@@ -234,6 +362,7 @@ class User {
         .catch(error => {
           console.log(error);
           console.dir(error);
+          console.trace();
 
           return Promise.reject(error);
         });
@@ -265,6 +394,7 @@ class User {
       .catch(error => {
         console.log(error);
         console.dir(error);
+        console.trace();
 
         return Promise.reject(error);
       });
@@ -289,6 +419,7 @@ class User {
       .catch(error => {
         console.log(error);
         console.dir(error);
+        console.trace();
 
         return Promise.reject(error);
       });
@@ -304,7 +435,7 @@ class User {
         if (jsonRoster.length > 0) {
           return Convert.parseJsonRoster(jsonRoster);
         } else {
-          return CothorityMessages.createRoster(new Uint8Array(), new Array(), new Uint8Array());
+          return CothorityMessages.createRoster(new Uint8Array(), [], new Uint8Array());
         }
       })
       .then(roster => {
@@ -313,6 +444,7 @@ class User {
       .catch(error => {
         console.log(error);
         console.dir(error);
+        console.trace();
 
         return Promise.reject(error);
       });

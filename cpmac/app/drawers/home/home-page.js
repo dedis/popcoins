@@ -17,7 +17,7 @@ function onNavigatingTo(args) {
   page.bindingContext = viewModel;
 
   if (viewModel.statusList.length !== viewModel.list.length) {
-    loadConodeList();
+    //loadConodeList();
   }
 }
 
@@ -37,20 +37,23 @@ function deblockConodeList() {
 }
 
 function conodeTapped(args) {
+  return User.substractServerByIndex(args.index);
+  /*
   Frame.topmost().navigate({
     moduleName: "drawers/home/conode-stats/conode-stats-page",
     bindingContext: args.index
   });
+  */
 }
 
 function addConodeManual() {
-  function addManualCallBack(roster) {
-    if (roster !== undefined && !Helper.isOfType(roster, ObjectType.ROSTER)) {
-      throw new Error("roster must be an instance of Roster or undefined to be skipped");
+  function addManualCallBack(server) {
+    if (server !== undefined && !Helper.isOfType(server, ObjectType.SERVER_IDENTITY)) {
+      throw new Error("server must be an instance of ServerIdentity or undefined to be skipped");
     }
 
-    if (roster !== undefined) {
-      return User.addRoster(roster)
+    if (server !== undefined) {
+      return User.addServer(server)
         .then(() => {
           return loadConodeList();
         });

@@ -196,10 +196,10 @@ function tcpToWebsocket(serverIdentity, path) {
     throw new Error("path must be of type string");
   }
 
-  let [url, port] = serverIdentity.address.replace(BASE_URL_TCP, "").split(URL_PORT_SPLITTER);
+  let [ip, port] = serverIdentity.address.replace(BASE_URL_TCP, "").split(URL_PORT_SPLITTER);
   port = parseInt(port) + 1;
 
-  return BASE_URL_WS + url + URL_PORT_SPLITTER + port + path;
+  return BASE_URL_WS + ip + URL_PORT_SPLITTER + port + path;
 }
 
 /**
@@ -221,14 +221,11 @@ function parseJsonRoster(jsonString) {
     points.push(Crypto.unmarshal(base64ToByteArray(server.public)));
 
     let id = server.id;
-    if (id === undefined) {
-      const url = BASE_URL_CONODE_ID + Base64.decode(server.public, HEX_KEYWORD);
-      id = new Uint8Array(new UUID(5, NAME_SPACE_URL, url).export());
-    } else {
-      id = base64ToByteArray(server.id);
+    if (id !== undefined) {
+      id = base64ToByteArray(id);
     }
 
-    return CothorityMessages.createServerIdentity(base64ToByteArray(server.public), id, server.address, server.description);
+    return toServerIdentity(server.address, base64ToByteArray(server.public), server.description, id);
   });
 
   let aggregate = roster.aggregate;
@@ -256,12 +253,11 @@ function parseTomlRoster(tomlString) {
     points.push(Crypto.unmarshal(base64ToByteArray(server.Public)));
 
     let id = server.Id;
-    if (id === undefined) {
-      const url = BASE_URL_CONODE_ID + Base64.decode(server.Public, HEX_KEYWORD);
-      id = new Uint8Array(new UUID(5, NAME_SPACE_URL, url).export());
+    if (id !== undefined) {
+      id = base64ToByteArray(id);
     }
 
-    return CothorityMessages.createServerIdentity(server.Public, id, server.Address, server.Description);
+    return toServerIdentity(server.Address, base64ToByteArray(server.Public), server.Description, id);
   });
 
   return CothorityMessages.createRoster(undefined, list, Crypto.aggregatePublicKeys(points));
@@ -287,6 +283,36 @@ function parseJsonKeyPair(jsonString) {
   return CothorityMessages.createKeyPair(base64ToByteArray(keyPair.public), base64ToByteArray(keyPair.private), publicComplete);
 }
 
+/**
+ * Converts the arguments given as parameter into a ServerIdentity object.
+ * @param {string} address - the address of the server
+ * @param {Uint8Array} publicKey - the public key of the server
+ * @param {string} description - the description of the server
+ * @param {Uint8Array} id - the id of the server or undefined to be skipped
+ * @returns {ServerIdentity} - the server identity object created from the given parameters
+ */
+function toServerIdentity(address, publicKey, description, id) {
+  if (typeof address !== "string" || !Helper.isValidAddress(address)) {
+    throw new Error("address must be of type string and have the right format");
+  }
+  if (!(publicKey instanceof Uint8Array) || !Helper.isValidPublicKey(publicKey)) {
+    throw new Error("publicKey must be an instance of Uint8Array and have the right format");
+  }
+  if (typeof description !== "string") {
+    throw new Error("description must be of type string");
+  }
+  if (!(id === undefined || id instanceof Uint8Array)) {
+    throw new Error("id must be an instance of Uint8Array or be undefined to be skipped");
+  }
+
+  if (id === undefined) {
+    const url = BASE_URL_CONODE_ID + Base64.decode(publicKey, HEX_KEYWORD);
+    id = new Uint8Array(new UUID(5, NAME_SPACE_URL, url).export());
+  }
+
+  return CothorityMessages.createServerIdentity(publicKey, id, address, description);
+}
+
 module.exports.byteArrayToHex = byteArrayToHex;
 module.exports.hexToByteArray = hexToByteArray;
 module.exports.byteArrayToBase64 = byteArrayToBase64;
@@ -303,3 +329,4 @@ module.exports.tcpToWebsocket = tcpToWebsocket;
 module.exports.parseJsonRoster = parseJsonRoster;
 module.exports.parseTomlRoster = parseTomlRoster;
 module.exports.parseJsonKeyPair = parseJsonKeyPair;
+module.exports.toServerIdentity = toServerIdentity;
