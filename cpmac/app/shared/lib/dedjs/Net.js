@@ -2,7 +2,7 @@ const Convert = require("~/shared/lib/dedjs/Convert");
 const Helper = require("~/shared/lib/dedjs/Helper");
 const ObjectType = require("~/shared/lib/dedjs/ObjectType");
 const WebSocket = require("nativescript-websockets");
-const CothorityMessages = require("~/shared/lib/cothority-protobuf/build/cothority-messages");
+const CothorityMessages = require("~/shared/lib/dedjs/protobuf/build/cothority-messages");
 
 /**
  * Constructor for a standard socket. It can be used to communicate with standard web servers.
