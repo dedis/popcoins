@@ -1,9 +1,7 @@
-require("nativescript-nodeify");
 const Frame = require("ui/frame");
 const Dialog = require("ui/dialogs");
 const FilesPath = require("~/shared/res/files/files-path");
 const FileIO = require("~/shared/lib/file-io/file-io");
-const Base64 = require("base64-coder-node")();
 const Misc = require("~/shared/lib/dedis-js/src/misc");
 const DedisJsNet = require("~/shared/lib/dedis-js/src/net");
 const CothorityMessages = require("~/shared/lib/cothority-protobuf/build/cothority-messages");

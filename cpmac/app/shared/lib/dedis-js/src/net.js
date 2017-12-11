@@ -8,7 +8,6 @@ exports.Socket = Socket;
 exports.StandardSocket = StandardSocket;
 exports.CothoritySocket = CothoritySocket;
 
-require("nativescript-nodeify");
 const Misc = require("./misc.js");
 const WebSocket = require("nativescript-websockets");
 const CothorityMessages = require("~/shared/lib/cothority-protobuf/build/cothority-messages");
@@ -16,7 +15,6 @@ const CothorityDecodeTypes = require("~/shared/res/cothority-decode-types/cothor
 
 const TOPL = require("topl");
 const UUID = require("pure-uuid");
-const Base64 = require("base64-coder-node")();
 
 /**
  * Parse cothority roster toml string into a JavaScript object.

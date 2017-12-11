@@ -1,20 +1,22 @@
-require("nativescript-nodeify");
+const Buffer = require("buffer/").Buffer;
 const Helper = require("~/shared/lib/dedjs/Helper");
 const ObjectType = require("~/shared/lib/dedjs/ObjectType");
 const Crypto = require("~/shared/lib/dedjs/Crypto");
-const Base64 = require("base64-coder-node")();
 const TomlParser = require("toml");
 const Tomlify = require('tomlify-j0.4');
 const UUID = require("pure-uuid");
 const CothorityMessages = require("~/shared/lib/dedjs/protobuf/build/cothority-messages");
 
 const HEX_KEYWORD = "hex";
+const BASE64_KEYWORD = "base64";
 
 const URL_PORT_SPLITTER = ":";
 const BASE_URL_WS = "ws://";
 const BASE_URL_TCP = "tcp://";
+
 const BASE_URL_CONODE_ID = "https://dedis.epfl.ch/id/";
 const NAME_SPACE_URL = "ns:URL";
+const UUID_VERSION = 5;
 
 /**
  * Converts a byte array to it's hexadecimal string representation
@@ -84,7 +86,7 @@ function hexToBase64(hexString) {
     throw new Error("hexString must be of type string");
   }
 
-  return Base64.encode(hexString, HEX_KEYWORD);
+  return Buffer.from(hexString, HEX_KEYWORD).toString(BASE64_KEYWORD);
 }
 
 /**
@@ -97,7 +99,7 @@ function base64ToHex(base64String) {
     throw new Error("base64String must be of type string");
   }
 
-  return Base64.decode(base64String, HEX_KEYWORD);
+  return Buffer.from(base64String, BASE64_KEYWORD).toString(HEX_KEYWORD);
 }
 
 /**
@@ -306,11 +308,24 @@ function toServerIdentity(address, publicKey, description, id) {
   }
 
   if (id === undefined) {
-    const url = BASE_URL_CONODE_ID + Base64.decode(publicKey, HEX_KEYWORD);
-    id = new Uint8Array(new UUID(5, NAME_SPACE_URL, url).export());
+    id = publicKeyToUuid(publicKey);
   }
 
   return CothorityMessages.createServerIdentity(publicKey, id, address, description);
+}
+
+/**
+ * Converts a public key into a UUID. This UUID can then be used to uniquely identify the conode.
+ * @param {Uint8Array} publicKey - the public key of the server
+ * @returns {Uint8Array} - the uuid of the server
+ */
+function publicKeyToUuid(publicKey) {
+  if (!(publicKey instanceof Uint8Array)) {
+    throw new Error("publicKey must be an instance of Uint8Array");
+  }
+
+  const url = BASE_URL_CONODE_ID + byteArrayToBase64(publicKey);
+  return new Uint8Array(new UUID(UUID_VERSION, NAME_SPACE_URL, url).export());
 }
 
 module.exports.byteArrayToHex = byteArrayToHex;
