@@ -12,20 +12,8 @@
       "version": "3.2.0"
     }
   },
-  "scripts": {
-    "clean": "make clean",
-    "cinstall": "make clean-install",
-    "ios": "make run-ios",
-    "android": "make run-android",
-    "tios": "make test-ios",
-    "tandroid": "make test-android",
-    "cios": "npm cinstall && npm ios",
-    "candroid": "npm cinstall && npm android",
-    "ctios": "npm cinstall && npm tios",
-    "ctandroid": "npm cinstall && npm tandroid"
-  },
+  "scripts": {},
   "dependencies": {
-    "babel-core": "^6.26.0",
     "bn.js": "^4.11.8",
     "buffer": "^5.0.8",
     "elliptic": "^6.4.0",
@@ -36,23 +24,22 @@
     "nativescript-modal-datetimepicker": "^1.0.3",
     "nativescript-pro-ui": "^3.2.0",
     "nativescript-theme-core": "1.0.4",
-    "nativescript-unit-test-runner": "^0.3.4",
     "nativescript-websockets": "^1.3.4",
     "nativescript-zxing": "^1.5.2",
     "protobufjs": "^6.8.0",
     "pure-uuid": "^1.4.8",
-    "rollup": "^0.50.0",
-    "rollup-plugin-babel": "^3.0.2",
     "tns-core-modules": "^3.1.1",
     "toml": "^2.3.3",
     "tomlify-j0.4": "^3.0.0",
     "topl": "^0.3.1"
   },
   "devDependencies": {
+    "babel-core": "^6.26.0",
     "babel-traverse": "6.26.0",
     "babel-types": "6.26.0",
     "babylon": "6.18.0",
     "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
     "eslint": "4.4.1",
     "faker": "^4.1.0",
     "karma": "^1.7.1",
@@ -60,7 +47,11 @@
     "karma-mocha": "^1.3.0",
     "karma-nativescript-launcher": "^0.4.0",
     "lazy": "1.0.11",
+    "mocha": "^4.0.1",
     "nativescript-dev-sass": "1.3.0",
-    "opn": "^5.1.0"
+    "nativescript-unit-test-runner": "^0.3.4",
+    "opn": "^5.1.0",
+    "rollup": "^0.50.1",
+    "rollup-plugin-babel": "^3.0.2"
   }
 }
