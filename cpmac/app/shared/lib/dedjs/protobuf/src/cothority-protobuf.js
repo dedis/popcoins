@@ -69,6 +69,11 @@ export default class CothorityProtobuf {
       throw new Error("name must be of type string");
     }
 
-    return this.root.lookup(`${name}`);
+    const model = this.root.lookup(`${name}`);
+    if (model === undefined || model === null) {
+      throw new Error("unknown model: " + name);
+    }
+
+    return model;
   }
 }

@@ -1,6 +1,6 @@
 import CothorityProtobuf from "./cothority-protobuf";
 const Helper = require("../../Helper");
-const ObjectTypes = require("../../ObjectType");
+const ObjectType = require("../../ObjectType");
 
 /**
  * Helpers to encode and decode messages of the Cothority
@@ -47,7 +47,7 @@ class CothorityMessages extends CothorityProtobuf {
       throw new Error("publicCompleteKey must be an instance of Uint8Array or undefined to be skipped");
     }
 
-    const model = this.getModel("KeyPair");
+    const model = this.getModel(ObjectType.KEY_PAIR);
 
     const fields = {
       public: publicKey,
@@ -83,7 +83,7 @@ class CothorityMessages extends CothorityProtobuf {
       throw new Error("desc must be of type string");
     }
 
-    const model = this.getModel("ServerIdentity");
+    const model = this.getModel(ObjectType.SERVER_IDENTITY);
 
     const fields = {
       public: publicKey,
@@ -109,14 +109,14 @@ class CothorityMessages extends CothorityProtobuf {
     if (!(list instanceof Array)) {
       throw new Error("list must be an instance of Array");
     }
-    if (list.length > 0 && !Helper.isOfType(list[0], ObjectTypes.SERVER_IDENTITY)) {
+    if (list.length > 0 && !Helper.isOfType(list[0], ObjectType.SERVER_IDENTITY)) {
       throw new Error("list[i] must be an instance of ServerIdentity");
     }
     if (!(aggregate instanceof Uint8Array)) {
       throw new Error("aggregate must be an instance of Uint8Array");
     }
 
-    const model = this.getModel("Roster");
+    const model = this.getModel(ObjectType.ROSTER);
 
     const fields = {
       list: list,
@@ -135,62 +135,7 @@ class CothorityMessages extends CothorityProtobuf {
    * @returns {*|Buffer|Uint8Array} - the encoded status request
    */
   createStatusRequest() {
-    return this.encodeMessage("Request", {});
-  }
-
-  /**
-   * Creates an encoded  message to get a random number.
-   * @returns {*|Buffer|Uint8Array} - the encoded random request
-   */
-  createRandomMessage() {
-    return this.encodeMessage("RandomRequest", {});
-  }
-
-  /**
-   * Creates an encoded message to make a sign request to a cothority roster.
-   * @param {Uint8Array} message - message to sign
-   * @param {Roster} roster - roster from who to request signature
-   * @returns {*|Buffer|Uint8Array} - the encoded signature request
-   */
-  createSignatureRequest(message, roster) {
-    if (!(message instanceof Uint8Array)) {
-      throw new Error("message must be an instance of Uint8Array");
-    }
-    if (!Helper.isOfType(roster, ObjectTypes.ROSTER)) {
-      throw new Error("roster must be an instance of Roster");
-    }
-
-    const fields = {
-      message: message,
-      roster: roster
-    };
-
-    return this.encodeMessage("SignatureRequest", fields);
-  }
-
-  /**
-   * Creates an encoded message to make a ClockRequest to a cothority node.
-   * @param {Roster} roster - roster from who to request clock
-   * @returns {*|Buffer|Uint8Array} - the encoded clock request
-   */
-  createClockRequest(roster) {
-    if (!Helper.isOfType(roster, ObjectTypes.ROSTER)) {
-      throw new Error("roster must be an instance of Roster");
-    }
-
-    const fields = {
-      roster: roster
-    };
-
-    return this.encodeMessage("ClockRequest", fields);
-  }
-
-  /**
-   * Create an encoded message to make a CountRequest to a cothority node.
-   * @returns {*|Buffer|Uint8Array} - the encoded count request
-   */
-  createCountRequest() {
-    return this.encodeMessage("CountRequest", {});
+    return this.encodeMessage(ObjectType.STATUS_REQUEST, {});
   }
 
   /**
@@ -215,11 +160,11 @@ class CothorityMessages extends CothorityProtobuf {
     if (typeof location !== "string") {
       throw new Error("location must be of type string");
     }
-    if (!Helper.isOfType(roster, ObjectTypes.ROSTER)) {
+    if (!Helper.isOfType(roster, ObjectType.ROSTER)) {
       throw new Error("roster must be an instance of Roster");
     }
 
-    const model = this.getModel("PopDesc");
+    const model = this.getModel(ObjectType.POP_DESC);
 
     const fields = {
       name: name,
@@ -239,7 +184,7 @@ class CothorityMessages extends CothorityProtobuf {
    * @returns {PopToken} - the pop token created using the given parameters
    */
   createPopToken(final, privateKey, publicKey) {
-    if (!Helper.isOfType(final, ObjectTypes.FINAL_STATEMENT)) {
+    if (!Helper.isOfType(final, ObjectType.FINAL_STATEMENT)) {
       throw new Error("final must be an instance of FinalStatement");
     }
     if (!(privateKey instanceof Uint8Array)) {
@@ -249,7 +194,7 @@ class CothorityMessages extends CothorityProtobuf {
       throw new Error("publicKey must be an instance of Uint8Array");
     }
 
-    const model = this.getModel("PopToken");
+    const model = this.getModel(ObjectType.POP_TOKEN);
 
     const fields = {
       final: final,
@@ -267,7 +212,7 @@ class CothorityMessages extends CothorityProtobuf {
    * @returns {*|Buffer|Uint8Array} - the encoded store config request
    */
   createStoreConfig(desc, signature) {
-    if (!Helper.isOfType(desc, ObjectTypes.POP_DESC)) {
+    if (!Helper.isOfType(desc, ObjectType.POP_DESC)) {
       throw new Error("desc must be an instance of PopDesc");
     }
     if (!(signature instanceof Uint8Array)) {
@@ -279,7 +224,7 @@ class CothorityMessages extends CothorityProtobuf {
       signature: signature
     };
 
-    return this.encodeMessage("StoreConfig", fields);
+    return this.encodeMessage(ObjectType.STORE_CONFIG, fields);
   }
 
   /**
@@ -291,7 +236,7 @@ class CothorityMessages extends CothorityProtobuf {
    * @returns {FinalStatement} - the final statement created given the parameters
    */
   createFinalStatement(desc, attendees, signature, merged) {
-    if (!Helper.isOfType(desc, ObjectTypes.POP_DESC)) {
+    if (!Helper.isOfType(desc, ObjectType.POP_DESC)) {
       throw new Error("desc must be an instance of PopDesc");
     }
     if (!(attendees instanceof Array)) {
@@ -307,7 +252,7 @@ class CothorityMessages extends CothorityProtobuf {
       throw new Error("merged must be of type boolean");
     }
 
-    const model = this.getModel("FinalStatement");
+    const model = this.getModel(ObjectType.FINAL_STATEMENT);
 
     const fields = {
       desc: desc,
@@ -343,7 +288,7 @@ class CothorityMessages extends CothorityProtobuf {
       signature: signature
     };
 
-    return this.encodeMessage("FinalizeRequest", fields);
+    return this.encodeMessage(ObjectType.FINALIZE_REQUEST, fields);
   }
 
   /**
@@ -365,7 +310,7 @@ class CothorityMessages extends CothorityProtobuf {
       public: publicKey
     };
 
-    return this.encodeMessage("PinRequest", fields);
+    return this.encodeMessage(ObjectType.PIN_REQUEST, fields);
   }
 
   /**
@@ -382,7 +327,7 @@ class CothorityMessages extends CothorityProtobuf {
       id: id
     };
 
-    return this.encodeMessage("FetchRequest", fields);
+    return this.encodeMessage(ObjectType.FETCH_REQUEST, fields);
   }
 
   /**
