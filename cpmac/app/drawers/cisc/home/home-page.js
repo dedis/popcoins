@@ -19,11 +19,11 @@ let viewmodel;
  * Use the "onNavigatingTo" handler to initialize the page binding context.
  *************************************************************/
 function onLoaded(args) {
-  /* ***********************************************************
-   * The "onNavigatingTo" event handler lets you detect if the user navigated with a back button.
-   * Skipping the re-initialization on back navigation means the user will see the
-   * page in the same data state that he left it in before navigating.
-   *************************************************************/
+    /* ***********************************************************
+     * The "onNavigatingTo" event handler lets you detect if the user navigated with a back button.
+     * Skipping the re-initialization on back navigation means the user will see the
+     * page in the same data state that he left it in before navigating.
+     *************************************************************/
     if (args.isBackNavigation) {
         return;
     }
@@ -57,7 +57,7 @@ function toggleProposed() {
 
     viewmodel.update()
         .then(() => {
-            if (proposedStorage.visibility === "collapse"){
+            if (proposedStorage.visibility === "collapse") {
                 if (viewmodel.proposedData === null) {
                     Dialog.alert({
                         title: "No data",
@@ -73,7 +73,7 @@ function toggleProposed() {
         });
 }
 
-function voteForProposed(){
+function voteForProposed() {
 
     let hashedData = hashData(viewmodel.proposedData);
     let signature;
@@ -90,8 +90,8 @@ function voteForProposed(){
 
             const keyPair = DedisCrypto.getKeyPairFromPrivate(privateKey);
             let alreadySigned = false;
-            if (viewmodel.proposedData.votes[name] !== null && viewmodel.proposedData.votes[name] !== undefined){
-                alreadySigned = DedisCrypto.schnorrVerify(keyPair.getPublic(),DedisMisc.hexToUint8Array(hashedData),viewmodel.proposedData.votes[name])
+            if (viewmodel.proposedData.votes[name] !== null && viewmodel.proposedData.votes[name] !== undefined) {
+                alreadySigned = DedisCrypto.schnorrVerify(keyPair.getPublic(), DedisMisc.hexToUint8Array(hashedData), viewmodel.proposedData.votes[name])
             }
             if (alreadySigned) {
                 Dialog.alert({
@@ -111,31 +111,31 @@ function voteForProposed(){
             proposeVoteMessage = CothorityMessages.createProposeVote(viewmodel.id, name, signature);
             return cothoritySocket.send({Address: `tcp://${result.split("/")[2]}`}, CothorityPath.IDENTITY_PROPOSE_VOTE, proposeVoteMessage, CothorityDecodeTypes.PROPOSE_VOTE_REPLY)
         }))
-        .then((response)=>{
+        .then((response) => {
             console.dir(response);
             return viewmodel.update();
         })
         .then(() => viewmodel.isOnProposed = false)
-        .catch((error)=>console.log(error))
+        .catch((error) => console.log(error))
 }
 
-function hashData(data){
+function hashData(data) {
     let tab = new Uint8Array(4);
-    tab[3] = data.threshold / Math.pow(2,24);
-    tab[2] = (data.threshold % Math.pow(2,24)) / Math.pow(2,16);
-    tab[1] = (data.threshold % Math.pow(2,16)) / Math.pow(2,8);
-    tab[0] = (data.threshold % Math.pow(2,8));
+    tab[3] = data.threshold / Math.pow(2, 24);
+    tab[2] = (data.threshold % Math.pow(2, 24)) / Math.pow(2, 16);
+    tab[1] = (data.threshold % Math.pow(2, 16)) / Math.pow(2, 8);
+    tab[0] = (data.threshold % Math.pow(2, 8));
     const dataHash = HASH.sha256()
         .update(tab);
 
     let devices = [];
-    for (let device in data.device){
-        if (data.device.hasOwnProperty(device)){
+    for (let device in data.device) {
+        if (data.device.hasOwnProperty(device)) {
             devices.push(device);
         }
     }
     devices.sort();
-    for (let i in devices){
+    for (let i in devices) {
         console.log(`device: ${devices[i]}`);
         console.log(`point: ${DedisMisc.uint8ArrayToHex(data.device[devices[i]].point)}`);
         dataHash.update(GetByteArrayFromString(devices[i]));
@@ -143,8 +143,8 @@ function hashData(data){
     }
 
     let storageKeys = [];
-    for (let key in data.storage){
-        if (data.storage.hasOwnProperty(key)){
+    for (let key in data.storage) {
+        if (data.storage.hasOwnProperty(key)) {
             storageKeys.push(key);
         }
     }
@@ -165,17 +165,39 @@ function GetByteArrayFromString(parameter) {
 
 function connectButtonTapped(args) {
     const barcodescanner = new BarcodeScanner();
+    return FileIO.getStringOf(FilePaths.CISC_NAME)
+        .then((name) => {
+            if (name === null || name === undefined || name === "") {
+                throw new Error("Go to the settings to set your name")
+            } else {
+                return FileIO.getStringOf(FilePaths.PUBLIC_KEY_COTHORITY)
+            }
+        })
+        .then((key) => {
+            if (key === null || key === undefined || key === "") {
+                throw new Error("Go to the settings to generate a keypair")
+            } else {
+                return barcodescanner.available()
+            }
+        })
+        .then(function (available) {
+            if (available) {
+                return availableFunction();
+            } else {
+                return notAvailableFunction();
+            }
+        })
+        .catch((error) => {
+        console.log(error);
+        setTimeout(() => Dialog.alert({
+                title: "Scanner Error",
+                message: error.toString(),
+                okButtonText: "Ok"
+            }), 100)
+        });
 
-    return barcodescanner.available().then(function (available) {
-        if (available) {
-            return availableFunction();
-        } else {
-            return notAvailableFunction();
-        }
-    });
-
-    function availableFunction () {
-        barcodescanner.scan({
+    function availableFunction() {
+        return barcodescanner.scan({
             formats: "QR_CODE", // Pass in of you want to restrict scanning to certain types
             cancelLabel: "EXIT. Also, try the volume buttons!", // iOS only, default 'Close'
             cancelLabelBackgroundColor: "#333333", // iOS only, default '#000000' (black)
@@ -201,20 +223,20 @@ function connectButtonTapped(args) {
                     const toWrite = `${goodURL}/${splitSlash[1]}`;
                     FileIO.writeStringTo(FilePaths.CISC_IDENTITY_LINK, toWrite)
                         .then(() => {
-                            setTimeout(()=> {
+                            setTimeout(() => {
                                 viewmodel.update().then(() => askForDevice());
-                            },100);
+                            }, 100);
                             console.log(`saved ${toWrite} in ${FilePaths.CISC_IDENTITY_LINK}`);
                         });
                 }, 100);
             })
             .catch(
-            (error) => setTimeout(() => Dialog.alert({
-                title: "Scanner Error",
-                message: error,
-                okButtonText: "Ok"
-            }), 100)
-        );
+                (error) => setTimeout(() => Dialog.alert({
+                    title: "Scanner Error",
+                    message: error.toString(),
+                    okButtonText: "Ok"
+                }), 100)
+            );
     }
 
     function notAvailableFunction() {
@@ -231,7 +253,7 @@ function askForDevice() {
     let pointHex;
     let isIn = false;
     FileIO.getStringOf(FilePaths.CISC_NAME)
-        .then((result)=> {
+        .then((result) => {
             console.log(result);
             name = result;
             return FileIO.getStringOf(FilePaths.PUBLIC_KEY_COTHORITY)
@@ -239,8 +261,8 @@ function askForDevice() {
         .then((result) => {
             console.log(result);
             pointHex = result;
-            for (let i=0; i<viewmodel.deviceList.length; i++ ){
-                let device = viewmodel.deviceList.getItem(""+i).device;
+            for (let i = 0; i < viewmodel.deviceList.length; i++) {
+                let device = viewmodel.deviceList.getItem("" + i).device;
                 if (device.id === name && device.point === pointHex) {
                     isIn = true;
                 }
@@ -249,23 +271,23 @@ function askForDevice() {
                 return Dialog.alert({
                     title: "Connection successful",
                     message: "You successfully connected to this identity!",
-                    okButtonText:"Ok"
+                    okButtonText: "Ok"
                 })
             } else {
                 return Dialog.confirm({
-                    title:"First Connection",
-                    message:"Do you want to add this device to the identity ?",
-                    okButtonText:"yes",
-                    cancelButtonText:"no"
+                    title: "First Connection",
+                    message: "Do you want to add this device to the identity ?",
+                    okButtonText: "yes",
+                    cancelButtonText: "no"
                 })
             }
         })
-        .then((result) =>{
+        .then((result) => {
             if (result) {
                 addDevice()
             }
         })
-        .catch((error)=>console.log(error))
+        .catch((error) => console.log(error))
 }
 
 function addDevice() {
@@ -277,7 +299,7 @@ function addDevice() {
             device = CothorityMessages.createDevice(DedisMisc.hexToUint8Array(point));
             return FileIO.getStringOf(FilePaths.CISC_NAME);
         })
-        .then((name)=>{
+        .then((name) => {
             data.device[name] = device;
             proposeSendMessage = CothorityMessages.createProposeSend(viewmodel.id, data);
             return FileIO.getStringOf(FilePaths.CISC_IDENTITY_LINK)
@@ -286,7 +308,7 @@ function addDevice() {
             const cothoritySocket = new DedisJsNet.CothoritySocket();
             return cothoritySocket.send({Address: `tcp://${result.split("/")[2]}`}, CothorityPath.IDENTITY_PROPOSE_SEND, proposeSendMessage, CothorityDecodeTypes.DATA_UPDATE_REPLY)
         })
-        .then((response)=>console.dir(response))
+        .then((response) => console.dir(response))
         .catch((error) => console.log(`There was an error: ${error}`));
 }
 
