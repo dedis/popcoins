@@ -10,6 +10,7 @@ const FileIO = require("~/shared/lib/file-io/file-io");
 const FilePaths = require("~/shared/res/files/files-path");
 const HASH = require("hash.js");
 const BarcodeScanner = require("nativescript-barcodescanner").BarcodeScanner;
+const DeepCopy = require("~/shared/lib/deep-copy/DeepCopy");
 
 let page;
 let viewmodel;
@@ -188,12 +189,10 @@ function connectButtonTapped(args) {
                 console.log("Scanner closed");
             }, // invoked when the scanner was closed (success or abort)
             resultDisplayDuration: 500, // Android only, default 1500 (ms), set to 0 to disable echoing the scanned text
-            orientation: "landscape", // Android only, optionally lock the orientation to either "portrait" or "landscape"
+            orientation: "portrait", // Android only, optionally lock the orientation to either "portrait" or "landscape"
             openSettingsIfPermissionWasPreviouslyDenied: true // On iOS you can send the user to the settings app if access was previously denied
         }).then(
             (result) => {
-                console.log(`Scan format: ${result.format}`);
-                console.log(`Scan text: ${result.text}`);
                 const splitColon = result.text.split(":");
                 const splitSlash = splitColon[2].split("/");
                 const goodURL = `tcp:${splitColon[1]}:${splitSlash[0]}`;
@@ -203,17 +202,13 @@ function connectButtonTapped(args) {
                     FileIO.writeStringTo(FilePaths.CISC_IDENTITY_LINK, toWrite)
                         .then(() => {
                             setTimeout(()=> {
-                                viewModel.update();
+                                viewmodel.update().then(() => askForDevice());
                             },100);
                             console.log(`saved ${toWrite} in ${FilePaths.CISC_IDENTITY_LINK}`);
                         });
-                    Dialog.alert({
-                        title:"Scan Successful",
-                        message:`connection to ${goodURL}`,
-                        okButtonText: "Ok"
-                    });
                 }, 100);
-            },
+            })
+            .catch(
             (error) => setTimeout(() => Dialog.alert({
                 title: "Scanner Error",
                 message: error,
@@ -229,6 +224,71 @@ function connectButtonTapped(args) {
             okButtonText: "Ok"
         });
     }
+}
+
+function askForDevice() {
+    let name;
+    let pointHex;
+    let isIn = false;
+    FileIO.getStringOf(FilePaths.CISC_NAME)
+        .then((result)=> {
+            console.log(result);
+            name = result;
+            return FileIO.getStringOf(FilePaths.PUBLIC_KEY_COTHORITY)
+        })
+        .then((result) => {
+            console.log(result);
+            pointHex = result;
+            for (let i=0; i<viewmodel.deviceList.length; i++ ){
+                let device = viewmodel.deviceList.getItem(""+i).device;
+                if (device.id === name && device.point === pointHex) {
+                    isIn = true;
+                }
+            }
+            console.log("HEHEHE");
+            if (isIn) {
+                return Dialog.alert({
+                    title: "Connection successful",
+                    message: "You successfully connected to this identity!",
+                    okButtonText:"Ok"
+                })
+            } else {
+                return Dialog.confirm({
+                    title:"First Connection",
+                    message:"Do you want to add this device to the identity ?",
+                    okButtonText:"yes",
+                    cancelButtonText:"no"
+                })
+            }
+        })
+        .then((result) =>{
+            if (result) {
+                addDevice()
+            }
+        })
+        .catch((error)=>console.log(error))
+}
+
+function addDevice() {
+    let data = DeepCopy.copy(viewmodel.data);
+    let device;
+    let proposeSendMessage;
+    FileIO.getStringOf(FilePaths.PUBLIC_KEY_COTHORITY)
+        .then((point) => {
+            device = CothorityMessages.createDevice(DedisMisc.hexToUint8Array(point));
+            return FileIO.getStringOf(FilePaths.CISC_NAME);
+        })
+        .then((name)=>{
+            data.device[name] = device;
+            proposeSendMessage = CothorityMessages.createProposeSend(viewmodel.id, data);
+            return FileIO.getStringOf(FilePaths.CISC_IDENTITY_LINK)
+        })
+        .then((result) => {
+            const cothoritySocket = new DedisJsNet.CothoritySocket();
+            return cothoritySocket.send({Address: `tcp://${result.split("/")[2]}`}, CothorityPath.IDENTITY_PROPOSE_SEND, proposeSendMessage, CothorityDecodeTypes.DATA_UPDATE_REPLY)
+        })
+        .then((response)=>console.dir(response))
+        .catch((error) => console.log(`There was an error: ${error}`));
 }
 
 
