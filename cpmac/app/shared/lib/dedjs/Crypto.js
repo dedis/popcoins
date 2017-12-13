@@ -78,6 +78,8 @@ function aggregatePublicKeys(points) {
   }
   if (points.length > 0 && !Helper.isOfType(points[0], ObjectType.POINT)) {
     throw new Error("points[i] must be of type Point");
+  } else if (points.length === 0) {
+    throw new Error("points is an empty array");
   }
 
   const [head, ...tail] = points;
@@ -198,7 +200,7 @@ function schnorrSign(secret, message) {
   const right = Convert.hexToByteArray(s.toString(16, 2)).reverse();
 
   if (left.length + right.length > SCHNORR_SIGNATURE_LENGTH) {
-    throw new Error("signature length to long: " + left.length + right.length);
+    throw new Error("signature length too long: " + left.length + right.length);
   }
 
   const concat = new Uint8Array(SCHNORR_SIGNATURE_LENGTH);
