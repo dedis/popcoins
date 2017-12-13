@@ -245,7 +245,6 @@ function askForDevice() {
                     isIn = true;
                 }
             }
-            console.log("HEHEHE");
             if (isIn) {
                 return Dialog.alert({
                     title: "Connection successful",

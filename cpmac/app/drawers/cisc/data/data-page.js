@@ -7,6 +7,7 @@ const DedisJsNet = require("~/shared/lib/dedis-js/src/net");
 const FileIO = require("~/shared/lib/file-io/file-io");
 const FilePaths = require("~/shared/res/files/files-path");
 const DeepCopy = require("~/shared/lib/deep-copy/DeepCopy");
+const homePage = require("~/drawers/cisc/home/home-page");
 
 let viewmodel;
 let Page;
@@ -59,6 +60,10 @@ function addKeyValue() {
             if (response.result) {
                 value = response.text;
                 edited = DeepCopy.copy(viewmodel.data);
+                if (edited.storage === null || edited.storage === undefined) {
+                    console.log("HEHEHE");
+                    edited.storage = [];
+                }
                 edited.storage[key]=value;
                 edited.votes = null;
                 proposeSendMessage = CothorityMessages.createProposeSend(viewmodel.id, edited);
@@ -69,7 +74,9 @@ function addKeyValue() {
             const cothoritySocket = new DedisJsNet.CothoritySocket();
             return cothoritySocket.send({Address: `tcp://${result.split("/")[2]}`}, CothorityPath.IDENTITY_PROPOSE_SEND, proposeSendMessage, CothorityDecodeTypes.DATA_UPDATE_REPLY)
         })
-        .then((response)=>console.dir(response))
+        .then((response)=>{
+            viewmodel.update().then(()=>homePage.voteForProposed());
+        })
         .catch((error) => console.log(`There was an error: ${error}`));
 }
 
