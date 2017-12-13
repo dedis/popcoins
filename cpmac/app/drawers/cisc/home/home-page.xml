@@ -11,7 +11,7 @@
         <ListView id="storage" items="{{ storageList }}" orientation="vertical" visibility="{{ isOnProposed ? 'collapsed' : 'visible' }}">
             <ListView.itemTemplate>
                 <GridLayout>
-                    <Label text="{{ keyValuePair.key }}" textAlignment="center" textWrap="true" tap="{{ keyValuePair.showValue }}"/>
+                    <Label class="list-view-label" text="{{ keyValuePair.key }}" textAlignment="center" textWrap="true" tap="{{ keyValuePair.showValue }}"/>
                 </GridLayout>
             </ListView.itemTemplate>
         </ListView>
@@ -20,7 +20,7 @@
         <ListView id="device" items="{{ deviceList }}" orientation="vertical" visibility="{{ isOnProposed ? 'collapsed' : 'visible' }}">
             <ListView.itemTemplate>
                 <GridLayout rows="*" columns="*">
-                    <Label text="{{ device.id }}" textAlignment="center" textWrap="true" tap="{{ device.showPub }}"/>
+                    <Label class="list-view-label" text="{{ device.id }}" textAlignment="center" textWrap="true" tap="{{ device.showPub }}"/>
                 </GridLayout>
             </ListView.itemTemplate>
         </ListView>
@@ -29,7 +29,7 @@
         <ListView id="proposedStorage" items="{{ proposedStorageList }}" orientation="vertical" visibility="{{ isOnProposed ? 'visible' : 'collapsed' }}">
             <ListView.itemTemplate>
                 <GridLayout>
-                    <Label class="{{ (keyValuePair.newOrChanged ? 'cisc-new-or-changed' : '') + (keyValuePair.deleted ? ' cisc-deleted' : '')}}" text="{{ keyValuePair.key }}" textAlignment="center" textWrap="true" tap="{{ keyValuePair.showValue }}"/>
+                    <Label class="{{ (keyValuePair.newOrChanged ? 'list-view-label cisc-new-or-changed' : 'list-view-label') + (keyValuePair.deleted ? ' cisc-deleted' : '')}}" text="{{ keyValuePair.key }}" textAlignment="center" textWrap="true" tap="{{ keyValuePair.showValue }}"/>
                 </GridLayout>
             </ListView.itemTemplate>
         </ListView>
@@ -38,7 +38,7 @@
         <ListView id="proposedDevice" items="{{ proposedDeviceList }}" orientation="vertical" visibility="{{ isOnProposed ? 'visible' : 'collapsed' }}">
             <ListView.itemTemplate>
                 <GridLayout>
-                    <Label class="{{ (device.newOrChanged ? 'cisc-new-or-changed' : '') + (device.deleted ? ' cisc-deleted' : '')}}" text="{{ device.id }}" textAlignment="center" textWrap="true" tap="{{ device.showPub }}" />
+                    <Label class="{{ (device.newOrChanged ? 'list-view-label cisc-new-or-changed' : 'list-view-label') + (device.deleted ? ' cisc-deleted' : '')}}" text="{{ device.id }}" textAlignment="center" textWrap="true" tap="{{ device.showPub }}" />
                 </GridLayout>
             </ListView.itemTemplate>
         </ListView>
