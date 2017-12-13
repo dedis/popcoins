@@ -10,6 +10,8 @@ const PORT_MAX = 65535;
 // Regex taken from: https://www.w3resource.com/javascript/form/ip-address-validation.php
 const IP_REGEX = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
 
+const ARRAY_REGEX = /Array/;
+
 /**
  * Checks wether the object is of a specific type.
  * @param {object} object - the object we want to check the type of
@@ -25,6 +27,21 @@ function isOfType(object, type) {
   }
 
   return object.constructor.name === type;
+}
+
+/**
+ * Checks wether the object received as parameter is an array (typed or not!).
+ * @param {object} object - the object to test
+ * @returns {boolean} - true if and only if the object is an array (typed or not!)
+ */
+function isArray(object) {
+  if (!(object !== undefined && typeof object === "object")) {
+    throw new Error("object must be of type object and not undefined");
+  }
+
+  const toString = Object.prototype.toString.call(object);
+
+  return ARRAY_REGEX.test(toString);
 }
 
 /**
@@ -92,6 +109,7 @@ function deepCopy(object) {
 }
 
 module.exports.isOfType = isOfType;
+module.exports.isArray = isArray;
 module.exports.isValidPublicKey = isValidPublicKey;
 module.exports.isValidAddress = isValidAddress;
 module.exports.deepCopy = deepCopy;

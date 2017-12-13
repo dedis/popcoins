@@ -1,11 +1,11 @@
 const Buffer = require("buffer/").Buffer;
-const Helper = require("~/shared/lib/dedjs/Helper");
-const ObjectType = require("~/shared/lib/dedjs/ObjectType");
-const Crypto = require("~/shared/lib/dedjs/Crypto");
+const Helper = require("./Helper");
+const ObjectType = require("./ObjectType");
+const Crypto = require("./Crypto");
 const TomlParser = require("toml");
 const Tomlify = require('tomlify-j0.4');
 const UUID = require("pure-uuid");
-const CothorityMessages = require("~/shared/lib/dedjs/protobuf/build/cothority-messages");
+const CothorityMessages = require("./protobuf/build/cothority-messages");
 
 const HEX_KEYWORD = "hex";
 const BASE64_KEYWORD = "base64";
@@ -108,8 +108,8 @@ function base64ToHex(base64String) {
  * @returns {string} - the JSON string representation
  */
 function objectToJson(object) {
-  if (!(object !== undefined && typeof object === "object")) {
-    throw new Error("object must be of type object and not undefined");
+  if (!(object !== undefined && typeof object === "object" && !Helper.isArray(object))) {
+    throw new Error("object must be of type object (not array!) and not undefined");
   }
 
   return JSON.stringify(object, undefined, 4);
@@ -134,8 +134,8 @@ function jsonToObject(jsonString) {
  * @returns {string} - the TOML string representing the object
  */
 function objectToToml(object) {
-  if (!(object !== undefined && typeof object === "object")) {
-    throw new Error("object must be of type object and not undefined");
+  if (!(object !== undefined && typeof object === "object" && !Helper.isArray(object))) {
+    throw new Error("object must be of type object (not array!) and not undefined");
   }
 
   return Tomlify.toToml(object, { space: 4 });
@@ -215,19 +215,25 @@ function parseJsonRoster(jsonString) {
   }
 
   const roster = jsonToObject(jsonString);
+  if (roster.list === undefined || !Array.isArray(roster.list)) {
+    throw new Error("roster.list is undefined or not an array");
+  }
 
-  const id = roster.id;
+  let rosterId = roster.id;
+  if (rosterId !== undefined) {
+    rosterId = base64ToByteArray(rosterId);
+  }
 
   const points = [];
   const list = roster.list.map((server) => {
     points.push(Crypto.unmarshal(base64ToByteArray(server.public)));
 
-    let id = server.id;
-    if (id !== undefined) {
-      id = base64ToByteArray(id);
+    let serverId = server.id;
+    if (serverId !== undefined) {
+      serverId = base64ToByteArray(serverId);
     }
 
-    return toServerIdentity(server.address, base64ToByteArray(server.public), server.description, id);
+    return toServerIdentity(server.address, base64ToByteArray(server.public), server.description, serverId);
   });
 
   let aggregate = roster.aggregate;
@@ -237,11 +243,26 @@ function parseJsonRoster(jsonString) {
     aggregate = base64ToByteArray(roster.aggregate);
   }
 
-  return CothorityMessages.createRoster(id, list, aggregate);
+  return CothorityMessages.createRoster(rosterId, list, aggregate);
 }
 
 /**
  * Parses a TOML string into a Roster object, if the ServerIdentities does not have an ID yet it will be computed.
+ *
+ * The TOML has to be in this format:
+  "[[servers]]\n" +
+  "  Address = \"tcp://10.0.2.2:7002\"\n" +
+  "  Public = \"HkDzpR5Imd7WNx8kl2lJcIVRVn8gfDByJnmlfrYh/zU=\"\n" +
+  "  Description = \"Conode_1\"\n" +
+  "[[servers]]\n" +
+  "  Address = \"tcp://10.0.2.2:7004\"\n" +
+  "  Public = \"Fx6zzvJM6VzxfByLY2+uArGPtd2lHKPVmoXGMhdaFCA=\"\n" +
+  "  Description = \"Conode_2\"\n" +
+  "[[servers]]\n" +
+  "  Address = \"tcp://10.0.2.2:7006\"\n" +
+  "  Public = \"j53MMKZNdtLlglcK9Ct1YYtkbbEOfq3R8ZoJOFIu6tE=\"\n" +
+  "  Description = \"Conode_3\""
+ *
  * @param {string} tomlString - the TOML string to parse into a Roster object
  * @returns {Roster} - the parsed Roster object
  */
@@ -250,19 +271,29 @@ function parseTomlRoster(tomlString) {
     throw new Error("tomlString must be of type string");
   }
 
-  const points = [];
-  const list = tomlToObject(tomlString).servers.map((server) => {
-    points.push(Crypto.unmarshal(base64ToByteArray(server.Public)));
+  const roster = tomlToObject(tomlString);
+  if (roster.servers === undefined) {
+    throw new Error("roster.servers is undefined");
+  }
 
-    let id = server.Id;
-    if (id !== undefined) {
-      id = base64ToByteArray(id);
-    }
+  roster.servers.forEach(server => {
+    Object.getOwnPropertyNames(server).forEach((propertyName, index, array) => {
+      const lowerCased = propertyName.toLocaleLowerCase();
 
-    return toServerIdentity(server.Address, base64ToByteArray(server.Public), server.Description, id);
+      if (lowerCased !== propertyName) {
+        server[lowerCased] = server[propertyName];
+        delete server[propertyName];
+      }
+    });
   });
 
-  return CothorityMessages.createRoster(undefined, list, Crypto.aggregatePublicKeys(points));
+  roster.list = [];
+  roster.servers.forEach(server => {
+    roster.list.push(Helper.deepCopy(server));
+  });
+  delete roster.servers;
+
+  return parseJsonRoster(JSON.stringify(roster));
 }
 
 /**
@@ -324,7 +355,8 @@ function publicKeyToUuid(publicKey) {
     throw new Error("publicKey must be an instance of Uint8Array");
   }
 
-  const url = BASE_URL_CONODE_ID + byteArrayToBase64(publicKey);
+  const url = BASE_URL_CONODE_ID + byteArrayToHex(publicKey);
+
   return new Uint8Array(new UUID(UUID_VERSION, NAME_SPACE_URL, url).export());
 }
 
@@ -345,3 +377,4 @@ module.exports.parseJsonRoster = parseJsonRoster;
 module.exports.parseTomlRoster = parseTomlRoster;
 module.exports.parseJsonKeyPair = parseJsonKeyPair;
 module.exports.toServerIdentity = toServerIdentity;
+module.exports.publicKeyToUuid = publicKeyToUuid;

@@ -27,6 +27,13 @@ describe("Module", function () {
     it("should ...", function () {
       return Promise.resolve(2 + 2).should.eventually.equal(4);
     });
+
+    it("should throw ...", function () {
+      expect(() => {
+        throw new Error()
+      }
+      ).to.throw();
+    });
   });
 });
 
