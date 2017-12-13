@@ -5,10 +5,28 @@ clean:
 	-sudo rm -R hooks/
 	-sudo rm -f package-lock.json
 
-### Clean Install
+### Compile Protobuf Messages for EcmaScript6
+compile-protobuf-es6:
+	node app/shared/lib/dedjs/protobuf/src/build_proto.js
+	rollup app/shared/lib/dedjs/protobuf/src/index.js --output.file app/shared/lib/dedjs/protobuf/build/cothority-messages.js --output.format cjs
+
+### Compile Protobuf Messages for IIFE
+compile-protobuf-iife:
+	node app/shared/lib/dedjs/protobuf/src/build_proto.js
+	node app/shared/lib/dedjs/protobuf/src/build.js
+
+### Clean Install for EcmaScript6
 clean-install:
 	make clean
 	npm install --no-package-lock
+	make compile-protobuf-es6
+	./prepare-hook.sh
+
+### Clean Install for IIFE
+clean-install-iife:
+	make clean
+	npm install --no-package-lock
+	make compile-protobuf-iife
 	./prepare-hook.sh
 
 ### Run App iOS

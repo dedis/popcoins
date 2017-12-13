@@ -1,6 +1,6 @@
 import CothorityProtobuf from "./cothority-protobuf";
-const Helper = require("~/shared/lib/dedjs/Helper");
-const ObjectTypes = require("~/shared/lib/dedjs/ObjectType");
+const Helper = require("../../Helper");
+const ObjectTypes = require("../../ObjectType");
 
 /**
  * Helpers to encode and decode messages of the Cothority

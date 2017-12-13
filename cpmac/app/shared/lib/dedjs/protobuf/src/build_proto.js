@@ -7,7 +7,7 @@ const ROOT = new Protobuf.Root();
 
 ROOT.define("cothority");
 
-Files.walk("src/models/proto", (error, path, dirs, files) => {
+Files.walk("app/shared/lib/dedjs/protobuf/src/models/proto/", (error, path, dirs, files) => {
   console.log("#Path:");
   console.log(path);
   console.log("#Dirs:");
@@ -21,7 +21,7 @@ Files.walk("src/models/proto", (error, path, dirs, files) => {
     }
   });
 
-  FileSystem.writeFileSync("build/skeleton.js", `export default '${JSON.stringify(ROOT.toJSON())}';`);
+  FileSystem.writeFileSync("app/shared/lib/dedjs/protobuf/build/skeleton.js", `export default '${JSON.stringify(ROOT.toJSON())}';`);
   console.log("##############################");
   console.log("##############################");
 });

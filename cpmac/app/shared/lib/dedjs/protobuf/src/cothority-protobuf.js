@@ -1,5 +1,7 @@
 import Root from "./models/root";
 
+const Helper = require("../../Helper");
+
 /**
  * Base class for the protobuf library that provides helpers to encode and decode
  * messages according to a given model.
@@ -27,7 +29,7 @@ export default class CothorityProtobuf {
     if (typeof name !== "string") {
       throw new Error("name must be of type string");
     }
-    if (!(fields !== undefined && typeof object === "object")) {
+    if (!(fields !== undefined && typeof fields === "object" && !Helper.isArray(fields))) {
       throw new Error("fields must be of type object and not undefined");
     }
 

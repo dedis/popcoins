@@ -5,7 +5,7 @@ import CP from "./cothority-protobuf";
 const CothorityProtobuf = new CP();
 
 const mockSignReq = "CiCAHxMpFWVDC2nQwYfKiXWtrOGwZRS0Aw9T/ZOkwK3ZwxJgEl4KIOXiPlhTmgnTIR2PoPs0ddSGVeDAbYPpPI5uf" +
-                    "Raqh8EGEhCyCNMGs0dR/Luz1OnIZYjZGhd0Y3A6Ly83OC40Ni4yMjcuNjA6Nzc3MCIPSW5laXRpJ3Mgc2VydmVy";
+  "Raqh8EGEhCyCNMGs0dR/Luz1OnIZYjZGhd0Y3A6Ly83OC40Ni4yMjcuNjA6Nzc3MCIPSW5laXRpJ3Mgc2VydmVy";
 
 describe("Protobuf", () => {
 
