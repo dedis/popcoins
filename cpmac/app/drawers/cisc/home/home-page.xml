@@ -7,6 +7,8 @@
     </ActionBar>
 
     <StackLayout>
+        <Button text="Connect to ID" tap="connectButtonTapped" visibility="{{ isConnected ? 'collapsed' : 'visible' }}"/>
+        <StackLayout visibility="{{ isConnected ? 'visible' : 'collapsed' }}">
         <Label id="storageLabel" class="label-title" text="Actual Data" visibility="{{ isOnProposed ? 'collapsed' : 'visible' }}"/>
         <ListView id="storage" items="{{ storageList }}" orientation="vertical" visibility="{{ isOnProposed ? 'collapsed' : 'visible' }}">
             <ListView.itemTemplate>
@@ -50,5 +52,5 @@
             <Button text="Vote for proposed data" tap="voteForProposed" row="0" col="1" isEnabled="{{ isOnProposed }}"/>
         </GridLayout>
     </StackLayout>
-
+    </StackLayout>
 </Page>
