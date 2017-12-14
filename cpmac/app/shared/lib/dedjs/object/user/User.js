@@ -1,15 +1,15 @@
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
-const FileIO = require("~/shared/lib/file-io/file-io");
-const FilesPath = require("~/shared/res/files/files-path");
-const Convert = require("~/shared/lib/dedjs/Convert");
-const ObjectType = require("~/shared/lib/dedjs/ObjectType");
-const Helper = require("~/shared/lib/dedjs/Helper");
-const Net = require("~/shared/lib/dedjs/Net");
-const Crypto = require("~/shared/lib/dedjs/Crypto");
-const RequestPath = require("~/shared/lib/dedjs/RequestPath");
-const DecodeType = require("~/shared/lib/dedjs/DecodeType");
-const CothorityMessages = require("~/shared/lib/dedjs/protobuf/build/cothority-messages");
+const FileIO = require("../../lib/file-io/file-io");
+const FilesPath = require("../../res/files/files-path");
+const Convert = require("../../lib/dedjs/Convert");
+const ObjectType = require("../../lib/dedjs/ObjectType");
+const Helper = require("../../lib/dedjs/Helper");
+const Net = require("../../lib/dedjs/Net");
+const Crypto = require("../../lib/dedjs/Crypto");
+const RequestPath = require("../../lib/dedjs/RequestPath");
+const DecodeType = require("../../lib/dedjs/DecodeType");
+const CothorityMessages = require("../../lib/dedjs/protobuf/build/cothority-messages");
 
 /**
  * This singleton is the user of the app. It contains everything needed that is general, app-wide or does not belong to any precise subpart.

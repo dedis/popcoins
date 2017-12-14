@@ -19,7 +19,7 @@ const SERVER_IDENTITY = Convert.toServerIdentity(CONODE_ADDRESS, CONODE_PUBLIC_K
 const SERVER_IDENTITY_ENCODED = "CiAeQPOlHkiZ3tY3HySXaUlwhVFWfyB8MHImeaV+tiH/NRIQz6kCTQ77Xna9yfgKka5lNRoTdGNwOi8vMTAuMC4yLjI6NzAwMiIIQ29ub2RlXzE=";
 const SERVER_IDENTITY_ENCODED_BYTE_ARRAY = Convert.base64ToByteArray(SERVER_IDENTITY_ENCODED);
 
-const MODEL_ROSTER = { "fields": { "id": { "type": "bytes", "id": 1 }, "list": { "rule": "repeated", "type": "ServerIdentity", "id": 2, "options": { "packed": false } }, "aggregate": { "rule": "required", "type": "bytes", "id": 3 } } };
+const MODEL_ROSTER = { "fields": { "id": { "type": "bytes", "id": 1 }, "list": { "rule": "repeated", "type": "ServerIdentity", "id": 2 }, "aggregate": { "rule": "required", "type": "bytes", "id": 3 } } };
 
 const PRIVATE_KEY = "AWKlOlcTuCHEV/fKX0X1IoAoBU0n1c5iKp/SWRLj3T4=";
 const PRIVATE_KEY_BYTE_ARRAY = Convert.base64ToByteArray(PRIVATE_KEY);

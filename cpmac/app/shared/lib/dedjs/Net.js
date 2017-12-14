@@ -1,8 +1,8 @@
-const Convert = require("~/shared/lib/dedjs/Convert");
-const Helper = require("~/shared/lib/dedjs/Helper");
-const ObjectType = require("~/shared/lib/dedjs/ObjectType");
+const Convert = require("./Convert");
+const Helper = require("./Helper");
+const ObjectType = require("./ObjectType");
 const WebSocket = require("nativescript-websockets");
-const CothorityMessages = require("~/shared/lib/dedjs/protobuf/build/cothority-messages");
+const CothorityMessages = require("./protobuf/build/cothority-messages");
 
 /**
  * Constructor for a standard socket. It can be used to communicate with standard web servers.
@@ -11,43 +11,45 @@ const CothorityMessages = require("~/shared/lib/dedjs/protobuf/build/cothority-m
  * @returns {Promise} - a promise that gets resolved once a response is received
  */
 function StandardSocket() {
-  this.send = (address, data) => new Promise((resolve, reject) => {
+  this.send = (address, data) => {
     if (typeof address !== "string") {
-      reject("address must be of type string");
+      throw new Error("address must be of type string");
     }
 
-    const socket = new WebSocket(address, {
-      allowCellular: true
-    });
+    return new Promise((resolve, reject) => {
+      const socket = new WebSocket(address, {
+        allowCellular: true
+      });
 
-    socket.on("open", (socket) => {
-      console.log("Socket open...");
-      socket.send(data);
-    });
+      socket.on("open", (socket) => {
+        console.log("Socket open...");
+        socket.send(data);
+      });
 
-    socket.on("close", (socket, code, reason) => {
-      console.log("Socket closed...");
-    });
+      socket.on("close", (socket, code, reason) => {
+        console.log("Socket closed...");
+      });
 
-    socket.on("message", (socket, message) => {
-      console.log("Got message...");
+      socket.on("message", (socket, message) => {
+        console.log("Got message...");
 
-      socket.close();
-      resolve(message);
-    });
+        socket.close();
+        resolve(message);
+      });
 
-    socket.on("error", (socket, error) => {
-      console.log("Socket error:");
-      console.log(error);
-      console.dir(error);
-      console.trace();
+      socket.on("error", (socket, error) => {
+        console.log("Socket error:");
+        console.log(error);
+        console.dir(error);
+        console.trace();
 
-      socket.close();
-      reject(error);
-    });
+        socket.close();
+        reject(error);
+      });
 
-    socket.open();
-  });
+      socket.open();
+    })
+  };
 }
 
 /**
@@ -59,67 +61,69 @@ function StandardSocket() {
  * @returns {Promise} - a promise that gets resolved once a response is received
  */
 function CothoritySocket() {
-  this.send = (node, path, message, typeToDecode) => new Promise((resolve, reject) => {
+  this.send = (node, path, message, typeToDecode) => {
     if (!Helper.isOfType(node, ObjectType.SERVER_IDENTITY)) {
-      reject("node must be of type ServerIdentity");
+      throw new Error("node must be of type ServerIdentity");
     }
     if (typeof path !== "string") {
-      reject("path must be of type string");
+      throw new Error("path must be of type string");
     }
     if (!(message instanceof Uint8Array)) {
-      reject("message must be an instance of Uint8Array");
+      throw new Error("message must be an instance of Uint8Array");
     }
     if (!(typeToDecode === undefined || typeof typeToDecode === "string")) {
-      reject("typeToDecode must be of type string or undefined");
+      throw new Error("typeToDecode must be of type string or undefined");
     }
 
-    const url = Convert.tcpToWebsocket(node, path);
+    return new Promise((resolve, reject) => {
+      const url = Convert.tcpToWebsocket(node, path);
 
-    const socket = new WebSocket(url, {
-      allowCellular: true
-    });
-    socket.binaryType = "arraybuffer";
+      const socket = new WebSocket(url, {
+        allowCellular: true
+      });
+      socket.binaryType = "arraybuffer";
 
-    socket.on("open", (socket) => {
-      console.log("Socket open...");
-      socket.send(message);
-    });
+      socket.on("open", (socket) => {
+        console.log("Socket open...");
+        socket.send(message);
+      });
 
-    socket.on("close", (socket, code, reason) => {
-      if (code === 4100) {
-        resolve(reason);
-      }
-      if (code === 4101 || code === 4102 || code === 4104) {
-        reject(reason);
-      }
+      socket.on("close", (socket, code, reason) => {
+        if (code === 4100) {
+          resolve(reason);
+        }
+        if (code === 4101 || code === 4102 || code === 4104) {
+          reject(reason);
+        }
 
-      console.log("Socket closed...");
-    });
+        console.log("Socket closed...");
+      });
 
-    socket.on("message", (socket, message) => {
-      console.log("Got message...");
+      socket.on("message", (socket, message) => {
+        console.log("Got message...");
 
-      if (typeToDecode !== undefined) {
-        resolve(CothorityMessages.decodeResponse(typeToDecode, message));
-      } else {
-        resolve(message);
-      }
+        if (typeToDecode !== undefined) {
+          resolve(CothorityMessages.decodeResponse(typeToDecode, message));
+        } else {
+          resolve(message);
+        }
 
-      socket.close();
-    });
+        socket.close();
+      });
 
-    socket.on("error", (socket, error) => {
-      console.log("Socket error:");
-      console.log(error);
-      console.dir(error);
-      console.trace();
+      socket.on("error", (socket, error) => {
+        console.log("Socket error:");
+        console.log(error);
+        console.dir(error);
+        console.trace();
 
-      socket.close();
-      reject(error);
-    });
+        socket.close();
+        reject(error);
+      });
 
-    socket.open();
-  });
+      socket.open();
+    })
+  };
 }
 
 module.exports.StandardSocket = StandardSocket;

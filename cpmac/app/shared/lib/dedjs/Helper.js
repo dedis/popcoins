@@ -1,4 +1,4 @@
-const Crypto = require("~/shared/lib/dedjs/Crypto");
+const Crypto = require("./Crypto");
 
 const PUBLIC_KEY_BYTE_LENGTH = 32;
 
@@ -14,16 +14,16 @@ const ARRAY_REGEX = /Array/;
 
 /**
  * Checks wether the object is of a specific type.
- * @param {object} object - the object we want to check the type of
+ * @param {any} object - the object we want to check the type of
  * @param {string} type - the type name
  * @returns {boolean} - true if and only if object has the type given as paramter
  */
 function isOfType(object, type) {
-  if (!(object !== undefined && typeof object === "object")) {
-    throw new Error("object must be of type object and not undefined");
-  }
   if (typeof type !== "string") {
     throw new Error("type must be of type string");
+  }
+  if (!(object !== undefined && typeof object === "object")) {
+    return false;
   }
 
   return object.constructor.name === type;

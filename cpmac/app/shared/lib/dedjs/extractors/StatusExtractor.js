@@ -1,6 +1,6 @@
-const Convert = require("~/shared/lib/dedjs/Convert");
-const ObjectType = require("~/shared/lib/dedjs/ObjectType");
-const Helper = require("~/shared/lib/dedjs/Helper");
+const Convert = require("../Convert");
+const ObjectType = require("../ObjectType");
+const Helper = require("../Helper");
 
 /**
  * @file Library to extract stats from a status response.
@@ -79,38 +79,6 @@ function getUptime(statusResponse) {
   return statusResponse.system.Status.field.Uptime;
 }
 
-function getTomlFromStatusResponse(statusResponse) {
-  throwErrorIfTypeIsWrong(statusResponse)
-  return "[[servers]]\n" +
-    "  Address = \"" + getAddress(statusResponse) + "\"\n" +
-    "  Public = \"" + getPublicKey(statusResponse) + "\"\n" +
-    "  Description = \"" + getDescription(statusResponse) + "\"";
-}
-
-/**
- * Generates the TOML string representing a conode with its address, its public key and its description.
- * @param {string} address - the address of the conode
- * @param {string} publicKey - the public key of the conode
- * @param {string} description - the description of the conode
- * @returns {string} - the TOML string representing the conode
- */
-function getToml(address, publicKey, description) {
-  if (typeof address !== "string") {
-    throw new Error("address must be of type string");
-  }
-  if (typeof publicKey !== "string") {
-    throw new Error("publicKey must be of type string");
-  }
-  if (typeof description !== "string") {
-    throw new Error("description must be of type string");
-  }
-
-  return "[[servers]]\n" +
-    "  Address = \"" + address + "\"\n" +
-    "  Public = \"" + publicKey + "\"\n" +
-    "  Description = \"" + description + "\"";
-}
-
 module.exports.getDescription = getDescription;
 module.exports.getAddress = getAddress;
 module.exports.getID = getID;
@@ -124,5 +92,3 @@ module.exports.getVersion = getVersion;
 module.exports.getTXBytes = getTXBytes;
 module.exports.getRXBytes = getRXBytes;
 module.exports.getUptime = getUptime;
-module.exports.getTomlFromStatusResponse = getTomlFromStatusResponse;
-module.exports.getToml = getToml;

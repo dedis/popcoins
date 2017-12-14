@@ -30,16 +30,20 @@ const COMPLEX_OBJECT = {
 
 describe("Helper", function () {
   describe("#isOfType", function () {
-    it("should throw an error when object is undefined", function () {
-      expect(() => Helper.isOfType(undefined, "Object")).to.throw();
-    });
-
-    it("should throw an error when object is not an object", function () {
-      expect(() => Helper.isOfType("{}", "Object")).to.throw();
-    });
-
     it("should throw an error when type is not a string", function () {
       expect(() => Helper.isOfType({}, PUBLIC_KEY_BYTE_ARRAY)).to.throw();
+    });
+
+    it("should correctly find that a string is not a type of object", function () {
+      const bool = Helper.isOfType("{}", "Object");
+
+      bool.should.be.false;
+    });
+
+    it("should correctly find that undefined is not any type of object", function () {
+      const bool = Helper.isOfType(undefined, "Object");
+
+      bool.should.be.false;
     });
 
     it("should correctly check the type of a simple object", function () {
