@@ -2,6 +2,7 @@ const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const FileIO = require("../../lib/file-io/file-io");
 const FilesPath = require("../../res/files/files-path");
+const Package = require("../../Package");
 const Convert = require("../../lib/dedjs/Convert");
 const ObjectType = require("../../lib/dedjs/ObjectType");
 const Helper = require("../../lib/dedjs/Helper");
@@ -456,7 +457,7 @@ class User {
  */
 
 // The symbol key reference that the singleton will use.
-const USER_PACKAGE_KEY = Symbol.for("ch.epfl.dedis.cpmac.user");
+const USER_PACKAGE_KEY = Symbol.for(Package.USER);
 
 // We create the singleton if it hasn't been instanciated yet.
 const globalSymbols = Object.getOwnPropertySymbols(global);
