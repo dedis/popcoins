@@ -1,16 +1,16 @@
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
-const FileIO = require("../../lib/file-io/file-io");
-const FilesPath = require("../../res/files/files-path");
+const FileIO = require("../../../file-io/file-io");
+const FilesPath = require("../../../../res/files/files-path");
 const Package = require("../../Package");
-const Convert = require("../../lib/dedjs/Convert");
-const ObjectType = require("../../lib/dedjs/ObjectType");
-const Helper = require("../../lib/dedjs/Helper");
-const Net = require("../../lib/dedjs/Net");
-const Crypto = require("../../lib/dedjs/Crypto");
-const RequestPath = require("../../lib/dedjs/RequestPath");
-const DecodeType = require("../../lib/dedjs/DecodeType");
-const CothorityMessages = require("../../lib/dedjs/protobuf/build/cothority-messages");
+const Convert = require("../../Convert");
+const ObjectType = require("../../ObjectType");
+const Helper = require("../../Helper");
+const Net = require("../../Net");
+const Crypto = require("../../Crypto");
+const RequestPath = require("../../RequestPath");
+const DecodeType = require("../../DecodeType");
+const CothorityMessages = require("../../protobuf/build/cothority-messages");
 
 /**
  * This singleton is the user of the app. It contains everything needed that is general, app-wide or does not belong to any precise subpart.
@@ -19,6 +19,9 @@ const CothorityMessages = require("../../lib/dedjs/protobuf/build/cothority-mess
 /**
  * We define the User class which is the object representing the user of the app.
  */
+
+const EMPTY_KEYPAIR = CothorityMessages.createKeyPair(new Uint8Array(), new Uint8Array(), new Uint8Array());
+const EMPTY_ROSTER = CothorityMessages.createRoster(new Uint8Array(), [], new Uint8Array());
 
 class User {
 
@@ -94,7 +97,12 @@ class User {
     const newKeyPair = this.getKeyPair();
 
     if (save) {
-      return FileIO.writeStringTo(FilesPath.KEY_PAIR, Convert.objectToJson(newKeyPair))
+      let toWrite = "";
+      if (newKeyPair.public.length > 0 && newKeyPair.private.length > 0) {
+        toWrite = Convert.objectToJson(newKeyPair);
+      }
+
+      return FileIO.writeStringTo(FilesPath.KEY_PAIR, toWrite)
         .catch((error) => {
           console.log(error);
           console.dir(error);
@@ -376,8 +384,30 @@ class User {
   }
 
   /**
-   * Load functions and sub-functions to load the user into memory.
+   * Load and reset functions and sub-functions to load/reset the user.
    */
+
+  /**
+   * Completely resets the user.
+   * @returns {Promise} - a promise that gets completed once the user has been reset
+   */
+  reset() {
+    this._isLoaded = false;
+
+    const promises = [this.setKeyPair(EMPTY_KEYPAIR, true), this.setRoster(EMPTY_ROSTER, true)];
+
+    return Promise.all(promises)
+      .then(() => {
+        this._isLoaded = true;
+      })
+      .catch(error => {
+        console.log(error);
+        console.dir(error);
+        console.trace();
+
+        return Promise.reject(error);
+      });
+  }
 
   /**
    * Main load function.
@@ -411,7 +441,7 @@ class User {
         if (jsonKeyPair.length > 0) {
           return Convert.parseJsonKeyPair(jsonKeyPair);
         } else {
-          return CothorityMessages.createKeyPair(new Uint8Array(), new Uint8Array(), new Uint8Array());
+          return EMPTY_KEYPAIR;
         }
       })
       .then(keyPair => {
@@ -436,7 +466,7 @@ class User {
         if (jsonRoster.length > 0) {
           return Convert.parseJsonRoster(jsonRoster);
         } else {
-          return CothorityMessages.createRoster(new Uint8Array(), [], new Uint8Array());
+          return EMPTY_ROSTER;
         }
       })
       .then(roster => {
@@ -484,7 +514,7 @@ Object.defineProperty(USER, "get", {
   set: undefined
 });
 
-// We freete the singleton.
+// We freeze the singleton.
 Object.freeze(USER);
 
 // We export only the singleton API.
