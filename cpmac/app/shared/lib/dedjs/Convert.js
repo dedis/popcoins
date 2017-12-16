@@ -224,9 +224,13 @@ function parseJsonRoster(jsonString) {
     rosterId = base64ToByteArray(rosterId);
   }
 
+  let aggregate = (roster.aggregate === undefined) ? undefined : base64ToByteArray(roster.aggregate);
+
   const points = [];
   const list = roster.list.map((server) => {
-    points.push(Crypto.unmarshal(base64ToByteArray(server.public)));
+    if (aggregate === undefined) {
+      points.push(Crypto.unmarshal(base64ToByteArray(server.public)));
+    }
 
     let serverId = server.id;
     if (serverId !== undefined) {
@@ -236,11 +240,8 @@ function parseJsonRoster(jsonString) {
     return toServerIdentity(server.address, base64ToByteArray(server.public), server.description, serverId);
   });
 
-  let aggregate = roster.aggregate;
   if (aggregate === undefined) {
     aggregate = Crypto.aggregatePublicKeys(points);
-  } else {
-    aggregate = base64ToByteArray(roster.aggregate);
   }
 
   return CothorityMessages.createRoster(rosterId, list, aggregate);
