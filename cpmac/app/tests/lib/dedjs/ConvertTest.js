@@ -4,10 +4,10 @@ chai.should();
 
 const TomlParser = require("toml");
 const Tomlify = require("tomlify-j0.4");
-const Helper = require("../shared/lib/dedjs/Helper");
-const ObjectType = require("../shared/lib/dedjs/ObjectType");
+const Helper = require("../../../shared/lib/dedjs/Helper");
+const ObjectType = require("../../../shared/lib/dedjs/ObjectType");
 
-const Convert = require("../shared/lib/dedjs/Convert");
+const Convert = require("../../../shared/lib/dedjs/Convert");
 
 const BYTE_ARRAY = new Uint8Array([243, 39, 52, 77, 162, 48, 121, 100, 114, 48]);
 const HEX_STRING = "f327344da23079647230";

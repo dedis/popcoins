@@ -2,7 +2,7 @@ const ChaiAsPromised = require("chai-as-promised");
 chai.use(ChaiAsPromised);
 chai.should();
 
-const FileIO = require("../shared/lib/file-io/file-io");
+const FileIO = require("../../../shared/lib/file-io/file-io");
 
 describe("FileIO", function () {
   describe("#getStringOf", function () {

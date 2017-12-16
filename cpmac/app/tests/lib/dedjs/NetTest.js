@@ -2,12 +2,12 @@ const ChaiAsPromised = require("chai-as-promised");
 chai.use(ChaiAsPromised);
 chai.should();
 
-const RequestPath = require("../shared/lib/dedjs/RequestPath");
-const DecodeType = require("../shared/lib/dedjs/DecodeType");
-const Convert = require("../shared/lib/dedjs/Convert");
-const CothorityMessages = require("../shared/lib/dedjs/protobuf/build/cothority-messages");
+const RequestPath = require("../../../shared/lib/dedjs/RequestPath");
+const DecodeType = require("../../../shared/lib/dedjs/DecodeType");
+const Convert = require("../../../shared/lib/dedjs/Convert");
+const CothorityMessages = require("../../../shared/lib/dedjs/protobuf/build/cothority-messages");
 
-const Net = require("../shared/lib/dedjs/Net");
+const Net = require("../../../shared/lib/dedjs/Net");
 const StandardSocket = new Net.StandardSocket();
 const CothoritySocket = new Net.CothoritySocket();
 

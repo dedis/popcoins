@@ -3,9 +3,9 @@ chai.use(ChaiAsPromised);
 chai.should();
 
 const BigNumber = require("bn.js");
-const Convert = require("../shared/lib/dedjs/Convert");
+const Convert = require("../../../shared/lib/dedjs/Convert");
 
-const Crypto = require("../shared/lib/dedjs/Crypto");
+const Crypto = require("../../../shared/lib/dedjs/Crypto");
 
 const PRIVATE_KEY = "AWKlOlcTuCHEV/fKX0X1IoAoBU0n1c5iKp/SWRLj3T4=";
 const PRIVATE_KEY_BYTE_ARRAY = Convert.base64ToByteArray(PRIVATE_KEY);
