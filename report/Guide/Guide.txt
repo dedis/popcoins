@@ -1,4 +1,4 @@
-~15 pages (including cover and references) and has to be submitted by email to your supervisor along with your presentation and relevant project files
+~15-20 pages (including cover and references) and has to be submitted by email to your supervisor along with your presentation and relevant project files
 
 The relevant project files should be sent in a zip archive and include:
     -Source code of your report (LaTeX, EPS, GIF, etc)
@@ -11,7 +11,7 @@ The title page has to include the following information:
     -Name of the responsible (Prof. Bryan Ford).
     -Title of your project.
     -Type of project (Semester Project, Diploma Work, Graduate School Project, Internship).
-    -EPFL logo and lab name (DEDIS).
+    -EPFL logo and lab name (DeDiS).
 
 The content of the report should ideally cover the following topics:
     -Introduction of the subject and the problem.
