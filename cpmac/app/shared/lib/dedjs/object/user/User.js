@@ -183,7 +183,7 @@ class User {
         toWrite = Convert.objectToJson(newRoster);
       }
 
-      return FileIO.writeStringTo(FilesPath.CONODES_JSON, toWrite)
+      return FileIO.writeStringTo(FilesPath.ROSTER, toWrite)
         .catch((error) => {
           console.log(error);
           console.dir(error);
@@ -461,7 +461,7 @@ class User {
    * @returns {Promise} - a promise that gets resolved once the complete roster is loaded into memory
    */
   loadRoster() {
-    return FileIO.getStringOf(FilesPath.CONODES_JSON)
+    return FileIO.getStringOf(FilesPath.ROSTER)
       .then(jsonRoster => {
         if (jsonRoster.length > 0) {
           return Convert.parseJsonRoster(jsonRoster);

@@ -5,36 +5,33 @@
 /**
  * General settings files.
  */
-const CONODES_JSON = "shared/res/files/conodes.json";
-const KEY_PAIR = "shared/res/files/keypair.json";
+const ROSTER = "shared/res/files/user/roster.json";
+const KEY_PAIR = "shared/res/files/user/keypair.json";
 
 /**
  * PoP Files
  */
-const POP_DESC_HASH = "shared/res/files/pop/description.hash";
-const POP_FINAL_TOML = "shared/res/files/pop/final.toml";
-const POP_LINKED_CONODE = "shared/res/files/pop/org/link.conode";
-const POP_REGISTERED_KEYS = "shared/res/files/pop/org/party/registered_keys.txt";
-const POP_PARTY_NAME = "shared/res/files/pop/org/party/party.name";
-const POP_PARTY_DATETIME = "shared/res/files/pop/org/party/party.datetime";
-const POP_PARTY_LOCATION = "shared/res/files/pop/org/party/party.location";
-const POP_PARTY_CONODES = "shared/res/files/pop/org/party/party_conodes.toml";
+const POP_FINAL_STATEMENTS = "shared/res/files/user/pop/final_statements.json";
+const POP_TOKEN = "shared/res/files/user/pop/token.json";
+
+const POP_ORG_CONODE = "shared/res/files/user/pop/org/conode.json";
+const POP_ORG_DESC = "shared/res/files/user/pop/org/description.json";
+const POP_ORG_DESC_HASH = "shared/res/files/user/pop/org/description.hash";
+const POP_ORG_ATTENDEES = "shared/res/files/user/pop/org/attendees.json";
 
 /**
  * CISC Files
  */
-const CISC_IDENTITY_LINK = "shared/res/files/cisc/identity_link.txt";
-const CISC_NAME = "shared/res/files/cisc/name.txt";
+const CISC_IDENTITY_LINK = "shared/res/files/user/cisc/identity_link.txt";
+const CISC_NAME = "shared/res/files/user/cisc/name.txt";
 
-module.exports.CONODES_JSON = CONODES_JSON;
+module.exports.ROSTER = ROSTER;
 module.exports.KEY_PAIR = KEY_PAIR;
-module.exports.POP_DESC_HASH = POP_DESC_HASH;
-module.exports.POP_FINAL_TOML = POP_FINAL_TOML;
-module.exports.POP_LINKED_CONODE = POP_LINKED_CONODE;
-module.exports.POP_REGISTERED_KEYS = POP_REGISTERED_KEYS;
-module.exports.POP_PARTY_NAME = POP_PARTY_NAME;
-module.exports.POP_PARTY_DATETIME = POP_PARTY_DATETIME;
-module.exports.POP_PARTY_LOCATION = POP_PARTY_LOCATION;
-module.exports.POP_PARTY_CONODES = POP_PARTY_CONODES;
+module.exports.POP_FINAL_STATEMENTS = POP_FINAL_STATEMENTS;
+module.exports.POP_TOKEN = POP_TOKEN;
+module.exports.POP_ORG_CONODE = POP_ORG_CONODE;
+module.exports.POP_ORG_DESC = POP_ORG_DESC;
+module.exports.POP_ORG_DESC_HASH = POP_ORG_DESC_HASH;
+module.exports.POP_ORG_ATTENDEES = POP_ORG_ATTENDEES;
 module.exports.CISC_IDENTITY_LINK = CISC_IDENTITY_LINK;
 module.exports.CISC_NAME = CISC_NAME;

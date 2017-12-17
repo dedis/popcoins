@@ -207,7 +207,7 @@ describe("User", function () {
   });
 
   it("should correctly load roster", function () {
-    return FileIO.writeStringTo(FilesPath.CONODES_JSON, JSON_ROSTER_FULL)
+    return FileIO.writeStringTo(FilesPath.ROSTER, JSON_ROSTER_FULL)
       .then(() => {
         return User.load();
       })
@@ -229,7 +229,7 @@ describe("User", function () {
   it("should correctly reset files and memory", function () {
     return FileIO.writeStringTo(FilesPath.KEY_PAIR, JSON_KEY_PAIR)
       .then(() => {
-        return FileIO.writeStringTo(FilesPath.CONODES_JSON, JSON_ROSTER_FULL);
+        return FileIO.writeStringTo(FilesPath.ROSTER, JSON_ROSTER_FULL);
       })
       .then(() => {
         return User.load()
@@ -242,7 +242,7 @@ describe("User", function () {
           .then(string => {
             string.should.be.empty;
 
-            return FileIO.getStringOf(FilesPath.CONODES_JSON)
+            return FileIO.getStringOf(FilesPath.ROSTER)
               .then(string => {
                 string.should.be.empty;
 
@@ -501,7 +501,7 @@ describe("User", function () {
     it("should save if save is true", function () {
       return User.setRoster(ROSTER, true)
         .then(() => {
-          return FileIO.getStringOf(FilesPath.CONODES_JSON);
+          return FileIO.getStringOf(FilesPath.ROSTER);
         })
         .then(rosterString => {
           const expectedRoster = Convert.objectToJson(ROSTER);
@@ -513,7 +513,7 @@ describe("User", function () {
     it("should not save if save is false", function () {
       return User.setRoster(ROSTER, false)
         .then(() => {
-          return FileIO.getStringOf(FilesPath.CONODES_JSON);
+          return FileIO.getStringOf(FilesPath.ROSTER);
         })
         .then(rosterString => {
           rosterString.should.equal("");
