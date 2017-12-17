@@ -50,10 +50,18 @@ class User {
 
   /**
    * Gets the isLoaded property of the user. It is only true once all the settings of the user have been loaded into memory.
-   * @returns {boolean} - a boolean that is true once the user has been completely loaded into memory
+   * @returns {boolean} - a boolean that is true once the user has completely been loaded into memory
    */
   isLoaded() {
     return this._isLoaded;
+  }
+
+  /**
+   * Returns the observable key pair module.
+   * @returns {ObservableModule} - the observable key pair module
+   */
+  getKeyPairModule() {
+    return this._keyPair;
   }
 
   /**

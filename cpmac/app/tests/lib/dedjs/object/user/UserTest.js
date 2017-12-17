@@ -660,4 +660,10 @@ describe("User", function () {
       (User.isLoaded() === User._isLoaded).should.be.true;
     });
   });
+
+  describe("#getKeyPairModule", function () {
+    it("should return the reference to the key pair module", function () {
+      (User.getKeyPairModule() === User._keyPair).should.be.true;
+    });
+  });
 });
