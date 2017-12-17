@@ -1,6 +1,6 @@
 'use strict';
 
-function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
+function _interopDefault(ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 var Protobuf = _interopDefault(require('protobufjs'));
 
@@ -335,7 +335,7 @@ class CothorityMessages extends CothorityProtobuf {
     if (!(attendees instanceof Array)) {
       throw new Error("attendees must be an instance of Array");
     }
-    if (!(attendees[0] instanceof Uint8Array)) {
+    if (attendees.length > 0 && !(attendees[0] instanceof Uint8Array)) {
       throw new Error("attendees[i] must be an instance of Uint8Array");
     }
     if (!(signature instanceof Uint8Array)) {
