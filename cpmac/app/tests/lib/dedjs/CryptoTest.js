@@ -68,7 +68,6 @@ describe("Crypto", function () {
     });
 
     it("should correctly compute the marshal of a point", function () {
-      console.log(PUBLIC_KEY_POINT.constructor.name);
       const byteArray = Crypto.marshal(PUBLIC_KEY_POINT);
 
       byteArray.should.deep.equal(PUBLIC_KEY_BYTE_ARRAY);

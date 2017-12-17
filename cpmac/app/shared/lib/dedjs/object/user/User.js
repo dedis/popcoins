@@ -52,7 +52,7 @@ class User {
    * Gets the isLoaded property of the user. It is only true once all the settings of the user have been loaded into memory.
    * @returns {boolean} - a boolean that is true once the user has been completely loaded into memory
    */
-  getIsLoaded() {
+  isLoaded() {
     return this._isLoaded;
   }
 
@@ -138,7 +138,7 @@ class User {
       id = this._roster.id;
     }
 
-    let list = [];
+    const list = [];
     if (this._roster.list.length > 0) {
       this._roster.list.forEach(server => {
         list.push(server);
@@ -211,8 +211,8 @@ class User {
    * @returns {Promise} - a promise that gets returned once the server has been removed from the roster and saved
    */
   substractServerByIndex(index) {
-    if (typeof index !== "number" && index >= 0) {
-      throw new Error("index must be of type number and >= 0");
+    if (typeof index !== "number" || !(0 <= index && index < this._roster.list.length)) {
+      throw new Error("index must be of type number and be in the right range");
     }
 
     const server = this._roster.list.getItem(index);
@@ -234,19 +234,19 @@ class User {
       return new Promise((resolve, reject) => {
         resolve();
       });
-    } else if (roster.list === 0) {
+    } else if (roster.list.length === 0) {
       return new Promise((resolve, reject) => {
         resolve();
       });
     } else {
       const idsToExclude = roster.list.map(server => {
-        return server.id;
+        return Convert.byteArrayToBase64(server.id);
       });
 
       const newList = [];
       const points = [];
       this._roster.list.forEach(server => {
-        if (!idsToExclude.includes(server.id)) {
+        if (!idsToExclude.includes(Convert.byteArrayToBase64(server.id))) {
           newList.push(server);
           points.push(Crypto.unmarshal(server.public));
         }
@@ -309,7 +309,7 @@ class User {
 
     if (this._roster.list.length === 0) {
       return this.setRoster(roster, true);
-    } else if (roster.list === 0) {
+    } else if (roster.list.length === 0) {
       return new Promise((resolve, reject) => {
         resolve();
       });
