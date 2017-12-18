@@ -31,12 +31,28 @@
 # CISC:
 
   ## Theoretical and practical limitations of the project and its implementation
+    - Cisc backen is implemented
+    - Implementation of an app to allow users to vote on modifications and propose key pairs
+      - Users can have a skipchain to store key pairs/webpages
+      - Having more devices increase the security (possibility to reach the threshold to remove lost devices ...)
+    - Implementation of the communication between PoP front- and backend
+      - Messages, Signing...
+    - Show how to use the app to propose key pairs, to vote, to remove keypairs
 
   ## Results
+
+    - Possibility to connect to a id
+    - Possibility to add the device to the id
+    - Possibility to propose key pairs, to vote for new data
+    - Possibility to access the webpages stored on the cisc keypair
 
   ## Evaluation of the results and comparison with other approaches if applicable
 
   ## Future work
+
+    - Have multiple identities
+    - Creating identities using the pop token from the other side of the app as auth
+
 
 # PoP:
 
@@ -69,7 +85,7 @@
 
   - Nativescript Tutorial
   - Install Node, VS Code or Webstorm, Plugins
-  - Android Studio - Emulator / Xcode - Emulator
+  - Android Studio - Emulator / Xcode - Emulator - debugging on device
   - Own Makefile scripts (typically compile dedjs/protobuf)
   - Install and run conodes
   - Explain how to build/test
