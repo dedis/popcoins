@@ -1,6 +1,6 @@
 # Introduction of the subject and the problem
 
-  - Some words about Cothority in general
+  - Some words about Cothority in general + diagram and state diagram
   - Some details about CISC and PoP in general
 
 # Goals of the project and motivation
@@ -11,14 +11,14 @@
   - Create a cross-platform app to ease the access to functionalities of the Cothority framework
   - Create an app/library that will be easily extensible for further functionalities of the Cothority
   - Make a PoC for CISC and PoP, make the technology available to everyone
-  - Solution: Nativescript
+  - Solution: Nativescript (explain why)
 
 # Corresponding background
 
   - Define/Explain/Introduce Cothority
   - Define/Explain/Introduce CISC
-  - Define/Explain/Introduce PoP
-  - A bit of Elliptic Curve Cryptography?
+  - Define/Explain/Introduce PoP (define important terms: org, att, config, final, pop token...)
+  - A bit of Elliptic Curve Cryptography? (addition instead of multiplication)
   - A bit of Schnorr Signature Generation and Verification? (Including hashes)
   - A bit of Protobuf?
   - A bit of Websocket?
@@ -31,11 +31,11 @@
 # CISC:
 
   ## Theoretical and practical limitations of the project and its implementation
-    - Cisc backen is implemented
+    - Cisc backend is implemented
     - Implementation of an app to allow users to vote on modifications and propose key pairs
       - Users can have a skipchain to store key pairs/webpages
       - Having more devices increase the security (possibility to reach the threshold to remove lost devices ...)
-    - Implementation of the communication between PoP front- and backend
+    - Implementation of the communication between CISC front- and backend
       - Messages, Signing...
     - Show how to use the app to propose key pairs, to vote, to remove keypairs
 
@@ -46,12 +46,10 @@
     - Possibility to propose key pairs, to vote for new data
     - Possibility to access the webpages stored on the cisc keypair
 
-  ## Evaluation of the results and comparison with other approaches if applicable
-
   ## Future work
 
     - Have multiple identities
-    - Creating identities using the pop token from the other side of the app as auth
+    - Creating identity skipchains using the pop token from the other side of the app as auth
 
 
 # PoP:
@@ -62,7 +60,7 @@
     - Need to implement a user friendly frontend
     - Implementation of the communication between PoP front- and backend
       - Messages, Signing...
-    - Define terms like Organizer, Attendee
+    - Define terms like Organizer, Attendee (recall)
     - Talk about their possibilities
       - Organizer: Configure, Register, Finalize
       - Attendee: keypair, PoP Token creation
@@ -74,12 +72,11 @@
     - Ability to create, manage, attend a PoP party
     - PoP Token creation at the finalisation of the PoP party
 
-  ## Evaluation of the results and comparison with other approaches if applicable
-
   ## Future work
 
-    - Sign/Verify Services
+    - Sign/Verify Services (Ex. BeerToken)
     - Party Merging
+    - Register a final statement on a conode, everyone in the final should be to do either create a skipchain or new pop party
 
 # Step-by-step guide for installation, including dependencies, and running of the final product
 
@@ -90,3 +87,7 @@
   - Install and run conodes
   - Explain how to build/test
   - Talk about the bugs we had to bypass (.gz, brorand...)
+  
+# What have we learned? What would we now do differently?
+
+23 janvier 11h40 - BC229
