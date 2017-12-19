@@ -317,6 +317,14 @@ function parseJsonKeyPair(jsonString) {
   return CothorityMessages.createKeyPair(base64ToByteArray(keyPair.public), base64ToByteArray(keyPair.private), publicComplete);
 }
 
+function parseFinalStatementsArray(jsonString) {
+  // TODO
+}
+
+function parsePopTokenArray(jsonString) {
+  // TODO
+}
+
 /**
  * Converts the arguments given as parameter into a ServerIdentity object.
  * @param {string} address - the address of the server

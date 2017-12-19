@@ -13,7 +13,7 @@ const USER = `${APP}.user`;
 /**
  * PoP
  */
-const POP = `${USER}.pop`;
+const POP = `${APP}.pop`;
 const ORG = `${POP}.org`;
 const ATT = `${POP}.att`;
 

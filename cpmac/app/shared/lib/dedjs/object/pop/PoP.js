@@ -2,6 +2,8 @@ const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const Package = require("../../Package");
 const ObjectType = require("../../ObjectType");
+const Helper = require("../../Helper");
+const Convert = require("../../Convert");
 const FilesPath = require("../../../../res/files/files-path");
 const FileIO = require("../../../../lib/file-io/file-io");
 const CothorityMessages = require("../../protobuf/build/cothority-messages");
@@ -88,14 +90,31 @@ class PoP {
     if (!(array instanceof Array)) {
       throw new Error("array must be an instance of Array");
     }
-    if (!Helper.isOfType(array[0], ObjectType.FINAL_STATEMENT)) {
-      throw new Error("array[i] must be an instance of FinalStatement");
+    if (array.length === 0 || !Helper.isOfType(array[0], ObjectType.FINAL_STATEMENT)) {
+      throw new Error("array is empty or array[i] is not instance of FinalStatement");
     }
     if (typeof save !== "boolean") {
       throw new Error("save must be of type boolean");
     }
 
-    // TODO
+    return FileIO.writeStringTo(FilesPath.POP_FINAL_STATEMENTS, "")
+      .then(() => {
+        this.emptyFinalStatementArray()
+
+        if (array.length === 1) {
+          return this.addFinalStatement(array[0], save);
+        } else {
+          const promises = [];
+          for (let i = 0; i < array.length - 1; ++i) {
+            promises.push(this.addFinalStatement(array[i], false));
+          }
+
+          return Promise.all(promises)
+            .then(() => {
+              return this.addFinalStatement(array[array.length - 1], save);
+            });
+        }
+      });
   }
 
   /**
@@ -108,14 +127,31 @@ class PoP {
     if (!(array instanceof Array)) {
       throw new Error("array must be an instance of Array");
     }
-    if (!Helper.isOfType(array[0], ObjectType.POP_TOKEN)) {
-      throw new Error("array[i] must be an instance of PopToken");
+    if (array.length === 0 || !Helper.isOfType(array[0], ObjectType.POP_TOKEN)) {
+      throw new Error("array is empty or array[i] is not an instance of PopToken");
     }
     if (typeof save !== "boolean") {
       throw new Error("save must be of type boolean");
     }
 
-    // TODO
+    return FileIO.writeStringTo(FilesPath.POP_TOKEN, "")
+      .then(() => {
+        this.emptyPopTokenArray()
+
+        if (array.length === 1) {
+          return this.addPopToken(array[0], save);
+        } else {
+          const promises = [];
+          for (let i = 0; i < array.length - 1; ++i) {
+            promises.push(this.addPopToken(array[i], false));
+          }
+
+          return Promise.all(promises)
+            .then(() => {
+              return this.addPopToken(array[array.length - 1], save);
+            });
+        }
+      });
   }
 
   /**
@@ -176,6 +212,53 @@ class PoP {
           console.trace();
 
           return this.setFinalStatementsArray(oldFinalStatements, false)
+            .then(() => {
+              return Promise.reject(error);
+            });
+        });
+    } else {
+      return new Promise((resolve, reject) => {
+        resolve();
+      });
+    }
+  }
+
+  /**
+  * Adds the new PoP-Token given as parameter to the list of PoP-Token.
+  * @param {PopToken} popToken - the new PoP-Token to add
+  * @param {boolean} save - if the new PoPToken should be saved permanently
+  * @returns {Promise} - a promise that gets resolved once the new PoP-Token has been added and saved if the save parameter is set to true
+  */
+  addPopToken(popToken, save) {
+    if (!Helper.isOfType(popToken, ObjectType.POP_TOKEN)) {
+      throw new Error("popToken must be an instance of PopToken");
+    }
+    if (typeof save !== "boolean") {
+      throw new Error("save must be of type boolean");
+    }
+
+    const oldPopToken = this.getPopToken().slice();
+
+    this._popToken.array.push(popToken);
+
+    const newPopToken = this.getPopToken().slice();
+
+    if (save) {
+      let toWrite = "";
+      if (newPopToken.length > 0) {
+        const object = {};
+        object.array = newPopToken;
+
+        toWrite = Convert.objectToJson(object);
+      }
+
+      return FileIO.writeStringTo(FilesPath.POP_TOKEN, toWrite)
+        .catch((error) => {
+          console.log(error);
+          console.dir(error);
+          console.trace();
+
+          return this.setPopTokenArray(oldPopToken, false)
             .then(() => {
               return Promise.reject(error);
             });

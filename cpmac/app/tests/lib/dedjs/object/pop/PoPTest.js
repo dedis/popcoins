@@ -54,6 +54,21 @@ const FINAL_SIGNATURE = Convert.base64ToByteArray("2lHKPVm8gfDBhpxK3m119Gux6zzvJ
 const FINAL_MERGED = false;
 const FINAL_STATEMENT = CothorityMessages.createFinalStatement(FINAL_POP_DESC, FINAL_ATTENDEES, FINAL_SIGNATURE, FINAL_MERGED);
 
+const PRIVATE_KEY = "AWKlOlcTuCHEV/fKX0X1IoAoBU0n1c5iKp/SWRLj3T4=";
+const PRIVATE_KEY_BYTE_ARRAY = Convert.base64ToByteArray(PRIVATE_KEY);
+const PUBLIC_KEY = "y4JMDWrle6RMV+0BKU92Xbu8+J8VkZ5kV3SvSr2ZxHw=";
+const PUBLIC_KEY_BYTE_ARRAY = Convert.base64ToByteArray(PUBLIC_KEY);
+const PUBLIC_COMPLETE_KEY = "BBmiuL/uxUuItsuFVQJT4oUv4qZrb1fYQ+GL/ZTpZ43MfMSZvUqvdFdknpEVn/i8u112TykB7VdMpHvlag1Mgss=";
+const PUBLIC_COMPLETE_KEY_BYTE_ARRAY = Convert.base64ToByteArray(PUBLIC_COMPLETE_KEY);
+const JSON_KEY_PAIR = JSON.stringify({
+  "private": PRIVATE_KEY,
+  "public": PUBLIC_KEY,
+  "publicComplete": PUBLIC_COMPLETE_KEY
+});
+const KEY_PAIR = Convert.parseJsonKeyPair(JSON_KEY_PAIR);
+
+const POP_TOKEN = CothorityMessages.createPopToken(FINAL_STATEMENT, KEY_PAIR.private, KEY_PAIR.public);
+
 describe.only("PoP", function () {
 
   function clean() {
@@ -95,10 +110,16 @@ describe.only("PoP", function () {
     (PoP2 === PoP).should.be.true;
   });
 
-  it("should correctly load empty key pair", function () {
+  it("should correctly load empty final statements array", function () {
   });
 
-  it("should correctly load key pair", function () {
+  it("should correctly load final statements", function () {
+  });
+
+  it("should correctly load empty PoP-Token array", function () {
+  });
+
+  it("should correctly load PoP-Token", function () {
   });
 
   it("should correctly reset files and memory", function () {
@@ -195,12 +216,184 @@ describe.only("PoP", function () {
       expect(() => PoP.addFinalStatement(FINAL_STATEMENT, "true")).to.throw();
     });
 
+    it("should not save if save is false", function () {
+      return PoP.addFinalStatement(FINAL_STATEMENT, false)
+        .then(() => {
+          return FileIO.getStringOf(FilesPath.POP_FINAL_STATEMENTS);
+        })
+        .then(finalStatementsString => {
+          finalStatementsString.should.be.empty;
+          JSON.stringify(PoP.getFinalStatements().getItem(0)).should.equal(JSON.stringify(FINAL_STATEMENT));
+        });
+    });
+
     it("should save if save is true", function () {
-      /* // TODO
       return PoP.addFinalStatement(FINAL_STATEMENT, true)
         .then(() => {
+          return FileIO.getStringOf(FilesPath.POP_FINAL_STATEMENTS);
+        })
+        .then(finalStatementsString => {
+          const object = {};
+          object.array = [FINAL_STATEMENT];
+
+          JSON.stringify(JSON.parse(finalStatementsString)).should.equal(JSON.stringify(object));
+          JSON.stringify(PoP.getFinalStatements().getItem(0)).should.equal(JSON.stringify(FINAL_STATEMENT));
         });
-        */
+    });
+  });
+
+  describe("#addPopToken", function () {
+    it("should throw an error when popToken is not a PoP-Token", function () {
+      expect(() => PoP.addPopToken("POP_TOKEN", true)).to.throw();
+    });
+
+    it("should throw an error when save is not a boolean", function () {
+      expect(() => PoP.addPopToken(POP_TOKEN, "true")).to.throw();
+    });
+
+    it("should not save if save is false", function () {
+      return PoP.addPopToken(POP_TOKEN, false)
+        .then(() => {
+          return FileIO.getStringOf(FilesPath.POP_TOKEN);
+        })
+        .then(popTokenString => {
+          popTokenString.should.be.empty;
+          JSON.stringify(PoP.getPopToken().getItem(0)).should.equal(JSON.stringify(POP_TOKEN));
+        });
+    });
+
+    it("should save if save is true", function () {
+      return PoP.addPopToken(POP_TOKEN, true)
+        .then(() => {
+          return FileIO.getStringOf(FilesPath.POP_TOKEN);
+        })
+        .then(popTokenString => {
+          const object = {};
+          object.array = [POP_TOKEN];
+
+          JSON.stringify(JSON.parse(popTokenString)).should.equal(JSON.stringify(object));
+          JSON.stringify(PoP.getPopToken().getItem(0)).should.equal(JSON.stringify(POP_TOKEN));
+        });
+    });
+  });
+
+  describe("#setFinalStatementsArray", function () {
+    it("should throw an error when array is not an array", function () {
+      expect(() => PoP.setFinalStatementsArray("[FINAL_STATEMENT, FINAL_STATEMENT]", true)).to.throw();
+    });
+
+    it("should throw an error when array is empty", function () {
+      expect(() => PoP.setFinalStatementsArray([], true)).to.throw();
+    });
+
+    it("should throw an error when array is not an array of final statements", function () {
+      expect(() => PoP.setFinalStatementsArray([1, 2], true)).to.throw();
+    });
+
+    it("should throw an error when save is not a boolean", function () {
+      expect(() => PoP.setFinalStatementsArray([FINAL_STATEMENT, FINAL_STATEMENT], "true")).to.throw();
+    });
+
+    it("should completely replace the current final statements", function () {
+      for (let i = 0; i < 10; ++i) {
+        PoP._finalStatements.array.push(i);
+      }
+
+      return PoP.setFinalStatementsArray([FINAL_STATEMENT, FINAL_STATEMENT], false)
+        .then(() => {
+          PoP.getFinalStatements().length.should.equal(2);
+        });
+    });
+
+    it("should correctly set an array of length 1 and not save", function () {
+      return PoP.setFinalStatementsArray([FINAL_STATEMENT], false)
+        .then(() => {
+          PoP.getFinalStatements().length.should.equal(1);
+          JSON.stringify(PoP.getFinalStatements().getItem(0)).should.equal(JSON.stringify(FINAL_STATEMENT));
+
+          return FileIO.getStringOf(FilesPath.POP_FINAL_STATEMENTS);
+        })
+        .then(finalStatementsString => {
+          finalStatementsString.should.be.empty;
+        });
+    });
+
+    it("should correctly set an array of length 3 and save", function () {
+      return PoP.setFinalStatementsArray([FINAL_STATEMENT, FINAL_STATEMENT, FINAL_STATEMENT], true)
+        .then(() => {
+          PoP.getFinalStatements().length.should.equal(3);
+          JSON.stringify(PoP.getFinalStatements().getItem(0)).should.equal(JSON.stringify(FINAL_STATEMENT));
+          JSON.stringify(PoP.getFinalStatements().getItem(1)).should.equal(JSON.stringify(FINAL_STATEMENT));
+          JSON.stringify(PoP.getFinalStatements().getItem(2)).should.equal(JSON.stringify(FINAL_STATEMENT));
+
+          return FileIO.getStringOf(FilesPath.POP_FINAL_STATEMENTS);
+        })
+        .then(finalStatementsString => {
+          const object = {};
+          object.array = [FINAL_STATEMENT, FINAL_STATEMENT, FINAL_STATEMENT];
+
+          JSON.stringify(JSON.parse(finalStatementsString)).should.equal(JSON.stringify(object));
+        });
+    });
+  });
+
+  describe("#setPopTokenArray", function () {
+    it("should throw an error when array is not an array", function () {
+      expect(() => PoP.setPopTokenArray("[POP_TOKEN, POP_TOKEN]", true)).to.throw();
+    });
+
+    it("should throw an error when array is empty", function () {
+      expect(() => PoP.setPopTokenArray([], true)).to.throw();
+    });
+
+    it("should throw an error when array is not an array of PoP-Token", function () {
+      expect(() => PoP.setPopTokenArray([1, 2], true)).to.throw();
+    });
+
+    it("should throw an error when save is not a boolean", function () {
+      expect(() => PoP.setPopTokenArray([POP_TOKEN, POP_TOKEN], "true")).to.throw();
+    });
+
+    it("should completely replace the current PoP-Token", function () {
+      for (let i = 0; i < 10; ++i) {
+        PoP._popToken.array.push(i);
+      }
+
+      return PoP.setPopTokenArray([POP_TOKEN, POP_TOKEN], false)
+        .then(() => {
+          PoP.getPopToken().length.should.equal(2);
+        });
+    });
+
+    it("should correctly set an array of length 1 and not save", function () {
+      return PoP.setPopTokenArray([POP_TOKEN], false)
+        .then(() => {
+          PoP.getPopToken().length.should.equal(1);
+          JSON.stringify(PoP.getPopToken().getItem(0)).should.equal(JSON.stringify(POP_TOKEN));
+
+          return FileIO.getStringOf(FilesPath.POP_TOKEN);
+        })
+        .then(popTokenString => {
+          popTokenString.should.be.empty;
+        });
+    });
+
+    it("should correctly set an array of length 3 and save", function () {
+      return PoP.setPopTokenArray([POP_TOKEN, POP_TOKEN, POP_TOKEN], true)
+        .then(() => {
+          PoP.getPopToken().length.should.equal(3);
+          JSON.stringify(PoP.getPopToken().getItem(0)).should.equal(JSON.stringify(POP_TOKEN));
+          JSON.stringify(PoP.getPopToken().getItem(1)).should.equal(JSON.stringify(POP_TOKEN));
+          JSON.stringify(PoP.getPopToken().getItem(2)).should.equal(JSON.stringify(POP_TOKEN));
+
+          return FileIO.getStringOf(FilesPath.POP_TOKEN);
+        })
+        .then(popTokenString => {
+          const object = {};
+          object.array = [POP_TOKEN, POP_TOKEN, POP_TOKEN];
+
+          JSON.stringify(JSON.parse(popTokenString)).should.equal(JSON.stringify(object));
+        });
     });
   });
 });
