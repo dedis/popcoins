@@ -70,11 +70,11 @@ class User {
    */
   getKeyPair() {
     let publicComplete = undefined;
-    if (this._keyPair.publicComplete.length > 0) {
-      publicComplete = this._keyPair.publicComplete;
+    if (this.getKeyPairModule().publicComplete.length > 0) {
+      publicComplete = this.getKeyPairModule().publicComplete;
     }
 
-    return CothorityMessages.createKeyPair(this._keyPair.public, this._keyPair.private, publicComplete);
+    return CothorityMessages.createKeyPair(this.getKeyPairModule().public, this.getKeyPairModule().private, publicComplete);
   }
 
   /**
@@ -93,13 +93,13 @@ class User {
 
     const oldKeyPair = this.getKeyPair();
 
-    this._keyPair.public = keyPair.public;
-    this._keyPair.private = keyPair.private;
+    this.getKeyPairModule().public = keyPair.public;
+    this.getKeyPairModule().private = keyPair.private;
 
     if (keyPair.publicComplete !== undefined) {
-      this._keyPair.publicComplete = keyPair.publicComplete;
+      this.getKeyPairModule().publicComplete = keyPair.publicComplete;
     } else {
-      this._keyPair.publicComplete = new Uint8Array();
+      this.getKeyPairModule().publicComplete = new Uint8Array();
     }
 
     const newKeyPair = this.getKeyPair();
@@ -142,18 +142,18 @@ class User {
    */
   getRoster() {
     let id = undefined;
-    if (this._roster.id.length > 0) {
-      id = this._roster.id;
+    if (this.getRosterModule().id.length > 0) {
+      id = this.getRosterModule().id;
     }
 
     const list = [];
-    if (this._roster.list.length > 0) {
-      this._roster.list.forEach(server => {
+    if (this.getRosterModule().list.length > 0) {
+      this.getRosterModule().list.forEach(server => {
         list.push(server);
       });
     }
 
-    return CothorityMessages.createRoster(id, list, this._roster.aggregate);
+    return CothorityMessages.createRoster(id, list, this.getRosterModule().aggregate);
   }
 
   /**
@@ -172,16 +172,16 @@ class User {
 
     const oldRoster = this.getRoster();
 
-    this._roster.id = new Uint8Array();
+    this.getRosterModule().id = new Uint8Array();
     if (roster.id !== undefined) {
-      this._roster.id = roster.id;
+      this.getRosterModule().id = roster.id;
     }
-    this._roster.list = new ObservableArray();
+    this.getRosterModule().list = new ObservableArray();
     roster.list.forEach((server) => {
       server.toBase64 = Convert.byteArrayToBase64;
-      this._roster.list.push(server);
+      this.getRosterModule().list.push(server);
     });
-    this._roster.aggregate = roster.aggregate;
+    this.getRosterModule().aggregate = roster.aggregate;
 
     const newRoster = this.getRoster();
 
@@ -219,11 +219,11 @@ class User {
    * @returns {Promise} - a promise that gets returned once the server has been removed from the roster and saved
    */
   substractServerByIndex(index) {
-    if (typeof index !== "number" || !(0 <= index && index < this._roster.list.length)) {
+    if (typeof index !== "number" || !(0 <= index && index < this.getRosterModule().list.length)) {
       throw new Error("index must be of type number and be in the right range");
     }
 
-    const server = this._roster.list.getItem(index);
+    const server = this.getRosterModule().list.getItem(index);
 
     return this.substractRoster(CothorityMessages.createRoster(undefined, [server], server.public));
   }
@@ -238,7 +238,7 @@ class User {
       throw new Error("roster must be an instance of Roster");
     }
 
-    if (this._roster.list.length === 0) {
+    if (this.getRosterModule().list.length === 0) {
       return new Promise((resolve, reject) => {
         resolve();
       });
@@ -253,7 +253,7 @@ class User {
 
       const newList = [];
       const points = [];
-      this._roster.list.forEach(server => {
+      this.getRosterModule().list.forEach(server => {
         if (!idsToExclude.includes(Convert.byteArrayToBase64(server.id))) {
           newList.push(server);
           points.push(Crypto.unmarshal(server.public));
@@ -315,7 +315,7 @@ class User {
       throw new Error("roster must be an instance of Roster");
     }
 
-    if (this._roster.list.length === 0) {
+    if (this.getRosterModule().list.length === 0) {
       return this.setRoster(roster, true);
     } else if (roster.list.length === 0) {
       return new Promise((resolve, reject) => {
@@ -326,7 +326,7 @@ class User {
       const points = [];
       const idsToExclude = [];
 
-      this._roster.list.forEach(server => {
+      this.getRosterModule().list.forEach(server => {
         newList.push(server);
         points.push(Crypto.unmarshal(server.public));
         idsToExclude.push(Convert.byteArrayToBase64(server.id));
@@ -349,8 +349,8 @@ class User {
    * Empties the roster status list.
    */
   emptyRosterStatusList() {
-    while (this._roster.statusList.length > 0) {
-      this._roster.statusList.pop();
+    while (this.getRosterModule().statusList.length > 0) {
+      this.getRosterModule().statusList.pop();
     }
   }
 
@@ -359,7 +359,7 @@ class User {
    * @returns {Promise} - a promise that gets resolved once all the statuses of the conodes were received
    */
   getRosterStatus() {
-    this._roster.isLoading = true;
+    this.getRosterModule().isLoading = true;
     this.emptyRosterStatusList();
 
     const conodes = Array.from(this.getRoster().list);
@@ -369,7 +369,7 @@ class User {
     conodes.map((server) => {
       return cothoritySocket.send(server, RequestPath.STATUS_REQUEST, statusRequestMessage, DecodeType.STATUS_RESPONSE)
         .then(statusResponse => {
-          this._roster.statusList.push({
+          this.getRosterModule().statusList.push({
             conode: server,
             conodeStatus: statusResponse
           });
@@ -387,7 +387,7 @@ class User {
 
     return Promise.all(conodes)
       .then(() => {
-        this._roster.isLoading = false;
+        this.getRosterModule().isLoading = false;
       });
   }
 

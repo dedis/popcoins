@@ -8,6 +8,8 @@ const FilesPath = require("../../../../res/files/files-path");
 const FileIO = require("../../../../lib/file-io/file-io");
 const CothorityMessages = require("../../protobuf/build/cothority-messages");
 
+const User = require("../user/User").get;
+
 /**
  * This singleton is the PoP component of the app. It contains everything related to PoP in general and used by both, the organizer and the attendee.
  */
@@ -48,7 +50,7 @@ class PoP {
    * @returns {ObservableArray} - an observable array containing all the final statements
    */
   getFinalStatements() {
-    return this._finalStatements.array;
+    return this.getFinalStatementsModule().array;
   }
 
   /**
@@ -64,7 +66,7 @@ class PoP {
    * @returns {ObservableArray} - an observable array containing all the PoP-Token
    */
   getPopToken() {
-    return this._popToken.array;
+    return this.getPopTokenModule().array;
   }
 
   /**
@@ -151,8 +153,8 @@ class PoP {
    * Empties the final statements array (this action is not saved permanently).
    */
   emptyFinalStatementArray() {
-    while (this._finalStatements.array.length > 0) {
-      this._finalStatements.array.pop();
+    while (this.getFinalStatements().length > 0) {
+      this.getFinalStatements().pop();
     }
   }
 
@@ -160,8 +162,8 @@ class PoP {
    * Empties the PoP-Token array (this action is not saved permanently).
    */
   emptyPopTokenArray() {
-    while (this._popToken.array.length > 0) {
-      this._popToken.array.pop();
+    while (this.getPopToken().length > 0) {
+      this.getPopToken().pop();
     }
   }
 
@@ -181,7 +183,7 @@ class PoP {
 
     const oldFinalStatements = this.getFinalStatements().slice();
 
-    this._finalStatements.array.push(finalStatement);
+    this.getFinalStatements().push(finalStatement);
 
     const newFinalStatements = this.getFinalStatements().slice();
 
@@ -228,7 +230,7 @@ class PoP {
 
     const oldPopToken = this.getPopToken().slice();
 
-    this._popToken.array.push(popToken);
+    this.getPopToken().push(popToken);
 
     const newPopToken = this.getPopToken().slice();
 
@@ -272,7 +274,12 @@ class PoP {
       throw new Error("index is not in the range of the final statements list");
     }
 
-    const newArray = this.getFinalStatements().slice().slice(index, 1);
+    const newArray = [];
+    for (let i = 0; i < this.getFinalStatements().length; ++i) {
+      if (i !== index) {
+        newArray.push(this.getFinalStatements().getItem(i));
+      }
+    }
 
     if (newArray.length > 0) {
       return this.setFinalStatementsArray(newArray, true);
@@ -300,14 +307,24 @@ class PoP {
       throw new Error("index is not in the range of the PoP-Token list");
     }
 
-    // TODO: re-add final statement
-
-    const newArray = this.getPopToken().slice().slice(index, 1);
+    const finalStatement = this.getPopToken().getItem(index).final;
+    const newArray = [];
+    for (let i = 0; i < this.getPopToken().length; ++i) {
+      if (i !== index) {
+        newArray.push(this.getPopToken().getItem(i));
+      }
+    }
 
     if (newArray.length > 0) {
-      return this.setPopTokenArray(newArray, true);
+      return this.addFinalStatement(finalStatement, true)
+        .then(() => {
+          return this.setPopTokenArray(newArray, true);
+        });
     } else {
-      return FileIO.writeStringTo(FilesPath.POP_TOKEN, "")
+      return this.addFinalStatement(finalStatement, true)
+        .then(() => {
+          return FileIO.writeStringTo(FilesPath.POP_TOKEN, "");
+        })
         .then(() => {
           this.emptyPopTokenArray();
 
@@ -323,7 +340,20 @@ class PoP {
    * @returns {Promise} - a promise that gets resolved once the PoP-Token has been generated and saved permanently
    */
   generatePopTokenByIndex(index) {
-    // TODO
+    if (typeof index !== "number") {
+      throw new Error("index must be of type number");
+    }
+    if (!(0 <= index && index < this.getFinalStatements().length)) {
+      throw new Error("index is not in the range of the final statements list");
+    }
+
+    const keyPair = User.getKeyPair();
+    const popToken = CothorityMessages.createPopToken(this.getFinalStatements().getItem(index), keyPair.private, keyPair.public);
+
+    return this.addPopToken(popToken, true)
+      .then(() => {
+        return this.deleteFinalStatementByIndex(index);
+      });
   }
 
   /**
@@ -442,8 +472,7 @@ const popExists = (globalSymbols.indexOf(POP_PACKAGE_KEY) >= 0);
 if (!popExists) {
   global[POP_PACKAGE_KEY] = (function () {
     const newPoP = new PoP();
-    // TODO: decomment
-    //newPoP.load();
+    newPoP.load();
 
     return newPoP;
   })();

@@ -6,6 +6,7 @@ const FilesPath = require("../../../../../shared/res/files/files-path");
 const FileIO = require("../../../../../shared/lib/file-io/file-io");
 const Convert = require("../../../../../shared/lib/dedjs/Convert");
 const CothorityMessages = require("../../../../../shared/lib/dedjs/protobuf/build/cothority-messages");
+const User = require("../../../../../shared/lib/dedjs/object/user/User").get;
 
 const PoP = require("../../../../../shared/lib/dedjs/object/pop/PoP").get;
 
@@ -69,7 +70,7 @@ const KEY_PAIR = Convert.parseJsonKeyPair(JSON_KEY_PAIR);
 
 const POP_TOKEN = CothorityMessages.createPopToken(FINAL_STATEMENT, KEY_PAIR.private, KEY_PAIR.public);
 
-describe.only("PoP", function () {
+describe("PoP", function () {
 
   function clean() {
     const promises = Object.getOwnPropertyNames(FilesPath).map(filePath => {
@@ -423,6 +424,147 @@ describe.only("PoP", function () {
           object.array = [POP_TOKEN, POP_TOKEN, POP_TOKEN];
 
           JSON.stringify(JSON.parse(popTokenString)).should.equal(JSON.stringify(object));
+        });
+    });
+  });
+
+  describe("#deleteFinalStatementByIndex", function () {
+    it("should throw an error when index is not a number", function () {
+      expect(() => PoP.deleteFinalStatementByIndex("2")).to.throw();
+    });
+
+    it("should throw an error when index is negative", function () {
+      expect(() => PoP.deleteFinalStatementByIndex(-1)).to.throw();
+    });
+
+    it("should throw an error when index is too big", function () {
+      expect(() => PoP.deleteFinalStatementByIndex(0)).to.throw();
+    });
+
+    it("should correctly remove the final statement in memory and save it", function () {
+      return PoP.setFinalStatementsArray([FINAL_STATEMENT, FINAL_STATEMENT, FINAL_STATEMENT], true)
+        .then(() => {
+          PoP.getFinalStatements().length.should.equal(3);
+          return PoP.deleteFinalStatementByIndex(1);
+        })
+        .then(() => {
+          PoP.getFinalStatements().length.should.equal(2);
+          return PoP.deleteFinalStatementByIndex(1);
+        })
+        .then(() => {
+          PoP.getFinalStatements().length.should.equal(1);
+          return PoP.deleteFinalStatementByIndex(0);
+        })
+        .then(() => {
+          PoP.getFinalStatements().length.should.equal(0);
+
+          return FileIO.getStringOf(FilesPath.POP_FINAL_STATEMENTS);
+        })
+        .then(finalStatementsString => {
+          finalStatementsString.should.be.empty;
+        });
+    });
+  });
+
+  describe("#revokePopTokenByIndex", function () {
+    it("should throw an error when index is not a number", function () {
+      expect(() => PoP.revokePopTokenByIndex("2")).to.throw();
+    });
+
+    it("should throw an error when index is negative", function () {
+      expect(() => PoP.revokePopTokenByIndex(-1)).to.throw();
+    });
+
+    it("should throw an error when index is too big", function () {
+      expect(() => PoP.revokePopTokenByIndex(0)).to.throw();
+    });
+
+    it("should correctly remove the PoP-Token in memory and save it + re-add the final statement", function () {
+      return PoP.setPopTokenArray([POP_TOKEN, POP_TOKEN, POP_TOKEN], true)
+        .then(() => {
+          PoP.getPopToken().length.should.equal(3);
+          PoP.getFinalStatements().length.should.equal(0);
+
+          return PoP.revokePopTokenByIndex(1);
+        })
+        .then(() => {
+          PoP.getPopToken().length.should.equal(2);
+          PoP.getFinalStatements().length.should.equal(1);
+
+          return PoP.revokePopTokenByIndex(1);
+        })
+        .then(() => {
+          PoP.getPopToken().length.should.equal(1);
+          PoP.getFinalStatements().length.should.equal(2);
+
+          return PoP.revokePopTokenByIndex(0);
+        })
+        .then(() => {
+          PoP.getPopToken().length.should.equal(0);
+          PoP.getFinalStatements().length.should.equal(3);
+
+          return FileIO.getStringOf(FilesPath.POP_TOKEN);
+        })
+        .then(popTokenString => {
+          popTokenString.should.be.empty;
+
+          return FileIO.getStringOf(FilesPath.POP_FINAL_STATEMENTS);
+        })
+        .then(finalStatementsString => {
+          finalStatementsString.should.not.be.empty;
+        });
+    });
+  });
+
+  describe("#generatePopTokenByIndex", function () {
+    it("should throw an error when index is not a number", function () {
+      expect(() => PoP.generatePopTokenByIndex("2")).to.throw();
+    });
+
+    it("should throw an error when index is negative", function () {
+      expect(() => PoP.generatePopTokenByIndex(-1)).to.throw();
+    });
+
+    it("should throw an error when index is too big", function () {
+      expect(() => PoP.generatePopTokenByIndex(0)).to.throw();
+    });
+
+    it("should correctly generate the PoP-Token, save it + delete the final statement", function () {
+      return User.setKeyPair(KEY_PAIR, false)
+        .then(() => {
+          return PoP.setFinalStatementsArray([FINAL_STATEMENT, FINAL_STATEMENT, FINAL_STATEMENT], true);
+        })
+        .then(() => {
+          PoP.getPopToken().length.should.equal(0);
+          PoP.getFinalStatements().length.should.equal(3);
+
+          return PoP.generatePopTokenByIndex(1);
+        })
+        .then(() => {
+          PoP.getPopToken().length.should.equal(1);
+          PoP.getFinalStatements().length.should.equal(2);
+
+          return PoP.generatePopTokenByIndex(1);
+        })
+        .then(() => {
+          PoP.getPopToken().length.should.equal(2);
+          PoP.getFinalStatements().length.should.equal(1);
+
+          return PoP.generatePopTokenByIndex(0);
+        })
+        .then(() => {
+          PoP.getPopToken().length.should.equal(3);
+          PoP.getFinalStatements().length.should.equal(0);
+
+          return FileIO.getStringOf(FilesPath.POP_FINAL_STATEMENTS);
+        })
+        .then(finalStatementsString => {
+          finalStatementsString.should.be.empty;
+
+          return FileIO.getStringOf(FilesPath.POP_TOKEN);
+        })
+        .then(popTokenString => {
+          popTokenString.should.not.be.empty;
         });
     });
   });
