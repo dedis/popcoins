@@ -111,15 +111,39 @@ describe.only("PoP", function () {
   });
 
   it("should correctly load empty final statements array", function () {
+    const finalStatements = PoP.getFinalStatements();
+
+    finalStatements.length.should.equal(0);
   });
 
-  it("should correctly load final statements", function () {
+  it("should correctly load final statements array", function () {
+    const object = {};
+    object.array = [FINAL_STATEMENT, FINAL_STATEMENT, FINAL_STATEMENT, FINAL_STATEMENT];
+    return FileIO.writeStringTo(FilesPath.POP_FINAL_STATEMENTS, Convert.objectToJson(object))
+      .then(() => {
+        return PoP.load();
+      })
+      .then(() => {
+        PoP.getFinalStatements().length.should.equal(4);
+      });
   });
 
   it("should correctly load empty PoP-Token array", function () {
+    const popToken = PoP.getPopToken();
+
+    popToken.length.should.equal(0);
   });
 
-  it("should correctly load PoP-Token", function () {
+  it("should correctly load PoP-Token array", function () {
+    const object = {};
+    object.array = [POP_TOKEN, POP_TOKEN, POP_TOKEN, POP_TOKEN];
+    return FileIO.writeStringTo(FilesPath.POP_TOKEN, Convert.objectToJson(object))
+      .then(() => {
+        return PoP.load();
+      })
+      .then(() => {
+        PoP.getPopToken().length.should.equal(4);
+      });
   });
 
   it("should correctly reset files and memory", function () {
@@ -306,7 +330,10 @@ describe.only("PoP", function () {
     });
 
     it("should correctly set an array of length 1 and not save", function () {
-      return PoP.setFinalStatementsArray([FINAL_STATEMENT], false)
+      return FileIO.writeStringTo(FilesPath.POP_FINAL_STATEMENTS, "Hello")
+        .then(() => {
+          return PoP.setFinalStatementsArray([FINAL_STATEMENT], false)
+        })
         .then(() => {
           PoP.getFinalStatements().length.should.equal(1);
           JSON.stringify(PoP.getFinalStatements().getItem(0)).should.equal(JSON.stringify(FINAL_STATEMENT));
@@ -314,7 +341,7 @@ describe.only("PoP", function () {
           return FileIO.getStringOf(FilesPath.POP_FINAL_STATEMENTS);
         })
         .then(finalStatementsString => {
-          finalStatementsString.should.be.empty;
+          finalStatementsString.should.equal("Hello");
         });
     });
 
@@ -366,7 +393,10 @@ describe.only("PoP", function () {
     });
 
     it("should correctly set an array of length 1 and not save", function () {
-      return PoP.setPopTokenArray([POP_TOKEN], false)
+      return FileIO.writeStringTo(FilesPath.POP_TOKEN, "Hello")
+        .then(() => {
+          return PoP.setPopTokenArray([POP_TOKEN], false);
+        })
         .then(() => {
           PoP.getPopToken().length.should.equal(1);
           JSON.stringify(PoP.getPopToken().getItem(0)).should.equal(JSON.stringify(POP_TOKEN));
@@ -374,7 +404,7 @@ describe.only("PoP", function () {
           return FileIO.getStringOf(FilesPath.POP_TOKEN);
         })
         .then(popTokenString => {
-          popTokenString.should.be.empty;
+          popTokenString.should.equal("Hello");
         });
     });
 

@@ -6,6 +6,7 @@ const TomlParser = require("toml");
 const Tomlify = require("tomlify-j0.4");
 const Helper = require("../../../shared/lib/dedjs/Helper");
 const ObjectType = require("../../../shared/lib/dedjs/ObjectType");
+const CothorityMessages = require("../../../shared/lib/dedjs/protobuf/build/cothority-messages");
 
 const Convert = require("../../../shared/lib/dedjs/Convert");
 
@@ -163,6 +164,29 @@ const JSON_KEY_PAIR_NO_COMPLETE = JSON.stringify({
   "private": PRIVATE_KEY,
   "public": PUBLIC_KEY
 });
+
+
+const ROSTER_LIST_SERVER_IDENTITIES = ROSTER_LIST.map(conode => {
+  conode.public = Convert.base64ToByteArray(conode.public);
+  conode.id = Convert.base64ToByteArray(conode.id);
+
+  return Convert.toServerIdentity(conode.address, conode.public, conode.description, conode.id);
+});
+const POP_DESC_NAME = "Ced's Gang";
+const POP_DESC_DATETIME = "Thu, 30 Nov 2017 11:12:00 GMT";
+const POP_DESC_LOCATION = "INM, Lausanne";
+const POP_DESC_ROSTER = CothorityMessages.createRoster(ROSTER_ID_BYTE_ARRAY, ROSTER_LIST_SERVER_IDENTITIES, ROSTER_AGGREGATE_BYTE_ARRAY);
+
+const FINAL_POP_DESC = CothorityMessages.createPopDesc(POP_DESC_NAME, POP_DESC_DATETIME, POP_DESC_LOCATION, POP_DESC_ROSTER);
+let FINAL_ATTENDEES = ["HkDzpR5Imd7WNx8kl2lJcIVRVn8gfDByJnmlfrYh/zU=", "Fx6zzvJM6VzxfByLY2+uArGPtd2lHKPVmoXGMhdaFCA=", "j53MMKZNdtLlglcK9Ct1YYtkbbEOfq3R8ZoJOFIu6tE="];
+FINAL_ATTENDEES = FINAL_ATTENDEES.map(base64Key => {
+  return Convert.base64ToByteArray(base64Key);
+});
+const FINAL_SIGNATURE = Convert.base64ToByteArray("q+G+7n6FXsY7hpxK3m119GuDHnchS6wqTE0sZE/fOKg=");
+const FINAL_MERGED = false;
+const FINAL_STATEMENT = CothorityMessages.createFinalStatement(FINAL_POP_DESC, FINAL_ATTENDEES, FINAL_SIGNATURE, FINAL_MERGED);
+
+const POP_TOKEN = CothorityMessages.createPopToken(FINAL_STATEMENT, PRIVATE_KEY_BYTE_ARRAY, PUBLIC_KEY_BYTE_ARRAY);
 
 describe("Convert", function () {
   describe("#byteArrayToHex", function () {
@@ -600,6 +624,129 @@ describe("Convert", function () {
       const uuid = Convert.publicKeyToUuid(CONODE_PUBLIC_KEY_BYTE_ARRAY);
 
       uuid.should.deep.equal(CONODE_ID_REAL_BYTE_ARRAY);
+    });
+  });
+
+  describe("#parseJsonPopDesc", function () {
+    it("should throw an error when the input is not a string", function () {
+      expect(() => Convert.parseJsonPopDesc(FINAL_POP_DESC)).to.throw();
+    });
+
+    it("should return a PopDesc object", function () {
+      const popDesc = Convert.parseJsonPopDesc(JSON.stringify(FINAL_POP_DESC));
+
+      Helper.isOfType(popDesc, ObjectType.POP_DESC).should.be.true;
+    });
+
+    it("should correctly parse the JSON string into a PopDesc", function () {
+      const popDesc = Convert.parseJsonPopDesc(JSON.stringify(FINAL_POP_DESC));
+
+      popDesc.name.should.equal(FINAL_POP_DESC.name);
+      popDesc.dateTime.should.equal(FINAL_POP_DESC.dateTime);
+      popDesc.location.should.equal(FINAL_POP_DESC.location);
+
+      popDesc.roster.id.should.deep.equal(FINAL_POP_DESC.roster.id);
+      popDesc.roster.list.length.should.equal(FINAL_POP_DESC.roster.list.length);
+      for (let i = 0; i < FINAL_POP_DESC.roster.list.length; ++i) {
+        popDesc.roster.list[i].public.should.deep.equal(FINAL_POP_DESC.roster.list[i].public);
+        popDesc.roster.list[i].id.should.deep.equal(FINAL_POP_DESC.roster.list[i].id);
+        popDesc.roster.list[i].address.should.equal(FINAL_POP_DESC.roster.list[i].address);
+        popDesc.roster.list[i].description.should.equal(FINAL_POP_DESC.roster.list[i].description);
+      }
+      popDesc.roster.aggregate.should.deep.equal(ROSTER_AGGREGATE_BYTE_ARRAY);
+    });
+  });
+
+  describe("#parseJsonFinalStatement", function () {
+    it("should throw an error when the input is not a string", function () {
+      expect(() => Convert.parseJsonFinalStatement(FINAL_STATEMENT)).to.throw();
+    });
+
+    it("should return a FinalStatement object", function () {
+      const finalStatement = Convert.parseJsonFinalStatement(JSON.stringify(FINAL_STATEMENT));
+
+      Helper.isOfType(finalStatement, ObjectType.FINAL_STATEMENT).should.be.true;
+    });
+
+    it("should correctly parse the JSON string into a FinalStatement", function () {
+      const finalStatement = Convert.parseJsonFinalStatement(JSON.stringify(FINAL_STATEMENT));
+
+      finalStatement.attendees.length.should.equal(FINAL_STATEMENT.attendees.length);
+      for (let i = 0; i < FINAL_STATEMENT.attendees.length; ++i) {
+        finalStatement.attendees[i].should.deep.equal(FINAL_STATEMENT.attendees[i]);
+      }
+
+      finalStatement.signature.should.deep.equal(FINAL_STATEMENT.signature);
+      finalStatement.merged.should.equal(FINAL_STATEMENT.merged);
+    });
+  });
+
+  describe("#parseJsonPopToken", function () {
+    it("should throw an error when the input is not a string", function () {
+      expect(() => Convert.parseJsonPopToken(POP_TOKEN)).to.throw();
+    });
+
+    it("should return a PopToken object", function () {
+      const popToken = Convert.parseJsonPopToken(JSON.stringify(POP_TOKEN));
+
+      Helper.isOfType(popToken, ObjectType.POP_TOKEN).should.be.true;
+    });
+
+    it("should correctly parse the JSON string into a PopToken", function () {
+      const popToken = Convert.parseJsonPopToken(JSON.stringify(POP_TOKEN));
+
+      popToken.private.should.deep.equal(POP_TOKEN.private);
+      popToken.public.should.deep.equal(POP_TOKEN.public);
+    });
+  });
+
+  describe("#parseJsonFinalStatementsArray", function () {
+    it("should throw an error when the input is not a string", function () {
+      expect(() => Convert.parseJsonFinalStatementsArray("[FINAL_STATEMENT, FINAL_STATEMENT]")).to.throw();
+    });
+
+    it("should return an array of FinalStatements object", function () {
+      const object = {};
+      object.array = [FINAL_STATEMENT, FINAL_STATEMENT, FINAL_STATEMENT];
+
+      const finalStatements = Convert.parseJsonFinalStatementsArray(JSON.stringify(object));
+
+      Array.isArray(finalStatements).should.be.true;
+      Helper.isOfType(finalStatements[0], ObjectType.FINAL_STATEMENT).should.be.true;
+    });
+
+    it("should correctly parse the JSON string into an array of FinalStatements", function () {
+      const object = {};
+      object.array = [FINAL_STATEMENT, FINAL_STATEMENT, FINAL_STATEMENT];
+
+      const finalStatements = Convert.parseJsonFinalStatementsArray(JSON.stringify(object));
+
+      finalStatements.length.should.equal(3);
+    });
+  });
+
+  describe("#parseJsonPopTokenArray", function () {
+    it("should throw an error when the input is not a string", function () {
+      expect(() => Convert.parseJsonPopTokenArray("[POP_TOKEN, POP_TOKEN]")).to.throw();
+    });
+
+    it("should return an array of PopToken object", function () {
+      const object = {};
+      object.array = [POP_TOKEN, POP_TOKEN, POP_TOKEN];
+
+      const popToken = Convert.parseJsonPopTokenArray(JSON.stringify(object));
+
+      Array.isArray(popToken).should.be.true;
+      Helper.isOfType(popToken[0], ObjectType.POP_TOKEN).should.be.true;
+    });
+
+    it("should correctly parse the JSON string into an array of  PopToken", function () {
+      const object = {};
+      object.array = [POP_TOKEN, POP_TOKEN, POP_TOKEN];
+
+      const popToken = Convert.parseJsonPopTokenArray(JSON.stringify(object));
+
+      popToken.length.should.equal(3);
     });
   });
 });

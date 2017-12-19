@@ -16,11 +16,6 @@ const CothorityMessages = require("../../protobuf/build/cothority-messages");
  * We define the PoP class which is the object representing the PoP component of the app.
  */
 
-const EMPTY_ROSTER = CothorityMessages.createRoster(new Uint8Array(), [], new Uint8Array());
-const EMPTY_POP_DESC = CothorityMessages.createPopDesc("", "", "", EMPTY_ROSTER);
-const EMPTY_FINAL_STATEMENT = CothorityMessages.createFinalStatement(EMPTY_POP_DESC, [], new Uint8Array(), false);
-const EMPTY_POP_TOKEN = CothorityMessages.createPopToken(EMPTY_FINAL_STATEMENT, new Uint8Array(), new Uint8Array());
-
 class PoP {
 
   /**
@@ -41,9 +36,9 @@ class PoP {
    */
 
   /**
-  * Gets the isLoaded property of PoP. It is only true once all the settings have been loaded into memory.
-  * @returns {boolean} - a boolean that is true if PoP has completely been loaded into memory
-  */
+   * Gets the isLoaded property of PoP. It is only true once all the settings have been loaded into memory.
+   * @returns {boolean} - a boolean that is true if PoP has completely been loaded into memory
+   */
   isLoaded() {
     return this._isLoaded;
   }
@@ -97,24 +92,21 @@ class PoP {
       throw new Error("save must be of type boolean");
     }
 
-    return FileIO.writeStringTo(FilesPath.POP_FINAL_STATEMENTS, "")
-      .then(() => {
-        this.emptyFinalStatementArray()
+    this.emptyFinalStatementArray()
 
-        if (array.length === 1) {
-          return this.addFinalStatement(array[0], save);
-        } else {
-          const promises = [];
-          for (let i = 0; i < array.length - 1; ++i) {
-            promises.push(this.addFinalStatement(array[i], false));
-          }
+    if (array.length === 1) {
+      return this.addFinalStatement(array[0], save);
+    } else {
+      const promises = [];
+      for (let i = 0; i < array.length - 1; ++i) {
+        promises.push(this.addFinalStatement(array[i], false));
+      }
 
-          return Promise.all(promises)
-            .then(() => {
-              return this.addFinalStatement(array[array.length - 1], save);
-            });
-        }
-      });
+      return Promise.all(promises)
+        .then(() => {
+          return this.addFinalStatement(array[array.length - 1], save);
+        });
+    }
   }
 
   /**
@@ -134,24 +126,21 @@ class PoP {
       throw new Error("save must be of type boolean");
     }
 
-    return FileIO.writeStringTo(FilesPath.POP_TOKEN, "")
-      .then(() => {
-        this.emptyPopTokenArray()
+    this.emptyPopTokenArray()
 
-        if (array.length === 1) {
-          return this.addPopToken(array[0], save);
-        } else {
-          const promises = [];
-          for (let i = 0; i < array.length - 1; ++i) {
-            promises.push(this.addPopToken(array[i], false));
-          }
+    if (array.length === 1) {
+      return this.addPopToken(array[0], save);
+    } else {
+      const promises = [];
+      for (let i = 0; i < array.length - 1; ++i) {
+        promises.push(this.addPopToken(array[i], false));
+      }
 
-          return Promise.all(promises)
-            .then(() => {
-              return this.addPopToken(array[array.length - 1], save);
-            });
-        }
-      });
+      return Promise.all(promises)
+        .then(() => {
+          return this.addPopToken(array[array.length - 1], save);
+        });
+    }
   }
 
   /**
@@ -159,8 +148,8 @@ class PoP {
    */
 
   /**
-  * Empties the final statements array (this action is not saved permanently).
-  */
+   * Empties the final statements array (this action is not saved permanently).
+   */
   emptyFinalStatementArray() {
     while (this._finalStatements.array.length > 0) {
       this._finalStatements.array.pop();
@@ -168,8 +157,8 @@ class PoP {
   }
 
   /**
-  * Empties the PoP-Token array (this action is not saved permanently).
-  */
+   * Empties the PoP-Token array (this action is not saved permanently).
+   */
   emptyPopTokenArray() {
     while (this._popToken.array.length > 0) {
       this._popToken.array.pop();
@@ -177,11 +166,11 @@ class PoP {
   }
 
   /**
-  * Adds the new final statement given as parameter to the list of final statements.
-  * @param {FinalStatement} finalStatement - the new final statement to add
-  * @param {boolean} save - if the new final statement should be saved permanently
-  * @returns {Promise} - a promise that gets resolved once the new final statement has been added and saved if the save parameter is set to true
-  */
+   * Adds the new final statement given as parameter to the list of final statements.
+   * @param {FinalStatement} finalStatement - the new final statement to add
+   * @param {boolean} save - if the new final statement should be saved permanently
+   * @returns {Promise} - a promise that gets resolved once the new final statement has been added and saved if the save parameter is set to true
+   */
   addFinalStatement(finalStatement, save) {
     if (!Helper.isOfType(finalStatement, ObjectType.FINAL_STATEMENT)) {
       throw new Error("finalStatement must be an instance of FinalStatement");
@@ -224,11 +213,11 @@ class PoP {
   }
 
   /**
-  * Adds the new PoP-Token given as parameter to the list of PoP-Token.
-  * @param {PopToken} popToken - the new PoP-Token to add
-  * @param {boolean} save - if the new PoPToken should be saved permanently
-  * @returns {Promise} - a promise that gets resolved once the new PoP-Token has been added and saved if the save parameter is set to true
-  */
+   * Adds the new PoP-Token given as parameter to the list of PoP-Token.
+   * @param {PopToken} popToken - the new PoP-Token to add
+   * @param {boolean} save - if the new PoPToken should be saved permanently
+   * @returns {Promise} - a promise that gets resolved once the new PoP-Token has been added and saved if the save parameter is set to true
+   */
   addPopToken(popToken, save) {
     if (!Helper.isOfType(popToken, ObjectType.POP_TOKEN)) {
       throw new Error("popToken must be an instance of PopToken");
@@ -271,13 +260,80 @@ class PoP {
   }
 
   /**
+   * Removes the final statement corresponding to the index given as parameter.
+   * @param {number} index - the index of the final statement to remove
+   * @returns {Promise} - a promise that gets resolved once the final statement has been removed permanently
+   */
+  deleteFinalStatementByIndex(index) {
+    if (typeof index !== "number") {
+      throw new Error("index must be of type number");
+    }
+    if (!(0 <= index && index < this.getFinalStatements().length)) {
+      throw new Error("index is not in the range of the final statements list");
+    }
+
+    const newArray = this.getFinalStatements().slice().slice(index, 1);
+
+    if (newArray.length > 0) {
+      return this.setFinalStatementsArray(newArray, true);
+    } else {
+      return FileIO.writeStringTo(FilesPath.POP_FINAL_STATEMENTS, "")
+        .then(() => {
+          this.emptyFinalStatementArray();
+
+          return Promise.resolve();
+        });
+    }
+  }
+
+  /**
+   * Revokes the PoP-Token corresponding to the index given as parameter.
+   * This action will delete the PoP-Token permanently and re-add the final statement to the list of final statements.
+   * @param {number} index - the index of the PoP-Token to revoke
+   * @returns {Promise} - a promise that gets resolved once the PoP-Token has been revoked permanently
+   */
+  revokePopTokenByIndex(index) {
+    if (typeof index !== "number") {
+      throw new Error("index must be of type number");
+    }
+    if (!(0 <= index && index < this.getPopToken().length)) {
+      throw new Error("index is not in the range of the PoP-Token list");
+    }
+
+    // TODO: re-add final statement
+
+    const newArray = this.getPopToken().slice().slice(index, 1);
+
+    if (newArray.length > 0) {
+      return this.setPopTokenArray(newArray, true);
+    } else {
+      return FileIO.writeStringTo(FilesPath.POP_TOKEN, "")
+        .then(() => {
+          this.emptyPopTokenArray();
+
+          return Promise.resolve();
+        });
+    }
+  }
+
+  /**
+   * Generates a new PoP-Token using the User's key pair and the final statement corresponding to the index given as parameter.
+   * This action will "consume" the final statement.
+   * @param {number} index - the index of the final statement to use
+   * @returns {Promise} - a promise that gets resolved once the PoP-Token has been generated and saved permanently
+   */
+  generatePopTokenByIndex(index) {
+    // TODO
+  }
+
+  /**
    * Load and reset functions and sub-functions to load/reset PoP.
    */
 
   /**
-  * Completely resets PoP.
-  * @returns {Promise} - a promise that gets completed once PoP has been reset
-  */
+   * Completely resets PoP.
+   * @returns {Promise} - a promise that gets completed once PoP has been reset
+   */
   reset() {
     this._isLoaded = false;
 
@@ -291,6 +347,76 @@ class PoP {
         this._isLoaded = true;
 
         return Promise.resolve();
+      })
+      .catch(error => {
+        console.log(error);
+        console.dir(error);
+        console.trace();
+
+        return Promise.reject(error);
+      });
+  }
+
+  /**
+   * Main load function.
+   * @returns {Promise} - a promise that gets resolved once everything belonging to PoP has been loaded into memory
+   */
+  load() {
+    this._isLoaded = false;
+
+    const promises = [this.loadFinalStatements(), this.loadPopToken()];
+
+    return Promise.all(promises)
+      .then(() => {
+        this._isLoaded = true;
+      })
+      .catch(error => {
+        console.log(error);
+        console.dir(error);
+        console.trace();
+
+        return Promise.reject(error);
+      });
+  }
+
+  /**
+   * Loads all the final statements into memory.
+   * @returns {Promise} - a promise that gets resolved once all the final statements have been loaded into memory
+   */
+  loadFinalStatements() {
+    return FileIO.getStringOf(FilesPath.POP_FINAL_STATEMENTS)
+      .then(jsonFinalStatements => {
+        if (jsonFinalStatements.length > 0) {
+          const finalStatementsArray = Convert.parseJsonFinalStatementsArray(jsonFinalStatements);
+
+          return this.setFinalStatementsArray(finalStatementsArray, false);
+        } else {
+          return Promise.resolve();
+        }
+      })
+      .catch(error => {
+        console.log(error);
+        console.dir(error);
+        console.trace();
+
+        return Promise.reject(error);
+      });
+  }
+
+  /**
+   * Loads all the PoP-Token into memory.
+   * @returns {Promise} - a promise that gets resolved once all the PoP-Token have been loaded into memory
+   */
+  loadPopToken() {
+    return FileIO.getStringOf(FilesPath.POP_TOKEN)
+      .then(jsonPopToken => {
+        if (jsonPopToken.length > 0) {
+          const popTokenArray = Convert.parseJsonPopTokenArray(jsonPopToken);
+
+          return this.setPopTokenArray(popTokenArray, false);
+        } else {
+          return Promise.resolve();
+        }
       })
       .catch(error => {
         console.log(error);

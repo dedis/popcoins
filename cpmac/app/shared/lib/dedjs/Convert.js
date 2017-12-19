@@ -205,6 +205,106 @@ function tcpToWebsocket(serverIdentity, path) {
 }
 
 /**
+ * Parses a JSON string into an array of PopToken objects. The JSON string has to respresent an object with a property called "array".
+ * @param {string} jsonString - the JSON string to parse into an array of PopToken objects
+ * @returns {Array} - the parsed array of PopToken objects
+ */
+function parseJsonPopTokenArray(jsonString) {
+  if (typeof jsonString !== "string") {
+    throw new Error("jsonString must be of type string");
+  }
+
+  const object = jsonToObject(jsonString);
+  if (object.array === undefined || !Array.isArray(object.array)) {
+    throw new Error("object.array is undefined or not an array");
+  }
+
+  object.array = object.array.map(element => {
+    return parseJsonPopToken(objectToJson(element));
+  });
+
+  return object.array;
+}
+
+/**
+ * Parses a JSON string into a PopToken object.
+ * @param {string} jsonString - the JSON string to parse into a PopToken object
+ * @returns {PopToken} - the parsed PopToken object
+ */
+function parseJsonPopToken(jsonString) {
+  if (typeof jsonString !== "string") {
+    throw new Error("jsonString must be of type string");
+  }
+
+  const object = jsonToObject(jsonString);
+
+  object.final = parseJsonFinalStatement(objectToJson(object.final));
+
+  return CothorityMessages.createPopToken(object.final, base64ToByteArray(object.private), base64ToByteArray(object.public));
+}
+
+/**
+ * Parses a JSON string into an array of FinalStatement objects. The JSON string has to respresent an object with a property called "array".
+ * @param {string} jsonString - the JSON string to parse into an array of FinalStatement objects
+ * @returns {Array} - the parsed array of FinalStatement objects
+ */
+function parseJsonFinalStatementsArray(jsonString) {
+  if (typeof jsonString !== "string") {
+    throw new Error("jsonString must be of type string");
+  }
+
+  const object = jsonToObject(jsonString);
+  if (object.array === undefined || !Array.isArray(object.array)) {
+    throw new Error("object.array is undefined or not an array");
+  }
+
+  object.array = object.array.map(element => {
+    return parseJsonFinalStatement(objectToJson(element));
+  });
+
+  return object.array;
+}
+
+/**
+ * Parses a JSON string into a FinalStatement object.
+ * @param {string} jsonString - the JSON string to parse into a FinalStatement object
+ * @returns {FinalStatement} - the parsed FinalStatement object
+ */
+function parseJsonFinalStatement(jsonString) {
+  if (typeof jsonString !== "string") {
+    throw new Error("jsonString must be of type string");
+  }
+
+  const object = jsonToObject(jsonString);
+  if (object.attendees === undefined || !Array.isArray(object.attendees)) {
+    throw new Error("object.attendees is undefined or not an array");
+  }
+
+  object.attendees = object.attendees.map(base64String => {
+    return base64ToByteArray(base64String);
+  });
+  object.signature = base64ToByteArray(object.signature);
+  object.desc = parseJsonPopDesc(objectToJson(object.desc));
+
+  return CothorityMessages.createFinalStatement(object.desc, object.attendees, object.signature, object.merged);
+}
+
+/**
+ * Parses a JSON string into a PopDesc object.
+ * @param {string} jsonString - the JSON string to parse into a PopDesc object
+ * @returns {PopDesc} - the parsed PopDesc object
+ */
+function parseJsonPopDesc(jsonString) {
+  if (typeof jsonString !== "string") {
+    throw new Error("jsonString must be of type string");
+  }
+
+  const object = jsonToObject(jsonString);
+
+  return CothorityMessages.createPopDesc(object.name, object.dateTime, object.location, parseJsonRoster(objectToJson(object.roster)));
+}
+
+/**
  * Parses a JSON string into a Roster object, if the ServerIdentities does not have an ID yet it will be computed.
  * @param {string} jsonString - the JSON string to parse into a Roster object
  * @returns {Roster} - the parsed Roster object
@@ -317,14 +417,6 @@ function parseJsonKeyPair(jsonString) {
   return CothorityMessages.createKeyPair(base64ToByteArray(keyPair.public), base64ToByteArray(keyPair.private), publicComplete);
 }
 
-function parseFinalStatementsArray(jsonString) {
-  // TODO
-}
-
-function parsePopTokenArray(jsonString) {
-  // TODO
-}
-
 /**
  * Converts the arguments given as parameter into a ServerIdentity object.
  * @param {string} address - the address of the server
@@ -382,6 +474,11 @@ module.exports.tomlToObject = tomlToObject;
 module.exports.jsonToToml = jsonToToml;
 module.exports.tomlToJson = tomlToJson;
 module.exports.tcpToWebsocket = tcpToWebsocket;
+module.exports.parseJsonPopTokenArray = parseJsonPopTokenArray;
+module.exports.parseJsonPopToken = parseJsonPopToken;
+module.exports.parseJsonFinalStatementsArray = parseJsonFinalStatementsArray;
+module.exports.parseJsonFinalStatement = parseJsonFinalStatement;
+module.exports.parseJsonPopDesc = parseJsonPopDesc;
 module.exports.parseJsonRoster = parseJsonRoster;
 module.exports.parseTomlRoster = parseTomlRoster;
 module.exports.parseJsonKeyPair = parseJsonKeyPair;
