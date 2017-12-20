@@ -30,12 +30,12 @@ class User {
    */
   constructor() {
     this._isLoaded = false;
-    this._keyPair = ObservableModule.fromObjectRecursive({
+    this._keyPair = ObservableModule.fromObject({
       public: new Uint8Array(),
       private: new Uint8Array(),
       publicComplete: new Uint8Array()
     });
-    this._roster = ObservableModule.fromObjectRecursive({
+    this._roster = ObservableModule.fromObject({
       isLoading: false,
       id: new Uint8Array(),
       list: new ObservableArray(),

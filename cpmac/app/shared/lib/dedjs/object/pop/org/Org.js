@@ -15,20 +15,21 @@ const CothorityMessages = require("../../../protobuf/build/cothority-messages");
  * We define the Org class which is the object representing the organizer.
  */
 
+const EMPTY_SERVER_IDENTITY = CothorityMessages.createServerIdentity(new Uint8Array(), new Uint8Array(), "", "");
+const EMPTY_ROSTER = CothorityMessages.createRoster(new Uint8Array(), [], new Uint8Array());
+const EMPTY_POP_DESC = CothorityMessages.createPopDesc("", "", "", EMPTY_ROSTER);
+
 class Org {
 
   // TODO: test
-  // TODO: parse methods in Convert
-  // TODO: add/delete registered att, set popdesc {name, dateTime, location}, add/delete server in roster.list
   // TODO: link to conode, hash + register pop desc on conode, finalize party with registered atts, fetch party by id
-  // TODO: reset + load
 
   /**
    * Constructor for the Org class.
    */
   constructor() {
     this._isLoaded = false;
-    this._linkedConode = ObservableModule.fromObjectRecursive({
+    this._linkedConode = ObservableModule.fromObject({
       public: new Uint8Array(),
       id: new Uint8Array(),
       address: "",
@@ -44,10 +45,10 @@ class Org {
         aggregate: new Uint8Array()
       }
     });
-    this._registeredAtts = ObservableModule.fromObjectRecursive({
+    this._registeredAtts = ObservableModule.fromObject({
       array: new ObservableArray()
     });
-    this._popDescHash = ObservableModule.fromObjectRecursive({
+    this._popDescHash = ObservableModule.fromObject({
       hash: new Uint8Array()
     });
   }
@@ -371,8 +372,280 @@ class Org {
   }
 
   /**
+   * Sets the name of the PopDesc.
+   * @param {string} name - the new name of the PopDesc
+   * @returns {Promise} - a promise that gets completed once the name of the PopDesc has been set
+   */
+  setPopDescName(name) {
+    if (typeof name !== "string") {
+      throw new Error("name must be of type string");
+    }
+
+    const popDesc = this.getPopDesc();
+    popDesc.name = name;
+
+    return this.setPopDesc(popDesc, true);
+  }
+
+  /**
+   * Sets the date and time of the PopDesc.
+   * @param {string} dateTime - the new date and time of the PopDesc
+   * @returns {Promise} - a promise that gets completed once the date and time of the PopDesc has been set
+   */
+  setPopDescDateTime(dateTime) {
+    if (typeof dateTime !== "string") {
+      throw new Error("dateTime must be of type string");
+    }
+
+    const popDesc = this.getPopDesc();
+    popDesc.dateTime = dateTime;
+
+    return this.setPopDesc(popDesc, true);
+  }
+
+  /**
+   * Sets the location of the PopDesc.
+   * @param {string} location - the new location of the PopDesc
+   * @returns {Promise} - a promise that gets completed once the location of the PopDesc has been set
+   */
+  setPopDescLocation(location) {
+    if (typeof location !== "string") {
+      throw new Error("location must be of type string");
+    }
+
+    const popDesc = this.getPopDesc();
+    popDesc.location = location;
+
+    return this.setPopDesc(popDesc, true);
+  }
+
+  /**
+   * Adds a conode to the roster of the PopDesc.
+   * @param {ServerIdentity} conode - the new conode to add to the PopDesc roster
+   * @returns {Promise} - a promise that gets completed once the conode has been added to the PopDesc roster
+   */
+  addPopDescConode(conode) {
+    if (!Helper.isOfType(conode, ObjectType.SERVER_IDENTITY)) {
+      throw new Error("conode must be an instance of ServerIdentity");
+    }
+
+    let newRoster = {
+      list: this.getPopDesc().roster.list
+    };
+    newRoster.list.push(conode);
+    newRoster = Convert.parseJsonRoster(Convert.objectToJson(newRoster));
+
+    const newPopDesc = this.getPopDesc();
+    newPopDesc.roster = newRoster;
+
+    return this.setPopDesc(newPopDesc, true);
+  }
+
+  /**
+   * Removes the conode at the index given as parameter from the roster of the PopDesc.
+   * @param {number} index - the index of the conode to remove from the PopDesc roster
+   * @returns {Promise} - a promise that gets completed once the conode at the index given as parameter has been removed from the PopDesc roster
+   */
+  removePopDescConodeByIndex(index) {
+    if (typeof index !== "number" || !(0 <= index && index < this.getPopDescModule().roster.list.length)) {
+      throw new Error("index must be of type number and be in the right range");
+    }
+
+    let newRoster = {
+      list: []
+    };
+    for (let i = 0; i < this.getPopDescModule().roster.list.length; ++i) {
+      if (i !== index) {
+        newRoster.list.push(this.getPopDescModule().roster.list.getItem(i));
+      }
+    }
+    newRoster = Convert.parseJsonRoster(Convert.objectToJson(newRoster));
+
+    const newPopDesc = this.getPopDesc();
+    newPopDesc.roster = newRoster;
+
+    return this.setPopDesc(newPopDesc, true);
+  }
+
+  /**
+   * Registers the public key of the attendee.
+   * @param {Uint8Array} publicKey - the public key of the attendee
+   * @returns {Promise} - a promise that gets completed once the attendee has been registered
+   */
+  registerAttendee(publicKey) {
+    if (!(publicKey instanceof Uint8Array) || !Helper.isValidPublicKey(publicKey)) {
+      throw new Error("publicKey must be an instance of Uint8Array and have the right format");
+    }
+
+    const newAttendees = this.getRegisteredAtts().slice();
+    newAttendees.push(publicKey);
+
+    return this.setRegisteredAtts(newAttendees, true);
+  }
+
+  /**
+   * Unregisters the public key of the attendee corresponding to the given index.
+   * @param {number} index - the index of the public key to unregister
+   * @returns {Promise} - a promise that gets completed once the attendee has been unregistered
+   */
+  unregisterAttendeeByIndex(index) {
+    if (typeof index !== "number" || !(0 <= index && index < this.getRegisteredAtts().length)) {
+      throw new Error("index must be of type number and be in the right range");
+    }
+
+    const newAttendees = [];
+    for (let i = 0; i < this.getRegisteredAtts().length; ++i) {
+      if (i !== index) {
+        newAttendees.push(this.getRegisteredAtts().getItem(i));
+      }
+    }
+
+    return this.setRegisteredAtts(newAttendees, true);
+  }
+
+  /**
    * Load and reset functions and sub-functions to load/reset PoP.
    */
+
+  /**
+   * Completely resets the organizer.
+   * @returns {Promise} - a promise that gets completed once the organizer has been reset
+   */
+  reset() {
+    this._isLoaded = false;
+
+    const promises = [this.setLinkedConode(EMPTY_SERVER_IDENTITY, true), this.setPopDesc(EMPTY_POP_DESC, true), this.setRegisteredAtts([], true), this.setPopDescHash(new Uint8Array(), true)];
+
+    return Promise.all(promises)
+      .then(() => {
+        this._isLoaded = true;
+      })
+      .catch(error => {
+        console.log(error);
+        console.dir(error);
+        console.trace();
+
+        return Promise.reject(error);
+      });
+  }
+
+  /**
+   * Main load function.
+   * @returns {Promise} - a promise that gets resolved once everything belonging to Org has been loaded into memory
+   */
+  load() {
+    this._isLoaded = false;
+
+    const promises = [this.loadLinkedConode(), this.loadPopDesc(), this.loadRegisteredAtts(), this.loadPopDescHash()];
+
+    return Promise.all(promises)
+      .then(() => {
+        this._isLoaded = true;
+      })
+      .catch(error => {
+        console.log(error);
+        console.dir(error);
+        console.trace();
+
+        return Promise.reject(error);
+      });
+  }
+
+  /**
+   * Loads the linked conode into memory.
+   * @returns {Promise} - a promise that gets resolved once the linked conode has been loaded into memory
+   */
+  loadLinkedConode() {
+    return FileIO.getStringOf(FilesPath.POP_ORG_CONODE)
+      .then(jsonLinkedConode => {
+        if (jsonLinkedConode.length > 0) {
+          const linkedConode = Convert.parseJsonServerIdentity(jsonLinkedConode);
+
+          return this.setLinkedConode(linkedConode, false);
+        } else {
+          return Promise.resolve();
+        }
+      })
+      .catch(error => {
+        console.log(error);
+        console.dir(error);
+        console.trace();
+
+        return Promise.reject(error);
+      });
+  }
+
+  /**
+   * Loads the PopDesc into memory.
+   * @returns {Promise} - a promise that gets resolved once the PopDesc has been loaded into memory
+   */
+  loadPopDesc() {
+    return FileIO.getStringOf(FilesPath.POP_ORG_DESC)
+      .then(jsonPopDesc => {
+        if (jsonPopDesc.length > 0) {
+          const popDesc = Convert.parseJsonPopDesc(jsonPopDesc);
+
+          return this.setPopDesc(popDesc, false);
+        } else {
+          return Promise.resolve();
+        }
+      })
+      .catch(error => {
+        console.log(error);
+        console.dir(error);
+        console.trace();
+
+        return Promise.reject(error);
+      });
+  }
+
+  /**
+   * Loads the registered attendees into memory.
+   * @returns {Promise} - a promise that gets resolved once all the registered attendees have been loaded into memory
+   */
+  loadRegisteredAtts() {
+    return FileIO.getStringOf(FilesPath.POP_ORG_ATTENDEES)
+      .then(jsonRegisteredAtts => {
+        if (jsonRegisteredAtts.length > 0) {
+          const registeredAtts = Convert.parseJsonArrayOfKeys(jsonRegisteredAtts);
+
+          return this.setRegisteredAtts(registeredAtts, false);
+        } else {
+          return Promise.resolve();
+        }
+      })
+      .catch(error => {
+        console.log(error);
+        console.dir(error);
+        console.trace();
+
+        return Promise.reject(error);
+      });
+  }
+
+  /**
+   * Loads the PopDesc hash into memory.
+   * @returns {Promise} - a promise that gets resolved once the PopDesc hash has been loaded into memory
+   */
+  loadPopDescHash() {
+    return FileIO.getStringOf(FilesPath.POP_ORG_DESC_HASH)
+      .then(jsonPopDescHash => {
+        if (jsonPopDescHash.length > 0) {
+          const popDescHash = Convert.parseJsonPopDescHash(jsonPopDescHash);
+
+          return this.setPopDescHash(popDescHash, false);
+        } else {
+          return Promise.resolve();
+        }
+      })
+      .catch(error => {
+        console.log(error);
+        console.dir(error);
+        console.trace();
+
+        return Promise.reject(error);
+      });
+  }
 }
 
 /**
