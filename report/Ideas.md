@@ -1,6 +1,6 @@
 # Introduction of the subject and the problem
 
-  - Some words about Cothority in general + diagram and state diagram
+  - Some words about Cothority in general
   - Some details about CISC and PoP in general
 
 # Goals of the project and motivation
@@ -87,7 +87,7 @@
   - Install and run conodes
   - Explain how to build/test
   - Talk about the bugs we had to bypass (.gz, brorand...)
-  
+
 # What have we learned? What would we now do differently?
 
 23 janvier 11h40 - BC229
