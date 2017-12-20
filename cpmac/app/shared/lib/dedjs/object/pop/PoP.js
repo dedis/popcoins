@@ -25,10 +25,10 @@ class PoP {
    */
   constructor() {
     this._isLoaded = false;
-    this._finalStatements = ObservableModule.fromObject({
+    this._finalStatements = ObservableModule.fromObjectRecursive({
       array: new ObservableArray()
     });
-    this._popToken = ObservableModule.fromObject({
+    this._popToken = ObservableModule.fromObjectRecursive({
       array: new ObservableArray()
     });
   }

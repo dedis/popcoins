@@ -5,16 +5,16 @@ chai.should();
 const FilesPath = require("../../../../../../shared/res/files/files-path");
 const FileIO = require("../../../../../../shared/lib/file-io/file-io");
 
-const Att = require("../../../../../../shared/lib/dedjs/object/pop/att/Att").get;
+const Org = require("../../../../../../shared/lib/dedjs/object/pop/org/Org").get;
 
-describe("Att", function () {
+describe("Org", function () {
 
   function clean() {
     const promises = Object.getOwnPropertyNames(FilesPath).map(filePath => {
       return FileIO.writeStringTo(filePath, "");
     });
 
-    //promises.push(Att.reset());
+    //promises.push(Org.reset());
 
     return Promise.all(promises)
       .catch(error => {
@@ -43,8 +43,8 @@ describe("Att", function () {
   });
 
   it("should be a singleton", function () {
-    const Att2 = require("../../../../../../shared/lib/dedjs/object/pop/att/Att").get;
+    const Org2 = require("../../../../../../shared/lib/dedjs/object/pop/org/Org").get;
 
-    (Att2 === Att).should.be.true;
+    (Org2 === Org).should.be.true;
   });
 });
