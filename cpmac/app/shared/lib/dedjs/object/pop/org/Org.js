@@ -5,6 +5,7 @@ const Convert = require("../../../Convert");
 const Helper = require("../../../Helper");
 const ObjectType = require("../../../ObjectType");
 const FilesPath = require("../../../../../res/files/files-path");
+const FileIO = require("../../../../../lib/file-io/file-io");
 const CothorityMessages = require("../../../protobuf/build/cothority-messages");
 
 /**
@@ -21,7 +22,6 @@ const EMPTY_POP_DESC = CothorityMessages.createPopDesc("", "", "", EMPTY_ROSTER)
 
 class Org {
 
-  // TODO: test
   // TODO: link to conode, hash + register pop desc on conode, finalize party with registered atts, fetch party by id
 
   /**
@@ -156,7 +156,7 @@ class Org {
       list.push(server);
     });
 
-    const roster = CothorityMessages.createRoster(id, list, popDescModule.roster.aggregate);
+    const roster = CothorityMessages.createRoster(id, list, Uint8Array.from(popDescModule.roster.aggregate));
 
     return CothorityMessages.createPopDesc(popDescModule.name, popDescModule.dateTime, popDescModule.location, roster);
   }
@@ -185,7 +185,7 @@ class Org {
     popDescModule.roster.id = Uint8Array.from(popDesc.roster.id);
 
     this.emptyPopDescRosterList();
-    popDesc.list.forEach(server => {
+    popDesc.roster.list.forEach(server => {
       popDescModule.roster.list.push(server);
     });
 
@@ -263,7 +263,9 @@ class Org {
       let toWrite = "";
       if (newRegisteredAtts.length > 0) {
         const object = {};
-        object.array = newRegisteredAtts;
+        object.array = newRegisteredAtts.map(byteArray => {
+          return Convert.byteArrayToBase64(byteArray);
+        });
 
         toWrite = Convert.objectToJson(object);
       }
@@ -318,7 +320,7 @@ class Org {
 
     const oldHash = this.getPopDescHash();
 
-    this.getPopDescHash().hash = Uint8Array.from(hash);
+    this.getPopDescHashModule().hash = Uint8Array.from(hash);
 
     const newHash = this.getPopDescHash();
 
@@ -326,7 +328,7 @@ class Org {
       let toWrite = "";
       if (newHash.length > 0) {
         const object = {};
-        object.hash = newHash;
+        object.hash = Convert.byteArrayToBase64(newHash);
 
         toWrite = Convert.objectToJson(object);
       }
@@ -357,8 +359,8 @@ class Org {
    * Empties the registered attendees list. This action is not stored permanently.
    */
   emptyRegisteredAttsArray() {
-    while (this.getRegisteredAtts().array.length > 0) {
-      this.getRegisteredAtts().array.pop();
+    while (this.getRegisteredAtts().length > 0) {
+      this.getRegisteredAtts().pop();
     }
   }
 
@@ -662,7 +664,7 @@ const orgExists = (globalSymbols.indexOf(ORG_PACKAGE_KEY) >= 0);
 if (!orgExists) {
   global[ORG_PACKAGE_KEY] = (function () {
     const newOrg = new Org();
-    //newOrg.load();
+    newOrg.load();
 
     return newOrg;
   })();
