@@ -936,20 +936,16 @@ describe("Org", function () {
     });
 
     it.only("should register PopDesc and set the PopDesc's hash", function () {
-      User._keyPair.public = PUBLIC_KEY_BYTE_ARRAY;
-      User._keyPair.private = PRIVATE_KEY_BYTE_ARRAY;
-
-      Org._popDesc.name = POP_DESC_NAME;
-      Org._popDesc.dateTime = POP_DESC_DATETIME;
-      Org._popDesc.location = POP_DESC_LOCATION;
-      Org._popDesc.roster = POP_DESC_ROSTER;
-
-      Org._linkedConode.public = CONODE_PUBLIC_KEY_BYTE_ARRAY;
-      Org._linkedConode.id = CONODE_ID_REAL_BYTE_ARRAY;
-      Org._linkedConode.address = CONODE_ADDRESS;
-      Org._linkedConode.description = CONODE_DESCRIPTION;
-
-      return Org.registerPopDesc()
+      return User.setKeyPair(KEY_PAIR, false)
+        .then(() => {
+          return Org.setPopDesc(POP_DESC, false);
+        })
+        .then(() => {
+          return Org.setLinkedConode(SERVER_IDENTITY, false);
+        })
+        .then(() => {
+          return Org.registerPopDesc();
+        })
         .then(response => {
           if (typeof response !== "string") {
             console.log(response);
