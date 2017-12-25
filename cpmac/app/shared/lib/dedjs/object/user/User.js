@@ -65,6 +65,17 @@ class User {
   }
 
   /**
+   * Returns wether the key pair of the user is set.
+   * @returns {boolean} - true if and only if the key pair of the user has been set
+   */
+  isKeyPairSet() {
+    const keyPairModule = this.getKeyPairModule();
+
+    return keyPairModule.public.length > 0 &&
+      keyPairModule.private.length > 0;
+  }
+
+  /**
    * Gets the users key pair.
    * @returns {KeyPair} - a key pair object containg the keys of the user
    */

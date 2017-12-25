@@ -8,14 +8,15 @@ const Convert = require("../../../../../../shared/lib/dedjs/Convert");
 const Helper = require("../../../../../../shared/lib/dedjs/Helper");
 const ObjectType = require("../../../../../../shared/lib/dedjs/ObjectType");
 const CothorityMessages = require("../../../../../../shared/lib/dedjs/protobuf/build/cothority-messages");
+const User = require("../../../../../../shared/lib/dedjs/object/user/User").get;
 
 const Org = require("../../../../../../shared/lib/dedjs/object/pop/org/Org").get;
 
-const CONODE_ADDRESS = "tcp://10.0.2.2:7012";
-const CONODE_PUBLIC_KEY = "sDKFYWFa8R55ZSuiOT012qBCb40lDPIGQ4vWMZIk6tE=";
+const CONODE_ADDRESS = "tcp://10.0.2.2:7002";
+const CONODE_PUBLIC_KEY = "HkDzpR5Imd7WNx8kl2lJcIVRVn8gfDByJnmlfrYh/zU=";
 const CONODE_PUBLIC_KEY_BYTE_ARRAY = Convert.base64ToByteArray(CONODE_PUBLIC_KEY);
-const CONODE_DESCRIPTION = "Conode_6";
-const CONODE_ID_REAL = "i3ZiWNQo3r8wYEOLV9qh8w==";
+const CONODE_DESCRIPTION = "Conode_1";
+const CONODE_ID_REAL = "z6kCTQ77Xna9yfgKka5lNQ==";
 const CONODE_ID_REAL_BYTE_ARRAY = Convert.base64ToByteArray(CONODE_ID_REAL);
 const SERVER_IDENTITY = Convert.toServerIdentity(CONODE_ADDRESS, CONODE_PUBLIC_KEY_BYTE_ARRAY, CONODE_DESCRIPTION, CONODE_ID_REAL_BYTE_ARRAY);
 
@@ -70,6 +71,19 @@ const POP_DESC_HASH_JSON = Convert.objectToJson({
 });
 const POP_DESC_HASH_BYTE_ARRAY = Convert.base64ToByteArray(POP_DESC_HASH);
 
+const PRIVATE_KEY = "AWKlOlcTuCHEV/fKX0X1IoAoBU0n1c5iKp/SWRLj3T4=";
+const PRIVATE_KEY_BYTE_ARRAY = Convert.base64ToByteArray(PRIVATE_KEY);
+const PUBLIC_KEY = "y4JMDWrle6RMV+0BKU92Xbu8+J8VkZ5kV3SvSr2ZxHw=";
+const PUBLIC_KEY_BYTE_ARRAY = Convert.base64ToByteArray(PUBLIC_KEY);
+const PUBLIC_COMPLETE_KEY = "BBmiuL/uxUuItsuFVQJT4oUv4qZrb1fYQ+GL/ZTpZ43MfMSZvUqvdFdknpEVn/i8u112TykB7VdMpHvlag1Mgss=";
+const PUBLIC_COMPLETE_KEY_BYTE_ARRAY = Convert.base64ToByteArray(PUBLIC_COMPLETE_KEY);
+const JSON_KEY_PAIR = JSON.stringify({
+  "private": PRIVATE_KEY,
+  "public": PUBLIC_KEY,
+  "publicComplete": PUBLIC_COMPLETE_KEY
+});
+const KEY_PAIR = Convert.parseJsonKeyPair(JSON_KEY_PAIR);
+
 describe("Org", function () {
 
   function clean() {
@@ -78,6 +92,7 @@ describe("Org", function () {
     });
 
     promises.push(Org.reset());
+    promises.push(User.reset());
 
     return Promise.all(promises)
       .catch(error => {
@@ -771,6 +786,157 @@ describe("Org", function () {
 
           registeredAttendeesObject.array.length.should.equal(ATTENDEES.length - 1);
         });
+    });
+  });
+
+  describe("#isLinkedConodeSet", function () {
+    it("should return true if and only if all field of the conodes are non empty", function () {
+      Org.isLinkedConodeSet().should.be.false;
+
+      Org._linkedConode.public = CONODE_PUBLIC_KEY_BYTE_ARRAY;
+      Org.isLinkedConodeSet().should.be.false;
+
+      Org._linkedConode.id = CONODE_ID_REAL_BYTE_ARRAY;
+      Org.isLinkedConodeSet().should.be.false;
+
+      Org._linkedConode.address = CONODE_ADDRESS;
+      Org.isLinkedConodeSet().should.be.false;
+
+      Org._linkedConode.description = CONODE_DESCRIPTION;
+      Org.isLinkedConodeSet().should.be.true;
+    });
+  });
+
+  describe("#isPopDescBeingSet", function () {
+    it("should return true if and only if at least one field of the PopDesc is non empty", function () {
+      Org.isPopDescBeingSet().should.be.false;
+
+      Org._popDesc.name = POP_DESC_NAME;
+      Org.isPopDescBeingSet().should.be.true;
+
+      Org._popDesc.dateTime = POP_DESC_DATETIME;
+      Org.isPopDescBeingSet().should.be.true;
+
+      Org._popDesc.location = POP_DESC_LOCATION;
+      Org.isPopDescBeingSet().should.be.true;
+
+      Org._popDesc.roster.list = POP_DESC_ROSTER.list;
+      Org.isPopDescBeingSet().should.be.true;
+    });
+  });
+
+  describe("#isPopDescComplete", function () {
+    it("should return true if and only if all field of the PopDesc are non empty and contains at least 3 conodes", function () {
+      Org.isPopDescComplete().should.be.false;
+
+      Org._popDesc.name = POP_DESC_NAME;
+      Org.isPopDescComplete().should.be.false;
+
+      Org._popDesc.dateTime = POP_DESC_DATETIME;
+      Org.isPopDescComplete().should.be.false;
+
+      Org._popDesc.location = POP_DESC_LOCATION;
+      Org.isPopDescComplete().should.be.false;
+
+      Org._popDesc.roster.list = [SERVER_IDENTITY, SERVER_IDENTITY];
+      Org.isPopDescComplete().should.be.false;
+
+      Org._popDesc.roster.list = [SERVER_IDENTITY, SERVER_IDENTITY, SERVER_IDENTITY];
+      Org.isPopDescComplete().should.be.true;
+    });
+  });
+
+  describe("#linkToConode", function () {
+    it("should throw an error when conode is not a ServerIdentity", function () {
+      expect(() => {
+        User._keyPair.public = PUBLIC_KEY_BYTE_ARRAY;
+        User._keyPair.private = PRIVATE_KEY_BYTE_ARRAY;
+
+        Org.linkToConode("SERVER_IDENTITY", "123456");
+      }).to.throw();
+    });
+
+    it("should throw an error when pin is not a string", function () {
+      expect(() => {
+        User._keyPair.public = PUBLIC_KEY_BYTE_ARRAY;
+        User._keyPair.private = PRIVATE_KEY_BYTE_ARRAY;
+
+        Org.linkToConode(SERVER_IDENTITY, 123456);
+      }).to.throw();
+    });
+
+    it("should throw an error when the user's key pair is not a set", function () {
+      expect(() => Org.linkToConode(SERVER_IDENTITY, "123456")).to.throw();
+    });
+
+    /*
+    it("should link and set the linked conode", function () {
+      return User.setKeyPair(KEY_PAIR, false)
+        .then(() => {
+          return Org.linkToConode(SERVER_IDENTITY, "382090");
+        })
+        .then(response => {
+          console.log(response);
+          console.dir(response);
+
+          const linkedConode = Org.getLinkedConode();
+
+          linkedConode.public.should.deep.equal(CONODE_PUBLIC_KEY_BYTE_ARRAY);
+          linkedConode.id.should.deep.equal(CONODE_ID_REAL_BYTE_ARRAY);
+          linkedConode.address.should.equal(CONODE_ADDRESS);
+          linkedConode.description.should.equal(CONODE_DESCRIPTION);
+        });
+    });
+    */
+  });
+
+  describe.only("#registerPopDesc", function () {
+    it("should throw an error when the user's key pair is not set", function () {
+      expect(() => {
+        Org._popDesc.name = POP_DESC_NAME;
+        Org._popDesc.dateTime = POP_DESC_DATETIME;
+        Org._popDesc.location = POP_DESC_LOCATION;
+        Org._popDesc.roster = POP_DESC_ROSTER;
+
+        Org._linkedConode.public = CONODE_PUBLIC_KEY_BYTE_ARRAY;
+        Org._linkedConode.id = CONODE_ID_REAL_BYTE_ARRAY;
+        Org._linkedConode.address = CONODE_ADDRESS;
+        Org._linkedConode.description = CONODE_DESCRIPTION;
+
+        Org.registerPopDesc();
+      }).to.throw();
+    });
+
+    it("should throw an error when PopDesc is not complete", function () {
+      expect(() => {
+        User._keyPair.public = PUBLIC_KEY_BYTE_ARRAY;
+        User._keyPair.private = PRIVATE_KEY_BYTE_ARRAY;
+
+        Org._linkedConode.public = CONODE_PUBLIC_KEY_BYTE_ARRAY;
+        Org._linkedConode.id = CONODE_ID_REAL_BYTE_ARRAY;
+        Org._linkedConode.address = CONODE_ADDRESS;
+        Org._linkedConode.description = CONODE_DESCRIPTION;
+
+        Org.registerPopDesc();
+      }).to.throw();
+    });
+
+    it("should throw an error when not linked to conode", function () {
+      expect(() => {
+        User._keyPair.public = PUBLIC_KEY_BYTE_ARRAY;
+        User._keyPair.private = PRIVATE_KEY_BYTE_ARRAY;
+
+        Org._popDesc.name = POP_DESC_NAME;
+        Org._popDesc.dateTime = POP_DESC_DATETIME;
+        Org._popDesc.location = POP_DESC_LOCATION;
+        Org._popDesc.roster = POP_DESC_ROSTER;
+
+        Org.registerPopDesc();
+      }).to.throw();
+    });
+
+    it("should register PopDesc and set the PopDesc's hash", function () {
+      // TODO
     });
   });
 });

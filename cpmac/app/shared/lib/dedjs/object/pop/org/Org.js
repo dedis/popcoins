@@ -1,12 +1,20 @@
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
+const HashJs = require("hash.js");
+const BigNumber = require("bn.js");
 const Package = require("../../../Package");
 const Convert = require("../../../Convert");
+const Crypto = require("../../../Crypto");
 const Helper = require("../../../Helper");
 const ObjectType = require("../../../ObjectType");
+const Net = require("../../../Net");
 const FilesPath = require("../../../../../res/files/files-path");
 const FileIO = require("../../../../../lib/file-io/file-io");
 const CothorityMessages = require("../../../protobuf/build/cothority-messages");
+const RequestPath = require("../../../RequestPath");
+const DecodeType = require("../../../DecodeType");
+
+const User = require("../../user/User").get;
 
 /**
  * This singleton represents the organizer of a PoP party. It contains everything related to the organizer.
@@ -22,7 +30,7 @@ const EMPTY_POP_DESC = CothorityMessages.createPopDesc("", "", "", EMPTY_ROSTER)
 
 class Org {
 
-  // TODO: link to conode, hash + register pop desc on conode, finalize party with registered atts, fetch party by id
+  // TODO: hash + register pop desc on conode, finalize party with registered atts, fetch party by id
 
   /**
    * Constructor for the Org class.
@@ -84,6 +92,19 @@ class Org {
   }
 
   /**
+   * Returns wether the linked conode is set.
+   * @returns {boolean} - true if and only if the linked conode has been set
+   */
+  isLinkedConodeSet() {
+    const linkedConodeModule = this.getLinkedConodeModule();
+
+    return linkedConodeModule.public.length > 0 &&
+      linkedConodeModule.id.length > 0 &&
+      linkedConodeModule.address.length > 0 &&
+      linkedConodeModule.description.length > 0;
+  }
+
+  /**
    * Sets the new conode given as parameter as linked conode.
    * @param {ServerIdentity} conode - the new conode to set as linked conode
    * @param {boolean} save - if the new conode should be saved permanently
@@ -109,7 +130,7 @@ class Org {
 
     if (save) {
       let toWrite = "";
-      if (newLinkedConode.public.length > 0 && newLinkedConode.id.length > 0 && newLinkedConode.address.length > 0 && newLinkedConode.description.length > 0) {
+      if (this.isLinkedConodeSet()) {
         toWrite = Convert.objectToJson(newLinkedConode);
       }
 
@@ -162,6 +183,32 @@ class Org {
   }
 
   /**
+   * Returns wether the PopDesc is being set (partially or completely).
+   * @returns {boolean} - true if and only if the PopDesc is being set
+   */
+  isPopDescBeingSet() {
+    const popDescModule = this.getPopDescModule();
+
+    return popDescModule.name.length > 0 ||
+      popDescModule.dateTime.length > 0 ||
+      popDescModule.location.length > 0 ||
+      popDescModule.roster.list.length > 0;
+  }
+
+  /**
+   * Returns wether the PopDesc is complete.
+   * @returns {boolean} - true if and only if the PopDesc is complete
+   */
+  isPopDescComplete() {
+    const popDescModule = this.getPopDescModule();
+
+    return popDescModule.name.length > 0 &&
+      popDescModule.dateTime.length > 0 &&
+      popDescModule.location.length > 0 &&
+      popDescModule.roster.list.length >= 3;
+  }
+
+  /**
    * Sets the pop description.
    * @param {PopDesc} popDesc - the new pop description to set
    * @param {boolean} save - if the new pop description should be saved permanently
@@ -195,7 +242,7 @@ class Org {
 
     if (save) {
       let toWrite = "";
-      if (newPopDesc.name.length > 0 || newPopDesc.dateTime.length > 0 || newPopDesc.location.length > 0 || newPopDesc.roster.list.length > 0) {
+      if (this.isPopDescBeingSet()) {
         toWrite = Convert.objectToJson(newPopDesc);
       }
 
@@ -434,7 +481,7 @@ class Org {
     let newRoster = {
       list: this.getPopDesc().roster.list
     };
-    newRoster.list.push(conode);
+    newRoster.list.push(conode); // TODO: check for duplicates
     newRoster = Convert.parseJsonRoster(Convert.objectToJson(newRoster));
 
     const newPopDesc = this.getPopDesc();
@@ -503,6 +550,97 @@ class Org {
     }
 
     return this.setRegisteredAtts(newAttendees, true);
+  }
+
+  /**
+   * Sends a link request to the conode given as parameter. If the pin is not empty and the link request succeeds, the conode will be
+   * stored as the linked conode.
+   * @param {ServerIdentity} conode - the conode to which send the link request
+   * @param {string} pin - the pin received from the conode
+   * @returns {Promise} - a promise that gets completed once the link request has been sent and a response received
+   */
+  linkToConode(conode, pin) {
+    if (!Helper.isOfType(conode, ObjectType.SERVER_IDENTITY)) {
+      throw new Error("conode must be an instance of ServerIdentity");
+    }
+    if (typeof pin !== "string") {
+      throw new Error("pin must be of type string");
+    }
+    if (!User.isKeyPairSet()) {
+      throw new Error("user should generate a key pair before linking to a conode");
+    }
+
+    const cothoritySocket = new Net.CothoritySocket();
+    const pinRequestMessage = CothorityMessages.createPinRequest(pin, User.getKeyPair().public);
+
+    return cothoritySocket.send(conode, RequestPath.POP_PIN_REQUEST, pinRequestMessage, undefined)
+      .then(response => {
+        if (response instanceof ArrayBuffer) {
+          return this.setLinkedConode(conode, true)
+            .then(() => {
+              return Promise.resolve("PIN Accepted");
+            });
+        } else if (typeof response === "string") {
+          return Promise.resolve(response);
+        } else {
+          return Promise.reject("response if neither ArrayBuffer nor string");
+        }
+      })
+      .catch(error => {
+        console.log(error);
+        console.dir(error);
+        console.trace();
+
+        return Promise.reject(error);
+      });
+  }
+
+  /**
+   * Registers the local PopDesc on the linked conode. On success this will save the hash of the PopDesc for further usage.
+   * @returns {Promise} - a promise that gets completed once the hash of the PopDesc has been saved
+   */
+  registerPopDesc() {
+    if (!User.isKeyPairSet()) {
+      throw new Error("user should generate a key pair before linking to a conode");
+    }
+    if (!this.isPopDescComplete()) {
+      throw new Error("organizer should complete the PopDesc first");
+    }
+    if (!this.isLinkedConodeSet()) {
+      throw new Error("organizer should link to his conode first");
+    }
+
+    const popDesc = this.getPopDesc();
+    const descHash = Convert.hexToByteArray(HashJs.sha256()
+      .update(popDesc.name)
+      .update(popDesc.dateTime)
+      .update(popDesc.location)
+      .update(popDesc.roster.aggregate)
+      .digest("hex"));
+    const secret = new BigNumber(Convert.byteArrayToHex(User.getKeyPair().private), 16);
+    const signature = Crypto.schnorrSign(secret, descHash);
+
+    const cothoritySocket = new Net.CothoritySocket();
+    const storeConfigMessage = CothorityMessages.createStoreConfig(popDesc, signature);
+
+    return cothoritySocket.send(this.getLinkedConode(), RequestPath.POP_STORE_CONFIG, storeConfigMessage, DecodeType.STORE_CONFIG_REPLY)
+      .then(response => {
+        if (Convert.byteArrayToBase64(response.id) === Convert.byteArrayToBase64(descHash)) {
+          return this.setPopDescHash(descHash, true)
+            .then(() => {
+              return Promise.resolve(descHash);
+            });
+        } else {
+          return Promise.reject("hash was different");
+        }
+      })
+      .catch(error => {
+        console.log(error);
+        console.dir(error);
+        console.trace();
+
+        return Promise.reject(error);
+      });
   }
 
   /**
