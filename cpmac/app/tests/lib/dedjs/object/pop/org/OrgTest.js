@@ -873,7 +873,7 @@ describe("Org", function () {
     it("should link and set the linked conode", function () {
       return User.setKeyPair(KEY_PAIR, false)
         .then(() => {
-          return Org.linkToConode(SERVER_IDENTITY, "382090");
+          return Org.linkToConode(SERVER_IDENTITY, "");
         })
         .then(response => {
           console.log(response);
@@ -890,7 +890,7 @@ describe("Org", function () {
     */
   });
 
-  describe.only("#registerPopDesc", function () {
+  describe("#registerPopDesc", function () {
     it("should throw an error when the user's key pair is not set", function () {
       expect(() => {
         Org._popDesc.name = POP_DESC_NAME;
@@ -935,8 +935,29 @@ describe("Org", function () {
       }).to.throw();
     });
 
-    it("should register PopDesc and set the PopDesc's hash", function () {
-      // TODO
+    it.only("should register PopDesc and set the PopDesc's hash", function () {
+      User._keyPair.public = PUBLIC_KEY_BYTE_ARRAY;
+      User._keyPair.private = PRIVATE_KEY_BYTE_ARRAY;
+
+      Org._popDesc.name = POP_DESC_NAME;
+      Org._popDesc.dateTime = POP_DESC_DATETIME;
+      Org._popDesc.location = POP_DESC_LOCATION;
+      Org._popDesc.roster = POP_DESC_ROSTER;
+
+      Org._linkedConode.public = CONODE_PUBLIC_KEY_BYTE_ARRAY;
+      Org._linkedConode.id = CONODE_ID_REAL_BYTE_ARRAY;
+      Org._linkedConode.address = CONODE_ADDRESS;
+      Org._linkedConode.description = CONODE_DESCRIPTION;
+
+      return Org.registerPopDesc()
+        .then(response => {
+          if (typeof response !== "string") {
+            console.log(response);
+          } else {
+            console.log(Convert.byteArrayToBase64(response));
+            console.log(Convert.byteArrayToHex(response));
+          }
+        });
     });
   });
 });
