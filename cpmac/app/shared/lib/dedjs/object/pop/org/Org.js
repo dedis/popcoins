@@ -15,6 +15,7 @@ const RequestPath = require("../../../RequestPath");
 const DecodeType = require("../../../DecodeType");
 
 const User = require("../../user/User").get;
+const PoP = require("../../pop/PoP").get;
 
 /**
  * This singleton represents the organizer of a PoP party. It contains everything related to the organizer.
@@ -30,7 +31,7 @@ const EMPTY_POP_DESC = CothorityMessages.createPopDesc("", "", "", EMPTY_ROSTER)
 
 class Org {
 
-  // TODO: hash + register pop desc on conode, finalize party with registered atts, fetch party by id
+  // TODO: finalize party with registered atts, fetch party by id
 
   /**
    * Constructor for the Org class.
@@ -633,6 +634,58 @@ class Org {
         } else {
           return Promise.reject("hash was different");
         }
+      })
+      .catch(error => {
+        console.log(error);
+        console.dir(error);
+        console.trace();
+
+        return Promise.reject(error);
+      });
+  }
+
+  /**
+   * Registers the attendees to the PoP-Party stored on the linked conode, this finalizes the party.
+   * @returns {Promise} - a promise that gets completed once the attendees have been registered and the party finalized
+   */
+  registerAttsAndFinalizeParty() {
+    if (!User.isKeyPairSet()) {
+      throw new Error("user should generate a key pair before linking to a conode");
+    }
+    if (!this.isPopDescComplete()) {
+      throw new Error("organizer should complete the PopDesc first");
+    }
+    if (!this.isLinkedConodeSet()) {
+      throw new Error("organizer should link to his conode first");
+    }
+
+    const descId = Uint8Array.from(this.getPopDescHash());
+    if (descId.length === 0) {
+      throw new Error("organizer should first register the config on his conode");
+    }
+
+    const attendees = this.getRegisteredAtts().slice();
+    if (attendees.length === 0) {
+      throw new Error("no attendee to register");
+    }
+
+    let hashToSign = HashJs.sha256();
+
+    hashToSign.update(descId);
+    attendees.forEach(attendee => {
+      hashToSign.update(attendee);
+    });
+
+    hashToSign = Convert.hexToByteArray(hashToSign.digest("hex"));
+    const secret = new BigNumber(Convert.byteArrayToHex(User.getKeyPair().private), 16);
+    const signature = Crypto.schnorrSign(secret, hashToSign);
+
+    const cothoritySocket = new Net.CothoritySocket();
+    const finalizeRequestMessage = CothorityMessages.createFinalizeRequest(descId, attendees, signature);
+
+    return cothoritySocket.send(this.getLinkedConode(), RequestPath.POP_FINALIZE_REQUEST, finalizeRequestMessage, DecodeType.FINALIZE_RESPONSE)
+      .then(finalStatement => {
+        return PoP.addFinalStatement(finalStatement, true);
       })
       .catch(error => {
         console.log(error);
