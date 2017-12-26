@@ -869,7 +869,6 @@ describe("Org", function () {
       expect(() => Org.linkToConode(SERVER_IDENTITY, "123456")).to.throw();
     });
 
-    /*
     it("should link and set the linked conode", function () {
       return User.setKeyPair(KEY_PAIR, false)
         .then(() => {
@@ -887,7 +886,6 @@ describe("Org", function () {
           linkedConode.description.should.equal(CONODE_DESCRIPTION);
         });
     });
-    */
   });
 
   describe("#registerPopDesc", function () {
@@ -947,7 +945,7 @@ describe("Org", function () {
           return Org.registerPopDesc();
         })
         .then(response => {
-          if (typeof response !== "string") {
+          if (typeof response == "string") {
             console.log(response);
           } else {
             console.log(Convert.byteArrayToBase64(response));

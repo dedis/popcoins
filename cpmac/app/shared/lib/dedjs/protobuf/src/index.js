@@ -219,6 +219,10 @@ class CothorityMessages extends CothorityProtobuf {
       throw new Error("signature must be an instance of Uint8Array");
     }
 
+    if (desc.roster.id !== undefined) {
+      delete desc.roster.id;
+    }
+
     const fields = {
       desc: desc,
       signature: signature
