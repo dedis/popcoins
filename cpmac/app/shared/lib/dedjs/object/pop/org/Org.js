@@ -684,8 +684,8 @@ class Org {
     const finalizeRequestMessage = CothorityMessages.createFinalizeRequest(descId, attendees, signature);
 
     return cothoritySocket.send(this.getLinkedConode(), RequestPath.POP_FINALIZE_REQUEST, finalizeRequestMessage, DecodeType.FINALIZE_RESPONSE)
-      .then(finalStatement => {
-        return PoP.addFinalStatement(finalStatement, true);
+      .then(response => {
+        return PoP.addFinalStatement(response.final, true);
       })
       .catch(error => {
         console.log(error);

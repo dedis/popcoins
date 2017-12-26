@@ -1,6 +1,7 @@
 const Helper = require("./Helper");
 const ObjectType = require("./ObjectType");
 const Convert = require("./Convert");
+const CothorityMessages = require("./protobuf/build/cothority-messages");
 const EllipticCurve = require("elliptic").ec;
 const Hash = require("hash.js");
 const BigNumber = require("bn.js");
@@ -135,7 +136,9 @@ function unmarshal(bytes) {
  * @returns {KeyPair} - the generated key pair
  */
 function generateRandomKeyPair() {
-  return CURVE_ED25519.genKeyPair();
+  const keyPair = CURVE_ED25519.genKeyPair();
+
+  return CothorityMessages.createKeyPair(marshal(keyPair.getPublic()), Convert.hexToByteArray(keyPair.getPrivate(HEX_KEYWORD)), Convert.hexToByteArray(keyPair.getPublic(HEX_KEYWORD)));
 }
 
 /** (BASE CODE TAKEN FROM DEDIS-JS, IT HAS BEEN ADAPTED TO MY CODE AND FIXED TO WORK WITH THE CONODES)

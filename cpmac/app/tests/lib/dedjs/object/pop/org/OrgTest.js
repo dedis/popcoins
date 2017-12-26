@@ -9,14 +9,23 @@ const Helper = require("../../../../../../shared/lib/dedjs/Helper");
 const ObjectType = require("../../../../../../shared/lib/dedjs/ObjectType");
 const CothorityMessages = require("../../../../../../shared/lib/dedjs/protobuf/build/cothority-messages");
 const User = require("../../../../../../shared/lib/dedjs/object/user/User").get;
+const PoP = require("../../../../../../shared/lib/dedjs/object/pop/PoP").get;
 
 const Org = require("../../../../../../shared/lib/dedjs/object/pop/org/Org").get;
 
 const CONODE_ADDRESS = "tcp://10.0.2.2:7002";
+//const CONODE_ADDRESS = "tcp://10.0.2.2:7004";
+//const CONODE_ADDRESS = "tcp://10.0.2.2:7006";
 const CONODE_PUBLIC_KEY = "HkDzpR5Imd7WNx8kl2lJcIVRVn8gfDByJnmlfrYh/zU=";
+//const CONODE_PUBLIC_KEY = "Fx6zzvJM6VzxfByLY2+uArGPtd2lHKPVmoXGMhdaFCA=";
+//const CONODE_PUBLIC_KEY = "j53MMKZNdtLlglcK9Ct1YYtkbbEOfq3R8ZoJOFIu6tE=";
 const CONODE_PUBLIC_KEY_BYTE_ARRAY = Convert.base64ToByteArray(CONODE_PUBLIC_KEY);
 const CONODE_DESCRIPTION = "Conode_1";
+//const CONODE_DESCRIPTION = "Conode_2";
+//const CONODE_DESCRIPTION = "Conode_3";
 const CONODE_ID_REAL = "z6kCTQ77Xna9yfgKka5lNQ==";
+//const CONODE_ID_REAL = "Qd8XkrUlVEeClO9I95nklQ==";
+//const CONODE_ID_REAL = "tUq+0651WRaAI4aTQC0d8w==";
 const CONODE_ID_REAL_BYTE_ARRAY = Convert.base64ToByteArray(CONODE_ID_REAL);
 const SERVER_IDENTITY = Convert.toServerIdentity(CONODE_ADDRESS, CONODE_PUBLIC_KEY_BYTE_ARRAY, CONODE_DESCRIPTION, CONODE_ID_REAL_BYTE_ARRAY);
 
@@ -26,19 +35,19 @@ const ROSTER_LIST = [
   {
     "public": "HkDzpR5Imd7WNx8kl2lJcIVRVn8gfDByJnmlfrYh/zU=",
     "id": "z6kCTQ77Xna9yfgKka5lNQ==",
-    "address": "tcp://10.0.2.2:7002",
+    "address": "tcp://127.0.0.1:7002",
     "description": "Conode_1"
   },
   {
     "public": "Fx6zzvJM6VzxfByLY2+uArGPtd2lHKPVmoXGMhdaFCA=",
     "id": "Qd8XkrUlVEeClO9I95nklQ==",
-    "address": "tcp://10.0.2.2:7004",
+    "address": "tcp://127.0.0.1:7004",
     "description": "Conode_2"
   },
   {
     "public": "j53MMKZNdtLlglcK9Ct1YYtkbbEOfq3R8ZoJOFIu6tE=",
     "id": "tUq+0651WRaAI4aTQC0d8w==",
-    "address": "tcp://10.0.2.2:7006",
+    "address": "tcp://127.0.0.1:7006",
     "description": "Conode_3"
   }
 ];
@@ -72,10 +81,16 @@ const POP_DESC_HASH_JSON = Convert.objectToJson({
 const POP_DESC_HASH_BYTE_ARRAY = Convert.base64ToByteArray(POP_DESC_HASH);
 
 const PRIVATE_KEY = "AWKlOlcTuCHEV/fKX0X1IoAoBU0n1c5iKp/SWRLj3T4=";
+//const PRIVATE_KEY = "Cce6tc8ZxYR1JlnFjHRgZvVCjfEpFf1pRNFPSGmOkr4=";
+//const PRIVATE_KEY = "A+3lTDfz9oC/hCHPcggz6JwbId5cJ1PTjWhUArhCrfQ=";
 const PRIVATE_KEY_BYTE_ARRAY = Convert.base64ToByteArray(PRIVATE_KEY);
 const PUBLIC_KEY = "y4JMDWrle6RMV+0BKU92Xbu8+J8VkZ5kV3SvSr2ZxHw=";
+//const PUBLIC_KEY = "6ggWOlIW50fgUWTRuHfKtI9OPdH1LCWPaV+USJS85Vk=";
+//const PUBLIC_KEY = "roto8UHOJTWNHUSQGTptt1oAoNrkIirmPSteYCc5cDg=";
 const PUBLIC_KEY_BYTE_ARRAY = Convert.base64ToByteArray(PUBLIC_KEY);
 const PUBLIC_COMPLETE_KEY = "BBmiuL/uxUuItsuFVQJT4oUv4qZrb1fYQ+GL/ZTpZ43MfMSZvUqvdFdknpEVn/i8u112TykB7VdMpHvlag1Mgss=";
+//const PUBLIC_COMPLETE_KEY = "BFSG/1tmjE+dTSgy5PIvGIRUmADtlHisVTtXdXdwwKfQWeW8lEiUX2mPJSz10T1Oj7TKd7jRZFHgR+cWUjoWCOo=";
+//const PUBLIC_COMPLETE_KEY = "BCHV9x/kqfBnta5GTTzIaQvS1t+ZaxzO/+WE5BR8DnySOHA5J2BeKz3mKiLk2qAAWrdtOhmQRB2NNSXOQfFoi64=";
 const PUBLIC_COMPLETE_KEY_BYTE_ARRAY = Convert.base64ToByteArray(PUBLIC_COMPLETE_KEY);
 const JSON_KEY_PAIR = JSON.stringify({
   "private": PRIVATE_KEY,
@@ -93,6 +108,7 @@ describe("Org", function () {
 
     promises.push(Org.reset());
     promises.push(User.reset());
+    promises.push(PoP.reset());
 
     return Promise.all(promises)
       .catch(error => {
@@ -966,7 +982,7 @@ describe("Org", function () {
     */
   });
 
-  describe.only("#registerAttsAndFinalizeParty", function () {
+  describe("#registerAttsAndFinalizeParty", function () {
     it("should throw an error when the user's key pair is not set", function () {
       expect(() => {
         Org._popDesc.name = POP_DESC_NAME;
@@ -1065,8 +1081,8 @@ describe("Org", function () {
       }).to.throw();
     });
 
-    it("should register PopDesc and set the PopDesc's hash", function () {
-      /*
+    /*
+    it("should register attendees and save final statement if it is the last registration", function () {
       return User.setKeyPair(KEY_PAIR, false)
         .then(() => {
           return Org.setPopDesc(POP_DESC, false);
@@ -1077,22 +1093,23 @@ describe("Org", function () {
         .then(() => {
           return Org.registerPopDesc();
         })
-        .then(response => {
-          if (typeof response == "string") {
-            console.log(response);
-          } else {
-            console.log(Convert.byteArrayToBase64(response));
-            console.log(Convert.byteArrayToHex(response));
-          }
+        .then(descId => {
+          return Org.setPopDescHash(descId, false);
+        })
+        .then(() => {
+          return Org.setRegisteredAtts(ATTENDEES, false);
+        })
+        .then(() => {
+          return Org.registerAttsAndFinalizeParty();
+        })
+        .then(() => {
+          const finalStatements = PoP.getFinalStatements().slice();
 
-          const linkedConode = Org.getLinkedConode();
-
-          linkedConode.public.should.deep.equal(CONODE_PUBLIC_KEY_BYTE_ARRAY);
-          linkedConode.id.should.deep.equal(CONODE_ID_REAL_BYTE_ARRAY);
-          linkedConode.address.should.equal(CONODE_ADDRESS);
-          linkedConode.description.should.equal(CONODE_DESCRIPTION);
+          finalStatements.length.should.equal(1);
+          console.log(finalStatements[0]);
+          console.dir(finalStatements[0]);
         });
-        */
     });
+    */
   });
 });
