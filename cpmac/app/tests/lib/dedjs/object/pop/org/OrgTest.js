@@ -1112,4 +1112,50 @@ describe("Org", function () {
     });
     */
   });
+
+  describe("#fetchFinalStatement", function () {
+    it("should throw an error when not linked to a conode", function () {
+      expect(() => {
+        Org.fetchFinalStatement(POP_DESC_HASH_BYTE_ARRAY);
+      }).to.throw();
+    });
+
+    it("should throw an error when descId is not a byte array", function () {
+      expect(() => {
+        Org._linkedConode.public = CONODE_PUBLIC_KEY_BYTE_ARRAY;
+        Org._linkedConode.id = CONODE_ID_REAL_BYTE_ARRAY;
+        Org._linkedConode.address = CONODE_ADDRESS;
+        Org._linkedConode.description = CONODE_DESCRIPTION;
+
+        Org.fetchFinalStatement("POP_DESC_HASH_BYTE_ARRAY");
+      }).to.throw();
+    });
+
+    it("should throw an error when descId is empty", function () {
+      expect(() => {
+        Org._linkedConode.public = CONODE_PUBLIC_KEY_BYTE_ARRAY;
+        Org._linkedConode.id = CONODE_ID_REAL_BYTE_ARRAY;
+        Org._linkedConode.address = CONODE_ADDRESS;
+        Org._linkedConode.description = CONODE_DESCRIPTION;
+
+        Org.fetchFinalStatement(new Uint8Array());
+      }).to.throw();
+    });
+
+    /*
+    it("should register attendees and save final statement if it is the last registration", function () {
+      return Org.setLinkedConode(SERVER_IDENTITY, false)
+        .then(() => {
+          return Org.fetchFinalStatement(POP_DESC_HASH_BYTE_ARRAY);
+        })
+        .then(() => {
+          const finalStatements = PoP.getFinalStatements().slice();
+
+          finalStatements.length.should.equal(1);
+          console.log(finalStatements[0]);
+          console.dir(finalStatements[0]);
+        });
+    });
+    */
+  });
 });

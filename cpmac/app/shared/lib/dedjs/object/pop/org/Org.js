@@ -31,8 +31,6 @@ const EMPTY_POP_DESC = CothorityMessages.createPopDesc("", "", "", EMPTY_ROSTER)
 
 class Org {
 
-  // TODO: finalize party with registered atts, fetch party by id
-
   /**
    * Constructor for the Org class.
    */
@@ -684,6 +682,35 @@ class Org {
     const finalizeRequestMessage = CothorityMessages.createFinalizeRequest(descId, attendees, signature);
 
     return cothoritySocket.send(this.getLinkedConode(), RequestPath.POP_FINALIZE_REQUEST, finalizeRequestMessage, DecodeType.FINALIZE_RESPONSE)
+      .then(response => {
+        return PoP.addFinalStatement(response.final, true);
+      })
+      .catch(error => {
+        console.log(error);
+        console.dir(error);
+        console.trace();
+
+        return Promise.reject(error);
+      });
+  }
+
+  /**
+   * Fetches the FinalStatement corresponding to the description id given as parameter.
+   * @param {Uint8Array} descId - the id of the PopDesc
+   * @returns {Promise} - a promise that gets completed once the final statement has been fetched and saved locally
+   */
+  fetchFinalStatement(descId) {
+    if (!this.isLinkedConodeSet()) {
+      throw new Error("organizer should link to his conode first");
+    }
+    if (!(descId instanceof Uint8Array) || descId.length === 0) {
+      throw new Error("descId must be an instance of Uint8Array and not empty");
+    }
+
+    const cothoritySocket = new Net.CothoritySocket();
+    const fetchRequestMessage = CothorityMessages.createFetchRequest(descId);
+
+    return cothoritySocket.send(this.getLinkedConode(), RequestPath.POP_FETCH_REQUEST, fetchRequestMessage, DecodeType.FETCH_RESPONSE)
       .then(response => {
         return PoP.addFinalStatement(response.final, true);
       })
