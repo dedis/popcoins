@@ -1,7 +1,7 @@
 const Dialog = require("ui/dialogs");
-const Convert = require("~/shared/lib/dedjs/Convert");
-const Helper = require("~/shared/lib/dedjs/Helper");
-const CothorityMessages = require("~/shared/lib/dedjs/protobuf/build/cothority-messages");
+const Convert = require("../../lib/dedjs/Convert");
+const Helper = require("../../lib/dedjs/Helper");
+const CothorityMessages = require("../../lib/dedjs/protobuf/build/cothority-messages");
 
 let textFieldAddress = undefined;
 let textFieldPublicKey = undefined;
@@ -70,7 +70,7 @@ function addManual() {
   } else {
     return Dialog.alert({
       title: "Provide More Information",
-      message: "To be able to add this conode to the list we need more information.",
+      message: "Please provide the address, the public key and the description of the conode.",
       okButtonText: "Ok"
     });
   }

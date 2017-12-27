@@ -1,0 +1,18 @@
+<Page
+        class="page"
+        loaded="onLoaded"
+        shownModally="onShownModally">>
+
+    <ActionBar class="action-bar">
+        <Label class="action-bar-title" text="QR Code"/>
+    </ActionBar>
+
+    <GridLayout class="page-content" rows="*,*,auto" columns="*">
+        <Image id="image" stretch="aspectFit" row="0" tap="copyToClipboard"/>
+        <TextView class="label-title" editable="false"
+          row="1"
+          id="text-view"/>
+        <Button text="Done" tap="onDone" row="2"/>
+    </GridLayout>
+
+</Page>

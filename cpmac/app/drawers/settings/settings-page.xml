@@ -1,6 +1,6 @@
 <Page
         navigatingTo="onNavigatingTo"
-        xmlns:nsDrawer="nativescript-telerik-ui/sidedrawer"
+        xmlns:nsDrawer="nativescript-pro-ui/sidedrawer"
         xmlns:myDrawer="shared/my-drawer"
         xmlns:pop="drawers/settings/pop"
         xmlns:cisc="drawers/settings/cisc"

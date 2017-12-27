@@ -1,7 +1,7 @@
 <Page
         class="page"
         navigatingTo="onNavigatingTo"
-        xmlns:nsDrawer="nativescript-telerik-ui/sidedrawer"
+        xmlns:nsDrawer="nativescript-pro-ui/sidedrawer"
         xmlns:myDrawer="shared/my-drawer"
         xmlns="http://www.nativescript.org/tns.xsd">
 
@@ -19,7 +19,7 @@
                     ios.position="left">
         </ActionItem>
         <Label class="action-bar-title" text="Home"/>
-        <ActionItem tap="addConodeManual"
+        <ActionItem tap="addConode"
                     ios.systemIcon="4" ios.position="right"
                     text="Add Conode" android.position="popup"/>
     </ActionBar>

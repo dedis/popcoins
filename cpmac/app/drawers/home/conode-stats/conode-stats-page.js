@@ -1,16 +1,13 @@
-const Dialog = require("ui/dialogs");
 const Frame = require("ui/frame");
-const CothorityPath = require("~/shared/res/cothority-path/cothority-path");
-const FilesPath = require("~/shared/res/files/files-path");
-const FileIO = require("~/shared/lib/file-io/file-io");
-const Crypto = require("~/shared/lib/dedis-js/src/crypto");
-const StatusExtractor = require("~/shared/lib/extractors/StatusExtractor");
+const Convert = require("../../../shared/lib/dedjs/Convert");
 const ConodeStatsViewModel = require("./conode-stats-view-model");
 
 const conodeStatsViewModel = new ConodeStatsViewModel();
 
 const myStatsList = conodeStatsViewModel.statsList;
-let selectedConode = undefined;
+
+let conode = undefined;
+let conodeStatus = undefined;
 
 function onNavigatingTo(args) {
   if (args.isBackNavigation) {
@@ -18,11 +15,12 @@ function onNavigatingTo(args) {
   }
 
   const page = args.object;
-  selectedConode = page.bindingContext;
+  conode = page.bindingContext.conode;
+  conodeStatus = page.bindingContext.conodeStatus;
 
   page.bindingContext = conodeStatsViewModel;
 
-  loadFunction(selectedConode);
+  loadFunction(conode);
 }
 
 /**
@@ -35,59 +33,16 @@ function loadFunction(conode) {
 }
 
 /**
- * Changes the frame to the QR displaying of the conodes toml string.
+ * Changes the frame to the QR displaying of the conodes.
  */
-function displayQrOfConodeStats() {
+function displayQrOfConode() {
   Frame.topmost().navigate({
-    moduleName: "drawers/home/conode-stats/qr-code/qr-code-page",
+    moduleName: "shared/pages/qr-code/qr-code-page",
     bindingContext: {
-      statsString: StatusExtractor.getTomlFromStatusResponse(selectedConode)
+      textToShow: Convert.objectToJson(conode)
     }
   });
 }
 
-/**
- * Function called when the user wants to link to his conode.
- * @returns {Promise.<any>}
- */
-function linkToConode() {
-  return Dialog.prompt({
-    title: "Link to Conode",
-    message: "Leave blank if you are requesting the PIN from your conode.",
-    okButtonText: "Link PoP",
-    cancelButtonText: "Cancel",
-    neutralButtonText: "Link CISC",
-    defaultText: "",
-    inputType: Dialog.inputType.text
-  })
-    .then(result => {
-      if (result.result) {
-        return FileIO.getStringOf(FilesPath.PUBLIC_KEY_COTHORITY)
-          .then(publicKey => {
-            if (publicKey === "") {
-              return Promise.reject();
-            } else {
-              return myStatsList.linkToConode(selectedConode, result.text, publicKey,
-                CothorityPath.POP_PIN_REQUEST);
-            }
-          });
-      } else if (result.result === undefined) {
-        // TODO: Case CISC - Use your own public key and path
-        return Promise.resolve();
-      } else {
-        return Promise.resolve();
-      }
-    })
-    .catch(() => {
-      return Dialog.alert({
-        title: "Error",
-        message: "An unexpected error occurred during the linking" +
-          " process. Please try again. Do you have a key pair in your settings?",
-        okButtonText: "Ok"
-      });
-    });
-}
-
-exports.onNavigatingTo = onNavigatingTo;
-exports.displayQrOfConodeStats = displayQrOfConodeStats;
-exports.linkToConode = linkToConode;
+module.exports.onNavigatingTo = onNavigatingTo;
+module.exports.displayQrOfConode = displayQrOfConode;

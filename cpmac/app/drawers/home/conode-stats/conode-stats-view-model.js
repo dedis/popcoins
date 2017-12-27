@@ -1,13 +1,7 @@
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
-const StatusExtractor = require("~/shared/lib/extractors/StatusExtractor");
-const Helper = require("~/shared/lib/dedjs/Helper");
-const FilesPath = require("~/shared/res/files/files-path");
-const FileIO = require("~/shared/lib/file-io/file-io");
-const DedisJsNet = require("~/shared/lib/dedis-js/src/net");
-const CothorityMessages = require("~/shared/lib/cothority-protobuf/build/cothority-messages");
-const Dialog = require("ui/dialogs");
-const Misc = require("~/shared/lib/dedis-js/src/misc");
+const StatusExtractor = require("../../../shared/lib/dedjs/extractor/StatusExtractor");
+const Helper = require("../../../shared/lib/dedjs/Helper");
 
 const viewModel = ObservableModule.fromObject({
   statsList: new ObservableArray()
@@ -96,39 +90,6 @@ function setUpConodeStatsList() {
       myStatsList.pop();
     }
   };
-
-  /**
-   * Starts the linking process.
-   * @param conode - the conode to link to
-   * @param pin - the pin given by the conode
-   * @param publicKey - the public key of the organizer
-   * @param cothorityPath - the path for the pin request on the conode
-   * @returns {Promise.<any>}
-   */
-  myStatsList.linkToConode = function (conode, pin, publicKey, cothorityPath) {
-    const wantedConodeKey = StatusExtractor.getPublicKey(conode);
-
-    return FileIO.getStringOf(FilesPath.CONODES_TOML)
-      .then((tomlString) => {
-        return DedisJsNet.getConodeFromRoster(tomlString, wantedConodeKey);
-      })
-      .then(parsedConode => {
-        if (parsedConode !== undefined) {
-          return link(parsedConode, pin, publicKey, cothorityPath);
-        } else {
-          return Promise.reject();
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-        return Dialog.alert({
-          title: "Error",
-          message: "An unexpected error occurred during the linking" +
-            " process. Please try again.",
-          okButtonText: "Ok"
-        });
-      });
-  };
 }
 
 /**
@@ -140,49 +101,6 @@ function pushStat(list, statToAdd) {
   list.push({
     info: statToAdd
   });
-}
-
-/**
- * Handles the socket part of the linking process.
- * @param conode - the conode to link to
- * @param pin - the pin given from the conode
- * @param publicKey - the public key of the organizer
- * @param cothorityPath - the path for the pin request on the conode
- */
-function link(conode, pin, publicKey, cothorityPath) {
-  const cothoritySocket = new DedisJsNet.CothoritySocket();
-  const pinRequestMessage = CothorityMessages.createPinRequest(pin, Misc.hexToUint8Array(publicKey));
-
-  return cothoritySocket.send(conode, cothorityPath, pinRequestMessage, undefined)
-    .then(response => {
-      if (response instanceof ArrayBuffer) {
-        return FileIO.writeStringTo(FilesPath.POP_LINKED_CONODE, StatusExtractor.getToml(conode.Address, conode.Public, conode.Description))
-          .then(() => {
-            return Dialog.alert({
-              title: "Conode Response",
-              message: "PIN Accepted",
-              okButtonText: "Ok"
-            });
-          });
-      } else if (typeof response === "string") {
-        return Dialog.alert({
-          title: "Conode Response",
-          message: response,
-          okButtonText: "Ok"
-        });
-      } else {
-        return Promise.reject();
-      }
-    })
-    .catch(error => {
-      console.log(error);
-      return Dialog.alert({
-        title: "Error",
-        message: "An unexpected error occurred during the linking" +
-          " process. Please try again.",
-        okButtonText: "Ok"
-      });
-    });
 }
 
 module.exports = ConodeStatsViewModel;

@@ -1,18 +1,17 @@
 /**
- * @file Library to scan a QR code and copy the content to the clipboard.
+ * @file Library to scan a QR code and return the content as a string.
  */
 
 const Dialog = require("ui/dialogs");
 const BCScanner = require("nativescript-barcodescanner").BarcodeScanner;
-const Clipboard = require("nativescript-clipboard");
 
 const BarCodeScanner = new BCScanner();
 
 // Functions ------------------------------------------------------------------
 
 /**
- * Global scan to clip function that is exported as main library function. It permits you to scan a QR code, the
- * content will be copied to the clipboard.
+ * Global scan to return function that is exported as main library function. It permits you to scan a QR code, the
+ * content will be returned as a string.
  * @returns {Promise} - a promise that gets resolved once the user took a photo
  */
 function scan() {
@@ -52,21 +51,14 @@ function scan() {
 
 /**
  * Callback function called every time a code has been scanned. In our case we stop after the first success. It will
- * copy the result to the clipboard and stop the scanning process.
+ * return the content as a string and stop the scanning process.
  * @param {object} scanResult - the result of the scan
- * @returns {Promise} - a promise that gets resolved once the content of the scan has been set to the clipboard
+ * @returns {Promise} - a promise that gets resolved once the content of the scan has been returned as a string
  */
 const continuousCallback = function (scanResult) {
-  return Clipboard.setText(scanResult.text)
+  return BarCodeScanner.stop()
     .then(() => {
-      return BarCodeScanner.stop();
-    })
-    .then(() => {
-      return Dialog.alert({
-        title: "Copied to Clipboard",
-        message: scanResult.text,
-        okButtonText: "Nice!"
-      });
+      return Promise.resolve(scanResult.text);
     })
     .catch(() => {
       console.log(error);
