@@ -90,5 +90,5 @@
   
 # What have we learned? What would we now do differently?
 
-12 janvier rapport + app! (send 8 janvier si "correction")
-23 janvier demo 11h40 - BC229
+  - 12 janvier rapport + app! (send 8 janvier si "correction")
+  - 23 janvier demo 11h40 - BC229
