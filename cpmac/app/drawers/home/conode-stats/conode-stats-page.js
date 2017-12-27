@@ -9,39 +9,39 @@ const myStatsList = conodeStatsViewModel.statsList;
 let conode = undefined;
 let conodeStatus = undefined;
 
+let pageObject = undefined;
+
 function onNavigatingTo(args) {
   if (args.isBackNavigation) {
     return;
   }
 
   const page = args.object;
+  pageObject = page.page;
   conode = page.bindingContext.conode;
   conodeStatus = page.bindingContext.conodeStatus;
 
   page.bindingContext = conodeStatsViewModel;
 
-  loadFunction(conode);
+  loadFunction(conodeStatus);
 }
 
 /**
  * Loads the properties of the selected conode into the list to display them to the user.
- * @param conode - the selected conode
+ * @param conodeStatus - the selected conode
  */
-function loadFunction(conode) {
+function loadFunction(conodeStatus) {
   myStatsList.empty();
-  myStatsList.load(conode);
+  myStatsList.load(conodeStatus);
 }
 
 /**
  * Changes the frame to the QR displaying of the conodes.
  */
 function displayQrOfConode() {
-  Frame.topmost().navigate({
-    moduleName: "shared/pages/qr-code/qr-code-page",
-    bindingContext: {
-      textToShow: Convert.objectToJson(conode)
-    }
-  });
+  pageObject.showModal("shared/pages/qr-code/qr-code-page", {
+    textToShow: Convert.objectToJson(conode)
+  }, function () { }, true);
 }
 
 module.exports.onNavigatingTo = onNavigatingTo;

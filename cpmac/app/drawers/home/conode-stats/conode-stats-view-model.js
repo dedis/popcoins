@@ -21,64 +21,64 @@ function setUpConodeStatsList() {
 
   /**
    * Loads the stats into the list.
-   * @param conode - the conode to fetch stats from
+   * @param conodeStatus - the conode to fetch stats from
    */
-  myStatsList.load = function (conode) {
+  myStatsList.load = function (conodeStatus) {
     let stat = {
       title: "",
       info: ""
     };
 
     stat.title = "Description";
-    stat.info = StatusExtractor.getDescription(conode);
+    stat.info = StatusExtractor.getDescription(conodeStatus);
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
     stat.title = "Address";
-    stat.info = StatusExtractor.getAddress(conode);
+    stat.info = StatusExtractor.getAddress(conodeStatus);
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
     stat.title = "ID (base64)";
-    stat.info = StatusExtractor.getID(conode);
+    stat.info = StatusExtractor.getID(conodeStatus);
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
     stat.title = "Public Key (base64)";
-    stat.info = StatusExtractor.getPublicKey(conode);
+    stat.info = StatusExtractor.getPublicKey(conodeStatus);
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
     stat.title = "Services";
-    stat.info = StatusExtractor.getServices(conode);
+    stat.info = StatusExtractor.getServices(conodeStatus);
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
     stat.title = "System";
-    stat.info = StatusExtractor.getSystem(conode);
+    stat.info = StatusExtractor.getSystem(conodeStatus);
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
     stat.title = "Host";
-    stat.info = StatusExtractor.getHost(conode);
+    stat.info = StatusExtractor.getHost(conodeStatus);
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
     stat.title = "Port";
-    stat.info = StatusExtractor.getPort(conode);
+    stat.info = StatusExtractor.getPort(conodeStatus);
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
     stat.title = "ConnectionType";
-    stat.info = StatusExtractor.getConnectionType(conode);
+    stat.info = StatusExtractor.getConnectionType(conodeStatus);
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
     stat.title = "Version";
-    stat.info = StatusExtractor.getVersion(conode);
+    stat.info = StatusExtractor.getVersion(conodeStatus);
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
     stat.title = "TX Bytes";
-    stat.info = StatusExtractor.getTXBytes(conode);
+    stat.info = StatusExtractor.getTXBytes(conodeStatus);
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
     stat.title = "RX Bytes";
-    stat.info = StatusExtractor.getRXBytes(conode);
+    stat.info = StatusExtractor.getRXBytes(conodeStatus);
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
     stat.title = "Uptime";
-    stat.info = StatusExtractor.getUptime(conode);
+    stat.info = StatusExtractor.getUptime(conodeStatus);
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
   };
 

@@ -15,6 +15,13 @@ let closeCallBackFunction = undefined;
 
 function onShownModally(args) {
   closeCallBackFunction = args.closeCallback;
+  textToShow = args.context.textToShow;
+
+  if (textToShow === undefined) {
+    throw new Error("textToShow is undefined, but is should not");
+  }
+
+  loadFields();
 }
 
 function onLoaded(args) {
@@ -23,11 +30,9 @@ function onLoaded(args) {
   }
 
   const page = args.object;
-  textToShow = page.bindingContext.textToShow;
-
   loadViews(page);
 
-  if (textView === undefined || qrImage === undefined || textToShow === undefined) {
+  if (textView === undefined || qrImage === undefined) {
     throw new Error("a field is undefined, but is should not");
   }
 
@@ -47,6 +52,10 @@ function loadViews(page) {
  * We load the text and the QR code (after generating it) into the views.
  */
 function loadFields() {
+  if (textView === undefined || qrImage === undefined || textToShow === undefined) {
+    return;
+  }
+
   // We set the text the text view.
   textView.text = textToShow;
 
@@ -97,6 +106,7 @@ function onDone() {
   closeCallBackFunction(undefined);
 }
 
+module.exports.onShownModally = onShownModally;
 module.exports.onLoaded = onLoaded;
 module.exports.copyToClipboard = copyToClipboard;
 module.exports.onDone = onDone;

@@ -1,5 +1,5 @@
 const Frame = require("ui/frame");
-const Dialogs = require("ui/dialogs");
+const Dialog = require("ui/dialogs");
 const Helper = require("../../shared/lib/dedjs/Helper");
 const Convert = require("../../shared/lib/dedjs/Convert");
 const ObjectType = require("../../shared/lib/dedjs/ObjectType");
@@ -42,7 +42,7 @@ function deblockConodeList() {
 function conodeTapped(args) {
   const index = args.index;
   const conodesId = Convert.byteArrayToBase64(User.getRoster().list[index].id);
-  const conodeAndStatusPair = undefined;
+  let conodeAndStatusPair = undefined;
   User._roster.statusList.slice().forEach(object => {
     if (Convert.byteArrayToBase64(object.conode.id) === conodesId) {
       conodeAndStatusPair = object;
@@ -77,7 +77,7 @@ function addConode() {
     }
   }
 
-  return Dialogs.confirm({
+  return Dialog.confirm({
     title: "Choose a Method",
     message: "How do you want to add the conode?",
     okButtonText: "Scan QR",
