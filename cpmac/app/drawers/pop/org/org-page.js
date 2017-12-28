@@ -1,14 +1,15 @@
 const Frame = require("ui/frame");
 const Dialog = require("ui/dialogs");
-const FilesPath = require("~/shared/res/files/files-path");
-const FileIO = require("~/shared/lib/file-io/file-io");
-const Misc = require("~/shared/lib/dedis-js/src/misc");
-const DedisJsNet = require("~/shared/lib/dedis-js/src/net");
-const CothorityMessages = require("~/shared/lib/cothority-protobuf/build/cothority-messages");
-const CothorityDecodeTypes = require("~/shared/res/cothority-decode-types/cothority-decode-types");
-const CothorityPath = require("~/shared/res/cothority-path/cothority-path");
+const ObservableModule = require("data/observable");
+const Convert = require("../../../shared/lib/dedjs/Convert");
 
-const OrgViewModel = require("./org-view-model");
+const Org = require("../../../shared/lib/dedjs/object/pop/org/Org").get;
+
+const viewModel = ObservableModule.fromObject({
+  linkedConode: Org.getLinkedConodeModule(),
+  hash: Org.getPopDescHashModule(),
+  toBase64: Convert.byteArrayToBase64
+});
 
 function onLoaded(args) {
   if (args.isBackNavigation) {
@@ -16,8 +17,45 @@ function onLoaded(args) {
   }
 
   const page = args.object;
-  page.bindingContext = new OrgViewModel();
+  page.bindingContext = viewModel;
 }
+
+function linkToConode() {
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /**
  * Function called when the organizer wants to enter his config/description of the PoP Party.
@@ -174,7 +212,8 @@ function fetchButtonTapped() {
     });
 }
 
-exports.onLoaded = onLoaded;
-exports.configButtonTapped = configButtonTapped;
-exports.registerButtonTapped = registerButtonTapped;
-exports.fetchButtonTapped = fetchButtonTapped;
+module.exports.onLoaded = onLoaded;
+module.exports.configButtonTapped = configButtonTapped;
+module.exports.registerButtonTapped = registerButtonTapped;
+module.exports.fetchButtonTapped = fetchButtonTapped;
+module.exports.linkToConode = linkToConode;

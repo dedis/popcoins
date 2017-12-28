@@ -582,7 +582,7 @@ class Org {
         } else if (typeof response === "string") {
           return Promise.resolve(response);
         } else {
-          return Promise.reject("response if neither ArrayBuffer nor string");
+          return Promise.reject("response is neither ArrayBuffer nor string");
         }
       })
       .catch(error => {
