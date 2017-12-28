@@ -3,6 +3,7 @@ const Dialog = require("ui/dialogs");
 const Helper = require("../../shared/lib/dedjs/Helper");
 const Convert = require("../../shared/lib/dedjs/Convert");
 const ObjectType = require("../../shared/lib/dedjs/ObjectType");
+const CothorityMessages = require("../../shared/lib/dedjs/protobuf/build/cothority-messages");
 const ScanToReturn = require("../../shared/lib/scan-to-return/scan-to-return");
 const User = require("../../shared/lib/dedjs/object/user/User").get;
 
@@ -117,6 +118,38 @@ function addConode() {
     });
 }
 
+function deleteConode(args) {
+  // We do not get the index of the item swiped/clicked...
+  const conode = args.object.bindingContext;
+
+  return User.substractRoster(CothorityMessages.createRoster(undefined, [conode], conode.public))
+    .then(() => {
+      const listView = Frame.topmost().currentPage.getViewById("listView");
+      listView.notifySwipeToExecuteFinished();
+
+      return Promise.resolve();
+    })
+    .catch(error => {
+      console.log(error);
+      console.dir(error);
+      console.trace();
+
+      return Promise.reject(error);
+    });
+}
+
+function onSwipeCellStarted(args) {
+  const swipeLimits = args.data.swipeLimits;
+  const swipeView = args.object;
+
+  const deleteButton = swipeView.getViewById("button-delete");
+
+  const width = deleteButton.getMeasuredWidth();
+
+  swipeLimits.right = width;
+  swipeLimits.threshold = width / 2;
+}
+
 function onDrawerButtonTap(args) {
   const sideDrawer = Frame.topmost().getViewById("sideDrawer");
   sideDrawer.showDrawer();
@@ -124,7 +157,9 @@ function onDrawerButtonTap(args) {
 
 module.exports.onNavigatingTo = onNavigatingTo;
 module.exports.onDrawerButtonTap = onDrawerButtonTap;
+module.exports.onSwipeCellStarted = onSwipeCellStarted;
 module.exports.loadConodeList = loadConodeList;
 module.exports.deblockConodeList = deblockConodeList;
 module.exports.conodeTapped = conodeTapped;
 module.exports.addConode = addConode;
+module.exports.deleteConode = deleteConode;
