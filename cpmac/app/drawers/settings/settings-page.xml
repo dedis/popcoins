@@ -2,6 +2,7 @@
         navigatingTo="onNavigatingTo"
         xmlns:nsDrawer="nativescript-pro-ui/sidedrawer"
         xmlns:myDrawer="shared/my-drawer"
+        xmlns:user="drawers/settings/user"
         xmlns:pop="drawers/settings/pop"
         xmlns:cisc="drawers/settings/cisc"
         xmlns="http://www.nativescript.org/tns.xsd">
@@ -65,17 +66,27 @@
             <TabView class="page-content" selectedIndex="0" selectedTabTextColor="black">
                 <TabView.items>
 
+                    <!--
                     <TabViewItem title="POP">
                         <TabViewItem.view>
                             <pop:pop-page/>
                         </TabViewItem.view>
                     </TabViewItem>
+                    -->
 
+                    <TabViewItem title="USER">
+                        <TabViewItem.view>
+                            <user:user-page/>
+                        </TabViewItem.view>
+                    </TabViewItem>
+
+                    <!--
                     <TabViewItem title="CISC">
                         <TabViewItem.view>
                             <cisc:cisc-page/>
                         </TabViewItem.view>
                     </TabViewItem>
+                    -->
 
                 </TabView.items>
             </TabView>

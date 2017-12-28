@@ -33,7 +33,8 @@ class User {
     this._keyPair = ObservableModule.fromObject({
       public: new Uint8Array(),
       private: new Uint8Array(),
-      publicComplete: new Uint8Array()
+      publicComplete: new Uint8Array(),
+      toBase64: Convert.byteArrayToBase64
     });
     this._roster = ObservableModule.fromObject({
       isLoading: false,

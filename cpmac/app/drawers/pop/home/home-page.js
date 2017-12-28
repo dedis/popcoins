@@ -18,8 +18,8 @@ function onLoaded(args) {
 
   loadViews(page);
   if (textViewSignMessage === undefined || textFieldSignContext === undefined || textViewVerifyMessage === undefined ||
-      textFieldVerifyContext === undefined || textFieldVerifySignature === undefined ||
-      textFieldVerifyTag === undefined) {
+    textFieldVerifyContext === undefined || textFieldVerifySignature === undefined ||
+    textFieldVerifyTag === undefined) {
     throw new Error("one of the fields is undefined, but it shouldn't");
   }
 
@@ -55,10 +55,10 @@ function signButtonTapped() {
     return Promise.resolve();
   } else {
     return Dialog.alert({
-                          title: "Missing Information",
-                          message: "Please provide a message and a context to be signed.",
-                          okButtonText: "Ok"
-                        });
+      title: "Missing Information",
+      message: "Please provide a message and a context to be signed.",
+      okButtonText: "Ok"
+    });
   }
 }
 
@@ -77,10 +77,10 @@ function verifyButtonTapped() {
     return Promise.resolve();
   } else {
     return Dialog.alert({
-                          title: "Missing Information",
-                          message: "Please provide a message, a context, a signature and a tag to be verified.",
-                          okButtonText: "Ok"
-                        });
+      title: "Missing Information",
+      message: "Please provide a message, a context, a signature and a tag to be verified.",
+      okButtonText: "Ok"
+    });
   }
 }
 
