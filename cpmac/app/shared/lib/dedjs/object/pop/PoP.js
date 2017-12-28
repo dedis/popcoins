@@ -340,6 +340,9 @@ class PoP {
    * @returns {Promise} - a promise that gets resolved once the PoP-Token has been generated and saved permanently
    */
   generatePopTokenByIndex(index) {
+    if (!User.isKeyPairSet()) {
+      throw new Error("user should have a key pair before generating a pop token");
+    }
     if (typeof index !== "number") {
       throw new Error("index must be of type number");
     }

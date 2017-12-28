@@ -22,7 +22,14 @@ class CothorityMessages extends CothorityProtobuf {
       throw new Error("messageType must be of type string");
     }
 
-    return this.decodeMessage(messageType, Uint8Array.from(response.array()));
+    let toDecode = undefined;
+    if (typeof response.array === "function") {
+      toDecode = Uint8Array.from(response.array());
+    } else {
+      toDecode = Uint8Array.from(response);
+    }
+
+    return this.decodeMessage(messageType, toDecode);
   }
 
   /**

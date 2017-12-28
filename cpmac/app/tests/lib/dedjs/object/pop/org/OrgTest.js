@@ -1143,7 +1143,7 @@ describe("Org", function () {
     });
 
     /*
-    it("should register attendees and save final statement if it is the last registration", function () {
+    it("should correctly fetch the final statement", function () {
       return Org.setLinkedConode(SERVER_IDENTITY, false)
         .then(() => {
           return Org.fetchFinalStatement(POP_DESC_HASH_BYTE_ARRAY);
