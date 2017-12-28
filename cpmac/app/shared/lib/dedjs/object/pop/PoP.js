@@ -183,7 +183,7 @@ class PoP {
 
     const oldFinalStatements = this.getFinalStatements().slice();
 
-    this.getFinalStatements().push(finalStatement);
+    this.getFinalStatements().unshift(finalStatement);
 
     const newFinalStatements = this.getFinalStatements().slice();
 
@@ -231,7 +231,7 @@ class PoP {
     const oldPopToken = this.getPopToken().slice();
 
     popToken.toBase64 = Convert.byteArrayToBase64;
-    this.getPopToken().push(popToken);
+    this.getPopToken().unshift(popToken);
 
     const newPopToken = this.getPopToken().slice();
 

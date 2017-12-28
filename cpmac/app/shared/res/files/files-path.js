@@ -16,7 +16,7 @@ const POP_TOKEN = "shared/res/files/pop/token.json";
 
 const POP_ORG_CONODE = "shared/res/files/pop/org/conode.json";
 const POP_ORG_DESC = "shared/res/files/pop/org/description.json";
-const POP_ORG_DESC_HASH = "shared/res/files/pop/org/description.hash";
+const POP_ORG_DESC_HASH = "shared/res/files/pop/org/hash.json";
 const POP_ORG_ATTENDEES = "shared/res/files/pop/org/attendees.json";
 
 /**

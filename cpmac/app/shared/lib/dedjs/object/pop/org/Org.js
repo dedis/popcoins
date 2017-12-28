@@ -232,7 +232,7 @@ class Org {
 
     this.emptyPopDescRosterList();
     popDesc.roster.list.forEach(server => {
-      popDescModule.roster.list.push(server);
+      popDescModule.roster.list.unshift(server);
     });
 
     popDescModule.roster.aggregate = Uint8Array.from(popDesc.roster.aggregate);
@@ -300,7 +300,7 @@ class Org {
 
     this.emptyRegisteredAttsArray();
     array.forEach(publicKey => {
-      this.getRegisteredAtts().push(publicKey);
+      this.getRegisteredAtts().unshift(publicKey);
     });
 
     const newRegisteredAtts = this.getRegisteredAtts().slice();

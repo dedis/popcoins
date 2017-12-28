@@ -7,10 +7,11 @@
         <Label class="action-bar-title" text="PoP"/>
     </ActionBar>
 
-    <GridLayout class="page-content" rows="auto,*,auto,*" columns="*">
+    <GridLayout class="page-content" rows="auto,*,auto,*" columns="*,auto">
 
-        <Label class="label-title" text="Final Statements" row="0"/>
-        <nsListView:RadListView items="{{ finalStatements }}" itemTap="finalStatementTapped" row="1"
+        <Label class="label-title" text="Final Statements" row="0" colSpan="2"/>
+        <Button text="Add" tap="scanFinalStatement" row="0" col="1"/>
+        <nsListView:RadListView items="{{ finalStatements }}" itemTap="finalStatementTapped" row="1" colSpan="2"
                   itemSwipeProgressStarted="onSwipeCellStartedFinalStatement"
                   swipeActions="true"
                   id="list-view-final-statements">
@@ -25,8 +26,8 @@
             </nsListView:RadListView.itemTemplate>
         </nsListView:RadListView>
 
-        <Label class="label-title" text="PoP-Token" row="2"/>
-        <nsListView:RadListView items="{{ popToken }}" itemTap="popTokenTapped" row="3"
+        <Label class="label-title" text="PoP-Token" row="2" colSpan="2"/>
+        <nsListView:RadListView items="{{ popToken }}" itemTap="popTokenTapped" row="3" colSpan="2"
                   itemSwipeProgressStarted="onSwipeCellStartedPopToken"
                   swipeActions="true"
                   id="list-view-pop-token">
