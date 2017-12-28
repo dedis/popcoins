@@ -5,7 +5,7 @@ const PoP = require("../../../shared/lib/dedjs/object/pop/PoP").get;
 const viewModel = ObservableModule.fromObject({
   finalStatements: PoP.getFinalStatements(),
   popToken: PoP.getPopToken()
-});;
+});
 
 function onLoaded(args) {
   if (args.isBackNavigation) {
@@ -14,10 +14,16 @@ function onLoaded(args) {
 
   const page = args.object;
   page.bindingContext = viewModel;
+}
 
-  PoP.getFinalStatements().push({
-    name: "MY_NAME_IS..."
-  });
+function finalStatementTapped() {
+  console.log("FINAL");
+}
+
+function popTokenTapped() {
+  console.log("TOKEN");
 }
 
 module.exports.onLoaded = onLoaded;
+module.exports.finalStatementTapped = finalStatementTapped;
+module.exports.popTokenTapped = popTokenTapped;
