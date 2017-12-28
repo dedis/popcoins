@@ -57,11 +57,17 @@ function generateKeyPair() {
         });
       })
       .catch(() => {
+        console.log(error);
+        console.dir(error);
+        console.trace();
+
         return Dialog.alert({
           title: "Key Pair Generation Error",
           message: "An unexpected error occurred. Please try again.",
           okButtonText: "Ok"
         });
+
+        return Promise.reject(error);
       });
   }
 
@@ -106,6 +112,43 @@ function displayQrOfPublicKey() {
   }
 }
 
+function resetUser() {
+  return Dialog.confirm({
+    title: "ALERT",
+    message: "You are about to completely reset the user, this action can NOT be undone! Please confirm.",
+    okButtonText: "Reset",
+    cancelButtonText: "Cancel"
+  })
+    .then(result => {
+      if (result) {
+        return User.reset()
+          .then(() => {
+            return Dialog.alert({
+              title: "User Has Been Reset",
+              message: "Everything belonging to the user has been completely reset.",
+              okButtonText: "Ok"
+            });
+          });
+      }
+
+      return Promise.resolve();
+    })
+    .catch(() => {
+      console.log(error);
+      console.dir(error);
+      console.trace();
+
+      return Dialog.alert({
+        title: "Error",
+        message: "An unexpected error occurred. Please try again.",
+        okButtonText: "Ok"
+      });
+
+      return Promise.reject(error);
+    });
+}
+
 module.exports.onLoaded = onLoaded;
 module.exports.generateKeyPair = generateKeyPair;
 module.exports.displayQrOfPublicKey = displayQrOfPublicKey;
+module.exports.resetUser = resetUser;

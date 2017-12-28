@@ -11,19 +11,19 @@ const KEY_PAIR = "shared/res/files/user/keypair.json";
 /**
  * PoP Files
  */
-const POP_FINAL_STATEMENTS = "shared/res/files/user/pop/final_statements.json";
-const POP_TOKEN = "shared/res/files/user/pop/token.json";
+const POP_FINAL_STATEMENTS = "shared/res/files/pop/final_statements.json";
+const POP_TOKEN = "shared/res/files/pop/token.json";
 
-const POP_ORG_CONODE = "shared/res/files/user/pop/org/conode.json";
-const POP_ORG_DESC = "shared/res/files/user/pop/org/description.json";
-const POP_ORG_DESC_HASH = "shared/res/files/user/pop/org/description.hash";
-const POP_ORG_ATTENDEES = "shared/res/files/user/pop/org/attendees.json";
+const POP_ORG_CONODE = "shared/res/files/pop/org/conode.json";
+const POP_ORG_DESC = "shared/res/files/pop/org/description.json";
+const POP_ORG_DESC_HASH = "shared/res/files/pop/org/description.hash";
+const POP_ORG_ATTENDEES = "shared/res/files/pop/org/attendees.json";
 
 /**
  * CISC Files
  */
-const CISC_IDENTITY_LINK = "shared/res/files/user/cisc/identity_link.txt";
-const CISC_NAME = "shared/res/files/user/cisc/name.txt";
+const CISC_IDENTITY_LINK = "shared/res/files/cisc/identity_link.txt";
+const CISC_NAME = "shared/res/files/cisc/name.txt";
 
 module.exports.ROSTER = ROSTER;
 module.exports.KEY_PAIR = KEY_PAIR;

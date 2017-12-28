@@ -63,16 +63,14 @@
         -->
         <nsDrawer:RadSideDrawer.mainContent>
 
-            <TabView class="page-content" selectedIndex="0" selectedTabTextColor="black">
+            <TabView class="page-content" selectedIndex="1" selectedTabTextColor="black">
                 <TabView.items>
 
-                    <!--
                     <TabViewItem title="POP">
                         <TabViewItem.view>
                             <pop:pop-page/>
                         </TabViewItem.view>
                     </TabViewItem>
-                    -->
 
                     <TabViewItem title="USER">
                         <TabViewItem.view>
