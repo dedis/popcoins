@@ -1,0 +1,38 @@
+<Page
+        class="page"
+        loaded="onLoaded"
+        xmlns:nsListView="nativescript-pro-ui/listview">
+
+    <ActionBar class="action-bar">
+        <Label class="action-bar-title" text="Home"/>
+    </ActionBar>
+
+    <GridLayout class="page-content" rows="auto,*,auto,*" columns="*">
+        <Label class="label-title" text="Final Statements" row="0"/>
+        <nsListView:RadListView items="{{ finalStatements }}" itemTap="finalStatementTapped" row="1"
+                  itemSwipeProgressStarted="onSwipeCellStarted"
+                  swipeActions="true"
+                  id="list-view-final-statements">
+
+            <nsListView:RadListView.itemSwipeTemplate>
+                <GridLayout rows="*" columns="*,auto">
+                    <StackLayout orientation="horizontal" col="0">
+                    </StackLayout>
+                    <StackLayout orientation="horizontal" col="1">
+                        <Button id="button-delete" text="Delete" tap="deletefinalStatement" backgroundColor="red"/>
+                        <Button id="button-pop-tokenify" text="PoP-Tokenify" tap="popTokenify" backgroundColor="green"/>
+                    </StackLayout>
+                </GridLayout>
+            </nsListView:RadListView.itemSwipeTemplate>
+
+            <nsListView:RadListView.itemTemplate>
+                <GridLayout id="grid-layout-final-statement" rows="*" columns="*" backgroundColor="white">
+                    <Label text="{{ name }}" row="0" textWrap="true"/>
+                </GridLayout>
+            </nsListView:RadListView.itemTemplate>
+        </nsListView:RadListView>
+
+        <Label class="label-title" text="PoP-Token" row="2"/>
+    </GridLayout>
+
+</Page>

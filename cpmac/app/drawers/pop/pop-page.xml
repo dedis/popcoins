@@ -3,8 +3,7 @@
         navigatingTo="onNavigatingTo"
         xmlns:nsDrawer="nativescript-pro-ui/sidedrawer"
         xmlns:myDrawer="shared/my-drawer"
-        xmlns:att="drawers/pop/att"
-        xmlns:home="drawers/pop/home"
+        xmlns:pop="drawers/pop/pop"
         xmlns:org="drawers/pop/org"
         xmlns="http://www.nativescript.org/tns.xsd">
 
@@ -64,26 +63,22 @@
         -->
         <nsDrawer:RadSideDrawer.mainContent>
 
-            <TabView class="page-content" selectedIndex="1" selectedTabTextColor="black">
+            <TabView class="page-content" selectedIndex="0" selectedTabTextColor="black">
                 <TabView.items>
 
-                    <TabViewItem title="ATT">
+                    <TabViewItem title="POP">
                         <TabViewItem.view>
-                            <att:att-page/>
+                            <pop:pop-page/>
                         </TabViewItem.view>
                     </TabViewItem>
 
-                    <TabViewItem title="HOME">
-                        <TabViewItem.view>
-                            <home:home-page/>
-                        </TabViewItem.view>
-                    </TabViewItem>
-
+                    <!--
                     <TabViewItem title="ORG">
                         <TabViewItem.view>
                             <org:org-page/>
                         </TabViewItem.view>
                     </TabViewItem>
+                    -->
 
                 </TabView.items>
             </TabView>
