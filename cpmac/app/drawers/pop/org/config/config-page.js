@@ -1,34 +1,28 @@
 const Dialog = require("ui/dialogs");
-const Misc = require("~/shared/lib/dedis-js/src/misc");
-const DedisJsNet = require("~/shared/lib/dedis-js/src/net");
-const CothorityMessages = require("~/shared/lib/cothority-protobuf/build/cothority-messages");
-const CothorityDecodeTypes = require("~/shared/res/cothority-decode-types/cothority-decode-types");
-const CothorityPath = require("~/shared/res/cothority-path/cothority-path");
-const FilesPath = require("~/shared/res/files/files-path");
-const FileIO = require("~/shared/lib/file-io/file-io");
-const SwipeToDelete = require("~/shared/lib/ios-swipe-delete/ios-swipe-delete");
+const Frame = require("ui/frame");
 const BCScanner = require("nativescript-barcodescanner").BarcodeScanner;
 const ModalPicker = require("nativescript-modal-datetimepicker").ModalDatetimepicker;
-const HASH = require("hash.js");
-const Crypto = require("~/shared/lib/dedis-js/src/crypto");
+const ObservableModule = require("data/observable");
+const Helper = require("../../../../shared/lib/dedjs/Helper");
+const Convert = require("../../../../shared/lib/dedjs/Convert");
+const ObjectType = require("../../../../shared/lib/dedjs/ObjectType");
+const ScanToReturn = require("../../../../shared/lib/scan-to-return/scan-to-return");
+
+const Org = require("../../../../shared/lib/dedjs/object/pop/org/Org").get;
+const User = require("../../../../shared/lib/dedjs/object/user/User").get;
+
+const viewModel = Org.getPopDescModule();
 
 const BarCodeScanner = new BCScanner();
-
-const ConfigViewModel = require("./config-view-model");
-
 const DateTimePicker = new ModalPicker();
 
 let textFieldName = undefined;
 let labelDate = undefined;
 let labelTime = undefined;
 let textFieldLocation = undefined;
-
 let chosenDateTime = undefined;
 
 let pageObject = undefined;
-
-const configViewModel = new ConfigViewModel();
-const myPartyConodes = configViewModel.partyConodes;
 
 function onLoaded(args) {
   if (args.isBackNavigation) {
@@ -37,16 +31,14 @@ function onLoaded(args) {
 
   const page = args.object;
   pageObject = page.page;
+  page.bindingContext = viewModel;
 
   loadViews(page);
-  if (textFieldName === undefined || labelDate === undefined || labelTime === undefined ||
-    textFieldLocation === undefined) {
+  if (textFieldName === undefined || labelDate === undefined || labelTime === undefined || textFieldLocation === undefined) {
     throw new Error("a field is undefined, but it shouldn't");
   }
 
-  page.bindingContext = configViewModel;
-
-  setUp();
+  setUpDate();
 }
 
 /**
@@ -59,81 +51,63 @@ function loadViews(page) {
   labelTime = page.getViewById("label-time");
   textFieldLocation = page.getViewById("text-field-location");
 
-  if (page.ios) {
-    let listView = page.getViewById("list-view-conodes");
-
-    SwipeToDelete.enable(listView, function (index) {
-      return myPartyConodes.deleteByIndex(index);
-    });
-  }
-
   textFieldName.on("textChange", onNameChangeHandler);
   textFieldLocation.on("textChange", onLocationChangeHandler);
 }
 
 function onNameChangeHandler() {
-  return FileIO.writeStringTo(FilesPath.POP_PARTY_NAME, textFieldName.text);
+  return Org.setPopDescName(textFieldName.text)
+    .catch(error => {
+      console.log(error);
+      console.dir(error);
+      console.trace();
+
+      Dialog.alert({
+        title: "Error",
+        message: "An unexpected error occurred during the save process.",
+        okButtonText: "Ok"
+      });
+
+      return Promise.reject(error);
+    });
 }
 
 function onLocationChangeHandler() {
-  return FileIO.writeStringTo(FilesPath.POP_PARTY_LOCATION, textFieldLocation.text);
-}
-
-function setUp() {
-  setUpNameLocation();
-  setUpDate();
-  loadPartyConodes();
-}
-
-function setUpNameLocation() {
-  return FileIO.getStringOf(FilesPath.POP_PARTY_NAME)
-    .then(partyName => {
-      textFieldName.text = partyName;
-
-      return FileIO.getStringOf(FilesPath.POP_PARTY_LOCATION);
-    })
-    .then(partyLocation => {
-      textFieldLocation.text = partyLocation;
-
-      return Promise.resolve();
-    })
+  return Org.setPopDescLocation(textFieldLocation.text)
     .catch(error => {
       console.log(error);
-      return Dialog.alert({
+      console.dir(error);
+      console.trace();
+
+      Dialog.alert({
         title: "Error",
-        message: "An unexpected error occurred during the load process of your party" +
-          " configuration.",
+        message: "An unexpected error occurred during the save process.",
         okButtonText: "Ok"
       });
+
+      return Promise.reject(error);
     });
 }
 
 function setUpDate() {
-  return FileIO.getStringOf(FilesPath.POP_PARTY_DATETIME)
-    .then(dateTimeString => {
-      if (dateTimeString === "") {
-        chosenDateTime = new Date(Date.now());
-        chosenDateTime.setMilliseconds(0);
-        chosenDateTime.setSeconds(0);
-      } else {
-        chosenDateTime = new Date(Date.parse(dateTimeString));
-      }
+  const dateTimeString = Org.getPopDesc().dateTime;
+  if (dateTimeString === "") {
+    chosenDateTime = new Date(Date.now());
+    chosenDateTime.setMilliseconds(0);
+    chosenDateTime.setSeconds(0);
+  } else {
+    chosenDateTime = new Date(Date.parse(dateTimeString));
+  }
 
-      labelDate.text = chosenDateTime.toDateString();
-      labelTime.text = chosenDateTime.toTimeString();
-    });
-}
-
-function loadPartyConodes() {
-  myPartyConodes.clear();
-  myPartyConodes.load();
+  labelDate.text = chosenDateTime.toDateString();
+  labelTime.text = chosenDateTime.toTimeString();
 }
 
 function setDate() {
   return DateTimePicker.pickDate({
-    title: "Pick a Date for you PoP Party"
+    title: "Pick a Date for you PoP-Party"
   })
-    .then((date) => {
+    .then(date => {
       const newDate = new Date(date.year, date.month - 1, date.day, 0, 0, 0, 0);
 
       if (newDate.toDateString() !== "Invalid Date") {
@@ -143,27 +117,31 @@ function setDate() {
 
         labelDate.text = chosenDateTime.toDateString();
 
-        return FileIO.writeStringTo(FilesPath.POP_PARTY_DATETIME, chosenDateTime.toUTCString());
+        return Org.setPopDescDateTime(chosenDateTime.toUTCString());
       }
 
       return Promise.resolve();
     })
     .catch(error => {
       console.log(error);
-      return Dialog.alert({
+      console.dir(error);
+      console.trace();
+
+      Dialog.alert({
         title: "Error",
-        message: "An unexpected error occurred during the save process of" +
-          " your chosen date.",
+        message: "An unexpected error occurred during the save process.",
         okButtonText: "Ok"
       });
+
+      return Promise.reject(error);
     });
 }
 
 function setTime() {
   return DateTimePicker.pickTime({
-    title: "Pick a Time for you PoP Party"
+    title: "Pick a Time for you PoP-Party"
   })
-    .then((time) => {
+    .then(time => {
       const newTime = new Date(0, 0, 0, time.hour, time.minute, 0, 0);
 
       if (newTime.toDateString() !== "Invalid Date") {
@@ -172,19 +150,23 @@ function setTime() {
 
         labelTime.text = chosenDateTime.toTimeString();
 
-        return FileIO.writeStringTo(FilesPath.POP_PARTY_DATETIME, chosenDateTime.toUTCString());
+        return Org.setPopDescDateTime(chosenDateTime.toUTCString());
       }
 
       return Promise.resolve();
     })
     .catch(error => {
       console.log(error);
-      return Dialog.alert({
+      console.dir(error);
+      console.trace();
+
+      Dialog.alert({
         title: "Error",
-        message: "An unexpected error occurred during the save process of" +
-          " your chosen time.",
+        message: "An unexpected error occurred during the save process.",
         okButtonText: "Ok"
       });
+
+      return Promise.reject(error);
     });
 }
 
@@ -192,96 +174,135 @@ function setTime() {
  * Changes the frame to be able to add a conode manually.
  */
 function addManual() {
-  function addManualCallBack(conode) {
-    if (conode !== undefined) {
-      myPartyConodes.addConode(conode);
+  function addManualCallBack(server) {
+    if (server !== undefined && !Helper.isOfType(server, ObjectType.SERVER_IDENTITY)) {
+      throw new Error("server must be an instance of ServerIdentity or undefined to be skipped");
+    }
+
+    if (server !== undefined) {
+      return Org.addPopDescConode(server)
+        .catch(error => {
+          console.log(error);
+          console.dir(error);
+          console.trace();
+
+          Dialog.alert({
+            title: "Error",
+            message: "An error occured, please try again.",
+            okButtonText: "Ok"
+          });
+
+          return Promise.reject(error);
+        });
     }
   }
 
-  pageObject.showModal("drawers/pop/org/config/add-manual/add-manual-page", undefined, addManualCallBack, true);
+  return Dialog.confirm({
+    title: "Conode",
+    message: "What conode do you want to add?",
+    okButtonText: "Another",
+    cancelButtonText: "Cancel",
+    neutralButtonText: "My Own"
+  })
+    .then(result => {
+      if (result) {
+        // Another
+        pageObject.showModal("shared/pages/add-conode-manual/add-conode-manual", undefined, addManualCallBack, true);
+        return Promise.resolve();
+      } else if (result === undefined) {
+        // My Own
+        if (!Org.isLinkedConodeSet()) {
+          return Dialog.alert({
+            title: "Not Linked to Conode",
+            message: "Please link to a conode first.",
+            okButtonText: "Ok"
+          });
+        }
+
+        return Org.addPopDescConode(Org.getLinkedConode());
+      } else {
+        // Cancel
+        return Promise.resolve();
+      }
+    })
+    .catch(error => {
+      console.log(error);
+      console.dir(error);
+      console.trace();
+
+      Dialog.alert({
+        title: "Error",
+        message: "An error occured, please try again.",
+        okButtonText: "Ok"
+      });
+
+      return Promise.reject(error);
+    });
 }
 
 function addScan() {
-  return BarCodeScanner.available().then(function (available) {
-    if (available) {
-      return availableFunction();
-    } else {
-      return notAvailableFunction();
-    }
+  return ScanToReturn.scan()
+    .then(string => {
+      const conode = Convert.parseJsonServerIdentity(string);
+
+      return Org.addPopDescConode(conode);
+    })
+    .catch(error => {
+      console.log(error);
+      console.dir(error);
+      console.trace();
+
+      Dialog.alert({
+        title: "Error",
+        message: "An error occured, please try again.",
+        okButtonText: "Ok"
+      });
+
+      return Promise.reject(error);
+    });
+}
+
+function deleteConode(args) {
+  // We do not get the index of the item swiped/clicked...
+  const conodeId = Convert.byteArrayToBase64(args.object.bindingContext.id);
+  const conodesList = Org.getPopDesc().roster.list.map(server => {
+    return Convert.byteArrayToBase64(server.id);
   });
 
-  /**
-   * Function that gets executed when there is a camera available on the users phone.
-   */
-  function availableFunction() {
-    /**
-     * Called every time a code was scanned.
-     * @param scanResult - the result of the scan
-     * @returns {*|Promise.<any>}
-     */
-    const continuousCallback = function (scanResult) {
-      return myPartyConodes.addConodeByTomlString(scanResult.text)
-        .then(() => {
-          return BarCodeScanner.stop();
-        })
-        .catch(() => {
-          return BarCodeScanner.stop()
-            .then(() => {
-              return Dialog.alert({
-                title: "Error",
-                message: "This conode has not been added to the" +
-                  "list. It may be duplicate or does not" +
-                  " have the right format.",
-                okButtonText: "Ok"
-              });
-            });
-        });
-    };
+  const index = conodesList.indexOf(conodeId);
 
-    /**
-     * Called when the scan session terminates.
-     */
-    const closeCallback = function () {
-      // Unused
-    };
+  return Org.removePopDescConodeByIndex(index)
+    .then(() => {
+      const listView = Frame.topmost().currentPage.getViewById("list-view-conodes");
+      listView.notifySwipeToExecuteFinished();
 
-    return BarCodeScanner.scan({
-      message: "Scan the conode of the organizer.",
-      showFlipCameraButton: true,
-      showTorchButton: true,
-      resultDisplayDuration: 1000,
-      openSettingsIfPermissionWasPreviouslyDenied: true,
-      beepOnScan: true,
-      continuousScanCallback: continuousCallback,
-      closeCallback: closeCallback
+      return Promise.resolve();
     })
-      .then(function () {
-        // Unused
-      }, function (error) {
-        // This error callback gets called even if there is no error. It gets called when no scan
-        // has been made.
-        /*
-         Dialog.alert({
-         title: "Please try again!",
-         message: "An error occurred.",
-         okButtonText: "Ok"
-         });
-         */
+    .catch(error => {
+      console.log(error);
+      console.dir(error);
+      console.trace();
 
-        console.dir(error);
+      Dialog.alert({
+        title: "Error",
+        message: "An error occured, please try again.",
+        okButtonText: "Ok"
       });
-  }
 
-  /**
-   * Function that gets executed when there is no camera available on the users phone.
-   */
-  function notAvailableFunction() {
-    return Dialog.alert({
-      title: "Where is your camera?",
-      message: "There is no camera available on your phone.",
-      okButtonText: "Ok"
+      return Promise.reject(error);
     });
-  }
+}
+
+function onSwipeCellStarted(args) {
+  const swipeLimits = args.data.swipeLimits;
+  const swipeView = args.object;
+
+  const deleteButton = swipeView.getViewById("button-delete");
+
+  const width = deleteButton.getMeasuredWidth();
+
+  swipeLimits.right = width;
+  swipeLimits.threshold = width / 2;
 }
 
 /**
@@ -289,116 +310,14 @@ function addScan() {
  * @returns {Promise.<*[]>}
  */
 function hashAndSave() {
-  const name = textFieldName.text;
-  const dateTime = chosenDateTime.toUTCString();
-  const location = textFieldLocation.text;
-  let aggregateKey = undefined;
-
-  try {
-    aggregateKey = Crypto.aggregatePublicKeys(myPartyConodes.map(obj => {
-      return Crypto.unmarshal(Misc.hexToUint8Array(Base64.decode(obj.conode.Public, "hex")));
-    }));
-  } catch (error) {
-    console.log(error);
-  }
-
-  /**
-   * Hashes the description and stores it permanently.
-   * @returns {*|Promise.<any>}
-   */
-  function hashAndStore() {
-    const descriptionHashHex = HASH.sha256()
-      .update(name)
-      .update(dateTime)
-      .update(location)
-      .update(aggregateKey)
-      .digest("hex");
-    const descriptionHash = Base64.encode(descriptionHashHex, "hex");
-
-    return FileIO.getStringOf(FilesPath.POP_PARTY_CONODES)
-      .then(tomlString => {
-        return DedisJsNet.parseCothorityRoster(tomlString).servers;
-      })
-      .then(servers => {
-        const serverIdentities = servers.map(conode => {
-          const public = Misc.hexToUint8Array(Base64.decode(conode.Public, "hex"));
-          return CothorityMessages.createServerIdentity(public, conode.Id, conode.Address, conode.Description);
-        });
-
-        const cothoritySocket = new DedisJsNet.CothoritySocket();
-        const roster = CothorityMessages.createRoster(serverIdentities, aggregateKey);
-        let signature = undefined;
-
-        return FileIO.getStringOf(FilesPath.PRIVATE_KEY)
-          .then(privateKey => {
-            const staticKeyPair = Crypto.getKeyPairFromPrivate(privateKey);
-            signature = Crypto.schnorrSign(Crypto.toRed(staticKeyPair.getPrivate()), Misc.hexToUint8Array(descriptionHashHex));
-
-            return FileIO.getStringOf(FilesPath.POP_LINKED_CONODE);
-          })
-          .then(toml => {
-            return DedisJsNet.parseCothorityRoster(toml).servers[0];
-          })
-          .then(conode => {
-            const storeConfigMessage = CothorityMessages.createStoreConfig(name, dateTime, location, roster, signature);
-            return cothoritySocket.send(conode, CothorityPath.POP_STORE_CONFIG, storeConfigMessage, CothorityDecodeTypes.STORE_CONFIG_REPLY);
-          });
-      })
-      .then(response => {
-        if (Base64.encode(Misc.uint8ArrayToHex(response.id), "hex") === descriptionHash) {
-          return FileIO.writeStringTo(FilesPath.POP_DESC_HASH, descriptionHash);
-        } else {
-          return Promise.reject();
-        }
-      })
-      .then(() => {
-        return Dialog.alert({
-          title: "Successfully Hashed",
-          message: "The hash of you description is accessible in your" +
-            " settings.\n\nHash:\n" + descriptionHash,
-          okButtonText: "Ok"
-        });
-      });
-  }
-
-  if (myPartyConodes.length > 0 && aggregateKey == undefined) {
+  if (!User.isKeyPairSet()) {
     return Dialog.alert({
-      title: "Error",
-      message: "One of the keys of your provided conodes is not valid.",
+      title: "Key Pair Missing",
+      message: "Please generate a key pair.",
       okButtonText: "Ok"
     });
-  } else if (name.length > 0 && dateTime.length > 0 && location.length > 0 && aggregateKey !== undefined && aggregateKey.length >= 3) {
-    return FileIO.getStringOf(FilesPath.POP_DESC_HASH)
-      .then(storedHash => {
-        if (storedHash.length > 0) {
-          return Dialog.confirm({
-            title: "Old Description Hash Overwriting",
-            message: "You already have a description hash stored in your settings." +
-              " Do you really want to overwrite it?",
-            okButtonText: "Yes",
-            cancelButtonText: "Cancel"
-          })
-            .then(result => {
-              if (result) {
-                return hashAndStore();
-              } else {
-                return Promise.resolve();
-              }
-            });
-        } else {
-          return hashAndStore();
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-        return Dialog.alert({
-          title: "Error During Hashing Process",
-          message: "An unexpected error occurred during the hashing" +
-            " process. Please try again.",
-          okButtonText: "Ok"
-        });
-      });
-  } else {
+  }
+  if (!Org.isPopDescComplete()) {
     return Dialog.alert({
       title: "Missing Information",
       message: "Please provide a name, date, time, location and the list (min 3) of conodes" +
@@ -406,71 +325,63 @@ function hashAndSave() {
       okButtonText: "Ok"
     });
   }
-}
+  if (!Org.isLinkedConodeSet()) {
+    return Dialog.alert({
+      title: "Not Linked to Conode",
+      message: "Please link to a conode first.",
+      okButtonText: "Ok"
+    });
+  }
 
-function deleteByIndex(args) {
-  let indexToDelete = args.index;
-
-  return myPartyConodes.get(indexToDelete)
-    .then(conodeToDelete => {
-      const address = conodeToDelete.Address;
-      const publicKey = conodeToDelete.Public;
-      const description = conodeToDelete.Description;
-
-      return Dialog.confirm({
-        title: "Please Confirm",
-        message: "Do you really want to delete the following" +
-          " conode?\n\nAddress: " + address + "\nPublic Key: " +
-          publicKey + "\nDescription: " + description,
-        okButtonText: "Yes",
-        cancelButtonText: "No"
-      })
-        .then(function (result) {
-          if (result) {
-            return myPartyConodes.deleteByIndex(indexToDelete);
-          } else {
-            return Promise.resolve();
-          }
-        })
-        .catch(() => {
-          return Dialog.alert({
-            title: "Deletion Aborted",
-            message: "The deletion process has been aborted," +
-              "either by you or by an error.",
-            okButtonText: "Ok"
-          });
+  function registerPopDesc() {
+    return Org.registerPopDesc()
+      .then(descHash => {
+        return Dialog.alert({
+          title: "Successfully Hashed",
+          message: "The hash of you description is accessible in the organizers tab.\n\nHash:\n" + Convert.byteArrayToBase64(descHash),
+          okButtonText: "Ok"
         });
-    });
-}
+      })
+      .catch(error => {
+        console.log(error);
+        console.dir(error);
+        console.trace();
 
-function emptyList() {
-  return Dialog.confirm({
-    title: "Please Confirm",
-    message: "Do you really want to delete all the conodes?",
-    okButtonText: "Yes",
-    cancelButtonText: "No"
-  })
-    .then(function (result) {
-      if (result) {
-        return myPartyConodes.empty();
-      } else {
-        return Promise.resolve();
-      }
-    })
-    .catch(() => {
-      return Dialog.alert({
-        title: "Deletion Aborted",
-        message: "The deletion process has been aborted, either by you or by an error.",
-        okButtonText: "Ok"
+        Dialog.alert({
+          title: "Error",
+          message: "An error occured, please try again.",
+          okButtonText: "Ok"
+        });
+
+        return Promise.reject(error);
       });
-    });
+  }
+
+  const oldPopDescHash = Org.getPopDescHash();
+  if (oldPopDescHash.length > 0) {
+    return Dialog.confirm({
+      title: "Old Description Hash Overwriting",
+      message: "You already have a description hash stored. Do you really want to overwrite it?",
+      okButtonText: "Yes",
+      cancelButtonText: "Cancel"
+    })
+      .then(result => {
+        if (result) {
+          return registerPopDesc();
+        } else {
+          return Promise.resolve();
+        }
+      });
+  } else {
+    return registerPopDesc();
+  }
 }
 
-exports.onLoaded = onLoaded;
-exports.setDate = setDate;
-exports.setTime = setTime;
-exports.hashAndSave = hashAndSave;
-exports.addManual = addManual;
-exports.addScan = addScan;
-exports.deleteByIndex = deleteByIndex;
-exports.emptyList = emptyList;
+module.exports.onLoaded = onLoaded;
+module.exports.setDate = setDate;
+module.exports.setTime = setTime;
+module.exports.hashAndSave = hashAndSave;
+module.exports.addManual = addManual;
+module.exports.addScan = addScan;
+module.exports.deleteConode = deleteConode;
+module.exports.onSwipeCellStarted = onSwipeCellStarted;

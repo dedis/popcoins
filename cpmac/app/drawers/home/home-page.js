@@ -74,6 +74,19 @@ function addConode() {
       return User.addServer(server)
         .then(() => {
           return loadConodeList();
+        })
+        .catch(error => {
+          console.log(error);
+          console.dir(error);
+          console.trace();
+
+          Dialog.alert({
+            title: "Error",
+            message: "An error occured, please try again.",
+            okButtonText: "Ok"
+          });
+
+          return Promise.reject(error);
         });
     }
   }
@@ -133,6 +146,12 @@ function deleteConode(args) {
       console.log(error);
       console.dir(error);
       console.trace();
+
+      Dialog.alert({
+        title: "Error",
+        message: "An error occured, please try again.",
+        okButtonText: "Ok"
+      });
 
       return Promise.reject(error);
     });

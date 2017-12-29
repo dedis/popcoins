@@ -232,6 +232,7 @@ class Org {
 
     this.emptyPopDescRosterList();
     popDesc.roster.list.forEach(server => {
+      server.toBase64 = Convert.byteArrayToBase64;
       popDescModule.roster.list.push(server);
     });
 
@@ -507,7 +508,12 @@ class Org {
         newRoster.list.push(this.getPopDescModule().roster.list.getItem(i));
       }
     }
-    newRoster = Convert.parseJsonRoster(Convert.objectToJson(newRoster));
+
+    if (newRoster.list.length > 0) {
+      newRoster = Convert.parseJsonRoster(Convert.objectToJson(newRoster));
+    } else {
+      newRoster = EMPTY_ROSTER;
+    }
 
     const newPopDesc = this.getPopDesc();
     newPopDesc.roster = newRoster;
