@@ -6,7 +6,7 @@ function onNavigatingTo(args) {
     return;
   }
 
-  // TODO: ID is not updating in the UI
+  // TODO: ID is not updating in the UI, showModal?
 
   const page = args.object;
 }
