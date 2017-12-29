@@ -3,6 +3,7 @@ const Dialog = require("ui/dialogs");
 const ObservableModule = require("data/observable");
 const Convert = require("../../../shared/lib/dedjs/Convert");
 
+const User = require("../../../shared/lib/dedjs/object/user/User").get;
 const Org = require("../../../shared/lib/dedjs/object/pop/org/Org").get;
 
 const viewModel = ObservableModule.fromObject({
@@ -21,9 +22,65 @@ function onLoaded(args) {
 }
 
 function linkToConode() {
+  const conodes = User.getRoster().list;
+  const conodesNames = conodes.map(serverIdentity => {
+    return serverIdentity.description + " - " + Convert.byteArrayToBase64(serverIdentity.id);
+  });
+
+  let index = undefined;
+
+  return Dialog.action({
+    message: "Choose a Conode",
+    cancelButtonText: "Cancel",
+    actions: conodesNames
+  })
+    .then(result => {
+      if (result !== "Cancel") {
+        index = conodesNames.indexOf(result);
+
+        return Org.linkToConode(conodes[index], "")
+          .then(result => {
+            return Dialog.prompt({
+              title: "Requested PIN",
+              message: result,
+              okButtonText: "Link",
+              cancelButtonText: "Cancel",
+              defaultText: "",
+              inputType: Dialog.inputType.text
+            })
+          })
+          .then(result => {
+            if (result.result) {
+              return Org.linkToConode(conodes[index], result.text)
+                .then(result => {
+                  return Dialog.alert({
+                    title: "Success",
+                    message: "Your are now linked to the conode.",
+                    okButtonText: "Nice"
+                  });
+                });
+            } else {
+              return Promise.resolve();
+            }
+          });
+      } else {
+        return Promise.resolve();
+      }
+    })
+    .catch(error => {
+      console.log(error);
+      console.dir(error);
+      console.trace();
+
+      Dialog.alert({
+        title: "Error",
+        message: "An unexpected error occurred. Please try again.",
+        okButtonText: "Ok"
+      });
+
+      return Promise.reject(error);
+    });
 }
-
-
 
 
 

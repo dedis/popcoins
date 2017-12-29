@@ -574,7 +574,11 @@ class Org {
 
     return cothoritySocket.send(conode, RequestPath.POP_PIN_REQUEST, pinRequestMessage, undefined)
       .then(response => {
-        if (response instanceof ArrayBuffer) {
+        if (typeof response === "object") {
+          response = Uint8Array.from(response.array());
+        }
+
+        if (response instanceof Uint8Array) {
           return this.setLinkedConode(conode, true)
             .then(() => {
               return Promise.resolve("PIN Accepted");
@@ -582,7 +586,7 @@ class Org {
         } else if (typeof response === "string") {
           return Promise.resolve(response);
         } else {
-          return Promise.reject("response is neither ArrayBuffer nor string");
+          return Promise.reject("response is neither Uint8Array nor string");
         }
       })
       .catch(error => {
