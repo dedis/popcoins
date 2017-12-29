@@ -191,7 +191,7 @@ class User {
     this.emptyRosterList();
     roster.list.forEach((server) => {
       server.toBase64 = Convert.byteArrayToBase64;
-      this.getRosterModule().list.unshift(server);
+      this.getRosterModule().list.push(server);
     });
     this.getRosterModule().aggregate = roster.aggregate;
 
