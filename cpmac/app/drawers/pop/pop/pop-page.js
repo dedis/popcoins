@@ -10,7 +10,6 @@ const FINAL_STATEMENT_OPTION_QR = "QR";
 const FINAL_STATEMENT_OPTION_POP_TOKENIFY = "PoP-Tokenify";
 
 const POP_TOKEN_OPTION_REVOKE = "Revoke";
-const POP_TOKEN_OPTION_QR = "QR";
 
 let pageObject = undefined;
 
@@ -82,22 +81,12 @@ function popTokenTapped(args) {
   return Dialog.action({
     message: "Choose an Action",
     cancelButtonText: "Cancel",
-    actions: [POP_TOKEN_OPTION_REVOKE, POP_TOKEN_OPTION_QR]
+    actions: [POP_TOKEN_OPTION_REVOKE]
   })
     .then(result => {
       if (result === POP_TOKEN_OPTION_REVOKE) {
         // Revoke Token
         return PoP.revokePopTokenByIndex(args.index);
-      } else if (result === POP_TOKEN_OPTION_QR) {
-        // Show QR of PoP-Token
-        const popToken = Convert.parseJsonPopToken(Convert.objectToJson(PoP.getPopToken().getItem(args.index)));
-        delete popToken.private;
-
-        pageObject.showModal("shared/pages/qr-code/qr-code-page", {
-          textToShow: JSON.stringify(popToken)
-        }, function () { }, true);
-
-        return Promise.resolve();
       }
 
       return Promise.resolve();

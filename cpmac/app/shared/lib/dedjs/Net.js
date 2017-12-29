@@ -126,5 +126,37 @@ function CothoritySocket() {
   };
 }
 
+/**
+ * Constructor foa pastebin object. This can be used to upload/download plain text.
+ */
+function PasteBin() {
+  /**
+   * Gets the plain text of a paste given its ID.
+   * @param {string} id - the id of the paste
+   * @returns {Promise} - a promise that gets resolved once the plain text has been downloaded from the paste, the promise contains the plain text
+   */
+  this.get = (id, callBack, fail) => {
+    if (typeof id !== "string") {
+      throw new Error("id must be of type string");
+    }
+  }
+
+  /**
+   * Creates a new paste from the text and title given as parameter.
+   * @param {string} text - the wanted content of the paste
+   * @param {string} title - the wanted title for the paste
+   * @returns {Promise} - a promise that gets resolved once the paste has been created, the promise contains the ID of the new paste
+   */
+  this.paste = (text, title) => {
+    if (typeof text !== "string") {
+      throw new Error("text must be of type string");
+    }
+    if (typeof title !== "string") {
+      throw new Error("title must be of type string");
+    }
+  }
+}
+
 module.exports.StandardSocket = StandardSocket;
 module.exports.CothoritySocket = CothoritySocket;
+module.exports.PasteBin = PasteBin;
