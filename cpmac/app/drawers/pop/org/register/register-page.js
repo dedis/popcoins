@@ -1,12 +1,12 @@
 const Dialog = require("ui/dialogs");
-const SwipeToDelete = require("~/shared/lib/ios-swipe-delete/ios-swipe-delete");
-const BCScanner = require("nativescript-barcodescanner").BarcodeScanner;
-const RegisterViewModel = require("./register-view-model");
+const Frame = require("ui/frame");
+const Convert = require("../../../../shared/lib/dedjs/Convert");
+const ScanToReturn = require("../../../../shared/lib/scan-to-return/scan-to-return");
 
-const BarCodeScanner = new BCScanner();
+const Org = require("../../../../shared/lib/dedjs/object/pop/org/Org").get;
+const User = require("../../../../shared/lib/dedjs/object/user/User").get;
 
-const registerViewModel = new RegisterViewModel();
-const myRegisteredKeys = registerViewModel.registeredKeys;
+const viewModel = Org.getRegisteredAttsModule()
 
 function onLoaded(args) {
   if (args.isBackNavigation) {
@@ -14,26 +14,7 @@ function onLoaded(args) {
   }
 
   const page = args.object;
-
-  if (page.ios) {
-    let listView = page.getViewById("list-view-registered-keys");
-
-    SwipeToDelete.enable(listView, function (index) {
-      return myRegisteredKeys.deleteByIndex(index);
-    });
-  }
-
-  page.bindingContext = registerViewModel;
-
-  loadRegisteredKeys();
-}
-
-/**
- * Loads the registered public keys of the attendees into the list.
- */
-function loadRegisteredKeys() {
-  myRegisteredKeys.clear();
-  myRegisteredKeys.load();
+  page.bindingContext = viewModel;
 }
 
 /**
@@ -50,20 +31,36 @@ function addManual() {
   })
     .then(args => {
       if (args.result && args.text !== undefined && args.text.length > 0) {
-        return myRegisteredKeys.addKey(args.text);
+        // Add Key
+        return Org.registerAttendee(Convert.base64ToByteArray(args.text));
       } else if (args.result === undefined) {
-        return myRegisteredKeys.addMyself();
+        // Add Myself
+        if (!User.isKeyPairSet()) {
+          return Dialog.alert({
+            title: "Key Pair Missing",
+            message: "Please generate a key pair.",
+            okButtonText: "Ok"
+          });
+        }
+
+        return Org.registerAttendee(User.getKeyPair().public);
       } else {
+        // Cancel
         return Promise.resolve();
       }
     })
-    .catch(() => {
-      return Dialog.alert({
+    .catch(error => {
+      console.log(error);
+      console.dir(error);
+      console.trace();
+
+      Dialog.alert({
         title: "Error",
-        message: "This public key has not been added to the list. It may be duplicate" +
-          " or does not have the right format.",
+        message: "An error occured, please try again.",
         okButtonText: "Ok"
       });
+
+      return Promise.reject(error);
     });
 }
 
@@ -71,86 +68,68 @@ function addManual() {
  * Function that gets called when the user wants to register a public key by scanning it.
  */
 function addScan() {
-  return BarCodeScanner.available().then(function (available) {
-    if (available) {
-      return availableFunction();
-    } else {
-      return notAvailableFunction();
-    }
+  return ScanToReturn.scan()
+    .then(keyPairJson => {
+      const keyPair = Convert.parseJsonKeyPair(keyPairJson);
+
+      return Org.registerAttendee(keyPair.public);
+    })
+    .catch(error => {
+      console.log(error);
+      console.dir(error);
+      console.trace();
+
+      Dialog.alert({
+        title: "Error",
+        message: "An error occured, please try again.",
+        okButtonText: "Ok"
+      });
+
+      return Promise.reject(error);
+    });
+}
+
+function onSwipeCellStarted(args) {
+  const swipeLimits = args.data.swipeLimits;
+  const swipeView = args.object;
+
+  const deleteButton = swipeView.getViewById("button-delete");
+
+  const width = deleteButton.getMeasuredWidth();
+
+  swipeLimits.right = width;
+  swipeLimits.threshold = width / 2;
+}
+
+function deleteAttendee(args) {
+  // We do not get the index of the item swiped/clicked...
+  const attendee = Convert.byteArrayToBase64(args.object.bindingContext);
+  const attendeeList = Org.getRegisteredAtts().slice().map(attendee => {
+    return Convert.byteArrayToBase64(attendee);
   });
 
-  /**
-   * Function that gets executed when there is a camera available on the users phone.
-   */
-  function availableFunction() {
-    /**
-     * Called every time a code was scanned.
-     * @param scanResult - the result of the scan
-     * @returns {*|Promise.<any>}
-     */
-    const continuousCallback = function (scanResult) {
-      return myRegisteredKeys.addKey(scanResult.text)
-        .then(() => {
-          return BarCodeScanner.stop();
-        })
-        .catch(() => {
-          return BarCodeScanner.stop()
-            .then(() => {
-              Dialog.alert({
-                title: "Error",
-                message: "This public key has not been added to the" +
-                  "list. It may be duplicate or does not" +
-                  " have the right format.",
-                okButtonText: "Ok"
-              });
-            });
-        });
-    };
+  const index = attendeeList.indexOf(attendee);
 
-    /**
-     * Called when the scan session terminates.
-     */
-    const closeCallback = function () {
-      // Unused
-    };
+  return Org.unregisterAttendeeByIndex(index)
+    .then(() => {
+      const listView = Frame.topmost().currentPage.getViewById("list-view-registered-keys");
+      listView.notifySwipeToExecuteFinished();
 
-    return BarCodeScanner.scan({
-      message: "Scan the public keys of the attendees.",
-      showFlipCameraButton: true,
-      showTorchButton: true,
-      resultDisplayDuration: 1000,
-      openSettingsIfPermissionWasPreviouslyDenied: true,
-      beepOnScan: true,
-      continuousScanCallback: continuousCallback,
-      closeCallback: closeCallback
+      return Promise.resolve();
     })
-      .then(function () {
-        // Unused
-      }, function (error) {
-        // This error callback gets called even if there is no error. It gets called when no scan
-        // has been made.
-        /*
-         Dialog.alert({
-         title: "Please try again!",
-         message: "An error occurred.",
-         okButtonText: "Ok"
-         });
-         */
+    .catch(error => {
+      console.log(error);
+      console.dir(error);
+      console.trace();
 
-        console.dir(error);
+      Dialog.alert({
+        title: "Error",
+        message: "An error occured, please try again.",
+        okButtonText: "Ok"
       });
-  }
 
-  /**
-   * Function that gets executed when there is no camera available on the users phone.
-   */
-  function notAvailableFunction() {
-    return Dialog.alert({
-      title: "Where is your camera?",
-      message: "There is no camera available on your phone.",
-      okButtonText: "Ok"
+      return Promise.reject(error);
     });
-  }
 }
 
 /**
@@ -158,73 +137,68 @@ function addScan() {
  * @returns {Promise.<any>}
  */
 function registerKeys() {
-  return myRegisteredKeys.register();
-}
-
-/**
- * Deletes an item by the its index. This function is only used in Android, since iOS uses swipe-to-delete.
- * @param args - the item clicked
- * @returns {*|Promise.<any>}
- */
-function deleteByIndex(args) {
-  let indexToDelete = args.index;
-
-  return myRegisteredKeys.get(indexToDelete)
-    .then(keyToDelete => {
-      return Dialog.confirm({
-        title: "Please Confirm",
-        message: "Do you really want to delete the following public" +
-          "key?\n\n" + keyToDelete,
-        okButtonText: "Yes",
-        cancelButtonText: "No"
-      })
-        .then(function (result) {
-          if (result) {
-            return myRegisteredKeys.deleteByIndex(indexToDelete);
-          } else {
-            return Promise.resolve();
-          }
-        })
-        .catch(() => {
-          return Dialog.alert({
-            title: "Deletion Aborted",
-            message: "The deletion process has been aborted," +
-              "either by you or by an error.",
-            okButtonText: "Ok"
-          });
-        });
+  if (!User.isKeyPairSet()) {
+    return Dialog.alert({
+      title: "Key Pair Missing",
+      message: "Please generate a key pair.",
+      okButtonText: "Ok"
     });
-}
+  }
+  if (!Org.isPopDescComplete()) {
+    return Dialog.alert({
+      title: "No PopDesc",
+      message: "Please configure the PopDesc first.",
+      okButtonText: "Ok"
+    });
+  }
+  if (Org.getPopDescHash().length === 0) {
+    return Dialog.alert({
+      title: "No PopDesc Hash",
+      message: "Please register you PopDesc on your conode first.",
+      okButtonText: "Ok"
+    });
+  }
+  if (!Org.isLinkedConodeSet()) {
+    return Dialog.alert({
+      title: "Not Linked to Conode",
+      message: "Please link to a conode first.",
+      okButtonText: "Ok"
+    });
+  }
+  if (Org.getRegisteredAtts().length === 0) {
+    return Dialog.alert({
+      title: "No Attendee to Register",
+      message: "Please add some attendees first.",
+      okButtonText: "Ok"
+    });
+  }
 
-/**
- * Function that gets called when the user wants to delete the whole list of registered keys.
- */
-function empty() {
-  return Dialog.confirm({
-    title: "Please Confirm",
-    message: "Do you really want to delete all the registered public keys?",
-    okButtonText: "Yes",
-    cancelButtonText: "No"
-  })
-    .then(function (result) {
-      if (result) {
-        return myRegisteredKeys.empty();
-      } else {
-        return Promise.resolve();
-      }
-    })
-    .catch(() => {
+  return Org.registerAttsAndFinalizeParty()
+    .then(() => {
       return Dialog.alert({
-        title: "Deletion Aborted",
-        message: "The deletion process has been aborted, either by you or by an error.",
+        title: "Success",
+        message: "The final statement of you PoP-Party is accessible in the PoP tab.",
         okButtonText: "Ok"
       });
+    })
+    .catch(error => {
+      console.log(error);
+      console.dir(error);
+      console.trace();
+
+      Dialog.alert({
+        title: "Error",
+        message: "An error occured, please try again. - " + error,
+        okButtonText: "Ok"
+      });
+
+      return Promise.reject(error);
     });
 }
 
-exports.onLoaded = onLoaded;
-exports.addManual = addManual;
-exports.addScan = addScan;
-exports.registerKeys = registerKeys;
-exports.deleteByIndex = deleteByIndex;
-exports.empty = empty;
+module.exports.onLoaded = onLoaded;
+module.exports.addManual = addManual;
+module.exports.addScan = addScan;
+module.exports.registerKeys = registerKeys;
+module.exports.deleteAttendee = deleteAttendee;
+module.exports.onSwipeCellStarted = onSwipeCellStarted;

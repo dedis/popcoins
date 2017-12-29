@@ -82,7 +82,7 @@ function linkToConode() {
 
       Dialog.alert({
         title: "Error",
-        message: "An unexpected error occurred. Please try again.",
+        message: "An unexpected error occurred. Please try again. - " + error,
         okButtonText: "Ok"
       });
 
@@ -145,7 +145,7 @@ function fetchButtonTapped() {
 
       Dialog.alert({
         title: "Error",
-        message: "An unexpected error occurred. Please try again.",
+        message: "An unexpected error occurred. Please try again. - " + error,
         okButtonText: "Ok"
       });
 

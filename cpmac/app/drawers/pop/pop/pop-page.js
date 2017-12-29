@@ -78,7 +78,7 @@ function finalStatementTapped(args) {
 
       Dialog.alert({
         title: "Error",
-        message: "An error occured, please retry.",
+        message: "An error occured, please retry. - " + error,
         okButtonText: "Ok"
       });
 

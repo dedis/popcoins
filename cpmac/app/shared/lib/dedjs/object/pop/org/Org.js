@@ -299,8 +299,11 @@ class Org {
 
     const oldRegisteredAtts = this.getRegisteredAtts().slice();
 
+    // TODO: check for duplicates
+
     this.emptyRegisteredAttsArray();
     array.forEach(publicKey => {
+      publicKey.toBase64 = Convert.byteArrayToBase64;
       this.getRegisteredAtts().push(publicKey);
     });
 

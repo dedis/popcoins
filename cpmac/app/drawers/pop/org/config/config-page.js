@@ -1,8 +1,6 @@
 const Dialog = require("ui/dialogs");
 const Frame = require("ui/frame");
-const BCScanner = require("nativescript-barcodescanner").BarcodeScanner;
 const ModalPicker = require("nativescript-modal-datetimepicker").ModalDatetimepicker;
-const ObservableModule = require("data/observable");
 const Helper = require("../../../../shared/lib/dedjs/Helper");
 const Convert = require("../../../../shared/lib/dedjs/Convert");
 const ObjectType = require("../../../../shared/lib/dedjs/ObjectType");
@@ -13,7 +11,6 @@ const User = require("../../../../shared/lib/dedjs/object/user/User").get;
 
 const viewModel = Org.getPopDescModule();
 
-const BarCodeScanner = new BCScanner();
 const DateTimePicker = new ModalPicker();
 
 let textFieldName = undefined;
@@ -349,7 +346,7 @@ function hashAndSave() {
 
         Dialog.alert({
           title: "Error",
-          message: "An error occured, please try again.",
+          message: "An error occured, please try again. - " + error,
           okButtonText: "Ok"
         });
 
