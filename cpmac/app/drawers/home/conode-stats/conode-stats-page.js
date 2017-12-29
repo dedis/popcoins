@@ -41,7 +41,7 @@ function loadFunction(conodeStatus) {
 function displayQrOfConode() {
   pageObject.showModal("shared/pages/qr-code/qr-code-page", {
     textToShow: Convert.objectToJson(conode)
-  }, function () { }, true);
+  }, () => { }, true);
 }
 
 module.exports.onNavigatingTo = onNavigatingTo;

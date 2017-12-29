@@ -102,7 +102,7 @@ function displayQrOfPublicKey() {
 
     pageObject.showModal("shared/pages/qr-code/qr-code-page", {
       textToShow: Convert.objectToJson(keyPair)
-    }, function () { }, true);
+    }, () => { }, true);
   } else {
     return Dialog.alert({
       title: "Please Generate a Key Pair",

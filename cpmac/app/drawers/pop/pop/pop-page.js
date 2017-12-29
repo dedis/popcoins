@@ -1,6 +1,7 @@
 const ObservableModule = require("data/observable");
 const Dialog = require("ui/dialogs");
 const Convert = require("../../../shared/lib/dedjs/Convert");
+const Net = require("../../../shared/lib/dedjs/Net");
 const ScanToReturn = require("../../../shared/lib/scan-to-return/scan-to-return");
 const User = require("../../../shared/lib/dedjs/object/user/User").get;
 const PoP = require("../../../shared/lib/dedjs/object/pop/PoP").get;
@@ -51,13 +52,21 @@ function finalStatementTapped(args) {
         }
       } else if (result === FINAL_STATEMENT_OPTION_QR) {
         // Show QR of Final Statement
-        const finalStatement = PoP.getFinalStatements().getItem(args.index);
 
-        pageObject.showModal("shared/pages/qr-code/qr-code-page", {
-          textToShow: JSON.stringify(finalStatement)
-        }, function () { }, true);
+        const PasteBin = new Net.PasteBin();
+        const finalStatementJson = JSON.stringify(PoP.getFinalStatements().getItem(args.index));
 
-        return Promise.resolve();
+        return PasteBin.paste(finalStatementJson)
+          .then(id => {
+            const object = {};
+            object.id = id;
+
+            pageObject.showModal("shared/pages/qr-code/qr-code-page", {
+              textToShow: Convert.objectToJson(object)
+            }, () => { }, true);
+
+            return Promise.resolve();
+          });
       }
 
       return Promise.resolve();
@@ -108,6 +117,12 @@ function popTokenTapped(args) {
 
 function scanFinalStatement() {
   return ScanToReturn.scan()
+    .then(pasteBinIdJson => {
+      const id = Convert.jsonToObject(pasteBinIdJson).id;
+      const PasteBin = new Net.PasteBin();
+
+      return PasteBin.get(id);
+    })
     .then(finalStatementJson => {
       const finalStatement = Convert.parseJsonFinalStatement(finalStatementJson);
 
