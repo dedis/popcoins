@@ -56,7 +56,7 @@ function loadFields() {
   textView.text = textToShow;
 
   // We generate the QR code image and set it to the image container in the XML.
-  let sideLength = PlatformModule.screen.mainScreen.widthPixels / 6;
+  let sideLength = PlatformModule.screen.mainScreen.widthPixels / 4;
   const QR_CODE = QRGenerator.createBarcode({
     encode: textToShow,
     format: ZXing.QR_CODE,

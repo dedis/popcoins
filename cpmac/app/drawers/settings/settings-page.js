@@ -1,5 +1,4 @@
 const Frame = require("ui/frame");
-const ScanToClip = require("../../shared/lib/scan-to-clip/scan-to-clip");
 
 function onNavigatingTo(args) {
   const page = args.object;
@@ -10,14 +9,5 @@ function onDrawerButtonTap(args) {
   sideDrawer.showDrawer();
 }
 
-/**
- * Global button to "scan to clip" in the settings drawer.
- * @returns {Promise.<any>}
- */
-function scanToClip() {
-  return ScanToClip.scan();
-}
-
 module.exports.onNavigatingTo = onNavigatingTo;
 module.exports.onDrawerButtonTap = onDrawerButtonTap;
-module.exports.scanToClip = scanToClip;

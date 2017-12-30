@@ -281,9 +281,9 @@ function parseJsonFinalStatement(jsonString) {
   }
 
   object.attendees = object.attendees.map(base64String => {
-    return base64ToByteArray(base64String);
+    return base64ToByteArray(base64String.replace(" ", "+"));
   });
-  object.signature = base64ToByteArray(object.signature);
+  object.signature = base64ToByteArray(object.signature.replace(" ", "+"));
   object.desc = parseJsonPopDesc(objectToJson(object.desc));
 
   return CothorityMessages.createFinalStatement(object.desc, object.attendees, object.signature, object.merged);
@@ -336,23 +336,23 @@ function parseJsonRoster(jsonString) {
 
   let rosterId = roster.id;
   if (rosterId !== undefined) {
-    rosterId = base64ToByteArray(rosterId);
+    rosterId = base64ToByteArray(rosterId.replace(" ", "+"));
   }
 
-  let aggregate = (roster.aggregate === undefined) ? undefined : base64ToByteArray(roster.aggregate);
+  let aggregate = (roster.aggregate === undefined) ? undefined : base64ToByteArray(roster.aggregate.replace(" ", "+"));
 
   const points = [];
   const list = roster.list.map((server) => {
     if (aggregate === undefined) {
-      points.push(Crypto.unmarshal(base64ToByteArray(server.public)));
+      points.push(Crypto.unmarshal(base64ToByteArray(server.public.replace(" ", "+"))));
     }
 
     let serverId = server.id;
     if (serverId !== undefined) {
-      serverId = base64ToByteArray(serverId);
+      serverId = base64ToByteArray(serverId.replace(" ", "+"));
     }
 
-    return toServerIdentity(server.address, base64ToByteArray(server.public), server.description, serverId);
+    return toServerIdentity(server.address, base64ToByteArray(server.public.replace(" ", "+")), server.description, serverId);
   });
 
   if (aggregate === undefined) {
