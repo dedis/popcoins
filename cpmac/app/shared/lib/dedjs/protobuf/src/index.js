@@ -25,6 +25,8 @@ class CothorityMessages extends CothorityProtobuf {
     let toDecode = undefined;
     if (typeof response.array === "function") {
       toDecode = Uint8Array.from(response.array());
+    } else if (response instanceof ArrayBuffer) {
+      toDecode = new Uint8Array(response);
     } else {
       toDecode = Uint8Array.from(response);
     }

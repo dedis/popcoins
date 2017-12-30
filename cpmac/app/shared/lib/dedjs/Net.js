@@ -1,7 +1,7 @@
+require("nativescript-websockets");
 const Convert = require("./Convert");
 const Helper = require("./Helper");
 const ObjectType = require("./ObjectType");
-const WebSocket = require("nativescript-websockets");
 const Fetch = require("fetch");
 const CothorityMessages = require("./protobuf/build/cothority-messages");
 
@@ -24,38 +24,34 @@ function StandardSocket() {
     }
 
     return new Promise((resolve, reject) => {
-      const socket = new WebSocket(address, {
-        allowCellular: true
-      });
+      const socket = new WebSocket(address);
 
-      socket.on("open", (socket) => {
+      socket.addEventListener("open", event => {
         console.log("Socket open...");
-        socket.send(data);
+        event.target.send(data);
       });
 
-      socket.on("close", (socket, code, reason) => {
+      socket.addEventListener("close", event => {
         console.log("Socket closed...");
       });
 
-      socket.on("message", (socket, message) => {
+      socket.addEventListener("message", event => {
         console.log("Got message...");
 
-        socket.close();
-        resolve(message);
+        event.target.close();
+        resolve(event.data);
       });
 
-      socket.on("error", (socket, error) => {
+      socket.addEventListener("error", event => {
         console.log("Socket error:");
-        console.log(error);
-        console.dir(error);
+        console.log(event.error);
+        console.dir(event.error);
         console.trace();
 
-        socket.close();
-        reject(error);
+        event.target.close();
+        reject(event.error);
       });
-
-      socket.open();
-    })
+    });
   };
 }
 
@@ -85,51 +81,46 @@ function CothoritySocket() {
     return new Promise((resolve, reject) => {
       const url = Convert.tcpToWebsocket(node, path);
 
-      const socket = new WebSocket(url, {
-        allowCellular: true
-      });
-      socket.binaryType = "arraybuffer";
+      const socket = new WebSocket(url);
 
-      socket.on("open", (socket) => {
+      socket.addEventListener("open", event => {
         console.log("Socket open...");
-        socket.send(message);
+        event.target.send(message);
       });
 
-      socket.on("close", (socket, code, reason) => {
-        if (code === 4100) {
-          resolve(reason);
+      socket.addEventListener("close", event => {
+        if (event.code === 4100) {
+          resolve(event.reason);
         }
-        if (code === 4101 || code === 4102 || code === 4104) {
-          reject(reason);
+        if (event.code === 4101 || event.code === 4102 || event.code === 4104) {
+          reject(event.reason);
         }
 
         console.log("Socket closed...");
       });
 
-      socket.on("message", (socket, message) => {
+      socket.addEventListener("message", event => {
         console.log("Got message...");
 
         if (typeToDecode !== undefined) {
-          resolve(CothorityMessages.decodeResponse(typeToDecode, message));
+          resolve(CothorityMessages.decodeResponse(typeToDecode, event.data));
         } else {
-          resolve(message);
+          resolve(event.data);
         }
 
-        socket.close();
+        event.target.close();
       });
 
-      socket.on("error", (socket, error) => {
+      socket.addEventListener("error", event => {
         console.log("Socket error:");
-        console.log(error);
-        console.dir(error);
+        console.log(event.error);
+        console.dir(event.error);
         console.trace();
 
-        socket.close();
-        reject(error);
+        event.target.close();
+        reject(event.error);
       });
-
-      socket.open();
-    })
+    });
   };
 }
 
@@ -158,7 +149,7 @@ function PasteBin() {
 
         return Promise.reject(error);
       });
-  }
+  };
 
   /**
    * Creates a new paste from the text given as parameter.
@@ -196,7 +187,7 @@ function PasteBin() {
 
         return Promise.reject(error);
       });
-  }
+  };
 }
 
 module.exports.StandardSocket = StandardSocket;
