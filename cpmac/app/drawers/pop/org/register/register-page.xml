@@ -5,10 +5,6 @@
 
     <ActionBar class="action-bar">
         <Label class="action-bar-title" text="Register"/>
-
-        <ActionItem tap="empty"
-                    ios.systemIcon="16" ios.position="right"
-                    text="Empty" android.position="popup"/>
     </ActionBar>
 
     <GridLayout class="page-content" rows="auto,*,auto" columns="*,*,*">
