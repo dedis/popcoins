@@ -10,10 +10,6 @@ const CiscViewModel = require("./cisc-view-model");
 const viewModel =  new CiscViewModel();
 
 function onLoaded(args) {
-  if (args.isBackNavigation) {
-    return;
-  }
-
   const page = args.object;
   page.bindingContext = viewModel;
 }

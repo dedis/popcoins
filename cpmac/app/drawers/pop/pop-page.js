@@ -2,12 +2,6 @@ const Frame = require("ui/frame");
 const ScanToClip = require("../../shared/lib/scan-to-clip/scan-to-clip");
 
 function onNavigatingTo(args) {
-  if (args.isBackNavigation) {
-    return;
-  }
-
-  // TODO: ID is not updating in the UI, showModal?
-
   const page = args.object;
 }
 

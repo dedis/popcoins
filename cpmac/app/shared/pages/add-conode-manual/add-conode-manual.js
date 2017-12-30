@@ -14,10 +14,6 @@ function onShownModally(args) {
 }
 
 function onLoaded(args) {
-  if (args.isBackNavigation) {
-    return;
-  }
-
   const page = args.object;
 
   loadViews(page);

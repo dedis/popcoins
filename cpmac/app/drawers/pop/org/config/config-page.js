@@ -23,10 +23,6 @@ let chosenDateTime = undefined;
 let pageObject = undefined;
 
 function onLoaded(args) {
-  if (args.isBackNavigation) {
-    return;
-  }
-
   const page = args.object;
   pageObject = page.page;
   page.bindingContext = viewModel;

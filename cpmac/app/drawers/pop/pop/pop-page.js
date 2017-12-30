@@ -20,10 +20,6 @@ const viewModel = ObservableModule.fromObject({
 });
 
 function onLoaded(args) {
-  if (args.isBackNavigation) {
-    return;
-  }
-
   const page = args.object;
   pageObject = page.parent.page;
   page.bindingContext = viewModel;

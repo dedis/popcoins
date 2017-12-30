@@ -9,10 +9,6 @@ const User = require("../../../../shared/lib/dedjs/object/user/User").get;
 const viewModel = Org.getRegisteredAttsModule()
 
 function onLoaded(args) {
-  if (args.isBackNavigation) {
-    return;
-  }
-
   const page = args.object;
   page.bindingContext = viewModel;
 }

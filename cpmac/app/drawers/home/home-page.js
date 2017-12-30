@@ -12,10 +12,6 @@ const viewModel = User.getRosterModule();
 let pageObject = undefined;
 
 function onNavigatingTo(args) {
-  if (args.isBackNavigation) {
-    return;
-  }
-
   const page = args.object;
   pageObject = page.page;
   page.bindingContext = viewModel;

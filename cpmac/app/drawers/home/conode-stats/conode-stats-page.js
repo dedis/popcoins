@@ -12,10 +12,6 @@ let conodeStatus = undefined;
 let pageObject = undefined;
 
 function onNavigatingTo(args) {
-  if (args.isBackNavigation) {
-    return;
-  }
-
   const page = args.object;
   pageObject = page.page;
   conode = page.bindingContext.conode;

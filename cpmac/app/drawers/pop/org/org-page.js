@@ -13,11 +13,10 @@ const viewModel = ObservableModule.fromObject({
 });
 
 function onLoaded(args) {
-  if (args.isBackNavigation) {
-    return;
-  }
-
   const page = args.object;
+
+  // This is to ensure that the hash will be updated in the UI when coming back from the config.
+  page.bindingContext = undefined;
   page.bindingContext = viewModel;
 }
 

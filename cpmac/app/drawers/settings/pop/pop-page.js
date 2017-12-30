@@ -4,10 +4,6 @@ const Att = require("../../../shared/lib/dedjs/object/pop/att/Att").get;
 const Org = require("../../../shared/lib/dedjs/object/pop/org/Org").get;
 
 function onLoaded(args) {
-  if (args.isBackNavigation) {
-    return;
-  }
-
   const page = args.object;
 }
 

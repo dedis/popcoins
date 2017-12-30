@@ -12,10 +12,6 @@ let textFieldPublicComplete = undefined;
 let pageObject = undefined;
 
 function onLoaded(args) {
-  if (args.isBackNavigation) {
-    return;
-  }
-
   const page = args.object;
   pageObject = page.parent.page;
 

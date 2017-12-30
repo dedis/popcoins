@@ -2,10 +2,6 @@ const Frame = require("ui/frame");
 const ScanToClip = require("../../shared/lib/scan-to-clip/scan-to-clip");
 
 function onNavigatingTo(args) {
-  if (args.isBackNavigation) {
-    return;
-  }
-
   const page = args.object;
 }
 
