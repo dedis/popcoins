@@ -121,7 +121,9 @@ function scanFinalStatement() {
       const id = Convert.jsonToObject(pasteBinIdJson).id;
       const PasteBin = new Net.PasteBin();
 
-      return PasteBin.get(id);
+      // TODO: remove
+      //return PasteBin.get(id);
+      return PasteBin.get("8VPb6X5g");
     })
     .then(finalStatementJson => {
       const finalStatement = Convert.parseJsonFinalStatement(finalStatementJson);

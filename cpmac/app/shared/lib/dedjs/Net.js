@@ -6,6 +6,7 @@ const Fetch = require("fetch");
 const CothorityMessages = require("./protobuf/build/cothority-messages");
 
 const PASTEBIN_API_DEV_KEY = "7e191c8a4ecbd45a89eaed70ad5cf282";
+const PASTEBIN_API_USER_KEY = "8f267e7c0493549910854cafa27f2df1";
 const PASTEBIN_URL = "https://pastebin.com/";
 const PASTEBIN_URL_PASTE = PASTEBIN_URL + "api/api_post.php?";
 const PASTEBIN_URL_GET = PASTEBIN_URL + "raw/";
@@ -169,13 +170,18 @@ function PasteBin() {
       throw new Error("text must be of type string");
     }
 
+    // TODO: remove
+    return new Promise((resolve, reject) => {
+        resolve("SOME_ID");
+      });
+
     return Fetch.fetch(PASTEBIN_URL_PASTE, {
       method: "POST",
       headers: new Headers({
         "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
       }),
       body: "api_dev_key=" + PASTEBIN_API_DEV_KEY + "&api_option=paste&api_paste_code=" + text
-        + "&api_paste_format=json&api_paste_private=1&api_paste_expire_date=1D"
+        + "&api_user_key=" + PASTEBIN_API_USER_KEY + "&api_paste_name=random&api_paste_format=json&api_paste_private=0&api_paste_expire_date=1D"
     })
       .then(response => {
         return response.text();

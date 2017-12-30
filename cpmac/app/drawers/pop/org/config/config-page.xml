@@ -5,6 +5,9 @@
 
     <ActionBar class="action-bar">
         <Label class="action-bar-title" text="Configuration"/>
+        <ActionItem tap="manageDesc"
+                    ios.systemIcon="2" ios.position="right"
+                    text="Manage Description" android.position="popup"/>
     </ActionBar>
 
     <GridLayout class="page-content" rows="auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,*,auto"

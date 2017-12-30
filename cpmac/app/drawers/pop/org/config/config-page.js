@@ -3,6 +3,7 @@ const Frame = require("ui/frame");
 const ModalPicker = require("nativescript-modal-datetimepicker").ModalDatetimepicker;
 const Helper = require("../../../../shared/lib/dedjs/Helper");
 const Convert = require("../../../../shared/lib/dedjs/Convert");
+const Net = require("../../../../shared/lib/dedjs/Net");
 const ObjectType = require("../../../../shared/lib/dedjs/ObjectType");
 const ScanToReturn = require("../../../../shared/lib/scan-to-return/scan-to-return");
 
@@ -374,6 +375,76 @@ function hashAndSave() {
   }
 }
 
+function manageDesc() {
+  return Dialog.confirm({
+    title: "PoP-Description",
+    message: "Do you want to share your description or import a new one?",
+    okButtonText: "Import",
+    cancelButtonText: "Cancel",
+    neutralButtonText: "Share"
+  })
+    .then(result => {
+      if (result) {
+        // Import
+        return ScanToReturn.scan()
+          .then(pasteBinIdJson => {
+            const id = Convert.jsonToObject(pasteBinIdJson).id;
+            const PasteBin = new Net.PasteBin();
+
+            // TODO: remove
+            //return PasteBin.get(id);
+            return PasteBin.get("fsA2pbdR");
+          })
+          .then(popDescJson => {
+            const popDesc = Convert.parseJsonPopDesc(popDescJson);
+
+            return Org.setPopDesc(popDesc, true);
+          })
+      } else if (result === undefined) {
+        // Share
+        if (!Org.isPopDescComplete()) {
+          return Dialog.alert({
+            title: "Missing Information",
+            message: "Please provide a name, date, time, location and the list (min 3) of conodes" +
+              " of the organizers of your PoP Party.",
+            okButtonText: "Ok"
+          });
+        }
+
+        const PasteBin = new Net.PasteBin();
+        const popDescJson = JSON.stringify(Org.getPopDesc());
+
+        return PasteBin.paste(popDescJson)
+          .then(id => {
+            const object = {};
+            object.id = id;
+
+            pageObject.showModal("shared/pages/qr-code/qr-code-page", {
+              textToShow: Convert.objectToJson(object)
+            }, () => { }, true);
+
+            return Promise.resolve();
+          });
+      } else {
+        // Cancel
+        return Promise.resolve();
+      }
+    })
+    .catch(error => {
+      console.log(error);
+      console.dir(error);
+      console.trace();
+
+      Dialog.alert({
+        title: "Error",
+        message: "An error occured, please try again.",
+        okButtonText: "Ok"
+      });
+
+      return Promise.reject(error);
+    });
+}
+
 module.exports.onLoaded = onLoaded;
 module.exports.setDate = setDate;
 module.exports.setTime = setTime;
@@ -382,3 +453,4 @@ module.exports.addManual = addManual;
 module.exports.addScan = addScan;
 module.exports.deleteConode = deleteConode;
 module.exports.onSwipeCellStarted = onSwipeCellStarted;
+module.exports.manageDesc = manageDesc;

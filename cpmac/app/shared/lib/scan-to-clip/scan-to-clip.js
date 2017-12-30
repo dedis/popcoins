@@ -20,7 +20,7 @@ function scan() {
     .then(function (available) {
       if (available) {
         return BarCodeScanner.scan({
-          message: "Scan your text.",
+          message: "Scan the QR code.",
           showFlipCameraButton: true,
           showTorchButton: true,
           resultDisplayDuration: 1000,
