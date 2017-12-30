@@ -12,8 +12,10 @@ const viewModel = ObservableModule.fromObject({
   toBase64: Convert.byteArrayToBase64
 });
 
+let page = undefined;
+
 function onLoaded(args) {
-  const page = args.object;
+  page = args.object;
 
   // This is to ensure that the hash will be updated in the UI when coming back from the config.
   page.bindingContext = undefined;
@@ -60,6 +62,10 @@ function linkToConode() {
             if (result.result) {
               return Org.linkToConode(conodes[index], result.text)
                 .then(result => {
+                  // This is to ensure that id and public will be updated in the UI when linking process is done.
+                  page.bindingContext = undefined;
+                  page.bindingContext = viewModel;
+
                   return Dialog.alert({
                     title: "Success",
                     message: "Your are now linked to the conode.",

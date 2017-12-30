@@ -281,9 +281,9 @@ function parseJsonFinalStatement(jsonString) {
   }
 
   object.attendees = object.attendees.map(base64String => {
-    return base64ToByteArray(base64String.replace(" ", "+"));
+    return base64ToByteArray(base64String.split(" ").join("+"));
   });
-  object.signature = base64ToByteArray(object.signature.replace(" ", "+"));
+  object.signature = base64ToByteArray(object.signature.split(" ").join("+"));
   object.desc = parseJsonPopDesc(objectToJson(object.desc));
 
   return CothorityMessages.createFinalStatement(object.desc, object.attendees, object.signature, object.merged);
@@ -336,23 +336,23 @@ function parseJsonRoster(jsonString) {
 
   let rosterId = roster.id;
   if (rosterId !== undefined) {
-    rosterId = base64ToByteArray(rosterId.replace(" ", "+"));
+    rosterId = base64ToByteArray(rosterId.split(" ").join("+"));
   }
 
-  let aggregate = (roster.aggregate === undefined) ? undefined : base64ToByteArray(roster.aggregate.replace(" ", "+"));
+  let aggregate = (roster.aggregate === undefined) ? undefined : base64ToByteArray(roster.aggregate.split(" ").join("+"));
 
   const points = [];
   const list = roster.list.map((server) => {
     if (aggregate === undefined) {
-      points.push(Crypto.unmarshal(base64ToByteArray(server.public.replace(" ", "+"))));
+      points.push(Crypto.unmarshal(base64ToByteArray(server.public.split(" ").join("+"))));
     }
 
     let serverId = server.id;
     if (serverId !== undefined) {
-      serverId = base64ToByteArray(serverId.replace(" ", "+"));
+      serverId = base64ToByteArray(serverId.split(" ").join("+"));
     }
 
-    return toServerIdentity(server.address, base64ToByteArray(server.public.replace(" ", "+")), server.description, serverId);
+    return toServerIdentity(server.address, base64ToByteArray(server.public.split(" ").join("+")), server.description, serverId);
   });
 
   if (aggregate === undefined) {
@@ -427,6 +427,10 @@ function parseJsonKeyPair(jsonString) {
   let publicComplete = undefined;
   if (keyPair.publicComplete !== undefined) {
     publicComplete = base64ToByteArray(keyPair.publicComplete);
+  }
+
+  if (keyPair.private === undefined) {
+    keyPair.private = "";
   }
 
   return CothorityMessages.createKeyPair(base64ToByteArray(keyPair.public), base64ToByteArray(keyPair.private), publicComplete);

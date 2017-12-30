@@ -89,7 +89,7 @@ function CothoritySocket() {
       });
 
       socket.addEventListener("close", event => {
-        if (event.code === 4100) {
+        if (event.code === 4100 || (event.code === 1000 && event.reason !== undefined)) {
           resolve(event.reason);
         }
         if (event.code === 4101 || event.code === 4102 || event.code === 4104) {

@@ -394,7 +394,10 @@ function manageDesc() {
           .then(popDescJson => {
             const popDesc = Convert.parseJsonPopDesc(popDescJson);
 
-            return Org.setPopDesc(popDesc, true);
+            return Org.setPopDesc(popDesc, true)
+              .then(() => {
+                return setUpDate();
+              });
           })
       } else if (result === undefined) {
         // Share
