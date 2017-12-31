@@ -1,13 +1,7 @@
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
-const StatusExtractor = require("~/shared/lib/extractors/StatusExtractor");
-const Helper = require("~/shared/lib/dedjs/Helper");
-const FilesPath = require("~/shared/res/files/files-path");
-const FileIO = require("~/shared/lib/file-io/file-io");
-const DedisJsNet = require("~/shared/lib/dedis-js/src/net");
-const CothorityMessages = require("~/shared/lib/cothority-protobuf/build/cothority-messages");
-const Dialog = require("ui/dialogs");
-const Misc = require("~/shared/lib/dedis-js/src/misc");
+const StatusExtractor = require("../../../shared/lib/dedjs/extractor/StatusExtractor");
+const Helper = require("../../../shared/lib/dedjs/Helper");
 
 const viewModel = ObservableModule.fromObject({
   statsList: new ObservableArray()
@@ -27,64 +21,64 @@ function setUpConodeStatsList() {
 
   /**
    * Loads the stats into the list.
-   * @param conode - the conode to fetch stats from
+   * @param conodeStatus - the conode to fetch stats from
    */
-  myStatsList.load = function (conode) {
+  myStatsList.load = function (conodeStatus) {
     let stat = {
       title: "",
       info: ""
     };
 
     stat.title = "Description";
-    stat.info = StatusExtractor.getDescription(conode);
+    stat.info = StatusExtractor.getDescription(conodeStatus);
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
     stat.title = "Address";
-    stat.info = StatusExtractor.getAddress(conode);
+    stat.info = StatusExtractor.getAddress(conodeStatus);
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
     stat.title = "ID (base64)";
-    stat.info = StatusExtractor.getID(conode);
+    stat.info = StatusExtractor.getID(conodeStatus);
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
     stat.title = "Public Key (base64)";
-    stat.info = StatusExtractor.getPublicKey(conode);
+    stat.info = StatusExtractor.getPublicKey(conodeStatus);
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
     stat.title = "Services";
-    stat.info = StatusExtractor.getServices(conode);
+    stat.info = StatusExtractor.getServices(conodeStatus);
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
     stat.title = "System";
-    stat.info = StatusExtractor.getSystem(conode);
+    stat.info = StatusExtractor.getSystem(conodeStatus);
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
     stat.title = "Host";
-    stat.info = StatusExtractor.getHost(conode);
+    stat.info = StatusExtractor.getHost(conodeStatus);
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
     stat.title = "Port";
-    stat.info = StatusExtractor.getPort(conode);
+    stat.info = StatusExtractor.getPort(conodeStatus);
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
     stat.title = "ConnectionType";
-    stat.info = StatusExtractor.getConnectionType(conode);
+    stat.info = StatusExtractor.getConnectionType(conodeStatus);
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
     stat.title = "Version";
-    stat.info = StatusExtractor.getVersion(conode);
+    stat.info = StatusExtractor.getVersion(conodeStatus);
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
     stat.title = "TX Bytes";
-    stat.info = StatusExtractor.getTXBytes(conode);
+    stat.info = StatusExtractor.getTXBytes(conodeStatus);
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
     stat.title = "RX Bytes";
-    stat.info = StatusExtractor.getRXBytes(conode);
+    stat.info = StatusExtractor.getRXBytes(conodeStatus);
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
     stat.title = "Uptime";
-    stat.info = StatusExtractor.getUptime(conode);
+    stat.info = StatusExtractor.getUptime(conodeStatus);
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
   };
 
@@ -95,39 +89,6 @@ function setUpConodeStatsList() {
     while (myStatsList.length) {
       myStatsList.pop();
     }
-  };
-
-  /**
-   * Starts the linking process.
-   * @param conode - the conode to link to
-   * @param pin - the pin given by the conode
-   * @param publicKey - the public key of the organizer
-   * @param cothorityPath - the path for the pin request on the conode
-   * @returns {Promise.<any>}
-   */
-  myStatsList.linkToConode = function (conode, pin, publicKey, cothorityPath) {
-    const wantedConodeKey = StatusExtractor.getPublicKey(conode);
-
-    return FileIO.getStringOf(FilesPath.CONODES_TOML)
-      .then((tomlString) => {
-        return DedisJsNet.getConodeFromRoster(tomlString, wantedConodeKey);
-      })
-      .then(parsedConode => {
-        if (parsedConode !== undefined) {
-          return link(parsedConode, pin, publicKey, cothorityPath);
-        } else {
-          return Promise.reject();
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-        return Dialog.alert({
-          title: "Error",
-          message: "An unexpected error occurred during the linking" +
-            " process. Please try again.",
-          okButtonText: "Ok"
-        });
-      });
   };
 }
 
@@ -140,49 +101,6 @@ function pushStat(list, statToAdd) {
   list.push({
     info: statToAdd
   });
-}
-
-/**
- * Handles the socket part of the linking process.
- * @param conode - the conode to link to
- * @param pin - the pin given from the conode
- * @param publicKey - the public key of the organizer
- * @param cothorityPath - the path for the pin request on the conode
- */
-function link(conode, pin, publicKey, cothorityPath) {
-  const cothoritySocket = new DedisJsNet.CothoritySocket();
-  const pinRequestMessage = CothorityMessages.createPinRequest(pin, Misc.hexToUint8Array(publicKey));
-
-  return cothoritySocket.send(conode, cothorityPath, pinRequestMessage, undefined)
-    .then(response => {
-      if (response instanceof ArrayBuffer) {
-        return FileIO.writeStringTo(FilesPath.POP_LINKED_CONODE, StatusExtractor.getToml(conode.Address, conode.Public, conode.Description))
-          .then(() => {
-            return Dialog.alert({
-              title: "Conode Response",
-              message: "PIN Accepted",
-              okButtonText: "Ok"
-            });
-          });
-      } else if (typeof response === "string") {
-        return Dialog.alert({
-          title: "Conode Response",
-          message: response,
-          okButtonText: "Ok"
-        });
-      } else {
-        return Promise.reject();
-      }
-    })
-    .catch(error => {
-      console.log(error);
-      return Dialog.alert({
-        title: "Error",
-        message: "An unexpected error occurred during the linking" +
-          " process. Please try again.",
-        okButtonText: "Ok"
-      });
-    });
 }
 
 module.exports = ConodeStatsViewModel;

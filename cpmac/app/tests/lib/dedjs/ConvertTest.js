@@ -165,7 +165,6 @@ const JSON_KEY_PAIR_NO_COMPLETE = JSON.stringify({
   "public": PUBLIC_KEY
 });
 
-
 const ROSTER_LIST_SERVER_IDENTITIES = ROSTER_LIST.map(conode => {
   conode.public = Convert.base64ToByteArray(conode.public);
   conode.id = Convert.base64ToByteArray(conode.id);
@@ -187,6 +186,21 @@ const FINAL_MERGED = false;
 const FINAL_STATEMENT = CothorityMessages.createFinalStatement(FINAL_POP_DESC, FINAL_ATTENDEES, FINAL_SIGNATURE, FINAL_MERGED);
 
 const POP_TOKEN = CothorityMessages.createPopToken(FINAL_STATEMENT, PRIVATE_KEY_BYTE_ARRAY, PUBLIC_KEY_BYTE_ARRAY);
+
+const POP_DESC_HASH_JSON = Convert.objectToJson({
+  hash: PRIVATE_KEY
+});
+
+const SERVER_IDENTITY_JSON = Convert.objectToJson({
+  address: CONODE_ADDRESS,
+  public: CONODE_PUBLIC_KEY,
+  description: CONODE_DESCRIPTION,
+  id: CONODE_ID_REAL
+});
+
+const ARRAY_OF_KEYS_JSON = Convert.objectToJson({
+  array: [PUBLIC_KEY, PUBLIC_KEY, PUBLIC_KEY]
+});
 
 describe("Convert", function () {
   describe("#byteArrayToHex", function () {
@@ -747,6 +761,66 @@ describe("Convert", function () {
       const popToken = Convert.parseJsonPopTokenArray(JSON.stringify(object));
 
       popToken.length.should.equal(3);
+    });
+  });
+
+  describe("#parseJsonPopDescHash", function () {
+    it("should throw an error when the input is not a string", function () {
+      expect(() => Convert.parseJsonPopDescHash(42)).to.throw();
+    });
+
+    it("should return a byte array", function () {
+      const hash = Convert.parseJsonPopDescHash(POP_DESC_HASH_JSON);
+
+      (hash instanceof Uint8Array).should.be.true;
+    });
+
+    it("should correctly parse the PopDesc hash", function () {
+      const hash = Convert.parseJsonPopDescHash(POP_DESC_HASH_JSON);
+
+      hash.should.deep.equal(PRIVATE_KEY_BYTE_ARRAY);
+    });
+  });
+
+  describe("#parseJsonServerIdentity", function () {
+    it("should throw an error when the input is not a string", function () {
+      expect(() => Convert.parseJsonServerIdentity(42)).to.throw();
+    });
+
+    it("should return a ServerIdentity object", function () {
+      const serverIdentity = Convert.parseJsonServerIdentity(SERVER_IDENTITY_JSON);
+
+      Helper.isOfType(serverIdentity, ObjectType.SERVER_IDENTITY).should.be.true;
+    });
+
+    it("should correctly parse the server identity", function () {
+      const serverIdentity = Convert.parseJsonServerIdentity(SERVER_IDENTITY_JSON);
+
+      serverIdentity.address.should.equal(CONODE_ADDRESS);
+      serverIdentity.public.should.deep.equal(CONODE_PUBLIC_KEY_BYTE_ARRAY);
+      serverIdentity.description.should.equal(CONODE_DESCRIPTION);
+      serverIdentity.id.should.deep.equal(CONODE_ID_REAL_BYTE_ARRAY);
+    });
+  });
+
+  describe("#parseJsonArrayOfKeys", function () {
+    it("should throw an error when the input is not a string", function () {
+      expect(() => Convert.parseJsonArrayOfKeys(42)).to.throw();
+    });
+
+    it("should return an array of byte arrays", function () {
+      const arrayOfKeys = Convert.parseJsonArrayOfKeys(ARRAY_OF_KEYS_JSON);
+
+      Array.isArray(arrayOfKeys).should.be.true;
+      (arrayOfKeys[0] instanceof Uint8Array).should.be.true;
+    });
+
+    it("should correctly parse the array of keys", function () {
+      const arrayOfKeys = Convert.parseJsonArrayOfKeys(ARRAY_OF_KEYS_JSON);
+
+      arrayOfKeys.forEach(byteArray => {
+        byteArray.should.deep.equal(PUBLIC_KEY_BYTE_ARRAY);
+      });
     });
   });
 });

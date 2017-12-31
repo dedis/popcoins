@@ -1,27 +1,39 @@
 <Page
         class="page"
-        loaded="onLoaded">
+        loaded="onLoaded"
+        xmlns:nsListView="nativescript-pro-ui/listview">
 
     <ActionBar class="action-bar">
         <Label class="action-bar-title" text="Register"/>
-
-        <ActionItem tap="empty"
-                    ios.systemIcon="16" ios.position="right"
-                    text="Empty" android.position="popup"/>
     </ActionBar>
 
     <GridLayout class="page-content" rows="auto,*,auto" columns="*,*,*">
         <Label class="label-title" text="Registered Public Keys" row="0" colSpan="3"/>
 
-        <ListView items="{{ registeredKeys }}" id="list-view-registered-keys" android:itemTap="deleteByIndex"
+        <nsListView:RadListView items="{{ array }}" id="list-view-registered-keys"
+                  itemSwipeProgressStarted="onSwipeCellStarted"
+                  swipeActions="true"
                   row="1"
                   colSpan="3">
-            <ListView.itemTemplate>
-                <GridLayout rows="*" columns="*">
-                    <Label text="{{ key }}" textAlignment="center" textWrap="true"/>
+
+            <nsListView:RadListView.itemSwipeTemplate>
+                <GridLayout rows="*" columns="*,auto">
+                    <StackLayout orientation="horizontal" col="0">
+                    </StackLayout>
+                    <StackLayout orientation="horizontal" col="1">
+                        <Button id="button-delete" text="Delete" tap="deleteAttendee" backgroundColor="red"/>
+                    </StackLayout>
                 </GridLayout>
-            </ListView.itemTemplate>
-        </ListView>
+            </nsListView:RadListView.itemSwipeTemplate>
+
+            <nsListView:RadListView.itemTemplate>
+                <GridLayout rows="*,*" columns="*">
+                    <Label text="{{ toBase64($value) }}" fontSize="18" textAlignment="center" textWrap="true" backgroundColor="white"/>
+                    <StackLayout row="4" height="1" backgroundColor="black"/>
+                </GridLayout>
+            </nsListView:RadListView.itemTemplate>
+
+        </nsListView:RadListView>
 
         <Button text="Manual" tap="addManual" row="2" col="0"/>
         <Button text="Register" tap="registerKeys" row="2" col="1"/>

@@ -22,7 +22,16 @@ class CothorityMessages extends CothorityProtobuf {
       throw new Error("messageType must be of type string");
     }
 
-    return this.decodeMessage(messageType, new Uint8Array(response));
+    let toDecode = undefined;
+    if (typeof response.array === "function") {
+      toDecode = Uint8Array.from(response.array());
+    } else if (response instanceof ArrayBuffer) {
+      toDecode = new Uint8Array(response);
+    } else {
+      toDecode = Uint8Array.from(response);
+    }
+
+    return this.decodeMessage(messageType, toDecode);
   }
 
   /**
@@ -217,6 +226,10 @@ class CothorityMessages extends CothorityProtobuf {
     }
     if (!(signature instanceof Uint8Array)) {
       throw new Error("signature must be an instance of Uint8Array");
+    }
+
+    if (desc.roster.id !== undefined) {
+      delete desc.roster.id;
     }
 
     const fields = {

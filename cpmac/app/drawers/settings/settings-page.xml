@@ -1,7 +1,8 @@
 <Page
         navigatingTo="onNavigatingTo"
-        xmlns:nsDrawer="nativescript-telerik-ui/sidedrawer"
+        xmlns:nsDrawer="nativescript-pro-ui/sidedrawer"
         xmlns:myDrawer="shared/my-drawer"
+        xmlns:user="drawers/settings/user"
         xmlns:pop="drawers/settings/pop"
         xmlns:cisc="drawers/settings/cisc"
         xmlns="http://www.nativescript.org/tns.xsd">
@@ -20,9 +21,6 @@
                     ios.position="left">
         </ActionItem>
         <Label class="action-bar-title" text="Settings"/>
-        <ActionItem tap="scanToClip"
-                    ios.systemIcon="15" ios.position="right"
-                    text="ScanToClip" android.position="popup"/>
     </ActionBar>
 
     <!--
@@ -62,7 +60,7 @@
         -->
         <nsDrawer:RadSideDrawer.mainContent>
 
-            <TabView class="page-content" selectedIndex="0" selectedTabTextColor="black">
+            <TabView class="page-content" selectedIndex="1" selectedTabTextColor="black">
                 <TabView.items>
 
                     <TabViewItem title="POP">
@@ -71,11 +69,19 @@
                         </TabViewItem.view>
                     </TabViewItem>
 
+                    <TabViewItem title="USER">
+                        <TabViewItem.view>
+                            <user:user-page/>
+                        </TabViewItem.view>
+                    </TabViewItem>
+
+                    <!--
                     <TabViewItem title="CISC">
                         <TabViewItem.view>
                             <cisc:cisc-page/>
                         </TabViewItem.view>
                     </TabViewItem>
+                    -->
 
                 </TabView.items>
             </TabView>

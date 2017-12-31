@@ -7,7 +7,7 @@ const FileIO = require("../../../../../../shared/lib/file-io/file-io");
 
 const Att = require("../../../../../../shared/lib/dedjs/object/pop/att/Att").get;
 
-describe.only("Att", function () {
+describe("Att", function () {
 
   function clean() {
     const promises = Object.getOwnPropertyNames(FilesPath).map(filePath => {

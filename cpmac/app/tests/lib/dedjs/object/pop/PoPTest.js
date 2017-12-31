@@ -517,16 +517,35 @@ describe("PoP", function () {
   });
 
   describe("#generatePopTokenByIndex", function () {
+    it("should throw an error when key pair is set for the user", function () {
+      expect(() => PoP.generatePopTokenByIndex(0)).to.throw();
+    });
+
     it("should throw an error when index is not a number", function () {
-      expect(() => PoP.generatePopTokenByIndex("2")).to.throw();
+      expect(() => {
+        User._keyPair.public = PUBLIC_KEY_BYTE_ARRAY;
+        User._keyPair.private = PRIVATE_KEY_BYTE_ARRAY;
+
+        PoP.generatePopTokenByIndex("2")
+      }).to.throw();
     });
 
     it("should throw an error when index is negative", function () {
-      expect(() => PoP.generatePopTokenByIndex(-1)).to.throw();
+      expect(() => {
+        User._keyPair.public = PUBLIC_KEY_BYTE_ARRAY;
+        User._keyPair.private = PRIVATE_KEY_BYTE_ARRAY;
+
+        PoP.generatePopTokenByIndex(-1)
+      }).to.throw();
     });
 
     it("should throw an error when index is too big", function () {
-      expect(() => PoP.generatePopTokenByIndex(0)).to.throw();
+      expect(() => {
+        User._keyPair.public = PUBLIC_KEY_BYTE_ARRAY;
+        User._keyPair.private = PRIVATE_KEY_BYTE_ARRAY;
+
+        PoP.generatePopTokenByIndex(0)
+      }).to.throw();
     });
 
     it("should correctly generate the PoP-Token, save it + delete the final statement", function () {
