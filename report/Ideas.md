@@ -1,14 +1,14 @@
 # Introduction of the subject and the problem
 
-  - Some words about Cothority in general + diagram and state diagram
-  - Some details about CISC and PoP in general
+  - (OK)Some words about Cothority in general + diagram and state diagram
+  - (PARTIALLY)Some details about CISC and (OK)PoP in general
 
 # Goals of the project and motivation
 
-  - Mostly/Completely? CLI for now
-  - Difficult to access the functionalities of the Cothority framework
-  - Want to make it more user friendly
-  - Create a cross-platform app to ease the access to functionalities of the Cothority framework
+  - (OK)Mostly/Completely? CLI for now
+  - (OK)Difficult to access the functionalities of the Cothority framework
+  - (OK)Want to make it more user friendly
+  - (OK)Create a cross-platform app to ease the access to functionalities of the Cothority framework
   - Create an app/library that will be easily extensible for further functionalities of the Cothority
   - Make a PoC for CISC and PoP, make the technology available to everyone
   - Solution: Nativescript (explain why)
