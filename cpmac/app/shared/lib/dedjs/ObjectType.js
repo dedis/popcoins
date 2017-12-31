@@ -24,6 +24,8 @@ const PIN_REQUEST = "PinRequest";
 const FETCH_REQUEST = "FetchRequest";
 const KEY_PAIR = "KeyPair";
 
+const DEVICE = "Device";
+
 module.exports.BIG_NUMBER = BIG_NUMBER;
 module.exports.POINT = POINT;
 module.exports.STATUS_REQUEST = STATUS_REQUEST;
@@ -38,3 +40,4 @@ module.exports.FINALIZE_REQUEST = FINALIZE_REQUEST;
 module.exports.PIN_REQUEST = PIN_REQUEST;
 module.exports.FETCH_REQUEST = FETCH_REQUEST;
 module.exports.KEY_PAIR = KEY_PAIR;
+module.exports.DEVICE = DEVICE;

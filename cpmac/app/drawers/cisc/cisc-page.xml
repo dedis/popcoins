@@ -1,12 +1,12 @@
 <Page
-    navigatingTo="onNavigatingTo"
-    xmlns:nsDrawer="nativescript-pro-ui/sidedrawer"
-    xmlns:myDrawer="shared/my-drawer"
-    xmlns:qr="drawers/cisc/qr"
-    xmlns:home="drawers/cisc/home"
-    xmlns:data="drawers/cisc/data"
-    xmlns:devices="drawers/cisc/devices"
-    xmlns="http://www.nativescript.org/tns.xsd">
+        navigatingTo="onNavigatingTo"
+        xmlns:nsDrawer="nativescript-telerik-ui/sidedrawer"
+        xmlns:myDrawer="shared/my-drawer"
+        xmlns:qr="drawers/cisc/qr"
+        xmlns:home="drawers/cisc/home"
+        xmlns:data="drawers/cisc/data"
+        xmlns:devices="drawers/cisc/devices"
+        xmlns="http://www.nativescript.org/tns.xsd">
 
     <ActionBar class="action-bar">
         <!--
@@ -17,9 +17,9 @@
         Use the ActionItem for IOS with position set to left. Using the NavigationButton as a side-drawer button in iOS is not possible, because its function is to always navigate back in the application.
         -->
         <ActionItem icon="res://navigation/menu"
-            android:visibility="collapsed"
-            tap="onDrawerButtonTap"
-            ios.position="left">
+                    android:visibility="collapsed"
+                    tap="onDrawerButtonTap"
+                    ios.position="left">
         </ActionItem>
         <Label class="action-bar-title" text="Cisc"></Label>
     </ActionBar>

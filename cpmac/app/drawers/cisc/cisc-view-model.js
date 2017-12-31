@@ -8,6 +8,7 @@ const DedisMisc = require("~/shared/lib/dedis-js/src/misc");
 const FileIO = require("~/shared/lib/file-io/file-io");
 const FilePaths = require("~/shared/res/files/files-path");
 const Dialog = require("ui/dialogs");
+const FrameModule = require("ui/frame");
 
 let viewModel;
 
@@ -23,7 +24,7 @@ function CiscPageViewModel() {
         id:undefined,
         data: undefined,
         proposedData:undefined,
-        isOnProposed: false
+        isOnProposed: false,
     });
     setupViewModel();
     return viewModel;
@@ -78,15 +79,28 @@ function setupViewModel() {
             for (const property in viewModel.data.storage) {
                 if (viewModel.data.storage.hasOwnProperty(property)) {
                     const value = viewModel.data.storage[property];
+                    let showval;
+                    if (property.startsWith("web:")) {
+                        const topmost = FrameModule.topmost();
+                        let navigationEntry = {
+                            moduleName: "drawers/cisc/home/web/web-page",
+                            bindingContext: {html: value, data:viewModel.storageList},
+                            animated: false
+                        };
+                        showval = () => topmost.navigate(navigationEntry);
+
+                    } else {
+                        showval = () => Dialog.alert({
+                            title: property,
+                            message: value,
+                            okButtonText: "Ok"
+                        })
+                    }
                     viewModel.storageList.push({
                         keyValuePair: {
                             key: property,
                             value: value,
-                            showValue: () => Dialog.alert({
-                                title: property,
-                                message: value,
-                                okButtonText: "Ok"
-                            })
+                            showValue: showval
                         }
                     });
                 }
@@ -132,15 +146,28 @@ function setupViewModel() {
             for (const property in viewModel.proposedData.storage) {
                 if (viewModel.proposedData.storage.hasOwnProperty(property)) {
                     const value = viewModel.proposedData.storage[property];
+                    let showval;
+                    if (property.startsWith("web:")) {
+                        const topmost = FrameModule.topmost();
+                        let navigationEntry = {
+                            moduleName: "drawers/cisc/home/web/web-page",
+                            bindingContext: {html: value, data:viewModel.proposedStorageList},
+                            animated: false
+                        };
+                        showval = () => topmost.navigate(navigationEntry);
+
+                    } else {
+                        showval = () => Dialog.alert({
+                            title: property,
+                            message: value,
+                            okButtonText: "Ok"
+                        })
+                    }
                     viewModel.proposedStorageList.push({
                         keyValuePair: {
                             key: property,
                             value: value,
-                            showValue: () => Dialog.alert({
-                                title: property,
-                                message: value,
-                                okButtonText: "Ok"
-                            })
+                            showValue: showval
                         }
                     });
                 }
