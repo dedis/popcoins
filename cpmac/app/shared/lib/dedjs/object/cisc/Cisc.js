@@ -24,7 +24,20 @@ class Cisc {
      */
     constructor() {
         this._isLoaded = false;
+        this._isConnected = false;
+        this._adress = "";
+        this._deviceList = ObservableModule.fromObject({
+            array: new ObservableArray()
+        });
 
+
+        // this._identity = undefined;
+        // this._deviceList = new ObservableArray();
+        // this._proposedDeviceList = new ObservableArray();
+        // this._storageList = new ObservableArray();
+        // this._data = undefined;
+        // this._proposedData = undefined;
+        // this._isOnProposed = false;
     }
 
     /**
@@ -37,6 +50,36 @@ class Cisc {
      */
     isLoaded() {
         return this._isLoaded;
+    }
+
+    /**
+     * Gets the device list array.
+     * @returns {ObservableArray} - an observable array containing all the devices in the identity skipchain
+     */
+    getDeviceList() {
+        return this.getDeviceListModule().array;
+    }
+
+    /**
+     * Gets the device list module.
+     * @returns {ObservableModule} - an observable module/object containing everything related to the device list (including the array of devices)
+     */
+    getDeviceListModule() {
+        return this._deviceList;
+    }
+
+    /**
+     * Sets the new device list array given as parameter.
+     * @param {Array} array - the new device list to set
+     * @returns {Promise} - a promise that gets resolved once the new device list array has been set
+     */
+    setFinalStatementsArray(array) {
+        if (!(array instanceof Array)) {
+            throw new Error("array must be an instance of Array");
+        }
+        if (array.length === 0 || !Helper.isOfType(array[0], ObjectType.DEVICE)) {
+            throw new Error("array is empty or array[i] is not instance of device");
+        }
     }
 
     /**
@@ -97,7 +140,7 @@ class Cisc {
 }
 
 /**
- * Now we create a singleton object for PoP.
+ * Now we create a singleton object for Cisc.
  */
 
 // The symbol key reference that the singleton will use.
