@@ -1,7 +1,7 @@
 # Introduction of the subject and the problem
 
   - (OK)Some words about Cothority in general + diagram and state diagram
-  - (PARTIALLY)Some details about CISC and (OK)PoP in general
+  - (TODO - CISC)Some details about CISC and (OK)PoP in general
 
 # Goals of the project and motivation
 
@@ -9,24 +9,25 @@
   - (OK)Difficult to access the functionalities of the Cothority framework
   - (OK)Want to make it more user friendly
   - (OK)Create a cross-platform app to ease the access to functionalities of the Cothority framework
-  - Create an app/library that will be easily extensible for further functionalities of the Cothority
-  - Make a PoC for CISC and PoP, make the technology available to everyone
-  - Solution: Nativescript (explain why)
+  - (OK)Create an app/library that will be easily extensible for further functionalities of the Cothority
+  - (OK)Make a PoC for CISC and PoP, make the technology available to everyone
+  - (MAYBE BIT MORE???)Solution: Nativescript (explain why)
 
 # Corresponding background
 
-  - Define/Explain/Introduce Cothority
-  - Define/Explain/Introduce CISC
-  - Define/Explain/Introduce PoP (define important terms: org, att, config, final, pop token...)
-  - A bit of Elliptic Curve Cryptography? (addition instead of multiplication)
-  - A bit of Schnorr Signature Generation and Verification? (Including hashes)
-  - A bit of Protobuf?
-  - A bit of Websocket?
+  - (OK)Define/Explain/Introduce Cothority
+  - (TODO)Define/Explain/Introduce CISC
+  - (MAYBE BIT MORE???)Define/Explain/Introduce PoP (define important terms: key pair, link, pop party, org, att, config, register, final, pop token...)
+  - (OK)A bit of Elliptic Curve Cryptography? (addition instead of multiplication)
+  - (OK)A bit of Schnorr Signature Generation and Verification? (Including hashes)
+  - (OK)A bit of Protobuf?
+  - (OK)A bit of Websocket?
 
 # Step-by-step description of your design/implementation/evaluation/analysis
 
+  - (OK)Global structure of the app
   - Explain library structure: protobuf, Net, Crypto, Convert....
-  - Explain object structure: User, CISC/PoP{Org, Att}...
+  - (OK)Explain object structure: User, CISC/PoP{Org, Att}...
 
 # CISC:
 
@@ -50,7 +51,6 @@
 
     - Have multiple identities
     - Creating identity skipchains using the pop token from the other side of the app as auth
-
 
 # PoP:
 
@@ -76,7 +76,7 @@
 
     - Sign/Verify Services (Ex. BeerToken)
     - Party Merging
-    - Register a final statement on a conode, everyone in the final should be to do either create a skipchain or new pop party
+    - Register a final statement on a conode, everyone in the final should be able to either create a skipchain or new pop party
 
 # Step-by-step guide for installation, including dependencies, and running of the final product
 
@@ -86,7 +86,7 @@
   - Own Makefile scripts (typically compile dedjs/protobuf)
   - Install and run conodes
   - Explain how to build/test
-  - Talk about the bugs we had to bypass (.gz, brorand...)
+  - Talk about the bugs we had to bypass (.gz, brorand, websocket?...)
   
 # What have we learned? What would we now do differently?
 
