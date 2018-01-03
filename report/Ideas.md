@@ -26,8 +26,9 @@
 # Step-by-step description of your design/implementation/evaluation/analysis
 
   - (OK)Global structure of the app
-  - Explain library structure: protobuf, Net, Crypto, Convert....
+  - (OK)Explain library structure: protobuf, Net, Crypto, Convert....
   - (OK)Explain object structure: User, CISC/PoP{Org, Att}...
+  - (MAYBE BIT MORE???)Talk about implementation choices
 
 # CISC:
 
@@ -56,16 +57,15 @@
 
   ## Theoretical and practical limitations of the project and its implementation
 
-    - PoP backend is fully implemented
-    - Need to implement a user friendly frontend
+    - (OK)PoP backend is fully implemented
+    - (OK)Need to implement a user friendly frontend
     - Implementation of the communication between PoP front- and backend
       - Messages, Signing...
-    - Define terms like Organizer, Attendee (recall)
-    - Talk about their possibilities
-      - Organizer: Configure, Register, Finalize
-      - Attendee: keypair, PoP Token creation
-    - Explain/Demo a complete workflow of organising/attending a PoP party
-    - Talk about the hash/sign functions/algo used internally by the organizer
+      - Talk about the hash/sign functions/algo used internally by the organizer
+    - (OK)Talk about their possibilities
+      - (OK)Organizer: Configure, Register, Finalize
+      - (OK)Attendee: keypair, PoP Token creation
+    - (OK)Explain/Demo a complete workflow of organising/attending a PoP party
 
   ## Results
 
@@ -74,9 +74,10 @@
 
   ## Future work
 
+    - Config sharing over the conodes and not pastebin
     - Sign/Verify Services (Ex. BeerToken)
     - Party Merging
-    - Register a final statement on a conode, everyone in the final should be able to either create a skipchain or new pop party
+    - Viral PoP Parties: Register a final statement on a conode, everyone in the final should be able to either create a skipchain or new pop party
 
 # Step-by-step guide for installation, including dependencies, and running of the final product
 
