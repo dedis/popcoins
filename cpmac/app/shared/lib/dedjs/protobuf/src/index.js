@@ -22,7 +22,16 @@ class CothorityMessages extends CothorityProtobuf {
       throw new Error("messageType must be of type string");
     }
 
-    return this.decodeMessage(messageType, new Uint8Array(response));
+    let toDecode = undefined;
+    if (typeof response.array === "function") {
+      toDecode = Uint8Array.from(response.array());
+    } else if (response instanceof ArrayBuffer) {
+      toDecode = new Uint8Array(response);
+    } else {
+      toDecode = Uint8Array.from(response);
+    }
+
+    return this.decodeMessage(messageType, toDecode);
   }
 
   /**
@@ -219,6 +228,10 @@ class CothorityMessages extends CothorityProtobuf {
       throw new Error("signature must be an instance of Uint8Array");
     }
 
+    if (desc.roster.id !== undefined) {
+      delete desc.roster.id;
+    }
+
     const fields = {
       desc: desc,
       signature: signature
@@ -358,12 +371,12 @@ class CothorityMessages extends CothorityProtobuf {
    * @param id
    * @returns {*|Buffer|Uint8Array}
    */
-  createConfigUpdate(id) {
+  createDataUpdate(id) {
     const fields = {
       id: id
     };
 
-    return this.encodeMessage("ConfigUpdate", fields);
+    return this.encodeMessage("DataUpdate", fields);
   }
 
   /**
@@ -417,14 +430,11 @@ class CothorityMessages extends CothorityProtobuf {
    * @param response
    * @returns {*|Buffer|Uint8Array}
    */
-  createProposeVote(id, signer, challenge, response) {
+  createProposeVote(id, signer, signature) {
     const fields = {
       id: id,
       signer: signer,
-      signature: {
-        challenge: challenge,
-        response: response
-      }
+      signature: signature
     };
 
     return this.encodeMessage("ProposeVote", fields);

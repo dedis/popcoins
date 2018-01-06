@@ -1,10 +1,9 @@
 <Page
         class="page"
         navigatingTo="onNavigatingTo"
-        xmlns:nsDrawer="nativescript-telerik-ui/sidedrawer"
+        xmlns:nsDrawer="nativescript-pro-ui/sidedrawer"
         xmlns:myDrawer="shared/my-drawer"
-        xmlns:att="drawers/pop/att"
-        xmlns:home="drawers/pop/home"
+        xmlns:pop="drawers/pop/pop"
         xmlns:org="drawers/pop/org"
         xmlns="http://www.nativescript.org/tns.xsd">
 
@@ -22,9 +21,6 @@
                     ios.position="left">
         </ActionItem>
         <Label class="action-bar-title" text="PoP"/>
-        <ActionItem tap="scanToClip"
-                    ios.systemIcon="15" ios.position="right"
-                    text="ScanToClip" android.position="popup"/>
     </ActionBar>
 
     <!--
@@ -64,18 +60,12 @@
         -->
         <nsDrawer:RadSideDrawer.mainContent>
 
-            <TabView class="page-content" selectedIndex="1" selectedTabTextColor="black">
+            <TabView class="page-content" selectedIndex="0" selectedTabTextColor="black">
                 <TabView.items>
 
-                    <TabViewItem title="ATT">
+                    <TabViewItem title="POP">
                         <TabViewItem.view>
-                            <att:att-page/>
-                        </TabViewItem.view>
-                    </TabViewItem>
-
-                    <TabViewItem title="HOME">
-                        <TabViewItem.view>
-                            <home:home-page/>
+                            <pop:pop-page/>
                         </TabViewItem.view>
                     </TabViewItem>
 

@@ -1,7 +1,8 @@
 <Page
         class="page"
         navigatingTo="onNavigatingTo"
-        xmlns:nsDrawer="nativescript-telerik-ui/sidedrawer"
+        xmlns:nsDrawer="nativescript-pro-ui/sidedrawer"
+        xmlns:nsListView="nativescript-pro-ui/listview"
         xmlns:myDrawer="shared/my-drawer"
         xmlns="http://www.nativescript.org/tns.xsd">
 
@@ -19,7 +20,7 @@
                     ios.position="left">
         </ActionItem>
         <Label class="action-bar-title" text="Home"/>
-        <ActionItem tap="addConodeManual"
+        <ActionItem tap="addConode"
                     ios.systemIcon="4" ios.position="right"
                     text="Add Conode" android.position="popup"/>
     </ActionBar>
@@ -61,20 +62,31 @@
         -->
         <nsDrawer:RadSideDrawer.mainContent>
             <GridLayout class="page-content" rows="*,auto" columns="*,*">
-                <!--
-                <Label class="page-icon fa" text="&#xf015;"/>
-                <Label class="page-placeholder" text="Page content goes here"></Label>
-                 -->
-                <ListView items="{{ list }}" itemTap="conodeTapped" row="0" colSpan="2">
-                    <ListView.itemTemplate>
-                        <GridLayout id="grid-layout-conode-stats" rows="*,*,*,*" columns="*">
+                <nsListView:RadListView items="{{ list }}" itemTap="conodeTapped" row="0" colSpan="2"
+                          itemSwipeProgressStarted="onSwipeCellStarted"
+                          swipeActions="true"
+                          id="listView">
+
+                    <nsListView:RadListView.itemSwipeTemplate>
+                        <GridLayout rows="*" columns="*,auto">
+                            <StackLayout orientation="horizontal" col="0">
+                            </StackLayout>
+                            <StackLayout orientation="horizontal" col="1">
+                                <Button id="button-delete" text="Delete" tap="deleteConode" backgroundColor="red"/>
+                            </StackLayout>
+                        </GridLayout>
+                    </nsListView:RadListView.itemSwipeTemplate>
+
+                    <nsListView:RadListView.itemTemplate>
+                        <GridLayout id="grid-layout-conode-stats" rows="*,*,*,*,auto" columns="*" backgroundColor="white">
                             <Label text="{{ description }}" row="0" textWrap="true"/>
                             <Label text="{{ address }}" row="1" textWrap="true"/>
                             <Label text="{{ toBase64(id) }}" row="2" textWrap="true"/>
                             <Label text="{{ toBase64(public) }}" row="3" textWrap="true"/>
+                            <StackLayout row="4" height="1" backgroundColor="black"/>
                         </GridLayout>
-                    </ListView.itemTemplate>
-                </ListView>
+                    </nsListView:RadListView.itemTemplate>
+                </nsListView:RadListView>
 
                 <Button text="Reload" tap="loadConodeList" row="1" col="0" isEnabled="{{ !isLoading}}"/>
 

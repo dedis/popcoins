@@ -33,7 +33,8 @@ class User {
     this._keyPair = ObservableModule.fromObject({
       public: new Uint8Array(),
       private: new Uint8Array(),
-      publicComplete: new Uint8Array()
+      publicComplete: new Uint8Array(),
+      toBase64: Convert.byteArrayToBase64
     });
     this._roster = ObservableModule.fromObject({
       isLoading: false,
@@ -62,6 +63,17 @@ class User {
    */
   getKeyPairModule() {
     return this._keyPair;
+  }
+
+  /**
+   * Returns wether the key pair of the user is set.
+   * @returns {boolean} - true if and only if the key pair of the user has been set
+   */
+  isKeyPairSet() {
+    const keyPairModule = this.getKeyPairModule();
+
+    return keyPairModule.public.length > 0 &&
+      keyPairModule.private.length > 0;
   }
 
   /**
@@ -141,19 +153,19 @@ class User {
    * @returns {Roster} - a roster object containing the conodes of the user
    */
   getRoster() {
+    const rosterModule = this.getRosterModule();
+
     let id = undefined;
-    if (this.getRosterModule().id.length > 0) {
-      id = this.getRosterModule().id;
+    if (rosterModule.id.length > 0) {
+      id = rosterModule.id;
     }
 
     const list = [];
-    if (this.getRosterModule().list.length > 0) {
-      this.getRosterModule().list.forEach(server => {
-        list.push(server);
-      });
-    }
+    rosterModule.list.forEach(server => {
+      list.push(server);
+    });
 
-    return CothorityMessages.createRoster(id, list, this.getRosterModule().aggregate);
+    return CothorityMessages.createRoster(id, list, rosterModule.aggregate);
   }
 
   /**
@@ -176,7 +188,7 @@ class User {
     if (roster.id !== undefined) {
       this.getRosterModule().id = roster.id;
     }
-    this.getRosterModule().list = new ObservableArray();
+    this.emptyRosterList();
     roster.list.forEach((server) => {
       server.toBase64 = Convert.byteArrayToBase64;
       this.getRosterModule().list.push(server);
@@ -351,6 +363,15 @@ class User {
   emptyRosterStatusList() {
     while (this.getRosterModule().statusList.length > 0) {
       this.getRosterModule().statusList.pop();
+    }
+  }
+
+  /**
+   * Empties the roster list. This action is not stored permanently.
+   */
+  emptyRosterList() {
+    while (this.getRosterModule().list.length > 0) {
+      this.getRosterModule().list.pop();
     }
   }
 

@@ -10,6 +10,7 @@ const CothorityMessages = require("../../../shared/lib/dedjs/protobuf/build/coth
 const Net = require("../../../shared/lib/dedjs/Net");
 const StandardSocket = new Net.StandardSocket();
 const CothoritySocket = new Net.CothoritySocket();
+const PasteBin = new Net.PasteBin();
 
 const CONODE_ADDRESS = "tcp://10.0.2.2:7002";
 const CONODE_PUBLIC_KEY = "HkDzpR5Imd7WNx8kl2lJcIVRVn8gfDByJnmlfrYh/zU=";
@@ -47,5 +48,37 @@ describe("Net", function () {
     it("should throw when typeToDecode is not a string", function () {
       expect(() => CothoritySocket.send(SERVER_IDENTITY, PATH, MESSAGE, 42)).to.throw();
     });
+  });
+
+  describe("#PasteBin", function () {
+    describe("#get", function () {
+      it("should throw when id is not a string", function () {
+        expect(() => PasteBin.get(42)).to.throw();
+      });
+    });
+
+    describe("#paste", function () {
+      it("should throw when text is not a string", function () {
+        expect(() => PasteBin.paste(42)).to.throw();
+      });
+    });
+
+    /*
+    it("should correctly paste and get a paste for pastebin", function () {
+      const TEXT_TO_PASTE = "DIS_MAH_PASTE";
+
+      return PasteBin.paste(TEXT_TO_PASTE)
+        .then(id => {
+          console.log(id);
+          console.dir(id);
+
+          return PasteBin.get(id);
+        })
+        .then(pasteText => {
+          console.log(pasteText);
+          console.dir(pasteText);
+        });
+    });
+    */
   });
 });

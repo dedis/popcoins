@@ -4,6 +4,8 @@ chai.should();
 
 const BigNumber = require("bn.js");
 const Convert = require("../../../shared/lib/dedjs/Convert");
+const Helper = require("../../../shared/lib/dedjs/Helper");
+const ObjectType = require("../../../shared/lib/dedjs/ObjectType");
 
 const Crypto = require("../../../shared/lib/dedjs/Crypto");
 
@@ -120,6 +122,21 @@ describe("Crypto", function () {
       const verify = Crypto.schnorrVerify(PUBLIC_KEY_POINT, MESSAGE, SIGNATURE_BYTE_ARRAY);
 
       verify.should.be.true;
+    });
+  });
+
+  describe("#generateRandomKeyPair", function () {
+    it("should return a KeyPair object and the keys should have the right length", function () {
+      const keyPair = Crypto.generateRandomKeyPair();
+
+      Helper.isOfType(keyPair, ObjectType.KEY_PAIR).should.be.true;
+      keyPair.public.length.should.equal(32);
+      keyPair.private.length.should.equal(32);
+      keyPair.publicComplete.length.should.equal(65);
+
+      //console.log(Convert.byteArrayToBase64(keyPair.public));
+      //console.log(Convert.byteArrayToBase64(keyPair.private));
+      //console.log(Convert.byteArrayToBase64(keyPair.publicComplete));
     });
   });
 });

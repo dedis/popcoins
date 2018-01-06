@@ -281,9 +281,9 @@ function parseJsonFinalStatement(jsonString) {
   }
 
   object.attendees = object.attendees.map(base64String => {
-    return base64ToByteArray(base64String);
+    return base64ToByteArray(base64String.split(" ").join("+"));
   });
-  object.signature = base64ToByteArray(object.signature);
+  object.signature = base64ToByteArray(object.signature.split(" ").join("+"));
   object.desc = parseJsonPopDesc(objectToJson(object.desc));
 
   return CothorityMessages.createFinalStatement(object.desc, object.attendees, object.signature, object.merged);
@@ -305,6 +305,21 @@ function parseJsonPopDesc(jsonString) {
 }
 
 /**
+ * Parses a JSON string into a PopDesc hash. The JSON has to represent an object with a "hash" property containing a base64 encoded string.
+ * @param {string} jsonString - the JSON string to parse into a PopDesc hash
+ * @returns {Uint8Array} - the parsed PopDesc hash
+ */
+function parseJsonPopDescHash(jsonString) {
+  if (typeof jsonString !== "string") {
+    throw new Error("jsonString must be of type string");
+  }
+
+  const hash = jsonToObject(jsonString).hash;
+
+  return base64ToByteArray(hash);
+}
+
+/**
  * Parses a JSON string into a Roster object, if the ServerIdentities does not have an ID yet it will be computed.
  * @param {string} jsonString - the JSON string to parse into a Roster object
  * @returns {Roster} - the parsed Roster object
@@ -321,23 +336,23 @@ function parseJsonRoster(jsonString) {
 
   let rosterId = roster.id;
   if (rosterId !== undefined) {
-    rosterId = base64ToByteArray(rosterId);
+    rosterId = base64ToByteArray(rosterId.split(" ").join("+"));
   }
 
-  let aggregate = (roster.aggregate === undefined) ? undefined : base64ToByteArray(roster.aggregate);
+  let aggregate = (roster.aggregate === undefined) ? undefined : base64ToByteArray(roster.aggregate.split(" ").join("+"));
 
   const points = [];
   const list = roster.list.map((server) => {
     if (aggregate === undefined) {
-      points.push(Crypto.unmarshal(base64ToByteArray(server.public)));
+      points.push(Crypto.unmarshal(base64ToByteArray(server.public.split(" ").join("+"))));
     }
 
     let serverId = server.id;
     if (serverId !== undefined) {
-      serverId = base64ToByteArray(serverId);
+      serverId = base64ToByteArray(serverId.split(" ").join("+"));
     }
 
-    return toServerIdentity(server.address, base64ToByteArray(server.public), server.description, serverId);
+    return toServerIdentity(server.address, base64ToByteArray(server.public.split(" ").join("+")), server.description, serverId);
   });
 
   if (aggregate === undefined) {
@@ -414,7 +429,51 @@ function parseJsonKeyPair(jsonString) {
     publicComplete = base64ToByteArray(keyPair.publicComplete);
   }
 
+  if (keyPair.private === undefined) {
+    keyPair.private = "";
+  }
+
   return CothorityMessages.createKeyPair(base64ToByteArray(keyPair.public), base64ToByteArray(keyPair.private), publicComplete);
+}
+
+/**
+ * Parses a JSON string into a ServerIdentity object.
+ * @param {string} jsonString - the JSON string to parse into a ServerIdentity object
+ * @returns {ServerIdentity} - the parsed ServerIdentity object
+ */
+function parseJsonServerIdentity(jsonString) {
+  if (typeof jsonString !== "string") {
+    throw new Error("jsonString must be of type string");
+  }
+
+  const serverIdentity = jsonToObject(jsonString);
+
+  const publicKey = base64ToByteArray(serverIdentity.public);
+  const id = base64ToByteArray(serverIdentity.id);
+
+  return toServerIdentity(serverIdentity.address, publicKey, serverIdentity.description, id);
+}
+
+/**
+ * Parses a JSON string into an array of Uint8Array. The JSON has to represent an object with a "array" property that is an array of base64 encoded strings.
+ * @param {string} jsonString - the JSON string to parse into an array of Uint8Array
+ * @returns {Array} - the parsed an array of Uint8Array
+ */
+function parseJsonArrayOfKeys(jsonString) {
+  if (typeof jsonString !== "string") {
+    throw new Error("jsonString must be of type string");
+  }
+
+  let array = jsonToObject(jsonString).array;
+  if (array === undefined || !Array.isArray(array)) {
+    throw new Error("object.array is undefined or not an array");
+  }
+
+  array = array.map(base64String => {
+    return base64ToByteArray(base64String);
+  });
+
+  return array;
 }
 
 /**
@@ -479,8 +538,11 @@ module.exports.parseJsonPopToken = parseJsonPopToken;
 module.exports.parseJsonFinalStatementsArray = parseJsonFinalStatementsArray;
 module.exports.parseJsonFinalStatement = parseJsonFinalStatement;
 module.exports.parseJsonPopDesc = parseJsonPopDesc;
+module.exports.parseJsonPopDescHash = parseJsonPopDescHash;
 module.exports.parseJsonRoster = parseJsonRoster;
 module.exports.parseTomlRoster = parseTomlRoster;
 module.exports.parseJsonKeyPair = parseJsonKeyPair;
+module.exports.parseJsonServerIdentity = parseJsonServerIdentity;
+module.exports.parseJsonArrayOfKeys = parseJsonArrayOfKeys;
 module.exports.toServerIdentity = toServerIdentity;
 module.exports.publicKeyToUuid = publicKeyToUuid;

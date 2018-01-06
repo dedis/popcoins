@@ -34,14 +34,6 @@ class Cisc {
         });
         this._data = {};
         this._proposedData = {};
-
-        // this._identity = undefined;
-        // this._viewModel = new ObservableArray();
-        // this._proposedDevices = new ObservableArray();
-        // this._storageList = new ObservableArray();
-        // this._data = undefined;
-        // this._proposedData = undefined;
-        // this._isOnProposed = false;
     }
 
     /**
@@ -155,7 +147,6 @@ class Cisc {
         if (array.length === 0 || !Helper.isOfType(array[0], ObjectType.DEVICE)) {
             throw new Error("array is empty or array[i] is not instance of device");
         }
-
         this.emptyProposedDevicesArray();
 
         if (array.length === 1) {
@@ -345,6 +336,7 @@ class Cisc {
 
         this.getProposedStorage().push(keyValue);
         return new Promise((resolve, reject) => resolve())
+
     }
 
     /**
@@ -357,12 +349,12 @@ class Cisc {
      */
     reset() {
         this._isLoaded = false;
-
         const promises = [this.emptyViewModel()];
 
         return Promise.all(promises)
             .then(() => {
                 this._isLoaded = true;
+
                 return Promise.resolve();
             })
             .catch(error => {
@@ -371,6 +363,7 @@ class Cisc {
                 console.trace();
                 return Promise.reject(error);
             });
+
     }
 
     /**

@@ -666,4 +666,16 @@ describe("User", function () {
       (User.getKeyPairModule() === User._keyPair).should.be.true;
     });
   });
+
+  describe("#isKeyPairSet", function () {
+    it("should return true if and only if public and private are not empty", function () {
+      User.isKeyPairSet().should.be.false;
+
+      User._keyPair.public = PUBLIC_KEY_BYTE_ARRAY;
+      User.isKeyPairSet().should.be.false;
+
+      User._keyPair.private = PRIVATE_KEY_BYTE_ARRAY;
+      User.isKeyPairSet().should.be.true;
+    });
+  });
 });

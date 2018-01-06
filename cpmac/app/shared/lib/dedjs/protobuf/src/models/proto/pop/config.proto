@@ -1,7 +1,7 @@
 syntax = "proto2";
 
-import "final-statement.proto";
-import "pop-desc.proto";
+import "final.proto";
+import "desc.proto";
 
 option java_package = "ch.epfl.dedis.proto";
 option java_outer_classname = "ConfigProto";

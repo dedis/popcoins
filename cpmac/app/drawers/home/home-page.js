@@ -1,23 +1,23 @@
 const Frame = require("ui/frame");
-const Helper = require("~/shared/lib/dedjs/Helper");
-const ObjectType = require("~/shared/lib/dedjs/ObjectType");
-const User = require("~/shared/object/user/User").get;
+const Dialog = require("ui/dialogs");
+const Helper = require("../../shared/lib/dedjs/Helper");
+const Convert = require("../../shared/lib/dedjs/Convert");
+const ObjectType = require("../../shared/lib/dedjs/ObjectType");
+const CothorityMessages = require("../../shared/lib/dedjs/protobuf/build/cothority-messages");
+const ScanToReturn = require("../../shared/lib/scan-to-return/scan-to-return");
+const User = require("../../shared/lib/dedjs/object/user/User").get;
 
 const viewModel = User.getRosterModule();
 
 let pageObject = undefined;
 
 function onNavigatingTo(args) {
-  if (args.isBackNavigation) {
-    return;
-  }
-
   const page = args.object;
   pageObject = page.page;
   page.bindingContext = viewModel;
 
   if (viewModel.statusList.length !== viewModel.list.length) {
-    //loadConodeList();
+    loadConodeList();
   }
 }
 
@@ -37,16 +37,30 @@ function deblockConodeList() {
 }
 
 function conodeTapped(args) {
-  return User.substractServerByIndex(args.index);
-  /*
-  Frame.topmost().navigate({
-    moduleName: "drawers/home/conode-stats/conode-stats-page",
-    bindingContext: args.index
+  const index = args.index;
+  const conodesId = Convert.byteArrayToBase64(User.getRoster().list[index].id);
+  let conodeAndStatusPair = undefined;
+  User._roster.statusList.slice().forEach(object => {
+    if (Convert.byteArrayToBase64(object.conode.id) === conodesId) {
+      conodeAndStatusPair = object;
+    }
   });
-  */
+
+  if (conodeAndStatusPair !== undefined) {
+    Frame.topmost().navigate({
+      moduleName: "drawers/home/conode-stats/conode-stats-page",
+      bindingContext: conodeAndStatusPair
+    });
+  } else {
+    return Dialog.alert({
+      title: "No Status for this Conode",
+      message: "Please check your conodes information and try to reload.",
+      okButtonText: "Ok"
+    });
+  }
 }
 
-function addConodeManual() {
+function addConode() {
   function addManualCallBack(server) {
     if (server !== undefined && !Helper.isOfType(server, ObjectType.SERVER_IDENTITY)) {
       throw new Error("server must be an instance of ServerIdentity or undefined to be skipped");
@@ -56,11 +70,99 @@ function addConodeManual() {
       return User.addServer(server)
         .then(() => {
           return loadConodeList();
+        })
+        .catch(error => {
+          console.log(error);
+          console.dir(error);
+          console.trace();
+
+          Dialog.alert({
+            title: "Error",
+            message: "An error occured, please try again.",
+            okButtonText: "Ok"
+          });
+
+          return Promise.reject(error);
         });
     }
   }
 
-  pageObject.showModal("drawers/home/add-conode-manual/add-conode-manual", undefined, addManualCallBack, true);
+  return Dialog.confirm({
+    title: "Choose a Method",
+    message: "How do you want to add the conode?",
+    okButtonText: "Scan QR",
+    cancelButtonText: "Cancel",
+    neutralButtonText: "Manual"
+  })
+    .then(result => {
+      if (result) {
+        // Scan
+        return ScanToReturn.scan()
+          .then(string => {
+            const conode = Convert.parseJsonServerIdentity(string);
+
+            return User.addServer(conode);
+          });
+      } else if (result === undefined) {
+        // Manual
+        pageObject.showModal("shared/pages/add-conode-manual/add-conode-manual", undefined, addManualCallBack, true);
+        return Promise.resolve();
+      } else {
+        // Cancel
+        return Promise.resolve();
+      }
+    })
+    .catch(error => {
+      console.log(error);
+      console.dir(error);
+      console.trace();
+
+      Dialog.alert({
+        title: "Error",
+        message: "An error occured, please check the code you scanned.",
+        okButtonText: "Ok"
+      });
+
+      return Promise.reject(error);
+    });
+}
+
+function deleteConode(args) {
+  // We do not get the index of the item swiped/clicked...
+  const conode = args.object.bindingContext;
+
+  return User.substractRoster(CothorityMessages.createRoster(undefined, [conode], conode.public))
+    .then(() => {
+      const listView = Frame.topmost().currentPage.getViewById("listView");
+      listView.notifySwipeToExecuteFinished();
+
+      return Promise.resolve();
+    })
+    .catch(error => {
+      console.log(error);
+      console.dir(error);
+      console.trace();
+
+      Dialog.alert({
+        title: "Error",
+        message: "An error occured, please try again.",
+        okButtonText: "Ok"
+      });
+
+      return Promise.reject(error);
+    });
+}
+
+function onSwipeCellStarted(args) {
+  const swipeLimits = args.data.swipeLimits;
+  const swipeView = args.object;
+
+  const deleteButton = swipeView.getViewById("button-delete");
+
+  const width = deleteButton.getMeasuredWidth();
+
+  swipeLimits.right = width;
+  swipeLimits.threshold = width / 2;
 }
 
 function onDrawerButtonTap(args) {
@@ -68,11 +170,11 @@ function onDrawerButtonTap(args) {
   sideDrawer.showDrawer();
 }
 
-module.exports = {
-  onNavigatingTo,
-  onDrawerButtonTap,
-  loadConodeList,
-  deblockConodeList,
-  conodeTapped,
-  addConodeManual
-}
+module.exports.onNavigatingTo = onNavigatingTo;
+module.exports.onDrawerButtonTap = onDrawerButtonTap;
+module.exports.onSwipeCellStarted = onSwipeCellStarted;
+module.exports.loadConodeList = loadConodeList;
+module.exports.deblockConodeList = deblockConodeList;
+module.exports.conodeTapped = conodeTapped;
+module.exports.addConode = addConode;
+module.exports.deleteConode = deleteConode;
