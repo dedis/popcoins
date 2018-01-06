@@ -74,6 +74,7 @@
 
   ## Future work
 
+    - iOS WebSocket Bug
     - Config sharing over the conodes and not pastebin
     - Sign/Verify Services (Ex. BeerToken)
     - Party Merging
