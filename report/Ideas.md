@@ -59,9 +59,9 @@
 
     - (OK)PoP backend is fully implemented
     - (OK)Need to implement a user friendly frontend
-    - Implementation of the communication between PoP front- and backend
-      - Messages, Signing...
-      - Talk about the hash/sign functions/algo used internally by the organizer
+    - (OK)Implementation of the communication between PoP front- and backend
+      - (OK)Messages, Signing...
+      - (OK)Talk about the hash/sign functions/algo used internally by the organizer
     - (OK)Talk about their possibilities
       - (OK)Organizer: Configure, Register, Finalize
       - (OK)Attendee: keypair, PoP Token creation
@@ -69,27 +69,29 @@
 
   ## Results
 
-    - Ability to create, manage, attend a PoP party
-    - PoP Token creation at the finalisation of the PoP party
+    - (OK)Ability to create, manage, attend, finalize a PoP party, share the final statement
+    - (OK)PoP Token creation
 
   ## Future work
 
-    - iOS WebSocket Bug
-    - Config sharing over the conodes and not pastebin
-    - Sign/Verify Services (Ex. BeerToken)
-    - Party Merging
-    - Viral PoP Parties: Register a final statement on a conode, everyone in the final should be able to either create a skipchain or new pop party
+    - (OK)Config sharing over the conodes and not pastebin
+    - (OK)Sign/Verify Services (Ex. BeerToken)
+    - (OK)Party Merging
+    - (OK)Viral PoP Parties: Register a final statement on a conode, everyone in the final should be able to either create a skipchain or new pop party
 
 # Step-by-step guide for installation, including dependencies, and running of the final product
 
-  - Nativescript Tutorial
   - Install Node, VS Code or Webstorm, Plugins
+  - Nativescript Tutorial
   - Android Studio - Emulator / Xcode - Emulator - debugging on device
   - Own Makefile scripts (typically compile dedjs/protobuf)
   - Install and run conodes
   - Explain how to build/test
-  - Talk about the bugs we had to bypass (.gz, brorand, websocket?...)
-  
+
+  - Talk about the bugs we had to bypass (.gz, brorand, iOS WebSocket Bug...)
+
+    REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT
+
 # What have we learned? What would we now do differently?
 
   - 12 janvier rapport + app! (send 8 janvier si "correction")
