@@ -12,7 +12,12 @@ Secondly we would also like to thank our parents and friends who helped us throu
 
 As stated in the acknowledgements, the Cothority(https://github.com/dedis/cothority) framework is developed and maintained by the DeDiS laboratory at EPFL. This project provides a skeleton for developing, analysing, and deploying decentralized, distributed cryptographic protocols. A set of servers running these protocols and communicating to each other is reffered to as a collective authority or cothority and the individual servers are called cothority servers or conodes. A cothority collectively executing decentralized protocols could be used for collective signing, threshold signing or generation of public-randomness, to name only a few. The highest level of abstraction is created by the protocols like the collective signature (CoSi) protocol, the random numbers (RandHound) protocol or the communication (Messaging) protocol used by the conodes to exchange data. Then come the services, who rely on these protocols. As of today there exist a Status service to get the status of a conode, a CoSi service for collective signing, a Guard service which allow distributed encryption and decryption of passwords, a SkipChain service for storing arbitrary data on a permissioned blockchain and an Identity service for distributed key/value pairs storage. On top of these services are running so called apps like Status, CoSi, Guard, collective identity skipchains (CISC) and proof-of-personhood (PoP). In this project report we will only concentrate on the last two of them.
 
-###### CISC APP(TODO)
+###### CISC APP(https://github.com/dedis/cothority/wiki/Cisc)
+Cisc allows you to get your own provisioned blockchain to store your data. For example, it is possible to store SSH public keys of all your devices and configure it to rotate the keys when needed. It is also possible to store static web pages and any other data as it basicaly consist of a key-value pair storage. To use the Cisc you will need to:
+- create a blockchain (using the Cothority for example)
+- Add a group of devices allowed to vote on the data
+- Use the CLI to add any data you want
+
 
 ###### POP APP(https://github.com/dedis/cothority/wiki/PoP)
 Anonymity on the internet often trades-off with accountability. Users want to be as anonymous as possible without loosing rights and possibilities. This is in contradiction with a lot of online service providers who need this accountability to be able to provide the user a secure and high quality experience. Captcha is one of the most used method to block out non human beings, but on one side programs are becoming better and better in solving them and on the other side even human being are sometimes not able to correctly decode the Captcha. The PoP app tries to remedy to this problem by prividing so called PoP Token which can be seen as a one time captcha. These token are like completely anonymous ID cards. The PoP Token will prove that we are a human being that was at a specified time at a specified place without revealing which person we are.
@@ -35,6 +40,11 @@ Starting with a simple proof of concept (PoC) for CISC and PoP as a mobile appli
 The cothority framework is composed of multiple protocols, services and apps. At this state of developement CPMAC only supports the CISC and PoP app but is intended to progressively feature and integrate more apps. We will now present these two apps more deeply.
 
 ### CISC(TODO)
+CISC stands for Cothority Identity SkipChain. The goal of this application is to provide a simple way to store data. It is based on Identity SkipChains which are permissioned blockchain-based key/value storages for organizing identities (e.g., SSH-keys). The main use of the Cisc is to store data so that it is easy to modify/add/remove it if you have a majority of the registered device in your controle. This way, if the user loose a device or one of his device gets stolen, he won't loose the data, and no harm can be done. Here are some of the terms that will be used throughout this paper:
+- SkipChain: a very simple, extendable voting-based permissioned blockchain based on the Chainiac-paper. In the cisc implementation, users use a personal blockchain to store there data.
+- Data: The data stored on the Cisc SkipChain can either be SSH-public keys, web pages or any key-value pairs.
+- Manager: the owner of the SkipChain.
+- Device: any device stored on the skipchain. It is identified by a keypair, the public one being stored on the skipchain. For the moment a device can either be a laptop using the Cisc CLI or a smartphone using our cross platform application.
 
 ### POP(Intuitive model for the pop party process?)
 
@@ -86,14 +96,19 @@ The home screen is used to display the conodes of the app user, he can add/remov
   - Org
   Contains all the functionalities needed by the organizers of a PoP party.
 - CISC
-(TODO)
+  - Home
+  This is the main tab of the Cisc drawer. If you are not connected to an identity skipchain you will be prompted to do so. If you are connected to a skipchain you will have the possibility to see the data on the skipchain, see the proposed data and vote for them.
+  - QR
+  This page display the adress to connect to the identity skipchain and its QR code representation.
+  - Data
+  This page allows you to add simple key/value pairs.
 - Settings
   - User
   The settings of the user include key pair generation and displaying, you can also completeley reset all the data linked to the user of the app itself.
   - PoP
   In this tab you can reset the global PoP data and the data linked to the organizer.
   - CISC
-  (TODO)
+  This tab allows you to disconnect from the current stored skipchain and reset all the data linked to the Cisc component of the app.
 
 In order to easily represent, manage the data and use the corresponding functionalities for all these components we chose to create multiple JS classes that are true singletons (as far as JS allows it). Singletons permitted us to always work on the exact same object independently from the location we require the class, since we have to store data locally we had to load the saved states for each one of theses classes into memory. Thanks to the singleton design pattern this only executes once either at the start of the app or the first time the class is required, all subsequent calls will use this pre-loaded object. On the other hand, since we work with singletons, we were not able to create relationships between them e.g., the class that represents the organizer of a PoP party does not extends the main PoP class (each subclass instance would recreate their own parent class instance). Here are the classes that have been implemented:
 
@@ -102,11 +117,11 @@ In order to easily represent, manage the data and use the corresponding function
 - PoP.js
   Contains everything that is common to organizers and attendees, it manages the list of final statements and PoP token belonging to the user.
   - Org.js
-  Representing the organizer of a PoP party, in this class you'll find the current linked conode, th current PoP configuration, the currently registered attendees and the ID of the current PoP description.
+  Representing the organizer of a PoP party, in this class you'll find the current linked conode, the current PoP configuration, the currently registered attendees and the ID of the current PoP description.
   - Att.js
   This class is only a skeleton for now and not used at all. It is a placeholder for future implementations that are specific to the attendees of a PoP party (see future work).
 - Cisc.js
-  (TODO)
+  This class represnts the Cisc user. It manages the stored and proposed data on the skipchain, its adress and the viewmodel used for data binding in the cisc drawer.
 
 In addition to these objects we wrote some libraries so that we can easily manipulate any kind of data, may it be local or exchanged with conodes. The main libraries are:
 
@@ -132,7 +147,34 @@ The next functionalities of the user are located in the user tab in the settings
 
 # CISC
 
-(TODO)
+As it was shown earlier, right now the Cisc is only available on computers using the CLI developped by the DeDiS lab. The point of the Cisc is to have multiple devices connected to the skipchain for security reasons. Indeed, using the Cisc allow the user to spread its data, without giving the opportunity to an attacker to modifiy it without having access to a given threshold of devices. That is why it was necessary to develop an application to allow user to manage the Cisc data on smartphones. This section will present the work done in the Cisc drawer of the app, the results that were achieved and some of the possible future work to improve the application.
+
+## Implementation and Evaluation
+
+The implemetation of the Cisc drawer is done in a single JavaScript class Cisc.js. This object allows a user to connect to an existing skipchain that was created using the CLI. Once the device is connected to a skipchain it will access a first set of functionalities:
+- Access to the list of registered devices for the skipchain
+- Possibility to browse the SSH-keys
+- Possibility to browse the webpages stored on the skipchain
+
+The device will have the possibility to submit a request to become a part of the registered devices. To do so it will propose a new block to the skipchain containing the same data as the one that are already on the chain, completed by a new entry in the device array. This entrt being its name and public key. If this block gets accepted, the device becomes registered and receive the right to vote for the proposed data.
+The first thing to do when a user want to use the Cisc is to define a name in the parameters. Once this is done he will have the possibility to connect to a skipchain by using the button displayed in the drawer. When the button is tapped, the app turns into a QR code scanner. The QR scanner is expecting a QR formated as the one displayed using the command```cisc id qr```
+
+After scanning such code, the object will save it and try to access it to get the data from the identity skipchain. If this action is successful, the object will consider itself as connected to the skipchain. It will then try to see wether or not the device is part of the voting devices of the chain. If it is not it will propose a new block of data to add it.
+Once the device is part of the voting devices, it will have the ability to vote for the proposed data.
+To vote for an update, the user has to compute a hash of the proposed data. This hash is computed based on every data in the block, that is:
+- the threshold of the chain
+- the devices name and public-keys alphabetically ordered
+- the key-value pairs odered alphabetically
+The vote then consists of a schnorr signature of this hash using the device private key, so that it is verifiable using the public key stored in the skipchain.
+
+## Results
+As shown in the previous part, the app only use the basic functionalities of the Cisc implementation. The most important task was to allow a user to access the cisc on all his devices and this project is a good proof of concept.However, we can still imagine some work to complete the application.
+
+## Future Work
+
+Some functionalities could improve the current implementation of the cisc. As example we can site the following:
+- Adding the possibility to connect to multiple skipchains: indeed, right now a user can only be connected to a single identity skipchain. It could be a good thing to add an option to save a group of available skipchains that the user already connected to.
+- Creating identity skipchains: indeed, for the moment the user has to connect to an already existing skipchain that was created using the cisc CLI. A good improvement of the app could be to add the possibility to connect to conode to create a skipchain, either using a public or even better, using the pop token generated on the other part of the application.
 
 # PoP
 
