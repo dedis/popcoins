@@ -1,12 +1,7 @@
 # Introduction of the subject and the problem
 
-<<<<<<< HEAD
-  - Some words about Cothority in general
-  - Some details about CISC and PoP in general
-=======
   - (OK)Some words about Cothority in general + diagram and state diagram
   - (TODO - CISC)Some details about CISC and (OK)PoP in general
->>>>>>> 00d0403d05dd8977f1ad5804954fdeee7abe0089
 
 # Goals of the project and motivation
 
@@ -92,14 +87,10 @@
   - Own Makefile scripts (typically compile dedjs/protobuf)
   - Install and run conodes
   - Explain how to build/test
-<<<<<<< HEAD
-  - Talk about the bugs we had to bypass (.gz, brorand...)
-=======
-
   - Talk about the bugs we had to bypass (.gz, brorand, iOS WebSocket Bug...)
 
     REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT
->>>>>>> 00d0403d05dd8977f1ad5804954fdeee7abe0089
+
 
 # What have we learned? What would we now do differently?
 
