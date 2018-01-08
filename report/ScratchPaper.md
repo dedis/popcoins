@@ -166,4 +166,112 @@ As said in the result sub-section, only basic functionalities have been ported f
   Once a PoP party is finalized the final statement is registered on the hosting conodes. Moreover, all attendees listed in this statement are trusted people because they own a PoP token that is generated using it. Attendees should now be able to host a new PoP party on one of the hosting conodes using their PoP token as authentication (instead of linking to it by providing a PIN). This could ease the hosting of PoP parties as an attendee without having to set up a conode.
 
 - Sign and Verify Services:
-  One of the main purposes of a PoP token is to be able to sign and verify different services. The token allows us to prove that we were at a certain location at a certain date and time, thus it should provide us some rights that were linked to the PoP party. As an example we will use the BeerToken suggested by the DeDiS laboratory. The lab would organize a PoP party and invite all the DeDiS members. The goal of the PoP party is to hand out PoP tokens called BeerToken. A BeerToken would guarantee every attendee one free beer at Satellite(https://satellite.bar), the bar of EPFL. In order to make this possible it would be required to either verify a BeerToken, to know if the user already ordered is free beer of the week, or sign using a BeerToken to claim the weekly beer. All this could be implemented in CPMAC by extending the core libraries and objects.
+  One of the main purposes of a PoP token is to be able to sign and verify different services. The token allows us to prove that we were at a certain location at a certain date and time, thus it should provide us some rights that were linked to the PoP party. As an example we will use the BeerToken suggested by the DeDiS laboratory. The lab would organize a PoP party and invite all the DeDiS members. The goal of the PoP party is to hand out PoP tokens called BeerToken. A BeerToken would guarantee every attendee a weekly free beer at Satellite(https://satellite.bar), the bar of EPFL. In order to make this possible it would be required to either verify a BeerToken, to know if the user already ordered is free beer of the week, or sign using a BeerToken to claim the weekly beer. All this could be implemented in CPMAC by extending the core libraries and objects.
+
+# Installation and Running of CPMAC
+
+We will now see how to install all required dependencies and how to compile, test and run the app. The following steps are:
+
+1) Installation of Go Language(https://golang.org)
+To be able to run the Cothority framework you'll need the go compiler. Intall it by following the official installation guide: https://golang.org/doc/install . You also need to set your GOPATH environment variable by either following this guide(https://golang.org/doc/code.html#GOPATH) or by running(restart needed):
+
+    echo 'export PATH=$PATH:$(go env GOPATH)/bin' >> ~/.bash_profile
+
+2) Cothority Installation and Running of Conodes(https://github.com/dedis/cothority)
+First you'll need the correct version of Cothority and run the conodes to be able to interact with them as you use CPMAC. CPMAC is developped to run against the stable version 1.2 of Cothority. As stated in the README.md file on the GitHub page of the cothority framework, you have to use the version installed in "gopkg.in/dedis/cothority.v1". The source code in this folder corresponds to the branch v1.2 located here: https://github.com/dedis/cothority/tree/v1.2 . It is crucial that you run CPMAC against this stable version, as Cothority is in heavy developpement many functionalities have already been changed to work differently and the implementation will not be compatible.
+Clone the repository by running:
+
+    go get -u github.com/dedis/cothority
+
+Locate and enter the folder "gopkg.in/dedis/cothority.v1" in your GOPATH, you can then execute the following command to run three local conodes:
+
+    ./conode/run_conode.sh local 3 5
+
+3) Official NativeScript Tutorial(https://docs.nativescript.org/start/quick-setup)
+We recommend to follow the instructions on their official page, as it will always be up-to-date. But here are the basic steps:
+
+    1) NodeJS Installation(https://nodejs.org/en/)
+    This can be done by downloading the installer on their home page (https://nodejs.org/en/). Always install a long term service (LTS) version as it is the supported version for NativeScript. If you install it using the macOS package manager brew(https://brew.sh), don't forget to manually add the NodeJS path to your bash profile by running(replace {VERSION} by the installed version through brew, example if node@6 has been installed the {VERSION} should become 6)(restart needed):
+
+        echo 'export PATH="/usr/local/opt/node@{VERSION}/bin:$PATH"' >> ~/.bash_profile
+
+    2) NativeScript CLI Installation(https://www.npmjs.com/package/nativescript)
+    This can simply be done by running this command:
+
+        npm install -g nativescript
+
+    If you get EACCES errors, try to runn the last command with sudo. If you still gets EACCES errors, the run the command again with sudo and the unsafe permissions parameter of NPM(https://www.npmjs.com):
+
+        sudo npm install -g --unsafe-perm nativescript
+
+    Try running the command tns, if the command return no error you may continue.
+
+    3) Android and iOS Requirements
+    For this part of the installation process we redirect you to the official tutorial(https://docs.nativescript.org/start/quick-setup#step-3-install-ios-and-android-requirements) since it is more complex and depends on your operating system (OS). NativeScript provides scripts for Windows and macOS that will automatically setup most dependencies. But we recommend having a look at the advanced setups they provide to ensure that everything is correctly installed.
+    If you have some troubles installing Android Studio(https://developer.android.com/studio/index.html) or Xcode(https://developer.apple.com/xcode/) and their corresponding emulators/simulators, here are some useful links to get helped:
+
+        Android Studio: https://developer.android.com/studio/install.html
+        Android Emulator: https://developer.android.com/studio/run/managing-avds.html
+        Xcode: https://itunes.apple.com/us/app/xcode/id497799835?mt=12&ls=1
+        iOS Simulator: https://developer.apple.com/library/content/documentation/IDEs/Conceptual/iOS_Simulator_Guide/GettingStartedwithiOSSimulator/GettingStartedwithiOSSimulator.html
+
+    4) TNS Doctor
+    The last step is to check if all requirements are met, this can be done by running the tns doctor command, if errors are returned, fix them before continuing.
+
+4) Editor
+This step can be skipped if you don't want to contribute to the project. In essence, you could use any editor you'd like. We recommend using Visual Studio Code(https://code.visualstudio.com) since this is the officially supported editor and provides an official plugin(https://marketplace.visualstudio.com/items?itemName=Telerik.nativescript) to integrate with NativeScript.
+
+5) Install, Compile and Run CPMAC
+Before going further make sure you have your conodes, an Android emulator or iOS simulator set up and running.
+First you need to clone the repository by executing:
+
+    git clone https://github.com/dedis/student_17_mobile.git
+
+And enter the newly created folder student_17_mobile/ .
+You can now test and run CPMAC by executing either one of the following commands:
+
+    make clean-test-<platform>
+    make clean-run-<platform>
+
+Where <platform> has to be replaced by either "android" or "ios". This will install and compile all the needed libraries and test or run CPMAC. All subsequent tests and runs can be made by running:
+
+    make test-<platform>
+    make run-<platform>
+
+# Known Bugs
+Being relatively new, NativeScript still has some weird behaviours and we had to find work arounds. We will now discuss some know bugs that have been bypassed or are still a problem.
+
+- Compressed Files (Android)
+Some NPM libraries are shipped with compressed files that usually end with ".gz" and are also included in their non compressed form. Ex:
+
+    file.min.js
+    file.min.js.gz
+
+Those files are interpreted as a same and single file by Android, this means that at compilation time Gradle will throw a "duplicate resources" error. To bypass this bug we automatically delete(they are not needed at runtime) them before they get compiled. You can find the corresponding commands in the "prepare-hook.sh" bash script.
+
+- The BroRand Library(https://www.npmjs.com/package/brorand)
+BroRand is a JS library to generate random numbers. CPMAC makes indirectly use of BroRand through the EC library called elliptic(https://www.npmjs.com/package/elliptic). BroRand is not fully supported on the NativeScript framework and throws and error at execution time when trying to generate a random number. We bypassed this by rewriting the problematic line in such a way that it works with NativeScript. You can find the corresponding command in the "prepare-hook.sh" bash script and the modified code in the brorand-fix/ folder
+
+- WebSocket Bug (iOS)
+The websocket library for NativeScript does not work correctly when run on iOS. Currently we didn't find a way to correct this bug in any way. The used library is called "nativescript-websockets"(https://www.npmjs.com/package/nativescript-websockets). Basically, this library wraps native websockets libraries for Android and iOS in JS objects. It seems that the wrapper implemented by "nativescript-websockets" is working properly, but that the underlying native Objective-C library for iOS, which is a slightly modified version of PocketSocket(https://github.com/NathanaelA/PocketSocket), or iOS itself is causing troubles. It seems that either PocketSocket or iOS is resending previous messages by concatenating it with some new data. Below are two sent messages and the corresponding received messages by a conode, they are displayes in byte and base64 format to be easily readable. We verified that the sent messages are properly passed down to the native library by the JS wrapper. The first message is an empty pin request, thus only contains the public key of the organizer and is correctly received by the conode. For the second message that, which now also contains the PIN printed by the conode is not received correctly. The received message is the first message concatenated by six zeros and then the beginning of the second message.
+
+Sent
+EiDLgkwNauV7pExX7QEpT3Zdu7z4nxWRnmRXdK9KvZnEfA==
+18 32 203 130 76 13 106 229 123 164 76 87 237 1 41 79 118 93 187 188 248 159 21 145 158 100 87 116 175 74 189 153 196 124
+
+CgY3NTIzMTMSIMuCTA1q5XukTFftASlPdl27vPifFZGeZFd0r0q9mcR8
+10 6 55 53 50 51 49 51 18 32 203 130 76 13 106 229 123 164 76 87 237 1 41 79 118 93 187 188 248 159 21 145 158 100 87 116 175 74 189 153 196 124
+
+Received
+EiDLgkwNauV7pExX7QEpT3Zdu7z4nxWRnmRXdK9KvZnEfA==
+18 32 203 130 76 13 106 229 123 164 76 87 237 1 41 79 118 93 187 188 248 159 21 145 158 100 87 116 175 74 189 153 196 124
+
+EiDLgkwNauV7pExX7QEpT3Zdu7z4nxWRnmRXdK9KvZnEfAAAAAAAAAoG
+18 32 203 130 76 13 106 229 123 164 76 87 237 1 41 79 118 93 187 188 248 159 21 145 158 100 87 116 175 74 189 153 196 124 0 0 0 0 0 0 10 6
+
+As already stated before, we were not able to bypass or fix this bug. Here is a non-exhaustive list of what we already tried:
+
+- Find another NativeScript library to replace "nativescript-websockets"
+- Modifying "nativescript-websockets" to try to reset the message buffer and others
+- Natively implement websockets by using the same PocketSocket version as "nativescript-websockets"
+- Natively implement websockets by using a different native library called SwiftWebSocket(https://github.com/tidwall/SwiftWebSocket)

@@ -81,14 +81,14 @@
 
 # Step-by-step guide for installation, including dependencies, and running of the final product
 
-  - Install Node, VS Code or Webstorm, Plugins
-  - Nativescript Tutorial
-  - Android Studio - Emulator / Xcode - Emulator - debugging on device
-  - Own Makefile scripts (typically compile dedjs/protobuf)
-  - Install and run conodes
-  - Explain how to build/test
+  - (OK)Install Node, VS Code or Webstorm, Plugins
+  - (OK)Nativescript Tutorial
+  - (OK)Android Studio - Emulator / Xcode - Simulator - debugging on device
+  - (OK)Own Makefile scripts (typically compile dedjs/protobuf)
+  - (OK)Install and run conodes
+  - (OK)Explain how to build/test
 
-  - Talk about the bugs we had to bypass (.gz, brorand, iOS WebSocket Bug...)
+  - (OK)Talk about the bugs we had to bypass (.gz, brorand, iOS WebSocket Bug...)
 
     REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT  REMOVE PASTBIN FROM TEXT
 
