@@ -1,4 +1,4 @@
-\documentclass[11pt, a4paper, twoside, openright]{book} %draft
+\documentclass[11pt, a4paper, twoside, openright]{report} %draft
 
 \usepackage{graphicx,color}
 \usepackage{amssymb, amsmath, array}
@@ -7,6 +7,31 @@
 
 \begin{document}
 
-\input{cover}
+\input{content/cover}
+\cleardoublepage
+
+\input{content/acknowledgement}
+\clearpage
+
+\input{content/abstract}
+\clearpage
+
+\tableofcontents
+
+\input{content/introduction}
+
+\input{content/background}
+
+\input{content/design}
+
+\input{content/appuser}
+
+\input{content/cisc}
+
+\input{content/pop}
+
+\input{content/installation}
+
+\input{content/bugs}
 
 \end{document}

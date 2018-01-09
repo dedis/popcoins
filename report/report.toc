@@ -1,0 +1,53 @@
+\contentsline {paragraph}{}{3}
+\contentsline {paragraph}{}{4}
+\contentsline {paragraph}{}{4}
+\contentsline {chapter}{\numberline {1}"Introduction"}{9}
+\contentsline {paragraph}{}{9}
+\contentsline {paragraph}{}{9}
+\contentsline {chapter}{\numberline {2}"Background"}{11}
+\contentsline {section}{\numberline {2.1}"Cothority"}{11}
+\contentsline {paragraph}{}{11}
+\contentsline {subsection}{\numberline {2.1.1}"CISC"}{11}
+\contentsline {subsection}{\numberline {2.1.2}"PoP"}{11}
+\contentsline {paragraph}{}{11}
+\contentsline {paragraph}{}{12}
+\contentsline {section}{\numberline {2.2}"Technologies"}{13}
+\contentsline {paragraph}{}{13}
+\contentsline {subsection}{\numberline {2.2.1}"Elliptic Curve Cryptography - (https://en.wikipedia.org/wiki/Elliptic-curve\_cryptography)"}{13}
+\contentsline {paragraph}{}{13}
+\contentsline {subsection}{\numberline {2.2.2}"Schnorr Signature - (https://en.wikipedia.org/wiki/Schnorr\_signature)"}{13}
+\contentsline {paragraph}{}{13}
+\contentsline {subsection}{\numberline {2.2.3}"Protocol Buffers (ProtoBuf) - (https://en.wikipedia.org/wiki/Protocol\_Buffers)"}{13}
+\contentsline {paragraph}{}{13}
+\contentsline {subsection}{\numberline {2.2.4}"Websocket - (https://en.wikipedia.org/wiki/WebSocket)"}{13}
+\contentsline {paragraph}{}{13}
+\contentsline {chapter}{\numberline {3}"Design"}{15}
+\contentsline {paragraph}{}{15}
+\contentsline {paragraph}{}{15}
+\contentsline {paragraph}{}{16}
+\contentsline {paragraph}{}{16}
+\contentsline {paragraph}{}{17}
+\contentsline {paragraph}{}{17}
+\contentsline {chapter}{\numberline {4}"App User"}{19}
+\contentsline {paragraph}{}{19}
+\contentsline {paragraph}{}{19}
+\contentsline {chapter}{\numberline {5}"CISC"}{21}
+\contentsline {chapter}{\numberline {6}"PoP"}{23}
+\contentsline {paragraph}{}{23}
+\contentsline {section}{\numberline {6.1}"Implementation and Evaluation"}{23}
+\contentsline {paragraph}{}{23}
+\contentsline {paragraph}{}{23}
+\contentsline {paragraph}{}{24}
+\contentsline {paragraph}{}{24}
+\contentsline {paragraph}{}{25}
+\contentsline {section}{\numberline {6.2}"Results"}{25}
+\contentsline {paragraph}{}{25}
+\contentsline {paragraph}{}{26}
+\contentsline {section}{\numberline {6.3}"Future Work"}{26}
+\contentsline {paragraph}{}{26}
+\contentsline {chapter}{\numberline {7}"Installation and Running of CPMAC"}{29}
+\contentsline {paragraph}{}{29}
+\contentsline {chapter}{\numberline {8}"Known Bugs"}{33}
+\contentsline {paragraph}{}{33}
+\contentsline {paragraph}{}{33}
+\contentsline {paragraph}{}{34}

@@ -1,0 +1,46 @@
+\chapter{"Known Bugs"}
+
+\paragraph{}
+As it is relatively new, NativeScript still exhibits some unexpected behaviours for which we had to find solutions. We now discuss some know bugs that have been bypassed or are still problematic.
+
+// TODO: LIST AND FORMAT
+
+- Compressed Files (Android)
+Some NPM libraries are shipped with compressed files that usually end with ".gz" and are also included in their non-compressed form.  Ex:
+
+    file.min.js
+    file.min.js.gz
+    
+\paragraph{}
+Android interprets these as a same and single file, this means that at compilation time Gradle will throw a "duplicate resources" error. To bypass this bug, we automatically delete the compressed version(they are not needed at runtime)) before they get compiled. You can find the corresponding commands in the "prepare-hook.sh" bash script.
+
+- The BroRand Library(https://www.npmjs.com/package/brorand)
+BroRand is a JS library to generate random numbers. CPMAC makes indirectly use of BroRand through the EC library called elliptic(https://www.npmjs.com/package/elliptic). BroRand is not fully supported on the NativeScript framework and throws an error at execution time when trying to generate a random number. We bypassed this by adapting the problematic lines in such a way that it works with NativeScript. You can find the corresponding command in the "prepare-hook.sh" bash script and the modified code in the "brorand-fix" folder
+
+- WebSocket Bug (iOS)
+The websocket library for NativeScript does not work correctly when run on iOS. Currently we didn't find a way to correct this bug in any way. The used library is called "nativescript-websockets"(https://www.npmjs.com/package/nativescript-websockets). Basically, this library wraps native websockets libraries for Android and iOS in JS objects. It seems that the wrapper implemented by "nativescript-websockets" is working properly, but that either the underlying native Objective-C library, which is a slightly modified version of PocketSocket(https://github.com/NathanaelA/PocketSocket), or iOS itself is causing troubles. It seems that either PocketSocket or iOS is resending previous messages by concatenating it with some new data. Below are two sent messages and the corresponding received messages by a conode, they are displayes in byte and base64 format to be easily readable. We verified that the sent messages are properly passed down to the native library by the JS wrapper. The first message is an empty pin request, thus only contains the public key of the organizer and is correctly received by the conode. The second message, which now also contains the PIN printed by the conode is not received correctly. The received message is the first message concatenated by six zeros and then the beginning of the second message.
+
+Sent
+EiDLgkwNauV7pExX7QEpT3Zdu7z4nxWRnmRXdK9KvZnEfA==
+18 32 203 130 76 13 106 229 123 164 76 87 237 1 41 79 118 93 187 188 248 159 21 145 158 100 87 116 175 74 189 153 196 124
+
+CgY3NTIzMTMSIMuCTA1q5XukTFftASlPdl27vPifFZGeZFd0r0q9mcR8
+10 6 55 53 50 51 49 51 18 32 203 130 76 13 106 229 123 164 76 87 237 1 41 79 118 93 187 188 248 159 21 145 158 100 87 116 175 74 189 153 196 124
+
+Received
+EiDLgkwNauV7pExX7QEpT3Zdu7z4nxWRnmRXdK9KvZnEfA==
+18 32 203 130 76 13 106 229 123 164 76 87 237 1 41 79 118 93 187 188 248 159 21 145 158 100 87 116 175 74 189 153 196 124
+
+EiDLgkwNauV7pExX7QEpT3Zdu7z4nxWRnmRXdK9KvZnEfAAAAAAAAAoG
+18 32 203 130 76 13 106 229 123 164 76 87 237 1 41 79 118 93 187 188 248 159 21 145 158 100 87 116 175 74 189 153 196 124 0 0 0 0 0 0 10 6
+
+
+\paragraph{}
+As already stated before, we were not able to bypass or fix this bug. Here is a non-exhaustive list of what we already tried but didn't succeed:
+
+// TODO: LIST
+
+- Find another NativeScript library to replace "nativescript-websockets"
+- Modifying "nativescript-websockets" to try to reset the message buffer and others
+- Natively implement websockets by using the same PocketSocket version as "nativescript-websockets"
+- Natively implement websockets by using a different native library called SwiftWebSocket(https://github.com/tidwall/SwiftWebSocket)

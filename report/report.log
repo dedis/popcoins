@@ -1,15 +1,15 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2017.12.16)  16 DEC 2017 13:38
+This is XeTeX, Version 3.14159265-2.6-0.99998 (TeX Live 2017) (preloaded format=xelatex 2017.8.31)  9 JAN 2018 23:12
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
 **report.tex
 (./report.tex
-LaTeX2e <2016/02/01>
-Babel <3.9q> and hyphenation patterns for 5 language(s) loaded.
-(/usr/share/texlive/texmf-dist/tex/latex/base/book.cls
-Document Class: book 2014/09/29 v1.4h Standard LaTeX document class
-(/usr/share/texlive/texmf-dist/tex/latex/base/bk11.clo
-File: bk11.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
+LaTeX2e <2017-04-15>
+Babel <3.10> and hyphenation patterns for 84 language(s) loaded.
+(/usr/local/texlive/2017/texmf-dist/tex/latex/base/report.cls
+Document Class: report 2014/09/29 v1.4h Standard LaTeX document class
+(/usr/local/texlive/2017/texmf-dist/tex/latex/base/size11.clo
+File: size11.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
 )
 \c@part=\count79
 \c@chapter=\count80
@@ -24,50 +24,43 @@ File: bk11.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
 \belowcaptionskip=\skip42
 \bibindent=\dimen102
 )
-(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphicx.sty
+(/usr/local/texlive/2017/texmf-dist/tex/latex/graphics/graphicx.sty
 Package: graphicx 2014/10/28 v1.0g Enhanced LaTeX Graphics (DPC,SPQR)
 
-(/usr/share/texlive/texmf-dist/tex/latex/graphics/keyval.sty
+(/usr/local/texlive/2017/texmf-dist/tex/latex/graphics/keyval.sty
 Package: keyval 2014/10/28 v1.15 key=value parser (DPC)
 \KV@toks@=\toks14
 )
-(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphics.sty
-Package: graphics 2016/01/03 v1.0q Standard LaTeX Graphics (DPC,SPQR)
+(/usr/local/texlive/2017/texmf-dist/tex/latex/graphics/graphics.sty
+Package: graphics 2017/04/14 v1.1b Standard LaTeX Graphics (DPC,SPQR)
 
-(/usr/share/texlive/texmf-dist/tex/latex/graphics/trig.sty
+(/usr/local/texlive/2017/texmf-dist/tex/latex/graphics/trig.sty
 Package: trig 2016/01/03 v1.10 sin cos tan (DPC)
 )
-(/usr/share/texlive/texmf-dist/tex/latex/latexconfig/graphics.cfg
-File: graphics.cfg 2010/04/23 v1.9 graphics configuration of TeX Live
+(/usr/local/texlive/2017/texmf-dist/tex/latex/graphics-cfg/graphics.cfg
+File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
 )
-Package graphics Info: Driver file: pdftex.def on input line 95.
+Package graphics Info: Driver file: xetex.def on input line 99.
 
-(/usr/share/texlive/texmf-dist/tex/latex/pdftex-def/pdftex.def
-File: pdftex.def 2011/05/27 v0.06d Graphics/color for pdfTeX
-
-(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/infwarerr.sty
-Package: infwarerr 2010/04/08 v1.3 Providing info/warning/error messages (HO)
-)
-(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/ltxcmds.sty
-Package: ltxcmds 2011/11/09 v1.22 LaTeX kernel commands for general use (HO)
-)
-\Gread@gobject=\count88
+(/usr/local/texlive/2017/texmf-dist/tex/latex/graphics-def/xetex.def
+File: xetex.def 2016/07/11 v4.10 LaTeX color/graphics driver for XeTeX (L3/RRM/
+JK)
 ))
 \Gin@req@height=\dimen103
 \Gin@req@width=\dimen104
 )
-(/usr/share/texlive/texmf-dist/tex/latex/graphics/color.sty
-Package: color 2016/01/03 v1.1b Standard LaTeX Color (DPC)
+(/usr/local/texlive/2017/texmf-dist/tex/latex/graphics/color.sty
+Package: color 2016/07/10 v1.1e Standard LaTeX Color (DPC)
 
-(/usr/share/texlive/texmf-dist/tex/latex/latexconfig/color.cfg
-File: color.cfg 2007/01/18 v1.5 color configuration of teTeX/TeXLive
+(/usr/local/texlive/2017/texmf-dist/tex/latex/graphics-cfg/color.cfg
+File: color.cfg 2016/01/02 v1.6 sample color configuration
 )
-Package color Info: Driver file: pdftex.def on input line 143.
+Package color Info: Driver file: xetex.def on input line 147.
 )
-(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amssymb.sty
+(/usr/local/texlive/2017/texmf-dist/tex/latex/amsfonts/amssymb.sty
 Package: amssymb 2013/01/14 v3.01 AMS font symbols
 
-(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amsfonts.sty
+(/usr/local/texlive/2017/texmf-dist/tex/latex/amsfonts/amsfonts.sty
 Package: amsfonts 2013/01/14 v3.01 Basic AMSFonts support
 \@emptytoks=\toks15
 \symAMSa=\mathgroup4
@@ -75,50 +68,50 @@ Package: amsfonts 2013/01/14 v3.01 Basic AMSFonts support
 LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
 (Font)                  U/euf/m/n --> U/euf/b/n on input line 106.
 ))
-(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsmath.sty
-Package: amsmath 2016/03/03 v2.15a AMS math features
+(/usr/local/texlive/2017/texmf-dist/tex/latex/amsmath/amsmath.sty
+Package: amsmath 2016/11/05 v2.16a AMS math features
 \@mathmargin=\skip43
 
 For additional information on amsmath, use the `?' option.
-(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amstext.sty
+(/usr/local/texlive/2017/texmf-dist/tex/latex/amsmath/amstext.sty
 Package: amstext 2000/06/29 v2.01 AMS text
 
-(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsgen.sty
+(/usr/local/texlive/2017/texmf-dist/tex/latex/amsmath/amsgen.sty
 File: amsgen.sty 1999/11/30 v2.0 generic functions
 \@emptytoks=\toks16
 \ex@=\dimen105
 ))
-(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsbsy.sty
+(/usr/local/texlive/2017/texmf-dist/tex/latex/amsmath/amsbsy.sty
 Package: amsbsy 1999/11/29 v1.2d Bold Symbols
 \pmbraise@=\dimen106
 )
-(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsopn.sty
-Package: amsopn 1999/12/14 v2.01 operator names
+(/usr/local/texlive/2017/texmf-dist/tex/latex/amsmath/amsopn.sty
+Package: amsopn 2016/03/08 v2.02 operator names
 )
-\inf@bad=\count89
-LaTeX Info: Redefining \frac on input line 199.
-\uproot@=\count90
-\leftroot@=\count91
-LaTeX Info: Redefining \overline on input line 297.
-\classnum@=\count92
-\DOTSCASE@=\count93
-LaTeX Info: Redefining \ldots on input line 394.
-LaTeX Info: Redefining \dots on input line 397.
-LaTeX Info: Redefining \cdots on input line 518.
+\inf@bad=\count88
+LaTeX Info: Redefining \frac on input line 213.
+\uproot@=\count89
+\leftroot@=\count90
+LaTeX Info: Redefining \overline on input line 375.
+\classnum@=\count91
+\DOTSCASE@=\count92
+LaTeX Info: Redefining \ldots on input line 472.
+LaTeX Info: Redefining \dots on input line 475.
+LaTeX Info: Redefining \cdots on input line 596.
 \Mathstrutbox@=\box26
 \strutbox@=\box27
 \big@size=\dimen107
-LaTeX Font Info:    Redeclaring font encoding OML on input line 630.
-LaTeX Font Info:    Redeclaring font encoding OMS on input line 631.
-\macc@depth=\count94
-\c@MaxMatrixCols=\count95
+LaTeX Font Info:    Redeclaring font encoding OML on input line 712.
+LaTeX Font Info:    Redeclaring font encoding OMS on input line 713.
+\macc@depth=\count93
+\c@MaxMatrixCols=\count94
 \dotsspace@=\muskip10
-\c@parentequation=\count96
-\dspbrk@lvl=\count97
+\c@parentequation=\count95
+\dspbrk@lvl=\count96
 \tag@help=\toks17
-\row@=\count98
-\column@=\count99
-\maxfields@=\count100
+\row@=\count97
+\column@=\count98
+\maxfields@=\count99
 \andhelp@=\toks18
 \eqnshift@=\dimen108
 \alignsep@=\dimen109
@@ -130,11 +123,11 @@ LaTeX Font Info:    Redeclaring font encoding OMS on input line 631.
 \multlinegap=\skip44
 \multlinetaggap=\skip45
 \mathdisplay@stack=\toks20
-LaTeX Info: Redefining \[ on input line 2735.
-LaTeX Info: Redefining \] on input line 2736.
+LaTeX Info: Redefining \[ on input line 2817.
+LaTeX Info: Redefining \] on input line 2818.
 )
-(/usr/share/texlive/texmf-dist/tex/latex/tools/array.sty
-Package: array 2014/10/28 v2.4c Tabular extension package (FMi)
+(/usr/local/texlive/2017/texmf-dist/tex/latex/tools/array.sty
+Package: array 2016/10/06 v2.4d Tabular extension package (FMi)
 \col@sep=\dimen114
 \extrarowheight=\dimen115
 \NC@list=\toks21
@@ -151,121 +144,250 @@ LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 8.
 LaTeX Font Info:    ... okay on input line 8.
 LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 8.
 LaTeX Font Info:    ... okay on input line 8.
+LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 8.
+LaTeX Font Info:    ... okay on input line 8.
 LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 8.
 LaTeX Font Info:    ... okay on input line 8.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 8.
 LaTeX Font Info:    ... okay on input line 8.
 
-(/usr/share/texlive/texmf-dist/tex/context/base/supp-pdf.mkii
-[Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count101
-\scratchdimen=\dimen116
-\scratchbox=\box28
-\nofMPsegments=\count102
-\nofMParguments=\count103
-\everyMPshowfont=\toks22
-\MPscratchCnt=\count104
-\MPscratchDim=\dimen117
-\MPnumerator=\count105
-\makeMPintoPDFobject=\count106
-\everyMPtoPDFconversion=\toks23
-) (/usr/share/texlive/texmf-dist/tex/generic/oberdiek/pdftexcmds.sty
-Package: pdftexcmds 2011/11/29 v0.20 Utility functions of pdfTeX for LuaTeX (HO
-)
-
-(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/ifluatex.sty
-Package: ifluatex 2010/03/01 v1.3 Provides the ifluatex switch (HO)
-Package ifluatex Info: LuaTeX not detected.
-)
-(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/ifpdf.sty
-Package: ifpdf 2011/01/30 v2.3 Provides the ifpdf switch (HO)
-Package ifpdf Info: pdfTeX in PDF mode is detected.
-)
-Package pdftexcmds Info: LuaTeX not detected.
-Package pdftexcmds Info: \pdf@primitive is available.
-Package pdftexcmds Info: \pdf@ifprimitive is available.
-Package pdftexcmds Info: \pdfdraftmode found.
-)
-(/usr/share/texlive/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
-Package: epstopdf-base 2010/02/09 v2.5 Base part for package epstopdf
-
-(/usr/share/texlive/texmf-dist/tex/latex/oberdiek/grfext.sty
-Package: grfext 2010/08/19 v1.1 Manage graphics extensions (HO)
-
-(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/kvdefinekeys.sty
-Package: kvdefinekeys 2011/04/07 v1.3 Define keys (HO)
-))
-(/usr/share/texlive/texmf-dist/tex/latex/oberdiek/kvoptions.sty
-Package: kvoptions 2011/06/30 v3.11 Key value format for package options (HO)
-
-(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/kvsetkeys.sty
-Package: kvsetkeys 2012/04/25 v1.16 Key value parser (HO)
-
-(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/etexcmds.sty
-Package: etexcmds 2011/02/16 v1.5 Avoid name clashes with e-TeX commands (HO)
-Package etexcmds Info: Could not find \expanded.
-(etexcmds)             That can mean that you are not using pdfTeX 1.50 or
-(etexcmds)             that some package has redefined \expanded.
-(etexcmds)             In the latter case, load this package earlier.
-)))
-Package grfext Info: Graphics extension search list:
-(grfext)             [.png,.pdf,.jpg,.mps,.jpeg,.jbig2,.jb2,.PNG,.PDF,.JPG,.JPE
-G,.JBIG2,.JB2,.eps]
-(grfext)             \AppendGraphicsExtensions on input line 452.
-
-(/usr/share/texlive/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
-File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
-e
-))
-(./cover.tex
-Package epstopdf Info: Source file: <logo_epfl_coul.eps>
-(epstopdf)                    date: 2017-12-16 12:44:45
-(epstopdf)                    size: 104278 bytes
-(epstopdf)             Output file: <logo_epfl_coul-eps-converted-to.pdf>
-(epstopdf)                    date: 2017-12-16 12:44:45
-(epstopdf)                    size: 19393 bytes
-(epstopdf)             Command: <repstopdf --outfile=logo_epfl_coul-eps-convert
-ed-to.pdf logo_epfl_coul.eps>
-(epstopdf)             \includegraphics on input line 66.
-Package epstopdf Info: Output file is already uptodate.
-
-<logo_epfl_coul-eps-converted-to.pdf, id=1, 353.32pt x 170.6375pt>
-File: logo_epfl_coul-eps-converted-to.pdf Graphic file (type pdf)
-
-<use logo_epfl_coul-eps-converted-to.pdf>
-Package pdftex.def Info: logo_epfl_coul-eps-converted-to.pdf used on input line
- 66.
-(pdftex.def)             Requested size: 113.81102pt x 54.96442pt.
+(./content/cover.tex
+File: logo_epfl_coul.eps Graphic file (type eps)
+ <logo_epfl_coul.eps>
 LaTeX Font Info:    Try loading font information for U+msa on input line 78.
 
-(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
+(/usr/local/texlive/2017/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
 LaTeX Font Info:    Try loading font information for U+msb on input line 78.
 
-(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
+(/usr/local/texlive/2017/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )) [1
 
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map} <./logo_epfl_coul-eps-conve
-rted-to.pdf>]
-(./report.aux) ) 
-Here is how much of TeX's memory you used:
- 2494 strings out of 494910
- 32746 string characters out of 6179835
- 87837 words of memory out of 5000000
- 5751 multiletter control sequences out of 15000+600000
- 9491 words of font info for 36 fonts, out of 8000000 for 9000
- 36 hyphenation exceptions out of 8191
- 38i,15n,26p,254b,316s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/c
-mbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.p
-fb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></us
-r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb>
-Output written on report.pdf (1 page, 67607 bytes).
-PDF statistics:
- 27 PDF objects out of 1000 (max. 8388607)
- 18 compressed objects within 1 object stream
- 0 named destinations out of 1000 (max. 500000)
- 6 words of extra memory for PDF output out of 10000 (max. 10000000)
+] [2
 
+]
+(./content/acknowledgement.tex) [3] (./content/abstract.tex
+Overfull \hbox (33.26385pt too wide) in paragraph at lines 1--1
+[]\TU/lmr/bx/n/14.4 ”Abstract - (https://github.com/dedis/cothority/wiki)” 
+ []
+
+) [4
+
+] [5] [6
+
+
+] (./report.toc
+Overfull \hbox (83.36542pt too wide) in paragraph at lines 16--16
+ [][] []\TU/lmr/m/n/10.95 ”Elliptic Curve Cryptography - (https://en.wikipedia.
+org/wiki/Elliptic- 
+ []
+
+
+Overfull \hbox (82.30327pt too wide) in paragraph at lines 18--18
+ [][] []\TU/lmr/m/n/10.95 ”Schnorr Signature - (https://en.wikipedia.org/wiki/S
+chnorr_signature)” [][]  
+ []
+
+
+Overfull \hbox (123.05917pt too wide) in paragraph at lines 20--20
+ [][] []\TU/lmr/m/n/10.95 ”Protocol Buffers (ProtoBuf) - (https://en.wikipedia.
+org/wiki/Protocol_Buffers)” [][]  
+ []
+
+
+Overfull \hbox (11.19397pt too wide) in paragraph at lines 22--22
+ [][] []\TU/lmr/m/n/10.95 ”Websocket - (https://en.wikipedia.org/wiki/WebSocket
+)” [][]  
+ []
+
+)
+\tf@toc=\write3
+\openout3 = `report.toc'.
+
+ (./content/introduction.tex [7] [8
+
+]
+Chapter 1.
+) [9] (./content/background.tex [10]
+Chapter 2.
+[11
+
+]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [12]
+Overfull \hbox (98.20801pt too wide) in paragraph at lines 48--48
+[]\TU/lmr/bx/n/12 ”Elliptic Curve Cryptography - (https://en.wikipedia.org/wiki
+/Elliptic-
+ []
+
+
+Overfull \hbox (111.99599pt too wide) in paragraph at lines 55--55
+[]\TU/lmr/bx/n/12 ”Schnorr Signature - (https://en.wikipedia.org/wiki/Schnorr_s
+ignature)” 
+ []
+
+
+Overfull \hbox (162.684pt too wide) in paragraph at lines 62--62
+[]\TU/lmr/bx/n/12 ”Protocol Buffers (ProtoBuf) - (https://en.wikipedia.org/wiki
+/Protocol_Buffers)” 
+ []
+
+
+Overfull \hbox (23.724pt too wide) in paragraph at lines 69--69
+[]\TU/lmr/bx/n/12 ”Websocket - (https://en.wikipedia.org/wiki/WebSocket)” 
+ []
+
+) (./content/design.tex [13] [14
+
+]
+Chapter 3.
+
+Underfull \vbox (badness 4193) has occurred while \output is active []
+
+ [15]
+Underfull \vbox (badness 1796) has occurred while \output is active []
+
+ [16])
+Overfull \hbox (104.50983pt too wide) in paragraph at lines 73--26
+\TU/lmr/m/n/10.95 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refer
+ence/Global_Objects/Promise)
+ []
+
+(./content/appuser.tex [17] [18
+
+]
+Chapter 4.
+) (./content/cisc.tex [19] [20
+
+]
+Chapter 5.
+) (./content/pop.tex [21] [22
+
+]
+Chapter 6.
+[23] [24] [25] [26]) (./content/installation.tex [27] [28
+
+]
+Chapter 7.
+
+Overfull \hbox (103.48058pt too wide) in paragraph at lines 8--10
+\TU/lmr/m/n/10.95 environment variable by either following this guide(https://g
+olang.org/doc/code.html#GOPATH)
+ []
+
+
+Overfull \hbox (68.76375pt too wide) in paragraph at lines 13--16
+[]\TU/lmr/m/n/10.95 2) Cothority Installation and Running of Conodes(https://gi
+thub.com/dedis/cothority)
+ []
+
+
+Overfull \hbox (15.93004pt too wide) in paragraph at lines 19--20
+[]\TU/lmr/m/n/10.95 Locate and enter the folder ”gopkg.in/dedis/cothority.v1” i
+n your GOPATH,
+ []
+
+
+Overfull \hbox (10.57544pt too wide) in paragraph at lines 23--25
+[]\TU/lmr/m/n/10.95 3) Official NativeScript Tutorial(https://docs.nativescript
+.org/start/quick-
+ []
+
+[29]
+Overfull \hbox (37.3798pt too wide) in paragraph at lines 31--33
+[]\TU/lmr/m/n/10.95 2) NativeScript CLI Installation(https://www.npmjs.com/pack
+age/nativescript)
+ []
+
+
+Overfull \hbox (16.39525pt too wide) in paragraph at lines 42--45
+\TU/lmr/m/n/10.95 we redirect you to the official tutorial(https://docs.natives
+cript.org/start/quick-
+ []
+
+
+Overfull \hbox (24.42706pt too wide) in paragraph at lines 46--50
+\TU/lmr/m/n/10.95 droid Emulator: https://developer.android.com/studio/run/mana
+ging-avds.html
+ []
+
+
+Overfull \hbox (559.10326pt too wide) in paragraph at lines 46--50
+\TU/lmr/m/n/10.95 iOS Simulator: https://developer.apple.com/library/content/do
+cumentation/IDEs/Conceptual/iOS_Simulator_Guide/GettingStartedwithiOSSimulator/
+GettingStartedwithiOSSimulator.html 
+ []
+
+
+Overfull \hbox (261.16058pt too wide) in paragraph at lines 54--56
+\TU/lmr/m/n/10.95 cially supported editor and provides an official plugin(https
+://marketplace.visualstudio.com/items?itemName=Telerik.nativescript)
+ []
+
+[30]) (./content/bugs.tex [31] [32
+
+]
+Chapter 8.
+
+Overfull \hbox (1.3446pt too wide) in paragraph at lines 17--19
+[]\TU/lmr/m/n/10.95 - The BroRand Library(https://www.npmjs.com/package/brorand
+) Bro-
+ []
+
+
+Overfull \hbox (96.1429pt too wide) in paragraph at lines 17--19
+\TU/lmr/m/n/10.95 use of BroRand through the EC library called elliptic(https:/
+/www.npmjs.com/package/elliptic).
+ []
+
+
+Overfull \hbox (207.22087pt too wide) in paragraph at lines 20--22
+\TU/lmr/m/n/10.95 this bug in any way. The used library is called ”nativescript
+-websockets”(https://www.npmjs.com/package/nativescript-
+ []
+
+[33]
+Overfull \hbox (6.8743pt too wide) in paragraph at lines 23--26
+[]\TU/lmr/m/n/10.95 Sent EiDLgkwNauV7pExX7QEpT3Zdu7z4nxWRnmRXdK9KvZnEfA==
+ []
+
+
+Overfull \hbox (10.60825pt too wide) in paragraph at lines 27--29
+[]\TU/lmr/m/n/10.95 CgY3NTIzMTMSIMuCTA1q5XukTFftASlPdl27vPifFZGeZFd0r0q9mcR8
+ []
+
+
+Overfull \hbox (27.99684pt too wide) in paragraph at lines 30--33
+[]\TU/lmr/m/n/10.95 Received EiDLgkwNauV7pExX7QEpT3Zdu7z4nxWRnmRXdK9KvZnEfA==
+ []
+
+
+Overfull \hbox (45.87817pt too wide) in paragraph at lines 34--36
+[]\TU/lmr/m/n/10.95 EiDLgkwNauV7pExX7QEpT3Zdu7z4nxWRnmRXdK9KvZnEfAAAAAAAAAoG
+ []
+
+)
+Overfull \hbox (83.69392pt too wide) in paragraph at lines 43--36
+\TU/lmr/m/n/10.95 a different native library called SwiftWebSocket(https://gith
+ub.com/tidwall/SwiftWebSocket)
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 43--36
+
+ []
+
+[34] (./report.aux) ) 
+Here is how much of TeX's memory you used:
+ 1689 strings out of 493005
+ 20512 string characters out of 6134596
+ 90751 words of memory out of 5000000
+ 5627 multiletter control sequences out of 15000+600000
+ 8368 words of font info for 42 fonts, out of 8000000 for 9000
+ 1348 hyphenation exceptions out of 8191
+ 27i,15n,26p,1944b,321s stack positions out of 5000i,500n,10000p,200000b,80000s
+
+Output written on report.pdf (34 pages).

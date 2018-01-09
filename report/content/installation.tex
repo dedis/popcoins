@@ -1,0 +1,71 @@
+\chapter{"Installation and Running of CPMAC"}
+
+\paragraph{}
+We will now see how to install all required dependencies and how to compile, test and run the app. The following steps are:
+
+// TODO: LIST AND COMMANDS
+
+1) Installation of Go Language
+To be able to run the cothority framework you'll need the go compiler. Install it by following the official installation guide: https://golang.org/doc/install . You also need to set your GOPATH environment variable by either following this guide(https://golang.org/doc/code.html\#GOPATH) or by running(terminal restart needed):
+
+    echo 'export PATH=\$PATH:\$(go env GOPATH)/bin' >> ~/.bash\_profile
+
+2) Cothority Installation and Running of Conodes(https://github.com/dedis/cothority)
+First you'll need the correct version of Cothority and run the conodes to be able to interact with them as you use CPMAC. CPMAC is developped to run against the stable version 1.2 of Cothority. As stated in the README.md file on the GitHub page of the cothority framework, you have to use the version installed in "gopkg.in/dedis/cothority.v1". The source code in this folder corresponds to the branch v1.2 located here: https://github.com/dedis/cothority/tree/v1.2 . It is crucial that you run CPMAC against this stable version, as Cothority is in heavy developpement many functionalities have already been changed to work differently and the implementation will not be compatible.
+Clone the repository by running:
+
+    go get -u github.com/dedis/cothority
+
+Locate and enter the folder "gopkg.in/dedis/cothority.v1" in your GOPATH, you can then execute the following command to run three local conodes:
+
+    ./conode/run\_conode.sh local 3 5
+
+3) Official NativeScript Tutorial(https://docs.nativescript.org/start/quick-setup)
+We recommend to follow the instructions on their official page, as it will always be up-to-date. But here are the main steps:
+
+    1) NodeJS Installation(https://nodejs.org/en/)
+    This can be done by downloading the installer on their home page. Always install a long term service (LTS) version as it is the supported version for NativeScript. If you install it using the macOS package manager brew(https://brew.sh), don't forget to manually add the NodeJS path to your bash profile by running(replace {VERSION} by the installed version through brew, example if node@6 has been installed the {VERSION} should become 6)(terminal restart needed):
+
+        echo 'export PATH="/usr/local/opt/node@{VERSION}/bin:\$PATH"' >> ~/.bash\_profile
+
+    2) NativeScript CLI Installation(https://www.npmjs.com/package/nativescript)
+    This can simply be done by running this command:
+
+        npm install -g nativescript
+
+    If you get EACCES errors, try to run the last command again with administrator rights. If you still get EACCES errors, run the command again with administrator rights and the unsafe permissions parameter of NPM:
+
+        sudo npm install -g --unsafe-perm nativescript
+
+    Try running the command tns, if the command return no error you may continue.
+
+    3) Android and iOS Requirements
+    For this part of the installation process we redirect you to the official tutorial(https://docs.nativescript.org/start/quick-setup\#step-3-install-ios-and-android-requirements) since it is more complex and depends on your operating system (OS). NativeScript provides scripts for Windows and macOS that will automatically setup most dependencies. We still recommend having a look at the advanced setups they provide to ensure that everything is correctly installed.
+    If you have some troubles installing Android Studio(https://developer.android.com/studio/index.html) or Xcode(https://developer.apple.com/xcode/) and their corresponding emulators/simulators, here are some useful links to get helped:
+
+        Android Studio: https://developer.android.com/studio/install.html
+        Android Emulator: https://developer.android.com/studio/run/managing-avds.html
+        Xcode: https://itunes.apple.com/us/app/xcode/id497799835?mt=12\&ls=1
+        iOS Simulator: https://developer.apple.com/library/content/documentation/IDEs/Conceptual/iOS\_Simulator\_Guide/GettingStartedwithiOSSimulator/GettingStartedwithiOSSimulator.html
+
+    4) TNS Doctor
+    The last step is to check if all requirements are met, this can be done by running the "tns doctor" command, if errors are returned, fix them before continuing.
+
+4) Editor
+This step can be skipped if you don't want to contribute to the project. In essence, you could use any editor you'd like. We recommend using Visual Studio Code(https://code.visualstudio.com) since this is the officially supported editor and provides an official plugin(https://marketplace.visualstudio.com/items?itemName=Telerik.nativescript) to integrate with NativeScript.
+
+5) Install, Compile and Run CPMAC
+Before going further make sure you have your conodes and an Android emulator or iOS simulator set up and running(if you want to test or run CPMAC on you smartphone, make sure it is well connected and recognised by you system).
+First you need to clone the repository by executing:
+
+    git clone https://github.com/dedis/student\_17\_mobile.git
+
+After entering the newly created folder "student\_17\_mobile", you are able to test and run CPMAC by executing either one of the following commands:
+
+    make clean-test-<platform>
+    make clean-run-<platform>
+
+Where <platform> has to be replaced by either "android" or "ios". This will install and compile all the needed libraries and test or run CPMAC. All subsequent tests and runs can be made by running:
+
+    make test-<platform>
+    make run-<platform>
