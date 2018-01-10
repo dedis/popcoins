@@ -5,6 +5,8 @@ const PlatformModule = require("tns-core-modules/platform");
 
 const QRGenerator = new ZXing();
 
+const Cisc = require("../../../shared/lib/dedjs/object/cisc/Cisc").get;
+
 let viewModel;
 let image;
 let label;
@@ -26,23 +28,23 @@ function onLoaded(args) {
     viewModel = page.bindingContext;
     loadViews(page);
     setTimeout(() => {
-        if (viewModel.isConnectedAtBeginning) {
-            updateImage();
-        }
+        updateImage()
     },500);
 }
 
 function updateImage() {
-    label.text = viewModel.label;
-    const sideLength = PlatformModule.screen.mainScreen.widthPixels;
-    const QR_CODE = QRGenerator.createBarcode({
-        encode: label.text,
-        format: ZXing.QR_CODE,
-        height: sideLength,
-        width: sideLength
-    });
+    if (Cisc.getAdress() !== "" && Cisc.getIsConnected()) {
+        label.text = viewModel.label;
+        const sideLength = PlatformModule.screen.mainScreen.widthPixels;
+        const QR_CODE = QRGenerator.createBarcode({
+            encode: label.text,
+            format: ZXing.QR_CODE,
+            height: sideLength,
+            width: sideLength
+        });
 
-    image.imageSource = ImageSource.fromNativeSource(QR_CODE);
+        image.imageSource = ImageSource.fromNativeSource(QR_CODE);
+    }
 }
 
 function loadViews(page) {

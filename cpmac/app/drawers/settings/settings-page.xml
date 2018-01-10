@@ -75,13 +75,13 @@
                         </TabViewItem.view>
                     </TabViewItem>
 
-                    <!--
+
                     <TabViewItem title="CISC">
                         <TabViewItem.view>
                             <cisc:cisc-page/>
                         </TabViewItem.view>
                     </TabViewItem>
-                    -->
+
 
                 </TabView.items>
             </TabView>

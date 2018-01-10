@@ -1,4 +1,5 @@
 const frameModule = require("ui/frame");
+const Cisc = require("../../shared/lib/dedjs/object/cisc/Cisc").get;
 
 const CiscPageViewModel = require("./cisc-view-model");
 
@@ -16,7 +17,7 @@ function onNavigatingTo(args) {
     }
 
     const page = args.object;
-    page.bindingContext = new CiscPageViewModel();
+    page.bindingContext = Cisc.getVMModule();
 }
 
 /* ***********************************************************

@@ -7,10 +7,7 @@
     </ActionBar>
     <StackLayout class="page-content" orientation="vertical">
 
-        <Label class="label-title" text="Key Pair"/>
-
-        <Button text="Generate" tap="generateKeyPair"/>
-        <Button text="Display" tap="displayQrOfPublicKey"/>
+        <Button text="Reset Cisc" tap="resetCisc"/>
 
         <Label class="label-title" text="Device Name" />
         <TextField text="{{ name }}"/>

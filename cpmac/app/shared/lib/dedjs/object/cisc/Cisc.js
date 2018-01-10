@@ -24,13 +24,14 @@ class Cisc {
      */
     constructor() {
         this._isLoaded = false;
-        this._adress = "";
+        this._address = "";
         this._viewModel = ObservableModule.fromObject({
             devices: new ObservableArray(),
             proposedDevices: new ObservableArray(),
             storage: new ObservableArray(),
             proposedStorage: new ObservableArray(),
-            isConnected: false
+            isConnected: false,
+            name: ""
         });
         this._data = {};
         this._proposedData = {};
@@ -80,8 +81,20 @@ class Cisc {
         return this.getVMModule().proposedStorage;
     }
 
-    getIsConnected(){
+    /**
+     * Gets the boolean value showing if the app is connected to a skipchain stored in memory
+     * @returns {boolean} - the boolean stored in memory
+     */
+    getIsConnected() {
         return this.getVMModule().isConnected;
+    }
+
+    /**
+     * Gets the name stored in memory
+     * @returns {name} - the name stored in memory
+     */
+    getName() {
+        return this.getVMModule().name
     }
 
     /**
@@ -96,7 +109,7 @@ class Cisc {
      * Gets the data stored in memory
      * @returns {Data} - the data stored in memory
      */
-    getData(){
+    getData() {
         return this._data;
     }
 
@@ -104,8 +117,16 @@ class Cisc {
      * Gets the proposedData stored in memory
      * @returns {Data} - the proposed data stored in memory
      */
-    getProposedData(){
+    getProposedData() {
         return this._proposedData;
+    }
+
+    /**
+     * Gets the string representing the address to the identity skipchain
+     * @returns {string} - the url of the skipchain
+     */
+    getAddress() {
+        return this._address;
     }
 
     /**
@@ -220,12 +241,88 @@ class Cisc {
      * @param bool - the value to assign
      * @returns {Promise} - a promise that get resolved once the value is set
      */
-    setIsConnected(bool){
-        if (!(typeof bool !== "boolean")){
+    setIsConnected(bool) {
+        if (!(typeof bool !== "boolean")) {
             throw new Error("bool must be a Boolean");
         }
-        this._viewModel.isConnected = true;
+        this.getVMModule().isConnected = true;
         return new Promise((resolve, reject) => resolve())
+    }
+
+    /**
+     * set the address parameter from the class
+     * @param address - the value to assign
+     * @param save - a boolean saying if you want the value saved permanently
+     * @returns {Promise} - a promise that get resolved once the value is set
+     */
+    setAddress(address, save) {
+        if (typeof save !== "boolean") {
+            throw new Error("save must be of type boolean");
+        }
+        if (typeof address !== "string") {
+            throw new Error("address must be of type string");
+        }
+
+        const oldAddress = this.getAddress();
+        this._address = address;
+        if (save) {
+            let toWrite;
+            let obj = new Object();
+            obj.address = address;
+            toWrite = Convert.objectToJson(obj);
+
+            return FileIO.writeStringTo(FilesPath.CISC_IDENTITY_LINK, toWrite)
+                .catch((error) => {
+                    console.log(error);
+                    console.dir(error);
+                    console.trace();
+
+                    return this.setAddress(oldAddress, false)
+                        .then(() => {
+                            return Promise.reject(error);
+                        });
+                });
+        }
+
+        return Promise.resolve();
+    }
+
+    /**
+     * set the address parameter from the class
+     * @param name - the value to assign
+     * @param save - a boolean saying if you want the value saved permanently
+     * @returns {Promise} - a promise that get resolved once the value is set
+     */
+    setName(name, save) {
+        if (typeof save !== "boolean") {
+            throw new Error("save must be of type boolean");
+        }
+        if (typeof name !== "string") {
+            throw new Error("name must be of type string");
+        }
+
+        const oldName = this.getName();
+        this.getVMModule().name = name;
+        if (save) {
+            let toWrite;
+            let obj = new Object();
+            obj.name = name;
+            toWrite = Convert.objectToJson(obj);
+
+            return FileIO.writeStringTo(FilesPath.CISC_NAME, toWrite)
+                .catch((error) => {
+                    console.log(error);
+                    console.dir(error);
+                    console.trace();
+
+                    return this.setName(oldName, false)
+                        .then(() => {
+                            return Promise.reject(error);
+                        });
+                });
+        }
+
+        return Promise.resolve();
     }
 
     /**
@@ -349,7 +446,7 @@ class Cisc {
      */
     reset() {
         this._isLoaded = false;
-        const promises = [this.emptyViewModel()];
+        const promises = [this.emptyViewModel(),this.resetName(),this.resetAddress()];
 
         return Promise.all(promises)
             .then(() => {
@@ -363,7 +460,14 @@ class Cisc {
                 console.trace();
                 return Promise.reject(error);
             });
+    }
 
+    resetName(){
+        return this.setName("",true);
+    }
+
+    resetAddress(){
+        return this.setAddress("",true);
     }
 
     /**
@@ -373,11 +477,30 @@ class Cisc {
     load() {
         this._isLoaded = false;
 
-        //const promises = [this.loadFinalStatements(), this.loadPopToken()];
+        const promises = [this.loadAddress(),this.loadName()];
 
-        /*return Promise.all(promises)
-            .then(() => {
-                this._isLoaded = true;
+        return Promise.all(promises)
+         .then(() => {
+         this._isLoaded = true;
+         })
+         .catch(error => {
+         console.log(error);
+         console.dir(error);
+         console.trace();
+
+         return Promise.reject(error);
+         });
+    }
+
+    /**
+     * Load the identity address into memory
+     * @returns {Promise} that gets resolved once the address is loaded into memory
+     */
+    loadAddress() {
+        return FileIO.getStringOf(FilesPath.CISC_IDENTITY_LINK)
+            .then(jsonAddress => {
+                const obj = JSON.parse(jsonAddress);
+                return this.setAddress(obj.address,false)
             })
             .catch(error => {
                 console.log(error);
@@ -385,8 +508,26 @@ class Cisc {
                 console.trace();
 
                 return Promise.reject(error);
-            });*/
-        return Promise.resolve();
+            });
+    }
+
+    /**
+     * Load the device name into memory
+     * @returns {Promise} that gets resolved once the address is loaded into memory
+     */
+    loadName() {
+        return FileIO.getStringOf(FilesPath.CISC_NAME)
+            .then(jsonName => {
+                const obj = Convert.jsonToObject(jsonName);
+                return this.setName(obj.name,false)
+            })
+            .catch(error => {
+                console.log(error);
+                console.dir(error);
+                console.trace();
+
+                return Promise.reject(error);
+            });
     }
 
 }

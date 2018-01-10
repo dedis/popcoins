@@ -22,8 +22,8 @@ const POP_ORG_ATTENDEES = "shared/res/files/pop/org/attendees.json";
 /**
  * CISC Files
  */
-const CISC_IDENTITY_LINK = "shared/res/files/cisc/identity_link.txt";
-const CISC_NAME = "shared/res/files/cisc/name.txt";
+const CISC_IDENTITY_LINK = "shared/res/files/cisc/identity_link.json";
+const CISC_NAME = "shared/res/files/cisc/name.json";
 
 module.exports.ROSTER = ROSTER;
 module.exports.KEY_PAIR = KEY_PAIR;
