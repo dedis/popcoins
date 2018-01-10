@@ -1,14 +1,15 @@
-\documentclass[11pt, a4paper, twoside, openright]{report} %draft
+\documentclass[11pt, a4paper, twoside, openany]{book} %draft
 
-\usepackage{graphicx,color}
+\usepackage{graphicx,caption,color}
 \usepackage{amssymb, amsmath, array}
-
-
+\usepackage{url}
+\usepackage{enumitem}
+\usepackage{listings}
 
 \begin{document}
 
 \input{content/cover}
-\cleardoublepage
+\clearpage
 
 \input{content/acknowledgement}
 \clearpage
@@ -33,5 +34,7 @@
 \input{content/installation}
 
 \input{content/bugs}
+
+\listoffigures
 
 \end{document}
