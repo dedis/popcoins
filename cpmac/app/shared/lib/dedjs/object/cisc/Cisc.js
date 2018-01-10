@@ -3,11 +3,15 @@ const ObservableArray = require("data/observable-array").ObservableArray;
 const Package = require("../../Package");
 const ObjectType = require("../../ObjectType");
 const Helper = require("../../Helper");
+const Net = require("../../Net");
 const Convert = require("../../Convert");
 const FilesPath = require("../../../../res/files/files-path");
+const DecodeType = require("../../DecodeType");
 const FileIO = require("../../../../lib/file-io/file-io");
+const Crypto = require("../../Crypto");
+const RequestPath = require("../../RequestPath");
 const CothorityMessages = require("../../protobuf/build/cothority-messages");
-
+const BigNumber = require("bn.js");
 const User = require("../user/User").get;
 
 /**
@@ -24,14 +28,19 @@ class Cisc {
      */
     constructor() {
         this._isLoaded = false;
-        this._address = "";
+        this._identity = {
+            "address": "",
+            "id": "",
+            "label": ""
+        };
         this._viewModel = ObservableModule.fromObject({
             devices: new ObservableArray(),
             proposedDevices: new ObservableArray(),
             storage: new ObservableArray(),
             proposedStorage: new ObservableArray(),
             isConnected: false,
-            name: ""
+            name: "",
+            isOnProposed: false
         });
         this._data = {};
         this._proposedData = {};
@@ -125,8 +134,8 @@ class Cisc {
      * Gets the string representing the address to the identity skipchain
      * @returns {string} - the url of the skipchain
      */
-    getAddress() {
-        return this._address;
+    getIdentity() {
+        return this._identity;
     }
 
     /**
@@ -187,7 +196,7 @@ class Cisc {
      * @param {Array} array - the new key/value pair list to set
      * @returns {Promise} - a promise that gets resolved once the new key/value list array has been set
      */
-    setDevicesStorageArray(array) {
+    setStorageArray(array) {
         if (!(array instanceof Array)) {
             throw new Error("array must be an instance of Array");
         }
@@ -251,25 +260,33 @@ class Cisc {
 
     /**
      * set the address parameter from the class
-     * @param address - the value to assign
+     * @param identityId - the value to assign to the id field
+     * @param identityAddress - the value to assign to the address field
      * @param save - a boolean saying if you want the value saved permanently
      * @returns {Promise} - a promise that get resolved once the value is set
      */
-    setAddress(address, save) {
+    setIdentity(identityId, identityAddress, identityLabel, save) {
         if (typeof save !== "boolean") {
             throw new Error("save must be of type boolean");
         }
-        if (typeof address !== "string") {
-            throw new Error("address must be of type string");
+        if (typeof identityAddress !== "string") {
+            throw new Error("identityAddress must be of type string");
+        }
+        if (typeof identityId !== "string") {
+            throw new Error("identityId must be of type string");
+        }
+        if (typeof identityLabel !== "string") {
+            throw new Error("identityLabel must be of type string");
         }
 
-        const oldAddress = this.getAddress();
-        this._address = address;
+        const oldIdentity = this.getIdentity();
+        this._identity = new Object();
+        this._identity.address = identityAddress;
+        this._identity.id = identityId;
+        this._identity.label = identityLabel;
         if (save) {
             let toWrite;
-            let obj = new Object();
-            obj.address = address;
-            toWrite = Convert.objectToJson(obj);
+            toWrite = Convert.objectToJson(this._identity);
 
             return FileIO.writeStringTo(FilesPath.CISC_IDENTITY_LINK, toWrite)
                 .catch((error) => {
@@ -277,7 +294,7 @@ class Cisc {
                     console.dir(error);
                     console.trace();
 
-                    return this.setAddress(oldAddress, false)
+                    return this.setIdentity(oldIdentity.id, oldIdentity.address, oldIdentity.label, false)
                         .then(() => {
                             return Promise.reject(error);
                         });
@@ -322,6 +339,40 @@ class Cisc {
                 });
         }
 
+        return Promise.resolve();
+    }
+
+    /**
+     * get the data loaded in memory
+     * @returns {Data}
+     */
+    getData() {
+        return this._data;
+    }
+
+    /**
+     * set the data in memory
+     * @param data
+     * @returns {Promise}
+     */
+    setData(data) {
+        if (!Helper.isOfType(data, ObjectType.DATA)) {
+            throw new Error("data must be an instance of Data");
+        }
+        this._data = data;
+        return Promise.resolve();
+    }
+
+    /**
+     * set the proposed in memory
+     * @param data
+     * @returns {Promise}
+     */
+    setProposedData(proposedData) {
+        if (!Helper.isOfType(proposedData, ObjectType.DATA)) {
+            throw new Error("proposedData must be an instance of Data");
+        }
+        this._proposedData = proposedData;
         return Promise.resolve();
     }
 
@@ -437,6 +488,120 @@ class Cisc {
     }
 
     /**
+     * Request the data on the skipchain
+     * @returns {Promise.<TResult>}
+     */
+    updateData() {
+        const cothoritySocket = new Net.CothoritySocket();
+        const dataUpdateMessage = CothorityMessages.createDataUpdate(Convert.hexToByteArray(this.getIdentity().id));
+        return cothoritySocket.send({Address: this.getIdentity().address}, RequestPath.IDENTITY_DATA_UPDATE, dataUpdateMessage, DecodeType.DATA_UPDATE_REPLY)
+            .then((response) => {
+                this.getVMModule().isConnected = true;
+                return this.setData(response.data);
+            })
+    }
+
+    /**
+     * Request the proposed data on the skipchain
+     * @returns {Promise.<TResult>}
+     */
+    updateProposedData() {
+        const cothoritySocket = new Net.CothoritySocket();
+        const proposeUpdateMessage = CothorityMessages.createProposeUpdate(viewModel.id);
+        return cothoritySocket.send({Address: this.getIdentity().address}, RequestPath.IDENTITY_PROPOSE_UPDATE, proposeUpdateMessage, DecodeType.DATA_UPDATE_REPLY)
+            .then((response) => {
+                this.getVMModule().isConnected = true;
+                return this.setProposedData(response.data);
+            })
+    }
+
+    /**
+     * Request both the data and the proposed data from the skipchain and ask to update the viewmodel arrays
+     * @returns {Promise.<TResult>}
+     */
+    updateAll() {
+        const promises = [this.updateData(), this.updateProposedData()];
+
+        return Promise.all(promises)
+            .then(() => {
+                this.setDevicesArray(this.getData().device);
+                this.setProposedDevicesArray(this.getProposedData().device);
+                this.setStorageArray(this.getData().storage);
+                this.setProposedDevicesArray(this.getProposedData().storage);
+            })
+            .catch((error) => {
+                console.log(error);
+                console.dir(error);
+                console.trace();
+
+                this.setIsConnected(false);
+            })
+    }
+
+    voteForProposed() {
+        let hashedData = this.hashData(this.getProposedData());
+        const cothoritySocket = new Net.CothoritySocket();
+        let alreadySigned = false;
+        if (this.getProposedData().votes[this.getName()] !== null && this.getProposedData().votes[this.getName()] !== undefined) {
+            alreadySigned = Crypto.schnorrVerify(User.getKeyPairModule.public, Convert.hexToByteArray(hashedData), this.getProposedData().votes[name])
+        }
+        if (alreadySigned) {
+            return Promise.reject("You already signed the message")
+        }
+
+        const secret = new BigNumber(Convert.byteArrayToHex(User.getKeyPair().private), 16);
+        const signature = Crypto.schnorrSign(secret, hashedData);
+
+        let proposeVoteMessage = CothorityMessages.createProposeVote(this.getIdentity().id, name, signature);
+        return cothoritySocket.send({Address: this.getIdentity().address}, RequestPath.IDENTITY_PROPOSE_VOTE, proposeVoteMessage, DecodeType.PROPOSE_VOTE_REPLY)
+    }
+
+    hashData(data) {
+        let tab = new Uint8Array(4);
+        tab[3] = data.threshold / Math.pow(2, 24);
+        tab[2] = (data.threshold % Math.pow(2, 24)) / Math.pow(2, 16);
+        tab[1] = (data.threshold % Math.pow(2, 16)) / Math.pow(2, 8);
+        tab[0] = (data.threshold % Math.pow(2, 8));
+        const dataHash = HASH.sha256()
+            .update(tab);
+
+        let devices = [];
+        for (let device in data.device) {
+            if (data.device.hasOwnProperty(device)) {
+                devices.push(device);
+            }
+        }
+        devices.sort();
+        for (let i in devices) {
+            console.log(`device: ${devices[i]}`);
+            console.log(`point: ${DedisMisc.uint8ArrayToHex(data.device[devices[i]].point)}`);
+            dataHash.update(this.GetByteArrayFromString(devices[i]));
+            dataHash.update(data.device[devices[i]].point);
+        }
+
+        let storageKeys = [];
+        for (let key in data.storage) {
+            if (data.storage.hasOwnProperty(key)) {
+                storageKeys.push(key);
+            }
+        }
+        storageKeys.sort();
+        for (let i in storageKeys) {
+            dataHash.update(this.GetByteArrayFromString(data.storage[storageKeys[i]]));
+        }
+        return dataHash.digest("hex");
+    }
+
+    GetByteArrayFromString(parameter) {
+        let mainbytesArray = [];
+        for (let i = 0; i < parameter.length; i++)
+            mainbytesArray.push(parameter.charCodeAt(i));
+
+        return mainbytesArray;
+    }
+
+
+    /**
      * Load and reset functions and sub-functions to load/reset Cisc.
      */
 
@@ -446,7 +611,7 @@ class Cisc {
      */
     reset() {
         this._isLoaded = false;
-        const promises = [this.emptyViewModel(),this.resetName(),this.resetAddress()];
+        const promises = [this.emptyViewModel(), this.resetName(), this.resetAddress()];
 
         return Promise.all(promises)
             .then(() => {
@@ -462,12 +627,12 @@ class Cisc {
             });
     }
 
-    resetName(){
-        return this.setName("",true);
+    resetName() {
+        return this.setName("", true);
     }
 
-    resetAddress(){
-        return this.setAddress("",true);
+    resetAddress() {
+        return this.setIdentity("", "", true);
     }
 
     /**
@@ -477,19 +642,19 @@ class Cisc {
     load() {
         this._isLoaded = false;
 
-        const promises = [this.loadAddress(),this.loadName()];
+        const promises = [this.loadAddress(), this.loadName()];
 
         return Promise.all(promises)
-         .then(() => {
-         this._isLoaded = true;
-         })
-         .catch(error => {
-         console.log(error);
-         console.dir(error);
-         console.trace();
+            .then(() => {
+                this._isLoaded = true;
+            })
+            .catch(error => {
+                console.log(error);
+                console.dir(error);
+                console.trace();
 
-         return Promise.reject(error);
-         });
+                return Promise.reject(error);
+            });
     }
 
     /**
@@ -500,7 +665,7 @@ class Cisc {
         return FileIO.getStringOf(FilesPath.CISC_IDENTITY_LINK)
             .then(jsonAddress => {
                 const obj = JSON.parse(jsonAddress);
-                return this.setAddress(obj.address,false)
+                return this.setIdentity(obj.id, obj.address, false)
             })
             .catch(error => {
                 console.log(error);
@@ -519,7 +684,7 @@ class Cisc {
         return FileIO.getStringOf(FilesPath.CISC_NAME)
             .then(jsonName => {
                 const obj = Convert.jsonToObject(jsonName);
-                return this.setName(obj.name,false)
+                return this.setName(obj.name, false)
             })
             .catch(error => {
                 console.log(error);

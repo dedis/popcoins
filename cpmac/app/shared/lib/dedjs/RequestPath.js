@@ -16,6 +16,7 @@ const IDENTITY_PIN_REQUEST = `${IDENTITY}/PinRequest`;
 const IDENTITY_DATA_UPDATE = `${IDENTITY}/DataUpdate`;
 const IDENTITY_PROPOSE_UPDATE = `${IDENTITY}/ProposeUpdate`;
 const IDENTITY_PROPOSE_SEND = `${IDENTITY}/ProposeSend`;
+const IDENTITY_PROPOSE_VOTE = `${IDENTITY}/ProposeVote`;
 
 /**
  * Skipchain Requests
@@ -64,3 +65,4 @@ module.exports.CISC_PROPOSE_VOTE = CISC_PROPOSE_VOTE;
 module.exports.CISC_PROPOSE_SEND = CISC_PROPOSE_SEND;
 module.exports.CISC_PROPOSE_UPDATE = CISC_PROPOSE_UPDATE;
 module.exports.CISC_SCHNORR_SIG = CISC_SCHNORR_SIG;
+module.exports.IDENTITY_PROPOSE_VOTE = IDENTITY_PROPOSE_VOTE;

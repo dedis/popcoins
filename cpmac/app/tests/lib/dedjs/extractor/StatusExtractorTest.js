@@ -50,7 +50,7 @@ describe("StatusExtractor", function () {
     });
   });
 
-  describe("#getAddress", function () {
+  describe("#getIdentity", function () {
     it("should throw an error when statusResponse is not a status response", function () {
       expect(() => StatusExtractor.getAddress("statusResponse")).to.throw();
     });

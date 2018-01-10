@@ -1,13 +1,12 @@
 const FrameModule = require("ui/frame");
 const Dialog = require("ui/dialogs");
-const CothorityPath = require("~/shared/res/cothority-path/cothority-path");
-const CothorityMessages = require("~/shared/lib/cothority-protobuf/build/cothority-messages");
-const CothorityDecodeTypes = require("~/shared/res/cothority-decode-types/cothority-decode-types");
-const DedisJsNet = require("~/shared/lib/dedis-js/src/net");
-const FileIO = require("~/shared/lib/file-io/file-io");
-const FilePaths = require("~/shared/res/files/files-path");
-const DeepCopy = require("~/shared/lib/deep-copy/DeepCopy");
-const homePage = require("~/drawers/cisc/home/home-page");
+const RequestPath = require("~/shared/lib/dedjs/RequestPath");
+const CothorityMessages = require("~/shared/lib/dedjs/protobuf/build/cothority-messages");
+const DecodeType = require("~/shared/lib/dedjs/DecodeType");
+const DedisJsNet = require("~/shared/lib/dedjs/Net");
+const Convert = require("~/shared/lib/dedjs/Convert");
+const Helper = require("~/shared/lib/dedjs/Helper");
+const Cisc = require("~/shared/lib/dedjs/object/cisc/Cisc").get;
 
 let viewmodel;
 let Page;
@@ -27,7 +26,7 @@ function onLoaded(args) {
 
     const page = args.object;
     Page = page.page;
-    page.bindingContext = page.page.bindingContext;
+    page.bindingContext = Cisc.getVMModule();
     viewmodel = page.bindingContext;
 }
 

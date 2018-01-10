@@ -24,7 +24,7 @@ function onLoaded(args) {
         return;
     }
     const page = args.object;
-    page.bindingContext = page.page.bindingContext;
+    page.bindingContext = Cisc.getVMModule();
     viewModel = page.bindingContext;
     loadViews(page);
     setTimeout(() => {
@@ -33,7 +33,7 @@ function onLoaded(args) {
 }
 
 function updateImage() {
-    if (Cisc.getAdress() !== "" && Cisc.getIsConnected()) {
+    if (Cisc.getAddress() !== "" && Cisc.getIsConnected()) {
         label.text = viewModel.label;
         const sideLength = PlatformModule.screen.mainScreen.widthPixels;
         const QR_CODE = QRGenerator.createBarcode({

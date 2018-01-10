@@ -1,7 +1,6 @@
 const frameModule = require("ui/frame");
 const Cisc = require("../../shared/lib/dedjs/object/cisc/Cisc").get;
 
-const CiscPageViewModel = require("./cisc-view-model");
 
 /* ***********************************************************
  * Use the "onNavigatingTo" handler to initialize the page binding context.
