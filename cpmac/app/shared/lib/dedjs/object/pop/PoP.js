@@ -4,6 +4,9 @@ const Package = require("../../Package");
 const ObjectType = require("../../ObjectType");
 const Helper = require("../../Helper");
 const Convert = require("../../Convert");
+const RequestPath = require("../../RequestPath");
+const DecodeType = require("../../DecodeType");
+const Net = require("../../Net");
 const FilesPath = require("../../../../res/files/files-path");
 const FileIO = require("../../../../lib/file-io/file-io");
 const CothorityMessages = require("../../protobuf/build/cothority-messages");
@@ -357,6 +360,36 @@ class PoP {
     return this.addPopToken(popToken, true)
       .then(() => {
         return this.deleteFinalStatementByIndex(index);
+      });
+  }
+
+  /**
+   * Fetches the FinalStatement corresponding to the description id given as parameter.
+   * @param {ServerIdentity} conode - the conode from which to fetch the final statement
+   * @param {Uint8Array} descId - the id of the PopDesc
+   * @returns {Promise} - a promise that gets completed once the final statement has been fetched and saved locally
+   */
+  fetchFinalStatement(conode, descId) {
+    if (!Helper.isOfType(conode, ObjectType.SERVER_IDENTITY)) {
+      throw new Error("conode must be an instance of ServerIdentity");
+    }
+    if (!(descId instanceof Uint8Array) || descId.length === 0) {
+      throw new Error("descId must be an instance of Uint8Array and not empty");
+    }
+
+    const cothoritySocket = new Net.CothoritySocket();
+    const fetchRequestMessage = CothorityMessages.createFetchRequest(descId);
+
+    return cothoritySocket.send(conode, RequestPath.POP_FETCH_REQUEST, fetchRequestMessage, DecodeType.FETCH_RESPONSE)
+      .then(response => {
+        return this.addFinalStatement(response.final, true);
+      })
+      .catch(error => {
+        console.log(error);
+        console.dir(error);
+        console.trace();
+
+        return Promise.reject(error);
       });
   }
 

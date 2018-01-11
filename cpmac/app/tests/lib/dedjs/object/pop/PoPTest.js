@@ -70,6 +70,28 @@ const KEY_PAIR = Convert.parseJsonKeyPair(JSON_KEY_PAIR);
 
 const POP_TOKEN = CothorityMessages.createPopToken(FINAL_STATEMENT, KEY_PAIR.private, KEY_PAIR.public);
 
+const POP_DESC_HASH = "is4ISmQqzyEcbzTqDQEo6jP42SU4DTijtPYam5kwsoI=";
+const POP_DESC_HASH_JSON = Convert.objectToJson({
+  hash: POP_DESC_HASH
+});
+const POP_DESC_HASH_BYTE_ARRAY = Convert.base64ToByteArray(POP_DESC_HASH);
+
+const CONODE_ADDRESS = "tcp://10.0.2.2:7002";
+//const CONODE_ADDRESS = "tcp://10.0.2.2:7004";
+//const CONODE_ADDRESS = "tcp://10.0.2.2:7006";
+const CONODE_PUBLIC_KEY = "HkDzpR5Imd7WNx8kl2lJcIVRVn8gfDByJnmlfrYh/zU=";
+//const CONODE_PUBLIC_KEY = "Fx6zzvJM6VzxfByLY2+uArGPtd2lHKPVmoXGMhdaFCA=";
+//const CONODE_PUBLIC_KEY = "j53MMKZNdtLlglcK9Ct1YYtkbbEOfq3R8ZoJOFIu6tE=";
+const CONODE_PUBLIC_KEY_BYTE_ARRAY = Convert.base64ToByteArray(CONODE_PUBLIC_KEY);
+const CONODE_DESCRIPTION = "Conode_1";
+//const CONODE_DESCRIPTION = "Conode_2";
+//const CONODE_DESCRIPTION = "Conode_3";
+const CONODE_ID_REAL = "z6kCTQ77Xna9yfgKka5lNQ==";
+//const CONODE_ID_REAL = "Qd8XkrUlVEeClO9I95nklQ==";
+//const CONODE_ID_REAL = "tUq+0651WRaAI4aTQC0d8w==";
+const CONODE_ID_REAL_BYTE_ARRAY = Convert.base64ToByteArray(CONODE_ID_REAL);
+const SERVER_IDENTITY = Convert.toServerIdentity(CONODE_ADDRESS, CONODE_PUBLIC_KEY_BYTE_ARRAY, CONODE_DESCRIPTION, CONODE_ID_REAL_BYTE_ARRAY);
+
 describe("PoP", function () {
 
   function clean() {
@@ -586,5 +608,32 @@ describe("PoP", function () {
           popTokenString.should.not.be.empty;
         });
     });
+  });
+
+  describe("#fetchFinalStatement", function () {
+    it("should throw an error when conode is not a server identity", function () {
+      expect(() => PoP.fetchFinalStatement("SERVER_IDENTITY", POP_DESC_HASH_BYTE_ARRAY)).to.throw();
+    });
+
+    it("should throw an error when descId is not a byte array", function () {
+      expect(() => PoP.fetchFinalStatement(SERVER_IDENTITY, "POP_DESC_HASH_BYTE_ARRAY")).to.throw();
+    });
+
+    it("should throw an error when descId is empty", function () {
+      expect(() => PoP.fetchFinalStatement(SERVER_IDENTITY, new Uint8Array())).to.throw();
+    });
+
+    /*
+    it.only("should correctly fetch the final statement", function () {
+      return PoP.fetchFinalStatement(SERVER_IDENTITY, POP_DESC_HASH_BYTE_ARRAY)
+        .then(() => {
+          const finalStatements = PoP.getFinalStatements().slice();
+
+          finalStatements.length.should.equal(1);
+          console.log(finalStatements[0]);
+          console.dir(finalStatements[0]);
+        });
+    });
+    */
   });
 });

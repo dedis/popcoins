@@ -5,6 +5,7 @@ const Convert = require("../../../shared/lib/dedjs/Convert");
 
 const User = require("../../../shared/lib/dedjs/object/user/User").get;
 const Org = require("../../../shared/lib/dedjs/object/pop/org/Org").get;
+const PoP = require("../../../shared/lib/dedjs/object/pop/PoP").get;
 
 const viewModel = ObservableModule.fromObject({
   linkedConode: Org.getLinkedConodeModule(),
@@ -135,7 +136,7 @@ function fetchButtonTapped() {
     });
   }
 
-  return Org.fetchFinalStatement(popDescId)
+  return PoP.fetchFinalStatement(Org.getLinkedConode(), popDescId)
     .then(() => {
       return Dialog.alert({
         title: "Final Statement Saved",

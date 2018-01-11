@@ -1,6 +1,7 @@
 const Crypto = require("./Crypto");
 
-const PUBLIC_KEY_BYTE_LENGTH = 32;
+const PUBLIC_KEY_BYTE_LENGTH_31 = 31;
+const PUBLIC_KEY_BYTE_LENGTH_32 = 32;
 
 const BASE_URL_TCP = "tcp://";
 const URL_PORT_SPLITTER = ":";
@@ -54,7 +55,7 @@ function isValidPublicKey(publicKey) {
     throw new Error("publicKey must be an instance of Uint8Array");
   }
 
-  if (publicKey.length === PUBLIC_KEY_BYTE_LENGTH) {
+  if (publicKey.length === PUBLIC_KEY_BYTE_LENGTH_31 || publicKey.length === PUBLIC_KEY_BYTE_LENGTH_32) {
     try {
       const point = Crypto.unmarshal(publicKey);
 

@@ -886,7 +886,7 @@ describe("Org", function () {
     });
 
     /*
-    it("should link and set the linked conode", function () {
+    it.only("should link and set the linked conode", function () {
       return User.setKeyPair(KEY_PAIR, false)
         .then(() => {
           return Org.linkToConode(SERVER_IDENTITY, "");
@@ -952,7 +952,7 @@ describe("Org", function () {
     });
 
     /*
-    it("should register PopDesc and set the PopDesc's hash", function () {
+    it.only("should register PopDesc and set the PopDesc's hash", function () {
       return User.setKeyPair(KEY_PAIR, false)
         .then(() => {
           return Org.setPopDesc(POP_DESC, false);
@@ -1082,7 +1082,7 @@ describe("Org", function () {
     });
 
     /*
-    it("should register attendees and save final statement if it is the last registration", function () {
+    it.only("should register attendees and save final statement if it is the last registration", function () {
       return User.setKeyPair(KEY_PAIR, false)
         .then(() => {
           return Org.setPopDesc(POP_DESC, false);
@@ -1101,52 +1101,6 @@ describe("Org", function () {
         })
         .then(() => {
           return Org.registerAttsAndFinalizeParty();
-        })
-        .then(() => {
-          const finalStatements = PoP.getFinalStatements().slice();
-
-          finalStatements.length.should.equal(1);
-          console.log(finalStatements[0]);
-          console.dir(finalStatements[0]);
-        });
-    });
-    */
-  });
-
-  describe("#fetchFinalStatement", function () {
-    it("should throw an error when not linked to a conode", function () {
-      expect(() => {
-        Org.fetchFinalStatement(POP_DESC_HASH_BYTE_ARRAY);
-      }).to.throw();
-    });
-
-    it("should throw an error when descId is not a byte array", function () {
-      expect(() => {
-        Org._linkedConode.public = CONODE_PUBLIC_KEY_BYTE_ARRAY;
-        Org._linkedConode.id = CONODE_ID_REAL_BYTE_ARRAY;
-        Org._linkedConode.address = CONODE_ADDRESS;
-        Org._linkedConode.description = CONODE_DESCRIPTION;
-
-        Org.fetchFinalStatement("POP_DESC_HASH_BYTE_ARRAY");
-      }).to.throw();
-    });
-
-    it("should throw an error when descId is empty", function () {
-      expect(() => {
-        Org._linkedConode.public = CONODE_PUBLIC_KEY_BYTE_ARRAY;
-        Org._linkedConode.id = CONODE_ID_REAL_BYTE_ARRAY;
-        Org._linkedConode.address = CONODE_ADDRESS;
-        Org._linkedConode.description = CONODE_DESCRIPTION;
-
-        Org.fetchFinalStatement(new Uint8Array());
-      }).to.throw();
-    });
-
-    /*
-    it("should correctly fetch the final statement", function () {
-      return Org.setLinkedConode(SERVER_IDENTITY, false)
-        .then(() => {
-          return Org.fetchFinalStatement(POP_DESC_HASH_BYTE_ARRAY);
         })
         .then(() => {
           const finalStatements = PoP.getFinalStatements().slice();

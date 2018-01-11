@@ -130,9 +130,6 @@ describe("Crypto", function () {
       const keyPair = Crypto.generateRandomKeyPair();
 
       Helper.isOfType(keyPair, ObjectType.KEY_PAIR).should.be.true;
-      keyPair.public.length.should.equal(32);
-      keyPair.private.length.should.equal(32);
-      keyPair.publicComplete.length.should.equal(65);
 
       //console.log(Convert.byteArrayToBase64(keyPair.public));
       //console.log(Convert.byteArrayToBase64(keyPair.private));
