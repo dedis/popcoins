@@ -45,6 +45,10 @@ function resetCisc() {
         });
 }
 
+function disconnectCisc(){
+    return Cisc.setIsConnected(false);
+}
+
 function chooseName() {
     if (viewModel.name === "") {
         return Dialog.alert({
@@ -73,3 +77,4 @@ function chooseName() {
 exports.onLoaded = onLoaded;
 exports.chooseName = chooseName;
 exports.resetCisc = resetCisc;
+exports.disconnectCisc = disconnectCisc;

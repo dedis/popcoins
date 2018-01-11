@@ -13,6 +13,9 @@ const RequestPath = require("../../RequestPath");
 const CothorityMessages = require("../../protobuf/build/cothority-messages");
 const BigNumber = require("bn.js");
 const User = require("../user/User").get;
+const FrameModule = require("ui/frame");
+const Dialog = require("ui/dialogs");
+
 
 /**
  * This singleton is the Cisc component of the app. It contains everything needed to interact with the identity skipchain.
@@ -140,28 +143,29 @@ class Cisc {
 
     /**
      * Sets the new device list array given as parameter.
-     * @param {Array} array - the new device list to set
+     * @param {Devices} device - the device field from the data
      * @returns {Promise} - a promise that gets resolved once the new device list array has been set
      */
-    setDevicesArray(array) {
-        if (!(array instanceof Array)) {
-            throw new Error("array must be an instance of Array");
-        }
-        if (array.length === 0 || !Helper.isOfType(array[0], ObjectType.DEVICE)) {
-            throw new Error("array is empty or array[i] is not instance of device");
-        }
-
+    setDevicesArray() {
         this.emptyDevicesArray();
-
-        if (array.length === 1) {
-            return this.addDevice(array[0]);
-        } else {
-            const promises = [];
-            for (let i = 0; i < array.length; ++i) {
-                promises.push(this.addDevice(array[i]));
+        if (this.getData() !== undefined && this.getData() !== null) {
+            for (const property in this.getData().device) {
+                if (this.getData().device.hasOwnProperty(property)) {
+                    const point = this.getData().device[property];
+                    this.getVMModule().devices.push({
+                        device: {
+                            id: property,
+                            point: Convert.byteArrayToHex(point.point),
+                            showPub: () => Dialog.alert({
+                                title: `${property} public key`,
+                                message: Convert.byteArrayToHex(point.point),
+                                okButtonText: "Ok"
+                            })
+                        }
+                    });
+                }
             }
-
-            return Promise.all(promises);
+            return Promise.resolve();
         }
     }
 
@@ -170,24 +174,26 @@ class Cisc {
      * @param {Array} array - the new proposed device list to set
      * @returns {Promise} - a promise that gets resolved once the new proposed device list array has been set
      */
-    setProposedDevicesArray(array) {
-        if (!(array instanceof Array)) {
-            throw new Error("array must be an instance of Array");
-        }
-        if (array.length === 0 || !Helper.isOfType(array[0], ObjectType.DEVICE)) {
-            throw new Error("array is empty or array[i] is not instance of device");
-        }
+    setProposedDevicesArray() {
         this.emptyProposedDevicesArray();
-
-        if (array.length === 1) {
-            return this.addProposedDevice(array[0]);
-        } else {
-            const promises = [];
-            for (let i = 0; i < array.length; ++i) {
-                promises.push(this.addProposedDevice(array[i]));
+        if (this.getProposedData() !== undefined && this.getProposedData() !== null) {
+            for (const property in this.getProposedData().device) {
+                if (this.getProposedData().device.hasOwnProperty(property)) {
+                    const point = this.getProposedData().device[property];
+                    this.getVMModule().proposedDevices.push({
+                        device: {
+                            id: property,
+                            point: Convert.byteArrayToHex(point.point),
+                            showPub: () => Dialog.alert({
+                                title: `${property} public key`,
+                                message: Convert.byteArrayToHex(point.point),
+                                okButtonText: "Ok"
+                            })
+                        }
+                    });
+                }
             }
-
-            return Promise.all(promises);
+            return Promise.resolve();
         }
     }
 
@@ -196,25 +202,39 @@ class Cisc {
      * @param {Array} array - the new key/value pair list to set
      * @returns {Promise} - a promise that gets resolved once the new key/value list array has been set
      */
-    setStorageArray(array) {
-        if (!(array instanceof Array)) {
-            throw new Error("array must be an instance of Array");
-        }
-        if (array.length === 0 || !Helper.isOfType(array[0], ObjectType.keyValue)) {
-            throw new Error("array is empty or array[i] is not instance of device");
-        }
-
+    setStorageArray() {
         this.emptyStorageArray();
+        if (this.getData() !== undefined && this.getData() !== null) {
+            for (const property in this.getData().storage) {
+                if (this.getData().storage.hasOwnProperty(property)) {
+                    const value = this.getData().storage[property];
+                    let showval;
+                    if (property.startsWith("web:")) {
+                        const topmost = FrameModule.topmost();
+                        let navigationEntry = {
+                            moduleName: "drawers/cisc/home/web/web-page",
+                            bindingContext: {html: value, data:this.getStorage()},
+                            animated: false
+                        };
+                        showval = () => topmost.navigate(navigationEntry);
 
-        if (array.length === 1) {
-            return this.addStorage(array[0]);
-        } else {
-            const promises = [];
-            for (let i = 0; i < array.length; ++i) {
-                promises.push(this.addStorage(array[i]));
+                    } else {
+                        showval = () => Dialog.alert({
+                            title: property,
+                            message: value,
+                            okButtonText: "Ok"
+                        })
+                    }
+                    console.log("pushing value");
+                    this.getStorage().push({
+                        keyValuePair: {
+                            key: property,
+                            value: value,
+                            showValue: showval
+                        }
+                    });
+                }
             }
-
-            return Promise.all(promises);
         }
     }
 
@@ -223,25 +243,38 @@ class Cisc {
      * @param {Array} array - the new proposed key/value pair list to set
      * @returns {Promise} - a promise that gets resolved once the new proposed key/value list array has been set
      */
-    setProposedStorageArray(array) {
-        if (!(array instanceof Array)) {
-            throw new Error("array must be an instance of Array");
-        }
-        if (array.length === 0 || !Helper.isOfType(array[0], ObjectType.keyValue)) {
-            throw new Error("array is empty or array[i] is not instance of device");
-        }
-
+    setProposedStorageArray() {
         this.emptyProposedStorageArray();
+        if (this.getProposedData() !== undefined && this.getProposedData() !== null) {
+            for (const property in this.getProposedData().storage) {
+                if (this.getProposedData().storage.hasOwnProperty(property)) {
+                    const value = this.getProposedData().storage[property];
+                    let showval;
+                    if (property.startsWith("web:")) {
+                        const topmost = FrameModule.topmost();
+                        let navigationEntry = {
+                            moduleName: "drawers/cisc/home/web/web-page",
+                            bindingContext: {html: value, data:this.getProposedStorage},
+                            animated: false
+                        };
+                        showval = () => topmost.navigate(navigationEntry);
 
-        if (array.length === 1) {
-            return this.addProposedStorage(array[0]);
-        } else {
-            const promises = [];
-            for (let i = 0; i < array.length; ++i) {
-                promises.push(this.addProposedStorage(array[i]));
+                    } else {
+                        showval = () => Dialog.alert({
+                            title: property,
+                            message: value,
+                            okButtonText: "Ok"
+                        })
+                    }
+                    this.getProposedStorage().push({
+                        keyValuePair: {
+                            key: property,
+                            value: value,
+                            showValue: showval
+                        }
+                    });
+                }
             }
-
-            return Promise.all(promises);
         }
     }
 
@@ -251,7 +284,7 @@ class Cisc {
      * @returns {Promise} - a promise that get resolved once the value is set
      */
     setIsConnected(bool) {
-        if (!(typeof bool !== "boolean")) {
+        if (typeof bool !== "boolean") {
             throw new Error("bool must be a Boolean");
         }
         this.getVMModule().isConnected = true;
@@ -369,6 +402,10 @@ class Cisc {
      * @returns {Promise}
      */
     setProposedData(proposedData) {
+        if (proposedData === null || proposedData === undefined ){
+            this._proposedData = {};
+            return Promise.resolve();
+        }
         if (!Helper.isOfType(proposedData, ObjectType.DATA)) {
             throw new Error("proposedData must be an instance of Data");
         }
@@ -428,6 +465,8 @@ class Cisc {
         ];
 
         return Promise.all(promises)
+            .then(() => this.setIsConnected(false))
+            .catch((error)=>console.log(error))
     }
 
     /**
@@ -494,9 +533,11 @@ class Cisc {
     updateData() {
         const cothoritySocket = new Net.CothoritySocket();
         const dataUpdateMessage = CothorityMessages.createDataUpdate(Convert.hexToByteArray(this.getIdentity().id));
-        return cothoritySocket.send({Address: this.getIdentity().address}, RequestPath.IDENTITY_DATA_UPDATE, dataUpdateMessage, DecodeType.DATA_UPDATE_REPLY)
+        let node = CothorityMessages.createServerIdentity(new Uint8Array({}), new Uint8Array({}), this.getIdentity().address,"lelele");
+        return cothoritySocket.send(node, RequestPath.IDENTITY_DATA_UPDATE, dataUpdateMessage, DecodeType.DATA_UPDATE_REPLY)
             .then((response) => {
-                this.getVMModule().isConnected = true;
+                console.log("data");
+                console.dir(response);
                 return this.setData(response.data);
             })
     }
@@ -506,11 +547,14 @@ class Cisc {
      * @returns {Promise.<TResult>}
      */
     updateProposedData() {
+        console.log("updating proposed data");
         const cothoritySocket = new Net.CothoritySocket();
-        const proposeUpdateMessage = CothorityMessages.createProposeUpdate(viewModel.id);
-        return cothoritySocket.send({Address: this.getIdentity().address}, RequestPath.IDENTITY_PROPOSE_UPDATE, proposeUpdateMessage, DecodeType.DATA_UPDATE_REPLY)
+        const proposeUpdateMessage = CothorityMessages.createProposeUpdate(Convert.hexToByteArray(this.getIdentity().id));
+        let node = CothorityMessages.createServerIdentity(new Uint8Array({}), new Uint8Array({}), this.getIdentity().address,"lelele");
+        return cothoritySocket.send(node, RequestPath.IDENTITY_PROPOSE_UPDATE, proposeUpdateMessage, DecodeType.DATA_UPDATE_REPLY)
             .then((response) => {
-                this.getVMModule().isConnected = true;
+                console.log("proposed data");
+                console.dir(response);
                 return this.setProposedData(response.data);
             })
     }
@@ -520,14 +564,80 @@ class Cisc {
      * @returns {Promise.<TResult>}
      */
     updateAll() {
-        const promises = [this.updateData(), this.updateProposedData()];
+        let promises = [this.updateData(), this.updateProposedData()];
 
         return Promise.all(promises)
             .then(() => {
-                this.setDevicesArray(this.getData().device);
-                this.setProposedDevicesArray(this.getProposedData().device);
-                this.setStorageArray(this.getData().storage);
-                this.setProposedDevicesArray(this.getProposedData().storage);
+                if (this.getData() !== {}) {
+
+                    this.setIsConnected(true);
+                    promises = [
+                        this.setDevicesArray(),
+                        this.setProposedDevicesArray(),
+                        this.setStorageArray(),
+                        this.setProposedStorageArray(),
+                    ];
+                    return Promise.all(promises)
+                } else {
+                    return Promise.resolve();
+                }
+            })
+            .then(()=>{
+                for (let i=0; i<this.getProposedStorage().length; i++ ){
+                    let item = this.getProposedStorage().getItem(""+i);
+                    let NewOrChanged = true;
+                    for (let j=0; j<this.getStorage().length; j++ ){
+                        let oldItem = this.getStorage().getItem(""+j);
+                        if (oldItem.keyValuePair.key === item.keyValuePair.key && oldItem.keyValuePair.value === item.keyValuePair.value){
+                            NewOrChanged = false;
+                        }
+                    }
+                    item.keyValuePair.newOrChanged = NewOrChanged;
+                    this.getProposedStorage().setItem(""+i,item);
+                }
+                for (let i=0; i<this.getStorage().length; i++ ){
+                    let item = this.getStorage().getItem(""+i);
+                    let deleted = true;
+                    for (let j=0; j<this.getProposedStorage().length; j++ ){
+                        let oldItem = this.getProposedStorage().getItem(""+j);
+                        if (oldItem.keyValuePair.key === item.keyValuePair.key && oldItem.keyValuePair.value === item.keyValuePair.value){
+                            deleted = false;
+                        }
+                    }
+
+                    if (deleted) {
+                        item.keyValuePair.deleted = "deleted";
+                        this.getProposedStorage().push(item);
+                    }
+                }
+                for (let i=0; i<this.getProposedDevices().length; i++ ){
+                    let item = this.getProposedDevices().getItem(""+i);
+                    let NewOrChanged = true;
+                    for (let j=0; j<this.getDevices().length; j++ ){
+                        let oldItem = this.getDevices().getItem(""+j);
+                        if (item.device.id === oldItem.device.id && item.device.point === oldItem.device.point){
+                            NewOrChanged = false;
+                        }
+                    }
+                    item.device.newOrChanged = NewOrChanged;
+                    this.getProposedDevices().setItem(""+i,item);
+                }
+
+                for (let i=0; i<this.getDevices().length; i++ ){
+                    let item = this.getDevices().getItem(""+i);
+                    let deleted = true;
+                    for (let j=0; j<this.getProposedDevices().length; j++ ){
+                        let oldItem = this.getProposedDevices().getItem(""+j);
+                        if (item.device.id === oldItem.device.id && item.device.point === oldItem.device.point){
+                            deleted = false;
+                        }
+                    }
+
+                    if (deleted) {
+                        item.device.deleted = "deleted";
+                        this.getProposedDevices().push(item);
+                    }
+                }
             })
             .catch((error) => {
                 console.log(error);
@@ -632,7 +742,7 @@ class Cisc {
     }
 
     resetAddress() {
-        return this.setIdentity("", "", true);
+        return this.setIdentity("", "","", true);
     }
 
     /**
@@ -665,7 +775,7 @@ class Cisc {
         return FileIO.getStringOf(FilesPath.CISC_IDENTITY_LINK)
             .then(jsonAddress => {
                 const obj = JSON.parse(jsonAddress);
-                return this.setIdentity(obj.id, obj.address, false)
+                return this.setIdentity(obj.id, obj.address,obj.label, false)
             })
             .catch(error => {
                 console.log(error);

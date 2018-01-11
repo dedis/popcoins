@@ -10,6 +10,7 @@ const HASH = require("hash.js");
 const BarcodeScanner = require("nativescript-barcodescanner").BarcodeScanner;
 const Helper = require("~/shared/lib/dedjs/Helper");
 const Cisc = require("~/shared/lib/dedjs/object/cisc/Cisc").get;
+const User = require("~/shared/lib/dedjs/object/user/User").get;
 
 let page;
 let viewmodel;
@@ -57,7 +58,7 @@ function toggleProposed() {
     Cisc.updateAll()
         .then(() => {
             if (proposedStorage.visibility === "collapse") {
-                if (viewmodel.proposedData === null) {
+                if (JSON.stringify(Cisc.getProposedData()) === "{}" ){
                     Dialog.alert({
                         title: "No data",
                         message: `There is no proposed data`,
@@ -74,25 +75,11 @@ function toggleProposed() {
 
 function voteForProposed() {
 
-    let hashedData = hashData(viewmodel.proposedData);
-    let signature;
-    let proposeVoteMessage;
-    let name;
-    const cothoritySocket = new DedisJsNet.CothoritySocket();
-
-    FileIO.getStringOf(FilePaths.CISC_NAME)
-        .then((result) => {
-            name = result;
-            return FileIO.getStringOf(FilePaths.PRIVATE_KEY)
+    Cisc.voteForProposed()
+        .then(() => {
+            viewmodel.isOnProposed = false;
         })
-        .then(privateKey => {
-
-            const keyPair = DedisCrypto.getKeyPairFromPrivate(privateKey);
-            let alreadySigned = false;
-            if (viewmodel.proposedData.votes[name] !== null && viewmodel.proposedData.votes[name] !== undefined) {
-                alreadySigned = DedisCrypto.schnorrVerify(keyPair.getPublic(), DedisMisc.hexToUint8Array(hashedData), viewmodel.proposedData.votes[name])
-            }
-            if (alreadySigned) {
+        .catch((error) => {
                 Dialog.alert({
                     title: "Already signed",
                     message: "You already signed this proposition",
@@ -100,45 +87,19 @@ function voteForProposed() {
                 });
                 throw new Error("You already signed this message")
             }
-
-
-            signature = DedisCrypto.schnorrSign(DedisCrypto.toRed(keyPair.getPrivate()), DedisMisc.hexToUint8Array(hashedData));
-
-            return FileIO.getStringOf(FilePaths.CISC_IDENTITY_LINK)
-        })
-        .then(((result) => {
-            proposeVoteMessage = CothorityMessages.createProposeVote(viewmodel.id, name, signature);
-            return cothoritySocket.send({Address: `tcp://${result.split("/")[2]}`}, RequestPath.IDENTITY_PROPOSE_VOTE, proposeVoteMessage, CothorityDecodeTypes.PROPOSE_VOTE_REPLY)
-        }))
-        .then((response) => {
-            console.dir(response);
-            return viewmodel.update();
-        })
-        .then(() => viewmodel.isOnProposed = false)
-        .catch((error) => console.log(error))
+        );
 }
-
-
-
 
 
 function connectButtonTapped(args) {
     const barcodescanner = new BarcodeScanner();
-    return FileIO.getStringOf(FilePaths.CISC_NAME)
-        .then((name) => {
-            if (name === null || name === undefined || name === "") {
-                throw new Error("Go to the settings to set your name")
-            } else {
-                return FileIO.getStringOf(FilePaths.PUBLIC_KEY_COTHORITY)
-            }
-        })
-        .then((key) => {
-            if (key === null || key === undefined || key === "") {
-                throw new Error("Go to the settings to generate a keypair")
-            } else {
-                return barcodescanner.available()
-            }
-        })
+    if (Cisc.getName() === null || Cisc.getName() === undefined || Cisc.getName() === "") {
+        throw new Error("Go to the settings to set your name")
+    }
+    if (!(User.isKeyPairSet())) {
+        throw new Error("Go to the settings to generate a keypair")
+    }
+    return barcodescanner.available()
         .then(function (available) {
             if (available) {
                 return availableFunction();
@@ -174,20 +135,18 @@ function connectButtonTapped(args) {
             openSettingsIfPermissionWasPreviouslyDenied: true // On iOS you can send the user to the settings app if access was previously denied
         }).then(
             (result) => {
+                console.dir(result);
                 const splitColon = result.text.split(":");
                 const splitSlash = splitColon[2].split("/");
                 const goodURL = `tcp:${splitColon[1]}:${splitSlash[0]}`;
-                console.log(goodURL);
-                setTimeout(() => {
-                    const toWrite = `${goodURL}/${splitSlash[1]}`;
-                    FileIO.writeStringTo(FilePaths.CISC_IDENTITY_LINK, toWrite)
-                        .then(() => {
-                            setTimeout(() => {
-                                viewmodel.update().then(() => askForDevice());
-                            }, 100);
-                            console.log(`saved ${toWrite} in ${FilePaths.CISC_IDENTITY_LINK}`);
-                        });
-                }, 100);
+
+                let label = result.text;
+                let address = goodURL;
+                let id = `${splitSlash[1]}`;
+
+
+                Cisc.setIdentity(id, address, label, true)
+                    .then(() => askForDevice());
             })
             .catch(
                 (error) => setTimeout(() => Dialog.alert({
@@ -208,67 +167,58 @@ function connectButtonTapped(args) {
 }
 
 function askForDevice() {
-    let name;
-    let pointHex;
-    let isIn = false;
-    FileIO.getStringOf(FilePaths.CISC_NAME)
-        .then((result) => {
-            console.log(result);
-            name = result;
-            return FileIO.getStringOf(FilePaths.PUBLIC_KEY_COTHORITY)
-        })
-        .then((result) => {
-            console.log(result);
-            pointHex = result;
-            for (let i = 0; i < viewmodel.deviceList.length; i++) {
-                let device = viewmodel.deviceList.getItem("" + i).device;
-                if (device.id === name && device.point === pointHex) {
-                    isIn = true;
-                }
+    return Cisc.updateAll().then(() => {
+        console.log("checking for device");
+        let isIn = false;
+        for (let i = 0; i < Cisc.getDevices().length; i++) {
+            let device = Cisc.getDevices().getItem("" + i).device;
+            if (device.id === Cisc.getName() && device.point === Convert.byteArrayToHex(User.getKeyPairModule().public)) {
+                isIn = true;
             }
-            if (isIn) {
-                return Dialog.alert({
-                    title: "Connection successful",
-                    message: "You successfully connected to this identity!",
-                    okButtonText: "Ok"
-                })
-            } else {
-                return Dialog.confirm({
-                    title: "First Connection",
-                    message: "Do you want to add this device to the identity ?",
-                    okButtonText: "yes",
-                    cancelButtonText: "no"
-                })
-            }
-        })
+        }
+        if (isIn) {
+            return Dialog.alert({
+                title: "Connection successful",
+                message: "You successfully connected to this identity!",
+                okButtonText: "Ok"
+            })
+        } else {
+            return Dialog.confirm({
+                title: "First Connection",
+                message: "Do you want to add this device to the identity ?",
+                okButtonText: "yes",
+                cancelButtonText: "no"
+            })
+        }
+    })
         .then((result) => {
             if (result) {
                 addDevice()
             }
         })
-        .catch((error) => console.log(error))
+        .catch((error) => console.log(error));
 }
 
 function addDevice() {
-    let data = DeepCopy.copy(viewmodel.data);
-    let device;
-    let proposeSendMessage;
-    FileIO.getStringOf(FilePaths.PUBLIC_KEY_COTHORITY)
-        .then((point) => {
-            device = CothorityMessages.createDevice(DedisMisc.hexToUint8Array(point));
-            return FileIO.getStringOf(FilePaths.CISC_NAME);
+    let data = Helper.deepCopy(Cisc.getData());
+    data.device[Cisc.getName()] = CothorityMessages.createDevice(User.getKeyPairModule().public);
+    data.votes = {};
+    console.dir(data);
+
+    let proposeSendMessage = CothorityMessages.createProposeSend(Convert.hexToByteArray(Cisc.getIdentity().id), data);
+    console.log(Cisc.getIdentity().id);
+    const cothoritySocket = new DedisJsNet.CothoritySocket();
+    let node = CothorityMessages.createServerIdentity(new Uint8Array({}), new Uint8Array({}), Cisc.getIdentity().address,"lelele");
+    cothoritySocket.send(node, RequestPath.IDENTITY_PROPOSE_SEND, proposeSendMessage, DecodeType.DATA_UPDATE_REPLY)
+        .then((response) => {
+            console.log(response);
+            console.dir(response);
         })
-        .then((name) => {
-            data.device[name] = device;
-            proposeSendMessage = CothorityMessages.createProposeSend(viewmodel.id, data);
-            return FileIO.getStringOf(FilePaths.CISC_IDENTITY_LINK)
-        })
-        .then((result) => {
-            const cothoritySocket = new DedisJsNet.CothoritySocket();
-            return cothoritySocket.send({Address: `tcp://${result.split("/")[2]}`}, RequestPath.IDENTITY_PROPOSE_SEND, proposeSendMessage, CothorityDecodeTypes.DATA_UPDATE_REPLY)
-        })
-        .then((response) => console.dir(response))
-        .catch((error) => console.log(`There was an error: ${error}`));
+        .catch((error) => {
+            console.log(error);
+            console.dir(error);
+            console.trace();
+        });
 }
 
 

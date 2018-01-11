@@ -33,8 +33,8 @@ function onLoaded(args) {
 }
 
 function updateImage() {
-    if (Cisc.getAddress() !== "" && Cisc.getIsConnected()) {
-        label.text = viewModel.label;
+    if (Cisc.getIdentity().address !== "" && Cisc.getIsConnected()) {
+        label.text = Cisc.getIdentity().label;
         const sideLength = PlatformModule.screen.mainScreen.widthPixels;
         const QR_CODE = QRGenerator.createBarcode({
             encode: label.text,

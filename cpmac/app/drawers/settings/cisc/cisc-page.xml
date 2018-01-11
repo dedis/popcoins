@@ -8,6 +8,7 @@
     <StackLayout class="page-content" orientation="vertical">
 
         <Button text="Reset Cisc" tap="resetCisc"/>
+        <Button text="Disconnect Cisc" tap="disconnectCisc"/>
 
         <Label class="label-title" text="Device Name" />
         <TextField text="{{ name }}"/>

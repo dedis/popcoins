@@ -17,6 +17,7 @@ function onNavigatingTo(args) {
 
     const page = args.object;
     page.bindingContext = Cisc.getVMModule();
+    Cisc.load().then(()=>Cisc.updateAll())
 }
 
 /* ***********************************************************
