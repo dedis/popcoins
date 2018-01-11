@@ -99,7 +99,21 @@ function addConode() {
         // Scan
         return ScanToReturn.scan()
           .then(string => {
-            const conode = Convert.parseJsonServerIdentity(string);
+            let conode = undefined;
+
+            try {
+              conode = Convert.parseJsonServerIdentity(string);
+            } catch (error) { }
+
+            if (conode === undefined) {
+              try {
+                conode = Convert.parseTomlRoster(string).list[0];
+              } catch (error) { }
+            }
+
+            if (conode === undefined) {
+              return Promise.reject("parsing error");
+            }
 
             return User.addServer(conode);
           });
