@@ -52,7 +52,7 @@ function addManual() {
 
       Dialog.alert({
         title: "Error",
-        message: "An error occured, please try again.",
+        message: "An error occured, please try again. - " + error,
         okButtonText: "Ok"
       });
 
@@ -77,7 +77,7 @@ function addScan() {
 
       Dialog.alert({
         title: "Error",
-        message: "An error occured, please try again.",
+        message: "An error occured, please try again. - " + error,
         okButtonText: "Ok"
       });
 
@@ -120,7 +120,7 @@ function deleteAttendee(args) {
 
       Dialog.alert({
         title: "Error",
-        message: "An error occured, please try again.",
+        message: "An error occured, please try again. - " + error,
         okButtonText: "Ok"
       });
 

@@ -58,7 +58,7 @@ function onNameChangeHandler() {
 
       Dialog.alert({
         title: "Error",
-        message: "An unexpected error occurred during the save process.",
+        message: "An unexpected error occurred during the save process. - " + error,
         okButtonText: "Ok"
       });
 
@@ -75,7 +75,7 @@ function onLocationChangeHandler() {
 
       Dialog.alert({
         title: "Error",
-        message: "An unexpected error occurred during the save process.",
+        message: "An unexpected error occurred during the save process. - " + error,
         okButtonText: "Ok"
       });
 
@@ -123,7 +123,7 @@ function setDate() {
 
       Dialog.alert({
         title: "Error",
-        message: "An unexpected error occurred during the save process.",
+        message: "An unexpected error occurred during the save process. - " + error,
         okButtonText: "Ok"
       });
 
@@ -156,7 +156,7 @@ function setTime() {
 
       Dialog.alert({
         title: "Error",
-        message: "An unexpected error occurred during the save process.",
+        message: "An unexpected error occurred during the save process. - " + error,
         okButtonText: "Ok"
       });
 
@@ -182,7 +182,7 @@ function addManual() {
 
           Dialog.alert({
             title: "Error",
-            message: "An error occured, please try again.",
+            message: "An error occured, please try again. - " + error,
             okButtonText: "Ok"
           });
 
@@ -226,7 +226,7 @@ function addManual() {
 
       Dialog.alert({
         title: "Error",
-        message: "An error occured, please try again.",
+        message: "An error occured, please try again. - " + error,
         okButtonText: "Ok"
       });
 
@@ -248,7 +248,7 @@ function addScan() {
 
       Dialog.alert({
         title: "Error",
-        message: "An error occured, please try again.",
+        message: "An error occured, please try again. - " + error,
         okButtonText: "Ok"
       });
 
@@ -279,7 +279,7 @@ function deleteConode(args) {
 
       Dialog.alert({
         title: "Error",
-        message: "An error occured, please try again.",
+        message: "An error occured, please try again. - " + error,
         okButtonText: "Ok"
       });
 
@@ -387,9 +387,7 @@ function manageDesc() {
             const id = Convert.jsonToObject(pasteBinIdJson).id;
             const PasteBin = new Net.PasteBin();
 
-            // TODO: remove
-            //return PasteBin.get(id);
-            return PasteBin.get("fsA2pbdR");
+            return PasteBin.get(id);
           })
           .then(popDescJson => {
             const popDesc = Convert.parseJsonPopDesc(popDescJson);
@@ -436,7 +434,7 @@ function manageDesc() {
 
       Dialog.alert({
         title: "Error",
-        message: "An error occured, please try again.",
+        message: "An error occured, please try again. - " + error,
         okButtonText: "Ok"
       });
 

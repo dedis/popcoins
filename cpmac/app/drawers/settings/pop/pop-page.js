@@ -28,14 +28,14 @@ function resetPop() {
 
       return Promise.resolve();
     })
-    .catch(() => {
+    .catch(error => {
       console.log(error);
       console.dir(error);
       console.trace();
 
       return Dialog.alert({
         title: "Error",
-        message: "An unexpected error occurred. Please try again.",
+        message: "An unexpected error occurred. Please try again. - " + error,
         okButtonText: "Ok"
       });
 
@@ -64,14 +64,14 @@ function resetOrganizer() {
 
       return Promise.resolve();
     })
-    .catch(() => {
+    .catch(error => {
       console.log(error);
       console.dir(error);
       console.trace();
 
       return Dialog.alert({
         title: "Error",
-        message: "An unexpected error occurred. Please try again.",
+        message: "An unexpected error occurred. Please try again. - " + error,
         okButtonText: "Ok"
       });
 

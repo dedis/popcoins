@@ -103,7 +103,7 @@ function popTokenTapped(args) {
 
       Dialog.alert({
         title: "Error",
-        message: "An error occured, please retry.",
+        message: "An error occured, please retry. - " + error,
         okButtonText: "Ok"
       });
 
@@ -117,9 +117,7 @@ function scanFinalStatement() {
       const id = Convert.jsonToObject(pasteBinIdJson).id;
       const PasteBin = new Net.PasteBin();
 
-      // TODO: remove
-      //return PasteBin.get(id);
-      return PasteBin.get("8VPb6X5g");
+      return PasteBin.get(id);
     })
     .then(finalStatementJson => {
       const finalStatement = Convert.parseJsonFinalStatement(finalStatementJson);
@@ -133,7 +131,7 @@ function scanFinalStatement() {
 
       Dialog.alert({
         title: "Error",
-        message: "An error occured, please retry.",
+        message: "An error occured, please retry. - " + error,
         okButtonText: "Ok"
       });
 

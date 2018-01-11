@@ -299,8 +299,6 @@ class Org {
 
     const oldRegisteredAtts = this.getRegisteredAtts().slice();
 
-    // TODO: check for duplicates
-
     this.emptyRegisteredAttsArray();
     array.forEach(publicKey => {
       publicKey.toBase64 = Convert.byteArrayToBase64;
@@ -484,7 +482,7 @@ class Org {
     let newRoster = {
       list: this.getPopDesc().roster.list
     };
-    newRoster.list.push(conode); // TODO: check for duplicates
+    newRoster.list.push(conode);
     newRoster = Convert.parseJsonRoster(Convert.objectToJson(newRoster));
 
     const newPopDesc = this.getPopDesc();

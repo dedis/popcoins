@@ -78,7 +78,7 @@ function addConode() {
 
           Dialog.alert({
             title: "Error",
-            message: "An error occured, please try again.",
+            message: "An error occured, please try again. - " + error,
             okButtonText: "Ok"
           });
 
@@ -119,7 +119,7 @@ function addConode() {
 
       Dialog.alert({
         title: "Error",
-        message: "An error occured, please check the code you scanned.",
+        message: "An error occured, please check the code you scanned. - " + error,
         okButtonText: "Ok"
       });
 
@@ -145,7 +145,7 @@ function deleteConode(args) {
 
       Dialog.alert({
         title: "Error",
-        message: "An error occured, please try again.",
+        message: "An error occured, please try again. - " + error,
         okButtonText: "Ok"
       });
 

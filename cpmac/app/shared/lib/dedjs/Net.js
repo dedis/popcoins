@@ -161,11 +161,6 @@ function PasteBin() {
       throw new Error("text must be of type string");
     }
 
-    // TODO: remove
-    return new Promise((resolve, reject) => {
-        resolve("SOME_ID");
-      });
-
     return Fetch.fetch(PASTEBIN_URL_PASTE, {
       method: "POST",
       headers: new Headers({

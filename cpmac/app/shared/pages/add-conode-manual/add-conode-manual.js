@@ -21,10 +21,10 @@ function onLoaded(args) {
     throw new Error("a field is undefined, but it shouldn't");
   }
 
-  // TODO: remove
-  textFieldAddress.text = "tcp://10.0.2.2:7002";
-  textFieldPublicKey.text = "HkDzpR5Imd7WNx8kl2lJcIVRVn8gfDByJnmlfrYh/zU=";
-  textFieldDescription.text = "Conode_1";
+  // Can be removed. Only used for testing purposes.
+  //textFieldAddress.text = "tcp://10.0.2.2:7002";
+  //textFieldPublicKey.text = "HkDzpR5Imd7WNx8kl2lJcIVRVn8gfDByJnmlfrYh/zU=";
+  //textFieldDescription.text = "Conode_1";
 }
 
 /**

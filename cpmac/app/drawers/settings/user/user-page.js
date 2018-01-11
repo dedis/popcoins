@@ -52,14 +52,14 @@ function generateKeyPair() {
           okButtonText: "Ok"
         });
       })
-      .catch(() => {
+      .catch(error => {
         console.log(error);
         console.dir(error);
         console.trace();
 
         return Dialog.alert({
           title: "Key Pair Generation Error",
-          message: "An unexpected error occurred. Please try again.",
+          message: "An unexpected error occurred. Please try again. - " + error,
           okButtonText: "Ok"
         });
 
@@ -129,14 +129,14 @@ function resetUser() {
 
       return Promise.resolve();
     })
-    .catch(() => {
+    .catch(error => {
       console.log(error);
       console.dir(error);
       console.trace();
 
       return Dialog.alert({
         title: "Error",
-        message: "An unexpected error occurred. Please try again.",
+        message: "An unexpected error occurred. Please try again. - " + error,
         okButtonText: "Ok"
       });
 
