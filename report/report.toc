@@ -1,6 +1,7 @@
 \contentsline {paragraph}{}{2}
 \contentsline {paragraph}{}{3}
 \contentsline {paragraph}{}{4}
+\contentsline {paragraph}{}{4}
 \contentsline {chapter}{\numberline {1}Introduction}{6}
 \contentsline {paragraph}{}{6}
 \contentsline {paragraph}{}{6}
@@ -8,44 +9,53 @@
 \contentsline {section}{\numberline {2.1}Cothority}{8}
 \contentsline {paragraph}{}{8}
 \contentsline {subsection}{\numberline {2.1.1}CISC}{8}
-\contentsline {subsection}{\numberline {2.1.2}PoP}{8}
-\contentsline {paragraph}{}{8}
+\contentsline {subsection}{\numberline {2.1.2}PoP}{9}
 \contentsline {paragraph}{}{9}
+\contentsline {paragraph}{}{10}
 \contentsline {section}{\numberline {2.2}Technologies}{10}
 \contentsline {paragraph}{}{10}
 \contentsline {subsection}{\numberline {2.2.1}Elliptic Curve Cryptography}{10}
-\contentsline {paragraph}{}{10}
-\contentsline {subsection}{\numberline {2.2.2}Schnorr Signature}{10}
-\contentsline {paragraph}{}{10}
-\contentsline {subsection}{\numberline {2.2.3}Protocol Buffers}{10}
-\contentsline {paragraph}{}{10}
+\contentsline {paragraph}{}{11}
+\contentsline {subsection}{\numberline {2.2.2}Schnorr Signature}{11}
+\contentsline {paragraph}{}{11}
+\contentsline {subsection}{\numberline {2.2.3}Protocol Buffers}{11}
+\contentsline {paragraph}{}{11}
 \contentsline {subsection}{\numberline {2.2.4}Websocket}{11}
 \contentsline {paragraph}{}{11}
-\contentsline {chapter}{\numberline {3}Design}{12}
-\contentsline {paragraph}{}{12}
-\contentsline {paragraph}{}{12}
+\contentsline {chapter}{\numberline {3}Design}{13}
+\contentsline {paragraph}{}{13}
 \contentsline {paragraph}{}{13}
 \contentsline {paragraph}{}{14}
-\contentsline {paragraph}{}{14}
 \contentsline {paragraph}{}{15}
-\contentsline {chapter}{\numberline {4}App User}{16}
+\contentsline {paragraph}{}{15}
 \contentsline {paragraph}{}{16}
-\contentsline {paragraph}{}{16}
-\contentsline {chapter}{\numberline {5}CISC}{17}
-\contentsline {chapter}{\numberline {6}PoP}{18}
-\contentsline {paragraph}{}{18}
-\contentsline {section}{\numberline {6.1}Implementation and Evaluation}{18}
+\contentsline {chapter}{\numberline {4}App User}{18}
 \contentsline {paragraph}{}{18}
 \contentsline {paragraph}{}{18}
+\contentsline {chapter}{\numberline {5}CISC}{19}
+\contentsline {paragraph}{}{19}
+\contentsline {section}{\numberline {5.1}Implementation and Evaluation}{19}
 \contentsline {paragraph}{}{19}
 \contentsline {paragraph}{}{19}
 \contentsline {paragraph}{}{20}
-\contentsline {section}{\numberline {6.2}Results}{20}
+\contentsline {section}{\numberline {5.2}Results}{20}
 \contentsline {paragraph}{}{20}
-\contentsline {paragraph}{}{21}
-\contentsline {section}{\numberline {6.3}Future Work}{21}
-\contentsline {paragraph}{}{21}
-\contentsline {chapter}{\numberline {7}Installation and Running of CPMAC}{23}
+\contentsline {section}{\numberline {5.3}Future Work}{20}
+\contentsline {paragraph}{}{20}
+\contentsline {chapter}{\numberline {6}PoP}{22}
+\contentsline {paragraph}{}{22}
+\contentsline {section}{\numberline {6.1}Implementation and Evaluation}{22}
+\contentsline {paragraph}{}{22}
+\contentsline {paragraph}{}{22}
 \contentsline {paragraph}{}{23}
-\contentsline {chapter}{\numberline {8}Known Bugs}{26}
-\contentsline {paragraph}{}{26}
+\contentsline {paragraph}{}{23}
+\contentsline {paragraph}{}{24}
+\contentsline {section}{\numberline {6.2}Results}{24}
+\contentsline {paragraph}{}{24}
+\contentsline {paragraph}{}{25}
+\contentsline {section}{\numberline {6.3}Future Work}{25}
+\contentsline {paragraph}{}{25}
+\contentsline {chapter}{\numberline {7}Installation and Running of CPMAC}{27}
+\contentsline {paragraph}{}{27}
+\contentsline {chapter}{\numberline {8}Known Bugs}{30}
+\contentsline {paragraph}{}{30}

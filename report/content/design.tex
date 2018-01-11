@@ -15,13 +15,20 @@ The app itself uses a side drawer component to navigate between the main parts, 
 \item Org \linebreak Contains all the functionalities needed by the organizers of a PoP party.
 \end{itemize}
 
-\item CISC // TODO: INSERT
+\item Cisc
+\begin{itemize}
+\item Home \linebreak This is the main tab of the Cisc drawer. It allows the user to connect to an identity, to browse the available data, see the modifications to the data and vote for the proposed one.
+
+\item QR \linebreak This screen is used to display the QR code used to connect to the identity to add another device.
+
+\item Data \linebreak This tab allows the user to propose new data to the skipchain. Right only simple key-value pairs are available.
+\end{itemize}
 
 \item Settings
 \begin{itemize}
 \item User \linebreak The settings of the user include key pair generation and displaying, one can also completeley reset the data linked to the user of the app.
 
-\item CISC // TODO: INSERT
+\item CISC \linebreak This tab is used to reset completely the data from the Cisc class, disconnect from the current identity and modify the name used in the Cisc drawer.
 
 \item PoP \linebreak In this tab one can reset the global PoP data and the data linked to the organizer.
 \end{itemize}
@@ -33,7 +40,8 @@ In order to easily represent the information, manage the data, and use the corre
 \begin{itemize}
 \item User.js \linebreak Contains all the data and logic that is global and belongs to the user of the app. At this state the user class manages the key pair and the roster displayed in the home screen.
 
-\item Cisc.js // TODO: INSERT
+\item Cisc.js \linebreak Contains the data, data-bindings, and logic used by a user to interact with its skipchain. For example, it stores the last data and 
+proposed data it received from the skipchain.
 
 \item PoP.js \linebreak Contains everything that is common to organizers and attendees, it manages the list of final statements and PoP tokens belonging to the user.
 \begin{itemize}
