@@ -1,0 +1,25 @@
+~15-20 pages (including cover and references) and has to be submitted by email to your supervisor along with your presentation and relevant project files
+
+The relevant project files should be sent in a zip archive and include:
+    -Source code of your report (LaTeX, EPS, GIF, etc)
+    -Source code of your presentation (LaTeX, PPT, etc)
+    -Source code of your implementation or a link to the repository with the code if it is accessible.
+
+The title page has to include the following information:
+    -Name and affiliation of the student(s).
+    -Name of the supervisor.
+    -Name of the responsible (Prof. Bryan Ford).
+    -Title of your project.
+    -Type of project (Semester Project, Diploma Work, Graduate School Project, Internship).
+    -EPFL logo and lab name (DeDiS).
+
+The content of the report should ideally cover the following topics:
+    -Introduction of the subject and the problem.
+    -Goals of the project and motivation.
+    -Corresponding background.
+    -Step-by-step description of your design/implementation/evaluation/analysis.
+    -Theoretical and practical limitations of the project and its implementation.
+    -Results.
+    -Evaluation of the results and comparison with other approaches if applicable.
+    -Future work.
+    -Step-by-step guide for installation, including dependencies, and running of the final product.

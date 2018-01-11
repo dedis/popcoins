@@ -1,0 +1,5 @@
+\select@language {english}
+\beamer@sectionintoc {1}{Cothority}{2}{0}{1}
+\beamer@sectionintoc {2}{Why CPMAC?}{3}{0}{2}
+\beamer@sectionintoc {3}{CPMAC}{4}{0}{3}
+\beamer@sectionintoc {4}{DeDjS}{5}{0}{4}
