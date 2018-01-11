@@ -1,10 +1,12 @@
 const ObservableModule = require("data/observable");
 const Dialog = require("ui/dialogs");
+const HashJs = require("hash.js");
 const Convert = require("../../../shared/lib/dedjs/Convert");
 const Net = require("../../../shared/lib/dedjs/Net");
 const ScanToReturn = require("../../../shared/lib/scan-to-return/scan-to-return");
 const User = require("../../../shared/lib/dedjs/object/user/User").get;
 const PoP = require("../../../shared/lib/dedjs/object/pop/PoP").get;
+const Org = require("../../../shared/lib/dedjs/object/pop/org/Org").get;
 
 const FINAL_STATEMENT_OPTION_DELETE = "Delete";
 const FINAL_STATEMENT_OPTION_QR = "QR";
@@ -49,20 +51,31 @@ function finalStatementTapped(args) {
       } else if (result === FINAL_STATEMENT_OPTION_QR) {
         // Show QR of Final Statement
 
-        const PasteBin = new Net.PasteBin();
-        const finalStatementJson = JSON.stringify(PoP.getFinalStatements().getItem(args.index));
+        const popDesc = PoP.getFinalStatements().getItem(args.index).desc;
+        const descHash = Convert.hexToByteArray(HashJs.sha256()
+          .update(popDesc.name)
+          .update(popDesc.dateTime)
+          .update(popDesc.location)
+          .update(popDesc.roster.aggregate)
+          .digest("hex"));
 
-        return PasteBin.paste(finalStatementJson)
-          .then(id => {
-            const object = {};
-            object.id = id;
+        if (Org.isLinkedConodeSet()) {
+          const object = {};
+          object.conode = Org.getLinkedConode();
+          object.id = Convert.byteArrayToBase64(descHash);
 
-            pageObject.showModal("shared/pages/qr-code/qr-code-page", {
-              textToShow: Convert.objectToJson(object)
-            }, () => { }, true);
+          pageObject.showModal("shared/pages/qr-code/qr-code-page", {
+            textToShow: Convert.objectToJson(object)
+          }, () => { }, true);
 
-            return Promise.resolve();
+          return Promise.resolve();
+        } else {
+          return Dialog.alert({
+            title: "Not Linked to Conode",
+            message: "Please link to your conode first.",
+            okButtonText: "Ok"
           });
+        }
       }
 
       return Promise.resolve();
@@ -113,16 +126,12 @@ function popTokenTapped(args) {
 
 function scanFinalStatement() {
   return ScanToReturn.scan()
-    .then(pasteBinIdJson => {
-      const id = Convert.jsonToObject(pasteBinIdJson).id;
-      const PasteBin = new Net.PasteBin();
+    .then(fetchConodeIdJson => {
+      const object = Convert.jsonToObject(fetchConodeIdJson);
+      const conode = Convert.parseJsonServerIdentity(Convert.objectToJson(object.conode));
+      const id = Convert.base64ToByteArray(object.id);
 
-      return PasteBin.get(id);
-    })
-    .then(finalStatementJson => {
-      const finalStatement = Convert.parseJsonFinalStatement(finalStatementJson);
-
-      return PoP.addFinalStatement(finalStatement, true);
+      return PoP.fetchFinalStatement(conode, id);
     })
     .catch(error => {
       console.log(error);
