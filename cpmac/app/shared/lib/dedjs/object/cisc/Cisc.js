@@ -14,6 +14,7 @@ const CothorityMessages = require("../../protobuf/build/cothority-messages");
 const BigNumber = require("bn.js");
 const User = require("../user/User").get;
 const FrameModule = require("ui/frame");
+const HASH = require("hash.js");
 const Dialog = require("ui/dialogs");
 
 
@@ -54,7 +55,7 @@ class Cisc {
      */
 
     /**
-     * Gets the isLoaded property of Cisc. It is only true once all the settings have been loaded into memory.
+     * Gets the isLoaded property of Cisc. It is only  once all the settings have been loaded into memory.
      * @returns {boolean} - a boolean that is true if Cisc has completely been loaded into memory
      */
     isLoaded() {
@@ -287,7 +288,7 @@ class Cisc {
         if (typeof bool !== "boolean") {
             throw new Error("bool must be a Boolean");
         }
-        this.getVMModule().isConnected = true;
+        this.getVMModule().isConnected = bool;
         return new Promise((resolve, reject) => resolve())
     }
 
@@ -568,8 +569,6 @@ class Cisc {
 
         return Promise.all(promises)
             .then(() => {
-                if (this.getData() !== {}) {
-
                     this.setIsConnected(true);
                     promises = [
                         this.setDevicesArray(),
@@ -578,9 +577,7 @@ class Cisc {
                         this.setProposedStorageArray(),
                     ];
                     return Promise.all(promises)
-                } else {
-                    return Promise.resolve();
-                }
+
             })
             .then(()=>{
                 for (let i=0; i<this.getProposedStorage().length; i++ ){
@@ -653,17 +650,18 @@ class Cisc {
         const cothoritySocket = new Net.CothoritySocket();
         let alreadySigned = false;
         if (this.getProposedData().votes[this.getName()] !== null && this.getProposedData().votes[this.getName()] !== undefined) {
-            alreadySigned = Crypto.schnorrVerify(User.getKeyPairModule.public, Convert.hexToByteArray(hashedData), this.getProposedData().votes[name])
+
+            alreadySigned = Crypto.schnorrVerify(Crypto.unmarshal(User.getKeyPairModule().public), Convert.hexToByteArray(hashedData), this.getProposedData().votes[this.getName()])
         }
         if (alreadySigned) {
             return Promise.reject("You already signed the message")
         }
 
         const secret = new BigNumber(Convert.byteArrayToHex(User.getKeyPair().private), 16);
-        const signature = Crypto.schnorrSign(secret, hashedData);
-
-        let proposeVoteMessage = CothorityMessages.createProposeVote(this.getIdentity().id, name, signature);
-        return cothoritySocket.send({Address: this.getIdentity().address}, RequestPath.IDENTITY_PROPOSE_VOTE, proposeVoteMessage, DecodeType.PROPOSE_VOTE_REPLY)
+        const signature = Crypto.schnorrSign(secret, Convert.hexToByteArray(hashedData));
+        let node = CothorityMessages.createServerIdentity(new Uint8Array({}), new Uint8Array({}), this.getIdentity().address,"lelele");
+        let proposeVoteMessage = CothorityMessages.createProposeVote(Convert.hexToByteArray(this.getIdentity().id), this.getName(), signature);
+        return cothoritySocket.send(node, RequestPath.IDENTITY_PROPOSE_VOTE, proposeVoteMessage, DecodeType.PROPOSE_VOTE_REPLY)
     }
 
     hashData(data) {
@@ -683,8 +681,6 @@ class Cisc {
         }
         devices.sort();
         for (let i in devices) {
-            console.log(`device: ${devices[i]}`);
-            console.log(`point: ${DedisMisc.uint8ArrayToHex(data.device[devices[i]].point)}`);
             dataHash.update(this.GetByteArrayFromString(devices[i]));
             dataHash.update(data.device[devices[i]].point);
         }
@@ -757,6 +753,7 @@ class Cisc {
         return Promise.all(promises)
             .then(() => {
                 this._isLoaded = true;
+                return this.updateAll();
             })
             .catch(error => {
                 console.log(error);

@@ -58,23 +58,20 @@ function addKeyValue() {
         .then((response) => {
             if (response.result) {
                 value = response.text;
-                edited = DeepCopy.copy(viewmodel.data);
+                edited = Helper.deepCopy(Cisc.getData());
                 if (edited.storage === null || edited.storage === undefined) {
-                    console.log("HEHEHE");
-                    edited.storage = [];
+                    edited.storage = {};
                 }
                 edited.storage[key]=value;
                 edited.votes = null;
-                proposeSendMessage = CothorityMessages.createProposeSend(viewmodel.id, edited);
-                return FileIO.getStringOf(FilePaths.CISC_IDENTITY_LINK);
+                proposeSendMessage = CothorityMessages.createProposeSend(Convert.hexToByteArray(Cisc.getIdentity().id), edited);
+                const cothoritySocket = new DedisJsNet.CothoritySocket();
+                let node = CothorityMessages.createServerIdentity(new Uint8Array({}), new Uint8Array({}), Cisc.getIdentity().address,"lelele");
+                return cothoritySocket.send(node, RequestPath.IDENTITY_PROPOSE_SEND, proposeSendMessage, DecodeType.DATA_UPDATE_REPLY)
             }
         })
-        .then((result) => {
-            const cothoritySocket = new DedisJsNet.CothoritySocket();
-            return cothoritySocket.send({Address: `tcp://${result.split("/")[2]}`}, CothorityPath.IDENTITY_PROPOSE_SEND, proposeSendMessage, CothorityDecodeTypes.DATA_UPDATE_REPLY)
-        })
-        .then((response)=>{
-            viewmodel.update().then(()=>homePage.voteForProposed());
+        .then(()=>{
+            Cisc.updateAll().then(()=>Cisc.voteForProposed());
         })
         .catch((error) => console.log(`There was an error: ${error}`));
 }
