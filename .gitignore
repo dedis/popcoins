@@ -6,9 +6,6 @@ node_modules/
 cpmac/.nsbuildinfo
 cpmac/hooks/
 cpmac/platforms/
-cpmac/app/App_Resources/
-cpmac/app/shared/res/files/conodes.toml
-cpmac/app/shared/lib/cothority-protobuf/package-lock.json
 cpmac/package-lock.json
 conode/co1/
 conode/co2/
