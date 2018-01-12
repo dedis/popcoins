@@ -74,7 +74,7 @@ Throughout the entire project, any data like keys, IDs, or EC points were handle
 Much of the logic in DeDjS requires writing and reading data to and from the disk or sending messages over the internet in order to use the functionalities of Cothority. These tasks are slow, generate delays, and even have a relatively high probability of failing. One of the challenges was to find a way to execute all of these tasks in an asynchronous way so as to not block the main thread of the app and handle exceptions in a simple and clean manner. The solution to this problem was that, since ECMAScript\footnote{\url{https://en.wikipedia.org/wiki/ECMAScript}} 2015, it is possible to use promises\footnote{\url{https://en.wikipedia.org/wiki/Futures_and_promises}} in JS. Thus, we decided to implement DeDjS so that it uses promises anytime an asynchronous task is needed. In this way, the main thread of the app is never blocked, and the exceptions can easily be handled by the simple syntax provided by JS.
 
 \begin{figure}[h]
-\includegraphics[scale=.5]{graphic/dedjs.pdf}
+\includegraphics[scale=.3]{graphic/dedjs.pdf}
 \centering
 \caption{DeDjS Library Structure}
 \end{figure}
