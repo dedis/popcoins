@@ -5,6 +5,11 @@ clean:
 	-sudo rm -R hooks/
 	-sudo rm -f package-lock.json
 
+### Install local and global dependencies
+install-dependencies:
+	npm install --no-package-lock
+	npm install -g rollup
+
 ### Compile Protobuf Messages for EcmaScript6
 compile-protobuf-es6:
 	node app/shared/lib/dedjs/protobuf/src/build_proto.js
@@ -18,7 +23,7 @@ compile-protobuf-iife:
 ### Clean Install for EcmaScript6
 clean-install:
 	make clean
-	npm install --no-package-lock
+	make install-dependencies
 	make compile-protobuf-es6
 	./prepare-hook.sh
 	patch -p0 < nodeify_temporary_patch.patch
