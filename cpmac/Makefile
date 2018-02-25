@@ -21,6 +21,7 @@ clean-install:
 	npm install --no-package-lock
 	make compile-protobuf-es6
 	./prepare-hook.sh
+	patch -p0 < nodeify_temporary_patch.patch
 
 ### Clean Install for IIFE
 clean-install-iife:
