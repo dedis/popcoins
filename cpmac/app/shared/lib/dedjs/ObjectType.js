@@ -6,7 +6,6 @@
  * Third-Party Objects
  */
 const BIG_NUMBER = "BN";
-const POINT = "Point"
 
 /**
  * Cothority Objects
@@ -28,7 +27,6 @@ const DEVICE = "Device";
 const DATA = "Data";
 
 module.exports.BIG_NUMBER = BIG_NUMBER;
-module.exports.POINT = POINT;
 module.exports.STATUS_REQUEST = STATUS_REQUEST;
 module.exports.STATUS_RESPONSE = STATUS_RESPONSE;
 module.exports.SERVER_IDENTITY = SERVER_IDENTITY;
