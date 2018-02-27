@@ -656,7 +656,7 @@ class Cisc {
         if (this.getProposedData().votes[this.getName()] !== null && this.getProposedData().votes[this.getName()] !== undefined) {
             let point = CURVE_ED25519.point();
             point.unmarshalBinary(User.getKeyPairModule().public);
-            alreadySigned = Crypto.schnorrVerify(point, Convert.hexToByteArray(hashedData), this.getProposedData().votes[this.getName()])
+            alreadySigned = Schnorr.verify(CURVE_ED25519, point, Convert.hexToByteArray(hashedData), this.getProposedData().votes[this.getName()])
         }
         if (alreadySigned) {
             return Promise.reject("You already signed the message")
