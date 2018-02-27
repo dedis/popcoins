@@ -1,3 +1,7 @@
+require("nativescript-nodeify");
+const Kyber = require("@dedis/kyber-js");
+const CURVE_ED25519 = new Kyber.curve.edwards25519.Curve;
+
 const Buffer = require("buffer/").Buffer;
 const Helper = require("./Helper");
 const ObjectType = require("./ObjectType");
@@ -344,7 +348,9 @@ function parseJsonRoster(jsonString) {
   const points = [];
   const list = roster.list.map((server) => {
     if (aggregate === undefined) {
-      points.push(Crypto.unmarshal(base64ToByteArray(server.public.split(" ").join("+"))));
+      let point = CURVE_ED25519.point();
+      point.unmarshalBinary(base64ToByteArray(server.public.split(" ").join("+")));
+      points.push(point);
     }
 
     let serverId = server.id;

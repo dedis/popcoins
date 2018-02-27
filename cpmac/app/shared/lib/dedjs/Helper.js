@@ -1,4 +1,6 @@
-const Crypto = require("./Crypto");
+require("nativescript-nodeify");
+const Kyber = require("@dedis/kyber-js");
+const CURVE_ED25519 = new Kyber.curve.edwards25519.Curve;
 
 const PUBLIC_KEY_BYTE_LENGTH_31 = 31;
 const PUBLIC_KEY_BYTE_LENGTH_32 = 32;
@@ -57,7 +59,8 @@ function isValidPublicKey(publicKey) {
 
   if (publicKey.length === PUBLIC_KEY_BYTE_LENGTH_31 || publicKey.length === PUBLIC_KEY_BYTE_LENGTH_32) {
     try {
-      const point = Crypto.unmarshal(publicKey);
+      const point = CURVE_ED25519.point();
+      point.unmarshalBinary(publicKey);
 
       return point !== undefined;
     } catch (error) {

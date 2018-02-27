@@ -35,22 +35,6 @@ function aggregatePublicKeys(points) {
 }
 
 /**
- * Convert a Uint8Array back into a ED25519 curve point.
- * @param {Uint8Array} bytes - the bytes to be converted to a curve point
- * @returns {Point} - curve point
- */
-function unmarshal(bytes) {
-  if (!(bytes instanceof Uint8Array)) {
-    throw new Error("bytes must be an instance of Uint8Array");
-  }
-
-  let result = CURVE_ED25519_KYBER.point();
-  result.unmarshalBinary(bytes);
-
-  return result;
-}
-
-/**
  * Generates a random ED25519 key pair.
  * @returns {KeyPair} - the generated key pair
  */
@@ -105,7 +89,6 @@ function schnorrVerify(pub, message, signature) {
 }
 
 module.exports.aggregatePublicKeys = aggregatePublicKeys;
-module.exports.unmarshal = unmarshal;
 module.exports.generateRandomKeyPair = generateRandomKeyPair;
 module.exports.schnorrSign = schnorrSign;
 module.exports.schnorrVerify = schnorrVerify;
