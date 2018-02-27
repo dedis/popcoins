@@ -47,27 +47,6 @@ function generateRandomKeyPair() {
 }
 
 /** (BASE CODE TAKEN FROM DEDIS-JS, IT HAS BEEN ADAPTED TO MY CODE AND FIXED TO WORK WITH THE CONODES)
- * Computes the signature of the given message using the given secret.
- * @param {BigNumber} secret - the secret key
- * @param {Uint8Array} message - the message to sign
- * @returns {Uint8Array} - the computed signature
- */
-function schnorrSign(secret, message) {
-  if (!Helper.isOfType(secret, ObjectType.BIG_NUMBER)) {
-    throw new Error("secret must be of type BigNumber");
-  }
-  if (!(message instanceof Uint8Array)) {
-    throw new Error("message must be an instance of Uint8Array");
-  }
-
-  const bytes = new Uint8Array(secret.toArray('le'));
-  const secretScalar = CURVE_ED25519_KYBER.scalar();
-  secretScalar.unmarshalBinary(bytes);
-
-  return Schnorr.sign(CURVE_ED25519_KYBER, secretScalar, message);
-}
-
-/** (BASE CODE TAKEN FROM DEDIS-JS, IT HAS BEEN ADAPTED TO MY CODE AND FIXED TO WORK WITH THE CONODES)
  * Verifies the signature of a given message using the public key.
  * @param {Point} pub - the public key
  * @param {Uint8Array} message - the message that was signed
@@ -90,5 +69,4 @@ function schnorrVerify(pub, message, signature) {
 
 module.exports.aggregatePublicKeys = aggregatePublicKeys;
 module.exports.generateRandomKeyPair = generateRandomKeyPair;
-module.exports.schnorrSign = schnorrSign;
 module.exports.schnorrVerify = schnorrVerify;

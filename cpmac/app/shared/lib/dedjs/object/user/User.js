@@ -1,3 +1,7 @@
+require("nativescript-nodeify");
+
+const Kyber = require("@dedis/kyber-js");
+const CURVE_ED25519 = new Kyber.curve.edwards25519.Curve;
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const FileIO = require("../../../file-io/file-io");
@@ -268,7 +272,9 @@ class User {
       this.getRosterModule().list.forEach(server => {
         if (!idsToExclude.includes(Convert.byteArrayToBase64(server.id))) {
           newList.push(server);
-          points.push(Crypto.unmarshal(server.public));
+          let point = CURVE_ED25519.point();
+          point.unmarshalBinary(server.public);
+          points.push(point);
         }
       });
 
@@ -340,14 +346,18 @@ class User {
 
       this.getRosterModule().list.forEach(server => {
         newList.push(server);
-        points.push(Crypto.unmarshal(server.public));
+        let point = CURVE_ED25519.point();
+        point.unmarshalBinary(server.public);
+        points.push(point);
         idsToExclude.push(Convert.byteArrayToBase64(server.id));
       });
 
       roster.list.forEach(server => {
         if (!idsToExclude.includes(Convert.byteArrayToBase64(server.id))) {
           newList.push(server);
-          points.push(Crypto.unmarshal(server.public));
+          let point = CURVE_ED25519.point();
+          point.unmarshalBinary(server.public);
+          points.push(point);
         }
       });
 

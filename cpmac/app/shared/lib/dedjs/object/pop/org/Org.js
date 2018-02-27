@@ -1,3 +1,8 @@
+require("nativescript-nodeify");
+
+const Kyber = require("@dedis/kyber-js");
+const Schnorr = Kyber.sign.schnorr;
+const CURVE_ED25519_KYBER = new Kyber.curve.edwards25519.Curve;
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const HashJs = require("hash.js");
@@ -627,8 +632,8 @@ class Org {
       .update(popDesc.location)
       .update(popDesc.roster.aggregate)
       .digest("hex"));
-    const secret = new BigNumber(Convert.byteArrayToHex(User.getKeyPair().private), 16);
-    const signature = Crypto.schnorrSign(secret, descHash);
+
+    const signature = Schnorr.sign(CURVE_ED25519_KYBER, User.getKeyPair().private, descHash);
 
     const cothoritySocket = new Net.CothoritySocket();
     const storeConfigMessage = CothorityMessages.createStoreConfig(popDesc, signature);
@@ -686,8 +691,7 @@ class Org {
     });
 
     hashToSign = Convert.hexToByteArray(hashToSign.digest("hex"));
-    const secret = new BigNumber(Convert.byteArrayToHex(User.getKeyPair().private), 16);
-    const signature = Crypto.schnorrSign(secret, hashToSign);
+    const signature = Schnorr.sign(CURVE_ED25519_KYBER, User.getKeyPair().private, hashToSign);
 
     const cothoritySocket = new Net.CothoritySocket();
     const finalizeRequestMessage = CothorityMessages.createFinalizeRequest(descId, attendees, signature);

@@ -1,3 +1,7 @@
+require("nativescript-nodeify");
+const Kyber = require("@dedis/kyber-js");
+const CURVE_ED25519 = new Kyber.curve.edwards25519.Curve;
+const Schnorr = Kyber.sign.schnorr;
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const Package = require("../../Package");
@@ -650,15 +654,15 @@ class Cisc {
         const cothoritySocket = new Net.CothoritySocket();
         let alreadySigned = false;
         if (this.getProposedData().votes[this.getName()] !== null && this.getProposedData().votes[this.getName()] !== undefined) {
-
-            alreadySigned = Crypto.schnorrVerify(Crypto.unmarshal(User.getKeyPairModule().public), Convert.hexToByteArray(hashedData), this.getProposedData().votes[this.getName()])
+            let point = CURVE_ED25519.point();
+            point.unmarshalBinary(User.getKeyPairModule().public);
+            alreadySigned = Crypto.schnorrVerify(point, Convert.hexToByteArray(hashedData), this.getProposedData().votes[this.getName()])
         }
         if (alreadySigned) {
             return Promise.reject("You already signed the message")
         }
 
-        const secret = new BigNumber(Convert.byteArrayToHex(User.getKeyPair().private), 16);
-        const signature = Crypto.schnorrSign(secret, Convert.hexToByteArray(hashedData));
+        const signature = Schnorr.sign(CURVE_ED25519, User.getKeyPair().private, Convert.hexToByteArray(hashedData));
         let node = CothorityMessages.createServerIdentity(new Uint8Array({}), new Uint8Array({}), this.getIdentity().address,"lelele");
         let proposeVoteMessage = CothorityMessages.createProposeVote(Convert.hexToByteArray(this.getIdentity().id), this.getName(), signature);
         return cothoritySocket.send(node, RequestPath.IDENTITY_PROPOSE_VOTE, proposeVoteMessage, DecodeType.PROPOSE_VOTE_REPLY)
