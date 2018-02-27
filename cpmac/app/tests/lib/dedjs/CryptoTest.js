@@ -31,19 +31,6 @@ const SIGNATURE = "lfrA/C6nvY+pXbV0td869Ln6X8QMkeQofOxhQE+l1zNJA1VlM0mpmdQOKhDbz
 const SIGNATURE_BYTE_ARRAY = Convert.base64ToByteArray(SIGNATURE);
 
 describe("Crypto", function () {
-  describe("#getKeyPairFromSecret", function () {
-    it("should throw an error when the input is not a byte array", function () {
-      expect(() => Crypto.getKeyPairFromSecret("PRIVATE_KEY_BIG_NUMBER")).to.throw();
-    });
-
-    it("should correctly create a key pair", function () {
-      const keyPair = Crypto.getKeyPairFromSecret(PRIVATE_KEY_BYTE_ARRAY);
-
-      keyPair.priv.eq(PRIVATE_KEY_BIG_NUMBER).should.be.true;
-      keyPair.pub.eq(PUBLIC_KEY_POINT).should.be.true;
-    });
-  });
-
   describe("#aggregatePublicKeys", function () {
     it("should throw an error when the input is not an array", function () {
       expect(() => Crypto.aggregatePublicKeys("POINTS")).to.throw();
@@ -64,18 +51,6 @@ describe("Crypto", function () {
     });
   });
 
-  describe("#marshal", function () {
-    it("should throw an error when the input is not a point", function () {
-      expect(() => Crypto.marshal("PUBLIC_KEY_POINT")).to.throw();
-    });
-
-    it("should correctly compute the marshal of a point", function () {
-      const byteArray = Crypto.marshal(PUBLIC_KEY_POINT);
-
-      byteArray.should.deep.equal(PUBLIC_KEY_BYTE_ARRAY);
-    });
-  });
-
   describe("#unmarshal", function () {
     it("should throw an error when the input is not a byte array", function () {
       expect(() => Crypto.unmarshal("PUBLIC_COMPLETE_KEY_BYTE_ARRAY")).to.throw();
@@ -84,7 +59,7 @@ describe("Crypto", function () {
     it("should correctly compute the unmarshal of a byte array", function () {
       const point = Crypto.unmarshal(PUBLIC_KEY_BYTE_ARRAY);
 
-      point.eq(PUBLIC_KEY_POINT).should.be.true;
+      point.equal(PUBLIC_KEY_POINT).should.be.true;
     });
   });
 

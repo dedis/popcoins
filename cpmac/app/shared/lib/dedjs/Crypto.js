@@ -35,19 +35,6 @@ function aggregatePublicKeys(points) {
 }
 
 /**
- *  Convert a ed25519 curve point into a byte representation
- * @param {Point} point - elliptic.js curve point
- * @returns {Uint8Array} - byte representation of the point given as paramter
- */
-function marshal(point) {
-  if (point.constructor !== Kyber.curve.edwards25519.Point) {
-    throw new Error("point must be of type Point");
-  }
-
-  return point.marshalBinary();
-}
-
-/**
  * Convert a Uint8Array back into a ED25519 curve point.
  * @param {Uint8Array} bytes - the bytes to be converted to a curve point
  * @returns {Point} - curve point
@@ -72,7 +59,7 @@ function generateRandomKeyPair() {
   const basePoint = CURVE_ED25519_KYBER.point().base();
   const pubKey = CURVE_ED25519_KYBER.point().mul(privateKey, basePoint);
 
-  return CothorityMessages.createKeyPair(marshal(pubKey), Convert.hexToByteArray(privateKey.toString()), Convert.hexToByteArray(pubKey.toString()));
+  return CothorityMessages.createKeyPair(pubKey.marshalBinary(), Convert.hexToByteArray(privateKey.toString()), Convert.hexToByteArray(pubKey.toString()));
 }
 
 /** (BASE CODE TAKEN FROM DEDIS-JS, IT HAS BEEN ADAPTED TO MY CODE AND FIXED TO WORK WITH THE CONODES)
@@ -118,7 +105,6 @@ function schnorrVerify(pub, message, signature) {
 }
 
 module.exports.aggregatePublicKeys = aggregatePublicKeys;
-module.exports.marshal = marshal;
 module.exports.unmarshal = unmarshal;
 module.exports.generateRandomKeyPair = generateRandomKeyPair;
 module.exports.schnorrSign = schnorrSign;
