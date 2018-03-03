@@ -1,13 +1,10 @@
 require("nativescript-nodeify");
 
-const Helper = require("./Helper");
-const ObjectType = require("./ObjectType");
 const Convert = require("./Convert");
 const CothorityMessages = require("./protobuf/build/cothority-messages");
 const Kyber = require("@dedis/kyber-js");
 
 const CURVE_ED25519_KYBER = new Kyber.curve.edwards25519.Curve;
-const Schnorr = Kyber.sign.schnorr;
 
 /**
  * Computes the aggregate of a list of public keys (elliptic curve points).

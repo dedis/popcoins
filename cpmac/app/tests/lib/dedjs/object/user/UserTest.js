@@ -2,6 +2,10 @@ const ChaiAsPromised = require("chai-as-promised");
 chai.use(ChaiAsPromised);
 chai.should();
 
+require("nativescript-nodeify");
+const Kyber = require("@dedis/kyber-js");
+const CURVE_ED25519 = new Kyber.curve.edwards25519.Curve;
+
 const FilesPath = require("../../../../../shared/res/files/files-path");
 const FileIO = require("../../../../../shared/lib/file-io/file-io");
 const Convert = require("../../../../../shared/lib/dedjs/Convert");
@@ -122,8 +126,11 @@ const AGGREGATE_BOTH_ROSTER = (function fun() {
     }
   });
 
-  return Crypto.aggregatePublicKeys(aggregate.map(public => {
-    return Crypto.unmarshal(Convert.base64ToByteArray(public));
+  return Crypto.aggregatePublicKeys(aggregate.map(publicKey => {
+    let point = CURVE_ED25519.point();
+    point.unmarshalBinary(Convert.base64ToByteArray(publicKey));
+
+    return point;
   }));
 })();
 
@@ -361,7 +368,13 @@ describe("User", function () {
           roster.id.should.be.empty;
           roster.list.length.should.equal(ROSTER.list.length + 1);
 
-          const aggregate = Crypto.aggregatePublicKeys([Crypto.unmarshal(ROSTER.aggregate), Crypto.unmarshal(SERVER_IDENTITY.public)]);
+          let aggregatePoint = CURVE_ED25519.point();
+          let publicPoint = CURVE_ED25519.point();
+
+          aggregatePoint.unmarshalBinary(ROSTER.aggregate);
+          publicPoint.unmarshalBinary(SERVER_IDENTITY.public);
+
+          const aggregate = Crypto.aggregatePublicKeys([aggregatePoint, publicPoint]);
           roster.aggregate.should.deep.equal(aggregate);
         });
     });
@@ -402,7 +415,13 @@ describe("User", function () {
           roster.id.should.be.empty;
           roster.list.length.should.equal(ROSTER.list.length + 1);
 
-          const aggregate = Crypto.aggregatePublicKeys([Crypto.unmarshal(ROSTER.aggregate), Crypto.unmarshal(CONODE_PUBLIC_KEY_BYTE_ARRAY)]);
+          let aggregatePoint = CURVE_ED25519.point();
+          let publicPoint = CURVE_ED25519.point();
+
+          aggregatePoint.unmarshalBinary(ROSTER.aggregate);
+          publicPoint.unmarshalBinary(CONODE_PUBLIC_KEY_BYTE_ARRAY);
+
+          const aggregate = Crypto.aggregatePublicKeys([aggregatePoint, publicPoint]);
           roster.aggregate.should.deep.equal(aggregate);
         });
     });
@@ -449,7 +468,13 @@ describe("User", function () {
           roster.id.should.be.empty;
           roster.list.length.should.equal(ROSTER.list.length - 1);
 
-          const aggregate = Crypto.aggregatePublicKeys([Crypto.unmarshal(Convert.base64ToByteArray("Fx6zzvJM6VzxfByLY2+uArGPtd2lHKPVmoXGMhdaFCA=")), Crypto.unmarshal(Convert.base64ToByteArray("j53MMKZNdtLlglcK9Ct1YYtkbbEOfq3R8ZoJOFIu6tE="))]);
+          let point1 = CURVE_ED25519.point();
+          let point2 = CURVE_ED25519.point();
+
+          point1.unmarshalBinary(Convert.base64ToByteArray("Fx6zzvJM6VzxfByLY2+uArGPtd2lHKPVmoXGMhdaFCA="));
+          point2.unmarshalBinary(Convert.base64ToByteArray("j53MMKZNdtLlglcK9Ct1YYtkbbEOfq3R8ZoJOFIu6tE="));
+
+          const aggregate = Crypto.aggregatePublicKeys([point1, point2]);
           roster.aggregate.should.deep.equal(aggregate);
         });
     });
