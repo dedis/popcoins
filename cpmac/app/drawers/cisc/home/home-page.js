@@ -9,6 +9,7 @@ const BarcodeScanner = require("nativescript-barcodescanner").BarcodeScanner;
 const Helper = require("~/shared/lib/dedjs/Helper");
 const Cisc = require("~/shared/lib/dedjs/object/cisc/Cisc").get;
 const User = require("~/shared/lib/dedjs/object/user/User").get;
+const NetDedis = require("@dedis/cothority").net;
 
 let page;
 let viewmodel;
@@ -191,7 +192,8 @@ function askForDevice() {
     })
         .then((result) => {
             if (result) {
-                addDevice()
+                addDevice();
+
             }
         })
         .catch((error) => console.log(error));
@@ -199,15 +201,18 @@ function askForDevice() {
 
 function addDevice() {
     let data = Helper.deepCopy(Cisc.getData());
+    console.log("AVANT SKDEBUG");
+    // TODO CRASH A CETTE LIGNE
     data.device[Cisc.getName()] = CothorityMessages.createDevice(User.getKeyPairModule().public);
+    console.log("APRES SKDEBUG");
     data.votes = {};
     console.dir(data);
 
+    console.log("SKDEBUG id = " + Cisc.getIdentity().id);
     let proposeSendMessage = CothorityMessages.createProposeSend(Convert.hexToByteArray(Cisc.getIdentity().id), data);
     console.log(Cisc.getIdentity().id);
-    const cothoritySocket = new DedisJsNet.CothoritySocket();
-    let node = CothorityMessages.createServerIdentity(new Uint8Array({}), new Uint8Array({}), Cisc.getIdentity().address,"lelele");
-    cothoritySocket.send(node, RequestPath.IDENTITY_PROPOSE_SEND, proposeSendMessage, DecodeType.DATA_UPDATE_REPLY)
+    const cothoritySocket = new NetDedis.Socket(Convert.tcpToWebsocket(Cisc.getIdentity().address, ""), RequestPath.IDENTITY);
+    cothoritySocket.send(RequestPath.IDENTITY_PROPOSE_SEND, DecodeType.DATA_UPDATE_REPLY, proposeSendMessage)
         .then((response) => {
             console.log(response);
             console.dir(response);

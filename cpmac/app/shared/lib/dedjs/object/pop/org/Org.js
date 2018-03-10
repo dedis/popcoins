@@ -13,6 +13,7 @@ const Crypto = require("../../../Crypto");
 const Helper = require("../../../Helper");
 const ObjectType = require("../../../ObjectType");
 const Net = require("../../../Net");
+const NetDedis = require("@dedis/cothority").net;
 const FilesPath = require("../../../../../res/files/files-path");
 const FileIO = require("../../../../../lib/file-io/file-io");
 const CothorityMessages = require("../../../protobuf/build/cothority-messages");
@@ -581,6 +582,7 @@ class Org {
       throw new Error("user should generate a key pair before linking to a conode");
     }
 
+    // TODO : update with Cothority-JS
     const cothoritySocket = new Net.CothoritySocket();
     const pinRequestMessage = CothorityMessages.createPinRequest(pin, User.getKeyPair().public);
 
@@ -635,10 +637,10 @@ class Org {
 
     const signature = Schnorr.sign(CURVE_ED25519_KYBER, User.getKeyPair().private, descHash);
 
-    const cothoritySocket = new Net.CothoritySocket();
+    const cothoritySocket = new NetDedis.Socket(Convert.tcpToWebsocket(this.getLinkedConode(), ""), RequestPath.POP);
     const storeConfigMessage = CothorityMessages.createStoreConfig(popDesc, signature);
 
-    return cothoritySocket.send(this.getLinkedConode(), RequestPath.POP_STORE_CONFIG, storeConfigMessage, DecodeType.STORE_CONFIG_REPLY)
+    return cothoritySocket.send(RequestPath.POP_STORE_CONFIG, DecodeType.STORE_CONFIG_REPLY, storeConfigMessage)
       .then(response => {
         if (Convert.byteArrayToBase64(response.id) === Convert.byteArrayToBase64(descHash)) {
           return this.setPopDescHash(descHash, true)
@@ -693,10 +695,10 @@ class Org {
     hashToSign = Convert.hexToByteArray(hashToSign.digest("hex"));
     const signature = Schnorr.sign(CURVE_ED25519_KYBER, User.getKeyPair().private, hashToSign);
 
-    const cothoritySocket = new Net.CothoritySocket();
+    const cothoritySocket = new NetDedis.Socket(Convert.tcpToWebsocket(this.getLinkedConode(), ""), RequestPath.POP);
     const finalizeRequestMessage = CothorityMessages.createFinalizeRequest(descId, attendees, signature);
 
-    return cothoritySocket.send(this.getLinkedConode(), RequestPath.POP_FINALIZE_REQUEST, finalizeRequestMessage, DecodeType.FINALIZE_RESPONSE)
+    return cothoritySocket.send(RequestPath.POP_FINALIZE_REQUEST, DecodeType.FINALIZE_RESPONSE, finalizeRequestMessage)
       .then(response => {
         return PoP.addFinalStatement(response.final, true);
       })

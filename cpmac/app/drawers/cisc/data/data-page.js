@@ -7,6 +7,8 @@ const DedisJsNet = require("~/shared/lib/dedjs/Net");
 const Convert = require("~/shared/lib/dedjs/Convert");
 const Helper = require("~/shared/lib/dedjs/Helper");
 const Cisc = require("~/shared/lib/dedjs/object/cisc/Cisc").get;
+const NetDedis = require("@dedis/cothority").net;
+
 
 let viewmodel;
 let Page;
@@ -65,9 +67,9 @@ function addKeyValue() {
                 edited.storage[key]=value;
                 edited.votes = null;
                 proposeSendMessage = CothorityMessages.createProposeSend(Convert.hexToByteArray(Cisc.getIdentity().id), edited);
-                const cothoritySocket = new DedisJsNet.CothoritySocket();
                 let node = CothorityMessages.createServerIdentity(new Uint8Array({}), new Uint8Array({}), Cisc.getIdentity().address,"lelele");
-                return cothoritySocket.send(node, RequestPath.IDENTITY_PROPOSE_SEND, proposeSendMessage, DecodeType.DATA_UPDATE_REPLY)
+                const cothoritySocket = new NetDedis.Socket(node, RequestPath.IDENTITY);
+                return cothoritySocket.send(RequestPath.IDENTITY_PROPOSE_SEND, DecodeType.DATA_UPDATE_REPLY, proposeSendMessage)
             }
         })
         .then(()=>{

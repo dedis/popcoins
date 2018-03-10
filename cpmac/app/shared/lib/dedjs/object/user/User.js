@@ -10,7 +10,7 @@ const Package = require("../../Package");
 const Convert = require("../../Convert");
 const ObjectType = require("../../ObjectType");
 const Helper = require("../../Helper");
-const Net = require("../../Net");
+const NetDedis = require("@dedis/cothority").net;
 const Crypto = require("../../Crypto");
 const RequestPath = require("../../RequestPath");
 const DecodeType = require("../../DecodeType");
@@ -394,12 +394,15 @@ class User {
     this.emptyRosterStatusList();
 
     const conodes = Array.from(this.getRoster().list);
-    const cothoritySocket = new Net.CothoritySocket();
-    const statusRequestMessage = CothorityMessages.createStatusRequest();
+    const statusRequestMessage = {};
 
     conodes.map((server) => {
-      return cothoritySocket.send(server, RequestPath.STATUS_REQUEST, statusRequestMessage, DecodeType.STATUS_RESPONSE)
+      const address = Convert.tcpToWebsocket(server, "");
+      // TODO Change to Net instead of NetDedis
+      const cothoritySocket = new NetDedis.Socket(address, RequestPath.STATUS);
+      return cothoritySocket.send(RequestPath.STATUS_REQUEST, DecodeType.STATUS_RESPONSE, statusRequestMessage)
         .then(statusResponse => {
+          console.dir(statusResponse);
           this.getRosterModule().statusList.push({
             conode: server,
             conodeStatus: statusResponse

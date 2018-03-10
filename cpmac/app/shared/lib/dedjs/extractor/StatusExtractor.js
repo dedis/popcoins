@@ -36,47 +36,47 @@ function getPublicKey(statusResponse) {
 
 function getServices(statusResponse) {
   throwErrorIfTypeIsWrong(statusResponse)
-  return statusResponse.system.Status.field.Available_Services;
+  return statusResponse.system.Generic.field.Available_Services;
 }
 
 function getSystem(statusResponse) {
   throwErrorIfTypeIsWrong(statusResponse)
-  return statusResponse.system.Status.field.System;
+  return statusResponse.system.Generic.field.System;
 }
 
 function getHost(statusResponse) {
   throwErrorIfTypeIsWrong(statusResponse)
-  return statusResponse.system.Status.field.Host;
+  return statusResponse.system.Generic.field.Host;
 }
 
 function getPort(statusResponse) {
   throwErrorIfTypeIsWrong(statusResponse)
-  return statusResponse.system.Status.field.Port;
+  return statusResponse.system.Generic.field.Port;
 }
 
 function getConnectionType(statusResponse) {
   throwErrorIfTypeIsWrong(statusResponse)
-  return statusResponse.system.Status.field.ConnType;
+  return statusResponse.system.Generic.field.ConnType;
 }
 
 function getVersion(statusResponse) {
   throwErrorIfTypeIsWrong(statusResponse)
-  return statusResponse.system.Status.field.Version;
+  return statusResponse.system.Generic.field.Version;
 }
 
 function getTXBytes(statusResponse) {
   throwErrorIfTypeIsWrong(statusResponse)
-  return statusResponse.system.Status.field.TX_bytes;
+  return statusResponse.system.Generic.field.TX_bytes;
 }
 
 function getRXBytes(statusResponse) {
   throwErrorIfTypeIsWrong(statusResponse)
-  return statusResponse.system.Status.field.RX_bytes;
+  return statusResponse.system.Generic.field.RX_bytes;
 }
 
 function getUptime(statusResponse) {
   throwErrorIfTypeIsWrong(statusResponse)
-  return statusResponse.system.Status.field.Uptime;
+  return statusResponse.system.Generic.field.Uptime;
 }
 
 module.exports.getDescription = getDescription;

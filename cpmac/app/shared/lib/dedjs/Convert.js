@@ -190,19 +190,24 @@ function tomlToJson(tomlString) {
 
 /**
  * Converts a TCP URL to a Wesocket URL and builds a complete URL with the path given as parameter.
- * @param {ServerIdentity} serverIdentity - the server identity to take the url from
+ * @param {ServerIdentity|string} serverIdentity - the server identity to take the url from
  * @param {string} path - the path after the base url
  * @returns {string} - the builded websocket url
  */
 function tcpToWebsocket(serverIdentity, path) {
-  if (!Helper.isOfType(serverIdentity, ObjectType.SERVER_IDENTITY)) {
+  let address = "";
+  if (Helper.isOfType(serverIdentity, ObjectType.SERVER_IDENTITY)) {
+    address = serverIdentity.address
+  } else if (typeof serverIdentity === "string") {
+    address = serverIdentity;
+  } else {
     throw new Error("serverIdentity must be of type ServerIdentity");
   }
   if (typeof path !== "string") {
     throw new Error("path must be of type string");
   }
 
-  let [ip, port] = serverIdentity.address.replace(BASE_URL_TCP, "").split(URL_PORT_SPLITTER);
+  let [ip, port] = address.replace(BASE_URL_TCP, "").split(URL_PORT_SPLITTER);
   port = parseInt(port) + 1;
 
   return BASE_URL_WS + ip + URL_PORT_SPLITTER + port + path;

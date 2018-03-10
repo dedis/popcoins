@@ -7,7 +7,6 @@ const ObservableArray = require("data/observable-array").ObservableArray;
 const Package = require("../../Package");
 const ObjectType = require("../../ObjectType");
 const Helper = require("../../Helper");
-const Net = require("../../Net");
 const Convert = require("../../Convert");
 const FilesPath = require("../../../../res/files/files-path");
 const DecodeType = require("../../DecodeType");
@@ -20,6 +19,7 @@ const User = require("../user/User").get;
 const FrameModule = require("ui/frame");
 const HASH = require("hash.js");
 const Dialog = require("ui/dialogs");
+const NetDedis = require("@dedis/cothority").net;
 
 
 /**
@@ -536,10 +536,9 @@ class Cisc {
      * @returns {Promise.<TResult>}
      */
     updateData() {
-        const cothoritySocket = new Net.CothoritySocket();
+        const cothoritySocket = new NetDedis.Socket(Convert.tcpToWebsocket(this.getIdentity().address, ""), RequestPath.IDENTITY);
         const dataUpdateMessage = CothorityMessages.createDataUpdate(Convert.hexToByteArray(this.getIdentity().id));
-        let node = CothorityMessages.createServerIdentity(new Uint8Array({}), new Uint8Array({}), this.getIdentity().address,"lelele");
-        return cothoritySocket.send(node, RequestPath.IDENTITY_DATA_UPDATE, dataUpdateMessage, DecodeType.DATA_UPDATE_REPLY)
+        return cothoritySocket.send(RequestPath.IDENTITY_DATA_UPDATE, DecodeType.DATA_UPDATE_REPLY, dataUpdateMessage)
             .then((response) => {
                 console.log("data");
                 console.dir(response);
@@ -553,10 +552,9 @@ class Cisc {
      */
     updateProposedData() {
         console.log("updating proposed data");
-        const cothoritySocket = new Net.CothoritySocket();
+        const cothoritySocket = new NetDedis.Socket(Convert.tcpToWebsocket(this.getIdentity().address, ""), RequestPath.IDENTITY);
         const proposeUpdateMessage = CothorityMessages.createProposeUpdate(Convert.hexToByteArray(this.getIdentity().id));
-        let node = CothorityMessages.createServerIdentity(new Uint8Array({}), new Uint8Array({}), this.getIdentity().address,"lelele");
-        return cothoritySocket.send(node, RequestPath.IDENTITY_PROPOSE_UPDATE, proposeUpdateMessage, DecodeType.DATA_UPDATE_REPLY)
+        return cothoritySocket.send(RequestPath.IDENTITY_PROPOSE_UPDATE, DecodeType.DATA_UPDATE_REPLY, proposeUpdateMessage)
             .then((response) => {
                 console.log("proposed data");
                 console.dir(response);
@@ -651,7 +649,7 @@ class Cisc {
 
     voteForProposed() {
         let hashedData = this.hashData(this.getProposedData());
-        const cothoritySocket = new Net.CothoritySocket();
+        const cothoritySocket = new NetDedis.Socket(Convert.tcpToWebsocket(this.getIdentity().address, ""), RequestPath.IDENTITY);
         let alreadySigned = false;
         if (this.getProposedData().votes[this.getName()] !== null && this.getProposedData().votes[this.getName()] !== undefined) {
             let point = CURVE_ED25519.point();
@@ -661,11 +659,9 @@ class Cisc {
         if (alreadySigned) {
             return Promise.reject("You already signed the message")
         }
-
         const signature = Schnorr.sign(CURVE_ED25519, User.getKeyPair().private, Convert.hexToByteArray(hashedData));
-        let node = CothorityMessages.createServerIdentity(new Uint8Array({}), new Uint8Array({}), this.getIdentity().address,"lelele");
         let proposeVoteMessage = CothorityMessages.createProposeVote(Convert.hexToByteArray(this.getIdentity().id), this.getName(), signature);
-        return cothoritySocket.send(node, RequestPath.IDENTITY_PROPOSE_VOTE, proposeVoteMessage, DecodeType.PROPOSE_VOTE_REPLY)
+        return cothoritySocket.send(RequestPath.IDENTITY_PROPOSE_VOTE, DecodeType.PROPOSE_VOTE_REPLY, proposeVoteMessage)
     }
 
     hashData(data) {

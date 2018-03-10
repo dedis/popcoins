@@ -1,52 +1,61 @@
 /**
  * @file File containing different available paths for the Cothority.
  */
+/**
+ * Services
+ */
+const STATUS = "Status";
+const IDENTITY = "Identity";
+const SKIPCHAIN = "Skipchain";
+const POP = "PoPServer";
+const CISC = "Cisc";
+
 
 /**
  * Status Requests
  */
-const STATUS = "/Status";
-const STATUS_REQUEST = `${STATUS}/Request`;
+const STATUS_REQUEST = `Request`;
 
 /**
  * Identity Requests
  */
-const IDENTITY = "/Identity";
-const IDENTITY_PIN_REQUEST = `${IDENTITY}/PinRequest`;
-const IDENTITY_DATA_UPDATE = `${IDENTITY}/DataUpdate`;
-const IDENTITY_PROPOSE_UPDATE = `${IDENTITY}/ProposeUpdate`;
-const IDENTITY_PROPOSE_SEND = `${IDENTITY}/ProposeSend`;
-const IDENTITY_PROPOSE_VOTE = `${IDENTITY}/ProposeVote`;
+const IDENTITY_PIN_REQUEST = `PinRequest`;
+const IDENTITY_DATA_UPDATE = `DataUpdate`;
+const IDENTITY_PROPOSE_UPDATE = `ProposeUpdate`;
+const IDENTITY_PROPOSE_SEND = `ProposeSend`;
+const IDENTITY_PROPOSE_VOTE = `ProposeVote`;
 
 /**
  * Skipchain Requests
  */
-const SKIPCHAIN = "/Skipchain";
-const SKIPCHAIN_GET_UPDATE_CHAIN = `${SKIPCHAIN}/GetUpdateChain`;
-const SKIPCHAIN_GET_ALL_SKIPCHAINS = `${SKIPCHAIN}/GetAllSkipchains`;
+const SKIPCHAIN_GET_UPDATE_CHAIN = `GetUpdateChain`;
+const SKIPCHAIN_GET_ALL_SKIPCHAINS = `GetAllSkipchains`;
 
 /**
  * PoP Requests
  */
-const POP = "/PoPServer";
-const POP_STORE_CONFIG = `${POP}/storeConfig`;
-const POP_FINALIZE_REQUEST = `${POP}/finalizeRequest`;
-const POP_FETCH_REQUEST = `${POP}/fetchRequest`;
-const POP_PIN_REQUEST = `${POP}/PinRequest`;
+const POP_STORE_CONFIG = `storeConfig`;
+const POP_FINALIZE_REQUEST = `finalizeRequest`;
+const POP_FETCH_REQUEST = `fetchRequest`;
+const POP_PIN_REQUEST = `PinRequest`;
 
 /**
  * CISC Requests
  */
-const CISC = "/Cisc";
-const CISC_CONFIG = `${CISC}/Config`;
-const CISC_CONFIG_UPDATE = `${CISC}/ConfigUpdate`;
-const CISC_DEVICE = `${CISC}/Device`;
-const CISC_PROPOSE_VOTE = `${CISC}/ProposeVote`;
-const CISC_PROPOSE_SEND = `${CISC}/ProposeSend`;
-const CISC_PROPOSE_UPDATE = `${CISC}/ProposeUpdate`;
-const CISC_SCHNORR_SIG = `${CISC}/SchnorrSig`;
+const CISC_CONFIG = `Config`;
+const CISC_CONFIG_UPDATE = `ConfigUpdate`;
+const CISC_DEVICE = `Device`;
+const CISC_PROPOSE_VOTE = `ProposeVote`;
+const CISC_PROPOSE_SEND = `ProposeSend`;
+const CISC_PROPOSE_UPDATE = `ProposeUpdate`;
+const CISC_SCHNORR_SIG = `SchnorrSig`;
 
 // Exports --------------------------------------------------------------------
+module.exports.STATUS = STATUS;
+module.exports.IDENTITY = IDENTITY;
+module.exports.SKIPCHAIN = SKIPCHAIN;
+module.exports.POP = POP;
+module.exports.CISC = CISC;
 module.exports.STATUS_REQUEST = STATUS_REQUEST;
 module.exports.IDENTITY_PIN_REQUEST = IDENTITY_PIN_REQUEST;
 module.exports.IDENTITY_DATA_UPDATE = IDENTITY_DATA_UPDATE;
