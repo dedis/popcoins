@@ -587,7 +587,10 @@ class Org {
     // TODO change status request return type
     return cothoritySocket.send(RequestPath.POP_PIN_REQUEST, RequestPath.STATUS_REQUEST, pinRequestMessage)
       .then(response => {
-        return Promise.resolve();
+        return this.setLinkedConode(conode, true)
+          .then(() => {
+            return Promise.resolve("PIN Accepted");
+          });
       })
       .catch(error => {
         if (error.message === CothorityMessages.READ_PIN_ERROR) {
