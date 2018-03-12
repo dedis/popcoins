@@ -2,7 +2,6 @@ const ObservableModule = require("data/observable");
 const Dialog = require("ui/dialogs");
 const HashJs = require("hash.js");
 const Convert = require("../../../shared/lib/dedjs/Convert");
-const Net = require("../../../shared/lib/dedjs/Net");
 const ScanToReturn = require("../../../shared/lib/scan-to-return/scan-to-return");
 const User = require("../../../shared/lib/dedjs/object/user/User").get;
 const PoP = require("../../../shared/lib/dedjs/object/pop/PoP").get;

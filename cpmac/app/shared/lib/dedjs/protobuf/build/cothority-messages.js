@@ -104,6 +104,11 @@ const ObjectType = require("../../ObjectType");
  */
 class CothorityMessages extends CothorityProtobuf {
 
+  // TODO return undefined
+  get READ_PIN_ERROR() {
+    return 'Read PIN in server-log';
+  }
+
   /**
    * Decodes and returns the response of a request.
    * @param {string} messageType - type of the response
@@ -237,7 +242,7 @@ class CothorityMessages extends CothorityProtobuf {
    * @returns {*|Buffer|Uint8Array} - the encoded status request
    */
   createStatusRequest() {
-    return this.encodeMessage(ObjectType.STATUS_REQUEST, {});
+    return {};
   }
 
   /**
@@ -330,7 +335,7 @@ class CothorityMessages extends CothorityProtobuf {
       signature: signature
     };
 
-    return this.encodeMessage(ObjectType.STORE_CONFIG, fields);
+    return fields;
   }
 
   /**
@@ -394,7 +399,7 @@ class CothorityMessages extends CothorityProtobuf {
       signature: signature
     };
 
-    return this.encodeMessage(ObjectType.FINALIZE_REQUEST, fields);
+    return fields;
   }
 
   /**
@@ -416,7 +421,7 @@ class CothorityMessages extends CothorityProtobuf {
       public: publicKey
     };
 
-    return this.encodeMessage(ObjectType.PIN_REQUEST, fields);
+    return fields;
   }
 
   /**
@@ -433,7 +438,7 @@ class CothorityMessages extends CothorityProtobuf {
       id: id
     };
 
-    return this.encodeMessage(ObjectType.FETCH_REQUEST, fields);
+    return fields;
   }
 
   /**
@@ -469,7 +474,7 @@ class CothorityMessages extends CothorityProtobuf {
       id: id
     };
 
-    return this.encodeMessage("DataUpdate", fields);
+    return fields;
   }
 
   /**
@@ -530,7 +535,7 @@ class CothorityMessages extends CothorityProtobuf {
       signature: signature
     };
 
-    return this.encodeMessage("ProposeVote", fields);
+    return fields;
   }
 
   /**
@@ -545,7 +550,7 @@ class CothorityMessages extends CothorityProtobuf {
       data: data
     };
 
-    return this.encodeMessage("ProposeSend", fields);
+    return fields;
   }
 
   /**
@@ -558,7 +563,7 @@ class CothorityMessages extends CothorityProtobuf {
       id: id
     };
 
-    return this.encodeMessage("ProposeUpdate", fields);
+    return fields;
   }
 
   /**

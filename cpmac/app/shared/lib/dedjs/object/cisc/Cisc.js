@@ -537,6 +537,7 @@ class Cisc {
      */
     updateData() {
         const cothoritySocket = new NetDedis.Socket(Convert.tcpToWebsocket(this.getIdentity().address, ""), RequestPath.IDENTITY);
+        console.log(Convert.hexToByteArray(this.getIdentity().id));
         const dataUpdateMessage = CothorityMessages.createDataUpdate(Convert.hexToByteArray(this.getIdentity().id));
         return cothoritySocket.send(RequestPath.IDENTITY_DATA_UPDATE, DecodeType.DATA_UPDATE_REPLY, dataUpdateMessage)
             .then((response) => {
@@ -567,6 +568,7 @@ class Cisc {
      * @returns {Promise.<TResult>}
      */
     updateAll() {
+        // TODO remove comment
         let promises = [this.updateData(), this.updateProposedData()];
 
         return Promise.all(promises)

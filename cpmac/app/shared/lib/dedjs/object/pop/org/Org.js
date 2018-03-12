@@ -12,7 +12,6 @@ const Convert = require("../../../Convert");
 const Crypto = require("../../../Crypto");
 const Helper = require("../../../Helper");
 const ObjectType = require("../../../ObjectType");
-const Net = require("../../../Net");
 const NetDedis = require("@dedis/cothority").net;
 const FilesPath = require("../../../../../res/files/files-path");
 const FileIO = require("../../../../../lib/file-io/file-io");
@@ -582,28 +581,18 @@ class Org {
       throw new Error("user should generate a key pair before linking to a conode");
     }
 
-    // TODO : update with Cothority-JS
-    const cothoritySocket = new Net.CothoritySocket();
+    const cothoritySocket = new NetDedis.Socket(Convert.tcpToWebsocket(conode, ""), RequestPath.POP);
     const pinRequestMessage = CothorityMessages.createPinRequest(pin, User.getKeyPair().public);
 
-    return cothoritySocket.send(conode, RequestPath.POP_PIN_REQUEST, pinRequestMessage, undefined)
+    // TODO change status request return type
+    return cothoritySocket.send(RequestPath.POP_PIN_REQUEST, RequestPath.STATUS_REQUEST, pinRequestMessage)
       .then(response => {
-        if (typeof response === "object") {
-          response = Uint8Array.from(response.array());
-        }
-
-        if (response instanceof Uint8Array) {
-          return this.setLinkedConode(conode, true)
-            .then(() => {
-              return Promise.resolve("PIN Accepted");
-            });
-        } else if (typeof response === "string") {
-          return Promise.resolve(response);
-        } else {
-          return Promise.reject("response is neither Uint8Array nor string");
-        }
+        return Promise.resolve();
       })
       .catch(error => {
+        if (error.message === CothorityMessages.READ_PIN_ERROR) {
+          return Promise.resolve(error.message)
+        }
         console.log(error);
         console.dir(error);
         console.trace();
