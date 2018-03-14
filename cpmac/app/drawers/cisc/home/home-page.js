@@ -201,14 +201,10 @@ function askForDevice() {
 
 function addDevice() {
     let data = Helper.deepCopy(Cisc.getData());
-    console.log("AVANT SKDEBUG");
-    // TODO CRASH A CETTE LIGNE
     data.device[Cisc.getName()] = CothorityMessages.createDevice(User.getKeyPairModule().public);
-    console.log("APRES SKDEBUG");
     data.votes = {};
     console.dir(data);
 
-    console.log("SKDEBUG id = " + Cisc.getIdentity().id);
     let proposeSendMessage = CothorityMessages.createProposeSend(Convert.hexToByteArray(Cisc.getIdentity().id), data);
     console.log(Cisc.getIdentity().id);
     const cothoritySocket = new NetDedis.Socket(Convert.tcpToWebsocket(Cisc.getIdentity().address, ""), RequestPath.IDENTITY);
