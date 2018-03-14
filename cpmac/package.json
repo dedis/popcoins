@@ -19,7 +19,7 @@
   },
   "scripts": {},
   "dependencies": {
-    "@dedis/cothority": "file:../../cothority/external/js/cothority",
+    "@dedis/cothority": "file:dedis-cothority-1.0.2.tgz",
     "@dedis/kyber-js": "0.0.7",
     "bn.js": "^4.11.8",
     "buffer": "^5.0.8",
@@ -38,7 +38,6 @@
     "nativescript-unit-test-runner": "^0.3.4",
     "nativescript-websockets": "^1.3.4",
     "nativescript-zxing": "^1.5.3",
-    "protobufjs": "^6.8.6",
     "pure-uuid": "^1.4.8",
     "tns-core-modules": "^3.4.1",
     "toml": "^2.3.3",
