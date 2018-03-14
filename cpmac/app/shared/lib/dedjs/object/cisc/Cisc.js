@@ -537,7 +537,7 @@ class Cisc {
      */
     updateData() {
         const cothoritySocket = new NetDedis.Socket(Convert.tcpToWebsocket(this.getIdentity().address, ""), RequestPath.IDENTITY);
-        console.log(Convert.hexToByteArray(this.getIdentity().id));
+        console.log("SKDEBUG" + Convert.hexToByteArray(this.getIdentity().id));
         const dataUpdateMessage = CothorityMessages.createDataUpdate(Convert.hexToByteArray(this.getIdentity().id));
         return cothoritySocket.send(RequestPath.IDENTITY_DATA_UPDATE, DecodeType.DATA_UPDATE_REPLY, dataUpdateMessage)
             .then((response) => {
@@ -568,7 +568,6 @@ class Cisc {
      * @returns {Promise.<TResult>}
      */
     updateAll() {
-        // TODO remove comment
         let promises = [this.updateData(), this.updateProposedData()];
 
         return Promise.all(promises)
@@ -661,7 +660,9 @@ class Cisc {
         if (alreadySigned) {
             return Promise.reject("You already signed the message")
         }
-        const signature = Schnorr.sign(CURVE_ED25519, User.getKeyPair().private, Convert.hexToByteArray(hashedData));
+        const privateKey = CURVE_ED25519.scalar();
+        privateKey.unmarshalBinary(User.getKeyPair().private);
+        const signature = Schnorr.sign(CURVE_ED25519, privateKey, Convert.hexToByteArray(hashedData));
         let proposeVoteMessage = CothorityMessages.createProposeVote(Convert.hexToByteArray(this.getIdentity().id), this.getName(), signature);
         return cothoritySocket.send(RequestPath.IDENTITY_PROPOSE_VOTE, DecodeType.PROPOSE_VOTE_REPLY, proposeVoteMessage)
     }

@@ -627,7 +627,9 @@ class Org {
       .update(popDesc.roster.aggregate)
       .digest("hex"));
 
-    const signature = Schnorr.sign(CURVE_ED25519_KYBER, User.getKeyPair().private, descHash);
+    const privateKey = CURVE_ED25519_KYBER.scalar();
+    privateKey.unmarshalBinary(User.getKeyPair().private);
+    const signature = Schnorr.sign(CURVE_ED25519_KYBER, privateKey, descHash);
 
     const cothoritySocket = new NetDedis.Socket(Convert.tcpToWebsocket(this.getLinkedConode(), ""), RequestPath.POP);
     const storeConfigMessage = CothorityMessages.createStoreConfig(popDesc, signature);
@@ -685,7 +687,9 @@ class Org {
     });
 
     hashToSign = Convert.hexToByteArray(hashToSign.digest("hex"));
-    const signature = Schnorr.sign(CURVE_ED25519_KYBER, User.getKeyPair().private, hashToSign);
+    const privateKey = CURVE_ED25519_KYBER.scalar();
+    privateKey.unmarshalBinary(User.getKeyPair().private);
+    const signature = Schnorr.sign(CURVE_ED25519_KYBER, privateKey, hashToSign);
 
     const cothoritySocket = new NetDedis.Socket(Convert.tcpToWebsocket(this.getLinkedConode(), ""), RequestPath.POP);
     const finalizeRequestMessage = CothorityMessages.createFinalizeRequest(descId, attendees, signature);
