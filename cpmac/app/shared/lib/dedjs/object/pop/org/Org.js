@@ -237,7 +237,7 @@ class Org {
 
     this.emptyPopDescRosterList();
     popDesc.roster.list.forEach(server => {
-      server.toBase64 = Convert.byteArrayToBase64;
+      server.toHex = Convert.byteArrayToHex;
       popDescModule.roster.list.push(server);
     });
 
@@ -306,7 +306,7 @@ class Org {
 
     this.emptyRegisteredAttsArray();
     array.forEach(publicKey => {
-      publicKey.toBase64 = Convert.byteArrayToBase64;
+      publicKey.toHex = Convert.byteArrayToHex;
       this.getRegisteredAtts().push(publicKey);
     });
 
@@ -317,7 +317,7 @@ class Org {
       if (newRegisteredAtts.length > 0) {
         const object = {};
         object.array = newRegisteredAtts.map(byteArray => {
-          return Convert.byteArrayToBase64(byteArray);
+          return Convert.byteArrayToHex(byteArray);
         });
 
         toWrite = Convert.objectToJson(object);
@@ -381,7 +381,7 @@ class Org {
       let toWrite = "";
       if (newHash.length > 0) {
         const object = {};
-        object.hash = Convert.byteArrayToBase64(newHash);
+        object.hash = Convert.byteArrayToHex(newHash);
 
         toWrite = Convert.objectToJson(object);
       }
@@ -636,7 +636,7 @@ class Org {
 
     return cothoritySocket.send(RequestPath.POP_STORE_CONFIG, DecodeType.STORE_CONFIG_REPLY, storeConfigMessage)
       .then(response => {
-        if (Convert.byteArrayToBase64(response.id) === Convert.byteArrayToBase64(descHash)) {
+        if (Convert.byteArrayToHex(response.id) === Convert.byteArrayToHex(descHash)) {
           return this.setPopDescHash(descHash, true)
             .then(() => {
               return Promise.resolve(descHash);

@@ -28,7 +28,7 @@ function addManual() {
     .then(args => {
       if (args.result && args.text !== undefined && args.text.length > 0) {
         // Add Key
-        return Org.registerAttendee(Convert.base64ToByteArray(args.text));
+        return Org.registerAttendee(Convert.hexToByteArray(args.text));
       } else if (args.result === undefined) {
         // Add Myself
         if (!User.isKeyPairSet()) {
@@ -99,9 +99,9 @@ function onSwipeCellStarted(args) {
 
 function deleteAttendee(args) {
   // We do not get the index of the item swiped/clicked...
-  const attendee = Convert.byteArrayToBase64(args.object.bindingContext);
+  const attendee = Convert.byteArrayToHex(args.object.bindingContext);
   const attendeeList = Org.getRegisteredAtts().slice().map(attendee => {
-    return Convert.byteArrayToBase64(attendee);
+    return Convert.byteArrayToHex(attendee);
   });
 
   const index = attendeeList.indexOf(attendee);

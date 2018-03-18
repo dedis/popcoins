@@ -61,8 +61,8 @@
                 <GridLayout rows="*,*,*,*,*" columns="*" backgroundColor="white">
                     <Label text="{{ description }}" row="0" textAlignment="left" textWrap="true"/>
                     <Label text="{{ address }}" row="1" textAlignment="left" textWrap="true"/>
-                    <Label text="{{ toBase64(public) }}" row="2" textAlignment="left" textWrap="true"/>
-                    <Label text="{{ toBase64(id) }}" row="3" textAlignment="left" textWrap="true"/>
+                    <Label text="{{ toHex(public) }}" row="2" textAlignment="left" textWrap="true"/>
+                    <Label text="{{ toHex(id) }}" row="3" textAlignment="left" textWrap="true"/>
                     <StackLayout row="4" height="1" backgroundColor="black"/>
                 </GridLayout>
             </nsListView:RadListView.itemTemplate>

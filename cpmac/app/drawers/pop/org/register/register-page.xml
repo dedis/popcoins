@@ -28,7 +28,7 @@
 
             <nsListView:RadListView.itemTemplate>
                 <GridLayout rows="*,*" columns="*">
-                    <Label text="{{ toBase64($value) }}" fontSize="18" textAlignment="center" textWrap="true" backgroundColor="white"/>
+                    <Label text="{{ toHex($value) }}" fontSize="18" textAlignment="center" textWrap="true" backgroundColor="white"/>
                     <StackLayout row="4" height="1" backgroundColor="black"/>
                 </GridLayout>
             </nsListView:RadListView.itemTemplate>

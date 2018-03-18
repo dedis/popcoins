@@ -10,7 +10,7 @@ const PoP = require("../../../shared/lib/dedjs/object/pop/PoP").get;
 const viewModel = ObservableModule.fromObject({
   linkedConode: Org.getLinkedConodeModule(),
   hash: Org.getPopDescHashModule(),
-  toBase64: Convert.byteArrayToBase64
+  toHex: Convert.byteArrayToHex
 });
 
 let page = undefined;
@@ -34,7 +34,7 @@ function linkToConode() {
 
   const conodes = User.getRoster().list;
   const conodesNames = conodes.map(serverIdentity => {
-    return serverIdentity.description + " - " + Convert.byteArrayToBase64(serverIdentity.id);
+    return serverIdentity.description + " - " + Convert.byteArrayToHex(serverIdentity.id);
   });
 
   let index = undefined;

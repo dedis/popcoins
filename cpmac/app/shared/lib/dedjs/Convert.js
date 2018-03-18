@@ -51,36 +51,6 @@ function hexToByteArray(hexString) {
 }
 
 /**
- * Converts a byte array to it's base64 string representation.
- * @param {Uint8Array} byteArray - the byte array to convert
- * @returns {string} - the base64 string
- */
-function byteArrayToBase64(byteArray) {
-  if (!(byteArray instanceof Uint8Array)) {
-    throw new Error("byteArray must be an instance of Uint8Array");
-  }
-
-  const hexString = byteArrayToHex(byteArray);
-
-  return hexToBase64(hexString);
-}
-
-/**
- * Converts a base64 string to it's byte array representation.
- * @param {string} base64String - the base64 string to convert
- * @returns {Uint8Array} - the byte array
- */
-function base64ToByteArray(base64String) {
-  if (typeof base64String !== "string") {
-    throw new Error("base64String must be of type string");
-  }
-
-  const hexString = base64ToHex(base64String);
-
-  return hexToByteArray(hexString);
-}
-
-/**
  * Converts a hexadecimal string into it's base64 string representation.
  * @param {string} hexString - the hexadecimal string to convert
  * @returns {string} - the base64 string
@@ -249,7 +219,7 @@ function parseJsonPopToken(jsonString) {
 
   object.final = parseJsonFinalStatement(objectToJson(object.final));
 
-  return CothorityMessages.createPopToken(object.final, base64ToByteArray(object.private), base64ToByteArray(object.public));
+  return CothorityMessages.createPopToken(object.final, hexToByteArray(object.private), hexToByteArray(object.public));
 }
 
 /**
@@ -289,10 +259,10 @@ function parseJsonFinalStatement(jsonString) {
     throw new Error("object.attendees is undefined or not an array");
   }
 
-  object.attendees = object.attendees.map(base64String => {
-    return base64ToByteArray(base64String.split(" ").join("+"));
+  object.attendees = object.attendees.map(hexString => {
+    return hexToByteArray(hexString.split(" ").join("+"));
   });
-  object.signature = base64ToByteArray(object.signature.split(" ").join("+"));
+  object.signature = hexToByteArray(object.signature.split(" ").join("+"));
   object.desc = parseJsonPopDesc(objectToJson(object.desc));
 
   return CothorityMessages.createFinalStatement(object.desc, object.attendees, object.signature, object.merged);
@@ -314,7 +284,7 @@ function parseJsonPopDesc(jsonString) {
 }
 
 /**
- * Parses a JSON string into a PopDesc hash. The JSON has to represent an object with a "hash" property containing a base64 encoded string.
+ * Parses a JSON string into a PopDesc hash. The JSON has to represent an object with a "hash" property containing a hex encoded string.
  * @param {string} jsonString - the JSON string to parse into a PopDesc hash
  * @returns {Uint8Array} - the parsed PopDesc hash
  */
@@ -325,7 +295,7 @@ function parseJsonPopDescHash(jsonString) {
 
   const hash = jsonToObject(jsonString).hash;
 
-  return base64ToByteArray(hash);
+  return hexToByteArray(hash);
 }
 
 /**
@@ -345,25 +315,25 @@ function parseJsonRoster(jsonString) {
 
   let rosterId = roster.id;
   if (rosterId !== undefined) {
-    rosterId = base64ToByteArray(rosterId.split(" ").join("+"));
+    rosterId = hexToByteArray(rosterId.split(" ").join("+"));
   }
 
-  let aggregate = (roster.aggregate === undefined) ? undefined : base64ToByteArray(roster.aggregate.split(" ").join("+"));
+  let aggregate = (roster.aggregate === undefined) ? undefined : hexToByteArray(roster.aggregate.split(" ").join("+"));
 
   const points = [];
   const list = roster.list.map((server) => {
     if (aggregate === undefined) {
       let point = CURVE_ED25519.point();
-      point.unmarshalBinary(base64ToByteArray(server.public.split(" ").join("+")));
+      point.unmarshalBinary(hexToByteArray(server.public.split(" ").join("+")));
       points.push(point);
     }
 
     let serverId = server.id;
     if (serverId !== undefined) {
-      serverId = base64ToByteArray(serverId.split(" ").join("+"));
+      serverId = hexToByteArray(serverId.split(" ").join("+"));
     }
 
-    return toServerIdentity(server.address, base64ToByteArray(server.public.split(" ").join("+")), server.description, serverId);
+    return toServerIdentity(server.address, hexToByteArray(server.public.split(" ").join("+")), server.description, serverId);
   });
 
   if (aggregate === undefined) {
@@ -437,14 +407,14 @@ function parseJsonKeyPair(jsonString) {
 
   let publicComplete = undefined;
   if (keyPair.publicComplete !== undefined) {
-    publicComplete = base64ToByteArray(keyPair.publicComplete);
+    publicComplete = hexToByteArray(keyPair.publicComplete);
   }
 
   if (keyPair.private === undefined) {
     keyPair.private = "";
   }
 
-  return CothorityMessages.createKeyPair(base64ToByteArray(keyPair.public), base64ToByteArray(keyPair.private), publicComplete);
+  return CothorityMessages.createKeyPair(hexToByteArray(keyPair.public), hexToByteArray(keyPair.private), publicComplete);
 }
 
 /**
@@ -459,14 +429,14 @@ function parseJsonServerIdentity(jsonString) {
 
   const serverIdentity = jsonToObject(jsonString);
 
-  const publicKey = base64ToByteArray(serverIdentity.public);
-  const id = base64ToByteArray(serverIdentity.id);
+  const publicKey = hexToByteArray(serverIdentity.public);
+  const id = hexToByteArray(serverIdentity.id);
 
   return toServerIdentity(serverIdentity.address, publicKey, serverIdentity.description, id);
 }
 
 /**
- * Parses a JSON string into an array of Uint8Array. The JSON has to represent an object with a "array" property that is an array of base64 encoded strings.
+ * Parses a JSON string into an array of Uint8Array. The JSON has to represent an object with a "array" property that is an array of hex encoded strings.
  * @param {string} jsonString - the JSON string to parse into an array of Uint8Array
  * @returns {Array} - the parsed an array of Uint8Array
  */
@@ -480,8 +450,8 @@ function parseJsonArrayOfKeys(jsonString) {
     throw new Error("object.array is undefined or not an array");
   }
 
-  array = array.map(base64String => {
-    return base64ToByteArray(base64String);
+  array = array.map(hexString => {
+    return hexToByteArray(hexString);
   });
 
   return array;
@@ -533,8 +503,6 @@ function publicKeyToUuid(publicKey) {
 
 module.exports.byteArrayToHex = byteArrayToHex;
 module.exports.hexToByteArray = hexToByteArray;
-module.exports.byteArrayToBase64 = byteArrayToBase64;
-module.exports.base64ToByteArray = base64ToByteArray;
 module.exports.hexToBase64 = hexToBase64;
 module.exports.base64ToHex = base64ToHex;
 module.exports.objectToJson = objectToJson;

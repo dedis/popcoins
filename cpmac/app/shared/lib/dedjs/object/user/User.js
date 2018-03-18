@@ -264,13 +264,13 @@ class User {
       });
     } else {
       const idsToExclude = roster.list.map(server => {
-        return Convert.byteArrayToBase64(server.id);
+        return Convert.byteArrayToHex(server.id);
       });
 
       const newList = [];
       const points = [];
       this.getRosterModule().list.forEach(server => {
-        if (!idsToExclude.includes(Convert.byteArrayToBase64(server.id))) {
+        if (!idsToExclude.includes(Convert.byteArrayToHex(server.id))) {
           newList.push(server);
           let point = CURVE_ED25519.point();
           point.unmarshalBinary(server.public);
@@ -349,11 +349,11 @@ class User {
         let point = CURVE_ED25519.point();
         point.unmarshalBinary(server.public);
         points.push(point);
-        idsToExclude.push(Convert.byteArrayToBase64(server.id));
+        idsToExclude.push(Convert.byteArrayToHex(server.id));
       });
 
       roster.list.forEach(server => {
-        if (!idsToExclude.includes(Convert.byteArrayToBase64(server.id))) {
+        if (!idsToExclude.includes(Convert.byteArrayToHex(server.id))) {
           newList.push(server);
           let point = CURVE_ED25519.point();
           point.unmarshalBinary(server.public);
