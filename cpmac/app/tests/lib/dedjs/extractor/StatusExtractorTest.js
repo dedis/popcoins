@@ -16,7 +16,7 @@ const fields = {
         "Host": "127.0.0.1",
         "Port": "7002",
         "Description": "Conode_1",
-        "ConnType": "tcp",
+        "ConnType": "tls",
         "Version": "1.2",
         "TX_bytes": "0",
         "RX_bytes": "0",
@@ -28,7 +28,7 @@ const fields = {
   "server": {
     "public": "HkDzpR5Imd7WNx8kl2lJcIVRVn8gfDByJnmlfrYh/zU=",
     "id": "z6kCTQ77Xna9yfgKka5lNQ==",
-    "address": "tcp://127.0.0.1:7002",
+    "address": "tls://127.0.0.1:7002",
     "description": "Conode_1"
   }
 };
@@ -70,7 +70,7 @@ describe("StatusExtractor", function () {
     it("should correctly get back the id", function () {
       const id = StatusExtractor.getID(statusResponse);
 
-      id.should.equal(Convert.byteArrayToBase64(fields.server.id));
+      id.should.equal(Convert.byteArrayToHex(fields.server.id));
     });
   });
 
@@ -82,7 +82,7 @@ describe("StatusExtractor", function () {
     it("should correctly get back the public key", function () {
       const publicKey = StatusExtractor.getPublicKey(statusResponse);
 
-      publicKey.should.equal(Convert.byteArrayToBase64(fields.server.public));
+      publicKey.should.equal(Convert.byteArrayToHex(fields.server.public));
     });
   });
 

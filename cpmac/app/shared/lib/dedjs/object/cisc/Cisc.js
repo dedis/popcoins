@@ -536,7 +536,7 @@ class Cisc {
      * @returns {Promise.<TResult>}
      */
     updateData() {
-        const cothoritySocket = new NetDedis.Socket(Convert.tcpToWebsocket(this.getIdentity().address, ""), RequestPath.IDENTITY);
+        const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(this.getIdentity().address, ""), RequestPath.IDENTITY);
         const dataUpdateMessage = CothorityMessages.createDataUpdate(Convert.hexToByteArray(this.getIdentity().id));
         return cothoritySocket.send(RequestPath.IDENTITY_DATA_UPDATE, DecodeType.DATA_UPDATE_REPLY, dataUpdateMessage)
             .then((response) => {
@@ -552,7 +552,7 @@ class Cisc {
      */
     updateProposedData() {
         console.log("updating proposed data");
-        const cothoritySocket = new NetDedis.Socket(Convert.tcpToWebsocket(this.getIdentity().address, ""), RequestPath.IDENTITY);
+        const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(this.getIdentity().address, ""), RequestPath.IDENTITY);
         const proposeUpdateMessage = CothorityMessages.createProposeUpdate(Convert.hexToByteArray(this.getIdentity().id));
         return cothoritySocket.send(RequestPath.IDENTITY_PROPOSE_UPDATE, DecodeType.DATA_UPDATE_REPLY, proposeUpdateMessage)
             .then((response) => {
@@ -649,7 +649,7 @@ class Cisc {
 
     voteForProposed() {
         let hashedData = this.hashData(this.getProposedData());
-        const cothoritySocket = new NetDedis.Socket(Convert.tcpToWebsocket(this.getIdentity().address, ""), RequestPath.IDENTITY);
+        const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(this.getIdentity().address, ""), RequestPath.IDENTITY);
         let alreadySigned = false;
         if (this.getProposedData().votes[this.getName()] !== null && this.getProposedData().votes[this.getName()] !== undefined) {
             let point = CURVE_ED25519.point();

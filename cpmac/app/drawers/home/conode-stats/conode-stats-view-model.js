@@ -37,11 +37,11 @@ function setUpConodeStatsList() {
     stat.info = StatusExtractor.getAddress(conodeStatus);
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
-    stat.title = "ID (base64)";
+    stat.title = "ID (hex)";
     stat.info = StatusExtractor.getID(conodeStatus);
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
-    stat.title = "Public Key (base64)";
+    stat.title = "Public Key (hex)";
     stat.info = StatusExtractor.getPublicKey(conodeStatus);
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
 

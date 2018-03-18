@@ -115,27 +115,27 @@ describe("Helper", function () {
     });
 
     it("should correctly check that an address is correct", function () {
-      let bool = Helper.isValidAddress("tcp://10.0.2.2:7002");
+      let bool = Helper.isValidAddress("tls://10.0.2.2:7002");
       bool.should.be.true;
 
-      bool = Helper.isValidAddress("tcp://10.0.2.2:65534");
+      bool = Helper.isValidAddress("tls://10.0.2.2:65534");
       bool.should.be.true;
 
-      bool = Helper.isValidAddress("tcp://10.0.2.2:0");
+      bool = Helper.isValidAddress("tls://10.0.2.2:0");
       bool.should.be.true;
     });
 
     it("should correctly check that an address is incorrect", function () {
-      let bool = Helper.isValidAddress("tcp://10,0.2.2:7002");
+      let bool = Helper.isValidAddress("tls://10,0.2.2:7002");
       bool.should.be.false;
 
-      bool = Helper.isValidAddress("tcp://10.0.2.2,7002");
+      bool = Helper.isValidAddress("tls://10.0.2.2,7002");
       bool.should.be.false;
 
-      bool = Helper.isValidAddress("tcp:/10.0.2.2:7002");
+      bool = Helper.isValidAddress("tls:/10.0.2.2:7002");
       bool.should.be.false;
 
-      bool = Helper.isValidAddress("tcp:://10.0.2.2:7002");
+      bool = Helper.isValidAddress("tls:://10.0.2.2:7002");
       bool.should.be.false;
 
       bool = Helper.isValidAddress("tc://10.0.2.2:7002");
@@ -144,16 +144,16 @@ describe("Helper", function () {
       bool = Helper.isValidAddress("ws://10.0.2.2:7002");
       bool.should.be.false;
 
-      bool = Helper.isValidAddress("tcp://10.0.2.2:-3");
+      bool = Helper.isValidAddress("tls://10.0.2.2:-3");
       bool.should.be.false;
 
-      bool = Helper.isValidAddress("tcp://10.0.2.2:65535");
+      bool = Helper.isValidAddress("tls://10.0.2.2:65535");
       bool.should.be.false;
 
-      bool = Helper.isValidAddress("tcp://256.0.2.2:7002");
+      bool = Helper.isValidAddress("tls://256.0.2.2:7002");
       bool.should.be.false;
 
-      bool = Helper.isValidAddress("tcp://10.0.-2.2:7002");
+      bool = Helper.isValidAddress("tls://10.0.-2.2:7002");
       bool.should.be.false;
     });
   });

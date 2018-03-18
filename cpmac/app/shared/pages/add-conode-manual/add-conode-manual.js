@@ -22,7 +22,7 @@ function onLoaded(args) {
   }
 
   // Can be removed. Only used for testing purposes.
-  //textFieldAddress.text = "tcp://10.0.2.2:7002";
+  //textFieldAddress.text = "tls://10.0.2.2:7002";
   //textFieldPublicKey.text = "HkDzpR5Imd7WNx8kl2lJcIVRVn8gfDByJnmlfrYh/zU=";
   //textFieldDescription.text = "Conode_1";
 }
@@ -48,7 +48,7 @@ function addManual() {
 
   if (address.length > 0 && publicKey.length > 0 && description.length > 0) {
     try {
-      publicKey = Convert.base64ToByteArray(publicKey);
+      publicKey = Convert.hexToByteArray(publicKey);
       const server = Convert.toServerIdentity(address, publicKey, description, undefined);
 
       closeCallBackFunction(server);

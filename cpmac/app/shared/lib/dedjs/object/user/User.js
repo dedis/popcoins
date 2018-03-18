@@ -38,7 +38,7 @@ class User {
       public: new Uint8Array(),
       private: new Uint8Array(),
       publicComplete: new Uint8Array(),
-      toBase64: Convert.byteArrayToBase64
+      toHex: Convert.byteArrayToHex
     });
     this._roster = ObservableModule.fromObject({
       isLoading: false,
@@ -194,7 +194,7 @@ class User {
     }
     this.emptyRosterList();
     roster.list.forEach((server) => {
-      server.toBase64 = Convert.byteArrayToBase64;
+      server.toHex = Convert.byteArrayToHex;
       this.getRosterModule().list.push(server);
     });
     this.getRosterModule().aggregate = roster.aggregate;
@@ -397,7 +397,7 @@ class User {
     const statusRequestMessage = {};
 
     conodes.map((server) => {
-      const address = Convert.tcpToWebsocket(server, "");
+      const address = Convert.tlsToWebsocket(server, "");
       // TODO Change to Net instead of NetDedis
       const cothoritySocket = new NetDedis.Socket(address, RequestPath.STATUS);
       return cothoritySocket.send(RequestPath.STATUS_REQUEST, DecodeType.STATUS_RESPONSE, statusRequestMessage)

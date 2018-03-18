@@ -581,7 +581,7 @@ class Org {
       throw new Error("user should generate a key pair before linking to a conode");
     }
 
-    const cothoritySocket = new NetDedis.Socket(Convert.tcpToWebsocket(conode, ""), RequestPath.POP);
+    const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(conode, ""), RequestPath.POP);
     const pinRequestMessage = CothorityMessages.createPinRequest(pin, User.getKeyPair().public);
 
     // TODO change status request return type
@@ -631,7 +631,7 @@ class Org {
     privateKey.unmarshalBinary(User.getKeyPair().private);
     const signature = Schnorr.sign(CURVE_ED25519_KYBER, privateKey, descHash);
 
-    const cothoritySocket = new NetDedis.Socket(Convert.tcpToWebsocket(this.getLinkedConode(), ""), RequestPath.POP);
+    const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(this.getLinkedConode(), ""), RequestPath.POP);
     const storeConfigMessage = CothorityMessages.createStoreConfig(popDesc, signature);
 
     return cothoritySocket.send(RequestPath.POP_STORE_CONFIG, DecodeType.STORE_CONFIG_REPLY, storeConfigMessage)
@@ -688,10 +688,14 @@ class Org {
 
     hashToSign = Convert.hexToByteArray(hashToSign.digest("hex"));
     const privateKey = CURVE_ED25519_KYBER.scalar();
+    console.log("SKDEBUG signtre :");
+    console.log(User.getKeyPair().private);
+    console.dir(User.getKeyPair().private);
     privateKey.unmarshalBinary(User.getKeyPair().private);
     const signature = Schnorr.sign(CURVE_ED25519_KYBER, privateKey, hashToSign);
 
-    const cothoritySocket = new NetDedis.Socket(Convert.tcpToWebsocket(this.getLinkedConode(), ""), RequestPath.POP);
+
+    const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(this.getLinkedConode(), ""), RequestPath.POP);
     const finalizeRequestMessage = CothorityMessages.createFinalizeRequest(descId, attendees, signature);
 
     return cothoritySocket.send(RequestPath.POP_FINALIZE_REQUEST, DecodeType.FINALIZE_RESPONSE, finalizeRequestMessage)

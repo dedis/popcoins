@@ -137,7 +137,7 @@ function connectButtonTapped(args) {
                 console.dir(result);
                 const splitColon = result.text.split(":");
                 const splitSlash = splitColon[2].split("/");
-                const goodURL = `tcp:${splitColon[1]}:${splitSlash[0]}`;
+                const goodURL = `tls:${splitColon[1]}:${splitSlash[0]}`;
 
                 let label = result.text;
                 let address = goodURL;
@@ -207,7 +207,7 @@ function addDevice() {
 
     let proposeSendMessage = CothorityMessages.createProposeSend(Convert.hexToByteArray(Cisc.getIdentity().id), data);
     console.log(Cisc.getIdentity().id);
-    const cothoritySocket = new NetDedis.Socket(Convert.tcpToWebsocket(Cisc.getIdentity().address, ""), RequestPath.IDENTITY);
+    const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(Cisc.getIdentity().address, ""), RequestPath.IDENTITY);
     cothoritySocket.send(RequestPath.IDENTITY_PROPOSE_SEND, DecodeType.DATA_UPDATE_REPLY, proposeSendMessage)
         .then((response) => {
             console.log(response);

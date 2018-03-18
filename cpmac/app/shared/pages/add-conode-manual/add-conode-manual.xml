@@ -11,7 +11,7 @@
         <Label row="0" colSpan="2"/>
 
         <Label class="label-title" text="Conode Address" row="1" colSpan="2"/>
-        <TextField class="text-field" hint="tcp://127.0.0.1:7002" autocorrect="false"
+        <TextField class="text-field" hint="tls://127.0.0.1:7002" autocorrect="false"
                    autocapitalizationType="none"
                    returnKeyType="next"
                    row="2"
@@ -19,7 +19,7 @@
                    id="text-view-conode-address"/>
 
         <Label class="label-title" text="Conode Public Key" row="3" colSpan="2"/>
-        <TextField class="text-field" hint="base64" autocorrect="false"
+        <TextField class="text-field" hint="hex" autocorrect="false"
                    autocapitalizationType="none"
                    returnKeyType="next"
                    row="4"

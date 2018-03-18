@@ -377,7 +377,7 @@ class PoP {
       throw new Error("descId must be an instance of Uint8Array and not empty");
     }
 
-    const cothoritySocket = new NetDedis.Socket(Convert.tcpToWebsocket(conode, ""), RequestPath.POP);
+    const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(conode, ""), RequestPath.POP);
     const fetchRequestMessage = CothorityMessages.createFetchRequest(descId);
 
     return cothoritySocket.send(RequestPath.POP_FETCH_REQUEST, DecodeType.FETCH_RESPONSE, fetchRequestMessage)

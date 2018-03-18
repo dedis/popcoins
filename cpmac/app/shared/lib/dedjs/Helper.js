@@ -5,7 +5,7 @@ const CURVE_ED25519 = new Kyber.curve.edwards25519.Curve;
 const PUBLIC_KEY_BYTE_LENGTH_31 = 31;
 const PUBLIC_KEY_BYTE_LENGTH_32 = 32;
 
-const BASE_URL_TCP = "tcp://";
+const BASE_URL_TLS = "tls://";
 const URL_PORT_SPLITTER = ":";
 const PORT_MIN = 0;
 const PORT_MAX = 65535;
@@ -85,8 +85,8 @@ function isValidAddress(address) {
     throw new Error("address must be of type string");
   }
 
-  if (address.startsWith(BASE_URL_TCP)) {
-    let [ip, ...array] = address.replace(BASE_URL_TCP, "").split(URL_PORT_SPLITTER);
+  if (address.startsWith(BASE_URL_TLS)) {
+    let [ip, ...array] = address.replace(BASE_URL_TLS, "").split(URL_PORT_SPLITTER);
 
     if (array.length === 1) {
       const port = parseInt(array[0]);

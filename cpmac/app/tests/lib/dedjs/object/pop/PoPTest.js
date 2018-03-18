@@ -16,19 +16,19 @@ const ROSTER_LIST = [
   {
     "public": "HkDzpR5Imd7WNx8kl2lJcIVRVn8gfDByJnmlfrYh/zU=",
     "id": "z6kCTQ77Xna9yfgKka5lNQ==",
-    "address": "tcp://10.0.2.2:7002",
+    "address": "tls://10.0.2.2:7002",
     "description": "Conode_1"
   },
   {
     "public": "Fx6zzvJM6VzxfByLY2+uArGPtd2lHKPVmoXGMhdaFCA=",
     "id": "Qd8XkrUlVEeClO9I95nklQ==",
-    "address": "tcp://10.0.2.2:7004",
+    "address": "tls://10.0.2.2:7004",
     "description": "Conode_2"
   },
   {
     "public": "j53MMKZNdtLlglcK9Ct1YYtkbbEOfq3R8ZoJOFIu6tE=",
     "id": "tUq+0651WRaAI4aTQC0d8w==",
-    "address": "tcp://10.0.2.2:7006",
+    "address": "tls://10.0.2.2:7006",
     "description": "Conode_3"
   }
 ];
@@ -76,9 +76,9 @@ const POP_DESC_HASH_JSON = Convert.objectToJson({
 });
 const POP_DESC_HASH_BYTE_ARRAY = Convert.base64ToByteArray(POP_DESC_HASH);
 
-const CONODE_ADDRESS = "tcp://10.0.2.2:7002";
-//const CONODE_ADDRESS = "tcp://10.0.2.2:7004";
-//const CONODE_ADDRESS = "tcp://10.0.2.2:7006";
+const CONODE_ADDRESS = "tls://10.0.2.2:7002";
+//const CONODE_ADDRESS = "tls://10.0.2.2:7004";
+//const CONODE_ADDRESS = "tls://10.0.2.2:7006";
 const CONODE_PUBLIC_KEY = "HkDzpR5Imd7WNx8kl2lJcIVRVn8gfDByJnmlfrYh/zU=";
 //const CONODE_PUBLIC_KEY = "Fx6zzvJM6VzxfByLY2+uArGPtd2lHKPVmoXGMhdaFCA=";
 //const CONODE_PUBLIC_KEY = "j53MMKZNdtLlglcK9Ct1YYtkbbEOfq3R8ZoJOFIu6tE=";

@@ -34,7 +34,7 @@ const COMPLEX_OBJECT = {
   }
 };
 
-const CONODE_ADDRESS = "tcp://10.0.2.2:7002";
+const CONODE_ADDRESS = "tls://10.0.2.2:7002";
 const CONODE_PUBLIC_KEY = "HkDzpR5Imd7WNx8kl2lJcIVRVn8gfDByJnmlfrYh/zU=";
 const CONODE_PUBLIC_KEY_BYTE_ARRAY = Convert.base64ToByteArray(CONODE_PUBLIC_KEY);
 const CONODE_DESCRIPTION = "Conode_1";
@@ -52,19 +52,19 @@ const ROSTER_LIST = [
   {
     "public": "HkDzpR5Imd7WNx8kl2lJcIVRVn8gfDByJnmlfrYh/zU=",
     "id": "z6kCTQ77Xna9yfgKka5lNQ==",
-    "address": "tcp://10.0.2.2:7002",
+    "address": "tls://10.0.2.2:7002",
     "description": "Conode_1"
   },
   {
     "public": "Fx6zzvJM6VzxfByLY2+uArGPtd2lHKPVmoXGMhdaFCA=",
     "id": "Qd8XkrUlVEeClO9I95nklQ==",
-    "address": "tcp://10.0.2.2:7004",
+    "address": "tls://10.0.2.2:7004",
     "description": "Conode_2"
   },
   {
     "public": "j53MMKZNdtLlglcK9Ct1YYtkbbEOfq3R8ZoJOFIu6tE=",
     "id": "tUq+0651WRaAI4aTQC0d8w==",
-    "address": "tcp://10.0.2.2:7006",
+    "address": "tls://10.0.2.2:7006",
     "description": "Conode_3"
   }
 ];
@@ -92,17 +92,17 @@ const JSON_ROSTER_NO_CONODEID = JSON.stringify({
   "list": [
     {
       "public": "HkDzpR5Imd7WNx8kl2lJcIVRVn8gfDByJnmlfrYh/zU=",
-      "address": "tcp://10.0.2.2:7002",
+      "address": "tls://10.0.2.2:7002",
       "description": "Conode_1"
     },
     {
       "public": "Fx6zzvJM6VzxfByLY2+uArGPtd2lHKPVmoXGMhdaFCA=",
-      "address": "tcp://10.0.2.2:7004",
+      "address": "tls://10.0.2.2:7004",
       "description": "Conode_2"
     },
     {
       "public": "j53MMKZNdtLlglcK9Ct1YYtkbbEOfq3R8ZoJOFIu6tE=",
-      "address": "tcp://10.0.2.2:7006",
+      "address": "tls://10.0.2.2:7006",
       "description": "Conode_3"
     }
   ],
@@ -124,28 +124,28 @@ const JSON_ROSTER_LIST_WRONG_TYPE = JSON.stringify({
 
 const TOML_ROSTER =
   "[[servers]]\n" +
-  "  Address = \"tcp://10.0.2.2:7002\"\n" +
+  "  Address = \"tls://10.0.2.2:7002\"\n" +
   "  Public = \"HkDzpR5Imd7WNx8kl2lJcIVRVn8gfDByJnmlfrYh/zU=\"\n" +
   "  Description = \"Conode_1\"\n" +
   "[[servers]]\n" +
-  "  Address = \"tcp://10.0.2.2:7004\"\n" +
+  "  Address = \"tls://10.0.2.2:7004\"\n" +
   "  Public = \"Fx6zzvJM6VzxfByLY2+uArGPtd2lHKPVmoXGMhdaFCA=\"\n" +
   "  Description = \"Conode_2\"\n" +
   "[[servers]]\n" +
-  "  Address = \"tcp://10.0.2.2:7006\"\n" +
+  "  Address = \"tls://10.0.2.2:7006\"\n" +
   "  Public = \"j53MMKZNdtLlglcK9Ct1YYtkbbEOfq3R8ZoJOFIu6tE=\"\n" +
   "  Description = \"Conode_3\"";
 const TOML_ROSTER_NO_SERVERS_LIST =
   "[[server]]\n" +
-  "  Address = \"tcp://10.0.2.2:7002\"\n" +
+  "  Address = \"tls://10.0.2.2:7002\"\n" +
   "  Public = \"HkDzpR5Imd7WNx8kl2lJcIVRVn8gfDByJnmlfrYh/zU=\"\n" +
   "  Description = \"Conode_1\"\n" +
   "[[server]]\n" +
-  "  Address = \"tcp://10.0.2.2:7004\"\n" +
+  "  Address = \"tls://10.0.2.2:7004\"\n" +
   "  Public = \"Fx6zzvJM6VzxfByLY2+uArGPtd2lHKPVmoXGMhdaFCA=\"\n" +
   "  Description = \"Conode_2\"\n" +
   "[[server]]\n" +
-  "  Address = \"tcp://10.0.2.2:7006\"\n" +
+  "  Address = \"tls://10.0.2.2:7006\"\n" +
   "  Public = \"j53MMKZNdtLlglcK9Ct1YYtkbbEOfq3R8ZoJOFIu6tE=\"\n" +
   "  Description = \"Conode_3\"";
 
@@ -403,25 +403,25 @@ describe("Convert", function () {
     });
   });
 
-  describe("#tcpToWebsocket", function () {
+  describe("#tlsToWebsocket", function () {
     const conode = Convert.toServerIdentity(CONODE_ADDRESS, Convert.base64ToByteArray(CONODE_PUBLIC_KEY), CONODE_DESCRIPTION, CONODE_ID_UNDEFINED);
 
     it("should throw an error when the conode does not have the correct type", function () {
-      expect(() => Convert.tcpToWebsocket(BYTE_ARRAY , REQUEST_PATH)).to.throw();
+      expect(() => Convert.tlsToWebsocket(BYTE_ARRAY , REQUEST_PATH)).to.throw();
     });
 
     it("should throw an error when the path does not have the correct type", function () {
-      expect(() => Convert.tcpToWebsocket(conode, BYTE_ARRAY)).to.throw();
+      expect(() => Convert.tlsToWebsocket(conode, BYTE_ARRAY)).to.throw();
     });
 
-    it("should correctly convert a TCP address from server identity into a WS address", function () {
-      const websocketAddress = Convert.tcpToWebsocket(conode, REQUEST_PATH);
+    it("should correctly convert a tls address from server identity into a WS address", function () {
+      const websocketAddress = Convert.tlsToWebsocket(conode, REQUEST_PATH);
 
       websocketAddress.should.equal(WEBSOCKET_ADDRESS_FULL);
     });
 
-    it("should correctly convert a TCP address from a string into a WS address", function () {
-      const websocketAddress = Convert.tcpToWebsocket(conode.address, REQUEST_PATH);
+    it("should correctly convert a tls address from a string into a WS address", function () {
+      const websocketAddress = Convert.tlsToWebsocket(conode.address, REQUEST_PATH);
 
       websocketAddress.should.equal(WEBSOCKET_ADDRESS_FULL);
     });
@@ -589,19 +589,19 @@ describe("Convert", function () {
 
     it("should throw an error when the address format is not correct", function () {
       expect(() => {
-        return Convert.toServerIdentity("tcp://10.0.2.2-7002", CONODE_PUBLIC_KEY_BYTE_ARRAY, CONODE_DESCRIPTION, CONODE_ID_REAL_BYTE_ARRAY);
+        return Convert.toServerIdentity("tls://10.0.2.2-7002", CONODE_PUBLIC_KEY_BYTE_ARRAY, CONODE_DESCRIPTION, CONODE_ID_REAL_BYTE_ARRAY);
       }).to.throw();
       expect(() => {
         return Convert.toServerIdentity("ws://10.0.2.2:7002", CONODE_PUBLIC_KEY_BYTE_ARRAY, CONODE_DESCRIPTION, CONODE_ID_REAL_BYTE_ARRAY);
       }).to.throw();
       expect(() => {
-        return Convert.toServerIdentity("tcp:/10.0.2.2:7002", CONODE_PUBLIC_KEY_BYTE_ARRAY, CONODE_DESCRIPTION, CONODE_ID_REAL_BYTE_ARRAY);
+        return Convert.toServerIdentity("tls:/10.0.2.2:7002", CONODE_PUBLIC_KEY_BYTE_ARRAY, CONODE_DESCRIPTION, CONODE_ID_REAL_BYTE_ARRAY);
       }).to.throw();
       expect(() => {
-        return Convert.toServerIdentity("tcp://10.0.2.2:-1", CONODE_PUBLIC_KEY_BYTE_ARRAY, CONODE_DESCRIPTION, CONODE_ID_REAL_BYTE_ARRAY);
+        return Convert.toServerIdentity("tls://10.0.2.2:-1", CONODE_PUBLIC_KEY_BYTE_ARRAY, CONODE_DESCRIPTION, CONODE_ID_REAL_BYTE_ARRAY);
       }).to.throw();
       expect(() => {
-        return Convert.toServerIdentity("tcp://10.0.2.2:65535", CONODE_PUBLIC_KEY_BYTE_ARRAY, CONODE_DESCRIPTION, CONODE_ID_REAL_BYTE_ARRAY);
+        return Convert.toServerIdentity("tls://10.0.2.2:65535", CONODE_PUBLIC_KEY_BYTE_ARRAY, CONODE_DESCRIPTION, CONODE_ID_REAL_BYTE_ARRAY);
       }).to.throw();
     });
 

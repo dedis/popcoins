@@ -16,7 +16,7 @@ const BASE64_KEYWORD = "base64";
 
 const URL_PORT_SPLITTER = ":";
 const BASE_URL_WS = "ws://";
-const BASE_URL_TCP = "tcp://";
+const BASE_URL_TLS = "tls://";
 
 const BASE_URL_CONODE_ID = "https://dedis.epfl.ch/id/";
 const NAME_SPACE_URL = "ns:URL";
@@ -189,12 +189,12 @@ function tomlToJson(tomlString) {
 }
 
 /**
- * Converts a TCP URL to a Wesocket URL and builds a complete URL with the path given as parameter.
+ * Converts a TLS URL to a Wesocket URL and builds a complete URL with the path given as parameter.
  * @param {ServerIdentity|string} serverIdentity - the server identity to take the url from
  * @param {string} path - the path after the base url
  * @returns {string} - the builded websocket url
  */
-function tcpToWebsocket(serverIdentity, path) {
+function tlsToWebsocket(serverIdentity, path) {
   let address = "";
   if (Helper.isOfType(serverIdentity, ObjectType.SERVER_IDENTITY)) {
     address = serverIdentity.address
@@ -207,7 +207,7 @@ function tcpToWebsocket(serverIdentity, path) {
     throw new Error("path must be of type string");
   }
 
-  let [ip, port] = address.replace(BASE_URL_TCP, "").split(URL_PORT_SPLITTER);
+  let [ip, port] = address.replace(BASE_URL_TLS, "").split(URL_PORT_SPLITTER);
   port = parseInt(port) + 1;
 
   return BASE_URL_WS + ip + URL_PORT_SPLITTER + port + path;
@@ -378,15 +378,15 @@ function parseJsonRoster(jsonString) {
  *
  * The TOML has to be in this format:
   "[[servers]]\n" +
-  "  Address = \"tcp://10.0.2.2:7002\"\n" +
+  "  Address = \"tls://10.0.2.2:7002\"\n" +
   "  Public = \"HkDzpR5Imd7WNx8kl2lJcIVRVn8gfDByJnmlfrYh/zU=\"\n" +
   "  Description = \"Conode_1\"\n" +
   "[[servers]]\n" +
-  "  Address = \"tcp://10.0.2.2:7004\"\n" +
+  "  Address = \"tls://10.0.2.2:7004\"\n" +
   "  Public = \"Fx6zzvJM6VzxfByLY2+uArGPtd2lHKPVmoXGMhdaFCA=\"\n" +
   "  Description = \"Conode_2\"\n" +
   "[[servers]]\n" +
-  "  Address = \"tcp://10.0.2.2:7006\"\n" +
+  "  Address = \"tls://10.0.2.2:7006\"\n" +
   "  Public = \"j53MMKZNdtLlglcK9Ct1YYtkbbEOfq3R8ZoJOFIu6tE=\"\n" +
   "  Description = \"Conode_3\""
  *
@@ -543,7 +543,7 @@ module.exports.objectToToml = objectToToml;
 module.exports.tomlToObject = tomlToObject;
 module.exports.jsonToToml = jsonToToml;
 module.exports.tomlToJson = tomlToJson;
-module.exports.tcpToWebsocket = tcpToWebsocket;
+module.exports.tlsToWebsocket = tlsToWebsocket;
 module.exports.parseJsonPopTokenArray = parseJsonPopTokenArray;
 module.exports.parseJsonPopToken = parseJsonPopToken;
 module.exports.parseJsonFinalStatementsArray = parseJsonFinalStatementsArray;

@@ -35,19 +35,19 @@ const ROSTER_LIST = [
   {
     "public": "HkDzpR5Imd7WNx8kl2lJcIVRVn8gfDByJnmlfrYh/zU=",
     "id": "z6kCTQ77Xna9yfgKka5lNQ==",
-    "address": "tcp://10.0.2.2:7002",
+    "address": "tls://10.0.2.2:7002",
     "description": "Conode_1"
   },
   {
     "public": "Fx6zzvJM6VzxfByLY2+uArGPtd2lHKPVmoXGMhdaFCA=",
     "id": "Qd8XkrUlVEeClO9I95nklQ==",
-    "address": "tcp://10.0.2.2:7004",
+    "address": "tls://10.0.2.2:7004",
     "description": "Conode_2"
   },
   {
     "public": "j53MMKZNdtLlglcK9Ct1YYtkbbEOfq3R8ZoJOFIu6tE=",
     "id": "tUq+0651WRaAI4aTQC0d8w==",
-    "address": "tcp://10.0.2.2:7006",
+    "address": "tls://10.0.2.2:7006",
     "description": "Conode_3"
   }
 ];
@@ -75,25 +75,25 @@ const ROSTER_LIST_2 = [
   {
     "public": "vRcQ4GmyxC34Ag3ZAyiI5CyXy5pkfgFZe2GJpbQB/zU=",
     "id": "M0YVKeOx0nsKHQoFKPtYNQ==",
-    "address": "tcp://10.0.2.2:7008",
+    "address": "tls://10.0.2.2:7008",
     "description": "Conode_4"
   },
   {
     "public": "4NWGV7hzH4LDGUhCOQSX2qBCb40lDPIGQ4vWMZIkFCA=",
     "id": "NOxPV4jduFBBsKLZqb1alQ==",
-    "address": "tcp://10.0.2.2:7010",
+    "address": "tls://10.0.2.2:7010",
     "description": "Conode_5"
   },
   {
     "public": "HkDzpR5Imd7WNx8kl2lJcIVRVn8gfDByJnmlfrYh/zU=",
     "id": "z6kCTQ77Xna9yfgKka5lNQ==",
-    "address": "tcp://10.0.2.2:7002",
+    "address": "tls://10.0.2.2:7002",
     "description": "Conode_1"
   },
   {
     "public": "sDKFYWFa8R55ZSuiOT012qBCb40lDPIGQ4vWMZIk6tE=",
     "id": "i3ZiWNQo3r8wYEOLV9qh8w==",
-    "address": "tcp://10.0.2.2:7012",
+    "address": "tls://10.0.2.2:7012",
     "description": "Conode_6"
   }
 ];
@@ -134,7 +134,7 @@ const AGGREGATE_BOTH_ROSTER = (function fun() {
   }));
 })();
 
-const CONODE_ADDRESS = "tcp://10.0.2.2:7012";
+const CONODE_ADDRESS = "tls://10.0.2.2:7012";
 const CONODE_PUBLIC_KEY = "sDKFYWFa8R55ZSuiOT012qBCb40lDPIGQ4vWMZIk6tE=";
 const CONODE_PUBLIC_KEY_BYTE_ARRAY = Convert.base64ToByteArray(CONODE_PUBLIC_KEY);
 const CONODE_DESCRIPTION = "Conode_6";
