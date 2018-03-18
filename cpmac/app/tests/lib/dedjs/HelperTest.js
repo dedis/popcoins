@@ -2,9 +2,7 @@ const ChaiAsPromised = require("chai-as-promised");
 chai.use(ChaiAsPromised);
 chai.should();
 
-const BigNumber = require("bn.js");
 const Convert = require("../../../shared/lib/dedjs/Convert");
-const Crypto = require("../../../shared/lib/dedjs/Crypto");
 
 const Helper = require("../../../shared/lib/dedjs/Helper");
 
