@@ -407,18 +407,25 @@ describe("Convert", function () {
     const conode = Convert.toServerIdentity(CONODE_ADDRESS, Convert.base64ToByteArray(CONODE_PUBLIC_KEY), CONODE_DESCRIPTION, CONODE_ID_UNDEFINED);
 
     it("should throw an error when the conode does not have the correct type", function () {
-      expect(() => Convert.tcpToWebsocket("conode", REQUEST_PATH)).to.throw();
+      expect(() => Convert.tcpToWebsocket(BYTE_ARRAY , REQUEST_PATH)).to.throw();
     });
 
     it("should throw an error when the path does not have the correct type", function () {
       expect(() => Convert.tcpToWebsocket(conode, BYTE_ARRAY)).to.throw();
     });
 
-    it("should correctly convert a TCP address into a WS address", function () {
+    it("should correctly convert a TCP address from server identity into a WS address", function () {
       const websocketAddress = Convert.tcpToWebsocket(conode, REQUEST_PATH);
 
       websocketAddress.should.equal(WEBSOCKET_ADDRESS_FULL);
     });
+
+    it("should correctly convert a TCP address from a string into a WS address", function () {
+      const websocketAddress = Convert.tcpToWebsocket(conode.address, REQUEST_PATH);
+
+      websocketAddress.should.equal(WEBSOCKET_ADDRESS_FULL);
+    });
+
   });
 
   describe("#parseJsonRoster", function () {

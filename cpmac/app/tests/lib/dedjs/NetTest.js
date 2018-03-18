@@ -8,8 +8,6 @@ const Convert = require("../../../shared/lib/dedjs/Convert");
 const CothorityMessages = require("../../../shared/lib/dedjs/protobuf/build/cothority-messages");
 
 const Net = require("../../../shared/lib/dedjs/Net");
-const StandardSocket = new Net.StandardSocket();
-const CothoritySocket = new Net.CothoritySocket();
 const PasteBin = new Net.PasteBin();
 
 const CONODE_ADDRESS = "tcp://10.0.2.2:7002";
@@ -26,30 +24,6 @@ const MESSAGE = CothorityMessages.createStatusRequest();
 const TYPE_TO_DECODE = DecodeType.STATUS_RESPONSE;
 
 describe("Net", function () {
-  describe("#StandardSocket", function () {
-    it("should throw when address is not a string", function () {
-      expect(() => StandardSocket.send(42, "HELLO!")).to.throw();
-    });
-  });
-
-  describe("#CothoritySocket", function () {
-    it("should throw when node is not a ServerIdentity", function () {
-      expect(() => CothoritySocket.send("SERVER_IDENTITY", PATH, MESSAGE, TYPE_TO_DECODE)).to.throw();
-    });
-
-    it("should throw when path is not a string", function () {
-      expect(() => CothoritySocket.send(SERVER_IDENTITY, 42, MESSAGE, TYPE_TO_DECODE)).to.throw();
-    });
-
-    it("should throw when message is not a byte array", function () {
-      expect(() => CothoritySocket.send(SERVER_IDENTITY, PATH, "MESSAGE", TYPE_TO_DECODE)).to.throw();
-    });
-
-    it("should throw when typeToDecode is not a string", function () {
-      expect(() => CothoritySocket.send(SERVER_IDENTITY, PATH, MESSAGE, 42)).to.throw();
-    });
-  });
-
   describe("#PasteBin", function () {
     describe("#get", function () {
       it("should throw when id is not a string", function () {

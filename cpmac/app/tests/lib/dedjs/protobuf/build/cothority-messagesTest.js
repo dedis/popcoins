@@ -85,42 +85,6 @@ const PIN_REQUEST_ENCODED = Convert.base64ToByteArray("CgYxMjM0NTYSIMuCTA1q5XukT
 const FETCH_REQUEST_ENCODED = Convert.base64ToByteArray("ChDPqQJNDvtedr3J+AqRrmU1");
 
 describe("CothorityMessages", function () {
-  describe("#encodeMessage", function () {
-    it("should throw an error when name is not a string", function () {
-      expect(() => CothorityMessages.encodeMessage(42, {})).to.throw();
-    });
-
-    it("should throw an error when fields is undefined", function () {
-      expect(() => CothorityMessages.encodeMessage(ObjectType.ROSTER, undefined)).to.throw();
-    });
-
-    it("should throw an error when fields is not an object", function () {
-      expect(() => CothorityMessages.encodeMessage(ObjectType.ROSTER, [])).to.throw();
-    });
-
-    it("should correctly encode a message", function () {
-      const encoded = CothorityMessages.encodeMessage(ObjectType.SERVER_IDENTITY, SERVER_IDENTITY);
-
-      encoded.should.deep.equal(SERVER_IDENTITY_ENCODED_BYTE_ARRAY);
-    });
-  });
-
-  describe("#decodeMessage", function () {
-    it("should throw an error when name is not a string", function () {
-      expect(() => CothorityMessages.decodeMessage(42, SERVER_IDENTITY_ENCODED_BYTE_ARRAY)).to.throw();
-    });
-
-    it("should throw an error when buffer is not a byte array", function () {
-      expect(() => CothorityMessages.decodeMessage(ObjectType.ROSTER, "SERVER_IDENTITY_ENCODED_BYTE_ARRAY")).to.throw();
-    });
-
-    it("should correctly decode a message", function () {
-      const decoded = CothorityMessages.decodeMessage(ObjectType.SERVER_IDENTITY, SERVER_IDENTITY_ENCODED_BYTE_ARRAY);
-
-      decoded.should.deep.equal(SERVER_IDENTITY);
-    });
-  });
-
   describe("#getModel", function () {
     it("should throw an error when name is not a string", function () {
       expect(() => CothorityMessages.getModel(42)).to.throw();
@@ -134,18 +98,6 @@ describe("CothorityMessages", function () {
       const model = CothorityMessages.getModel(ObjectType.ROSTER);
 
       JSON.parse(JSON.stringify(model)).should.deep.equal(MODEL_ROSTER);
-    });
-  });
-
-  describe("#decodeResponse", function () {
-    it("should throw an error when messageType is not a string", function () {
-      expect(() => CothorityMessages.decodeResponse(42, SERVER_IDENTITY_ENCODED_BYTE_ARRAY)).to.throw();
-    });
-
-    it("should correctly decode a message", function () {
-      const decoded = CothorityMessages.decodeResponse(ObjectType.SERVER_IDENTITY, SERVER_IDENTITY_ENCODED_BYTE_ARRAY);
-
-      decoded.should.deep.equal(SERVER_IDENTITY);
     });
   });
 
@@ -377,7 +329,8 @@ describe("CothorityMessages", function () {
     it("should correctly create a store config", function () {
       const storeConfig = CothorityMessages.createStoreConfig(FINAL_POP_DESC, FINAL_SIGNATURE);
 
-      storeConfig.should.deep.equal(STORE_CONFIG_ENCODED);
+      storeConfig.desc.should.equal(FINAL_POP_DESC);
+      storeConfig.signature.should.equal(FINAL_SIGNATURE);
     });
   });
 
@@ -452,7 +405,9 @@ describe("CothorityMessages", function () {
     it("should correctly create a finalize request", function () {
       const finalizeRequest = CothorityMessages.createFinalizeRequest(POP_DESC_ID, FINAL_ATTENDEES, FINAL_SIGNATURE);
 
-      finalizeRequest.should.deep.equal(FINALIZE_REQUEST_ENCODED);
+      finalizeRequest.descId.should.equal(POP_DESC_ID);
+      finalizeRequest.attendees.should.equal(FINAL_ATTENDEES);
+      finalizeRequest.signature.should.equal(FINAL_SIGNATURE);
     });
   });
 
@@ -468,7 +423,8 @@ describe("CothorityMessages", function () {
     it("should correctly create a pin request", function () {
       const pinRequest = CothorityMessages.createPinRequest(PIN, PUBLIC_KEY_BYTE_ARRAY);
 
-      pinRequest.should.deep.equal(PIN_REQUEST_ENCODED);
+      pinRequest.pin.should.equal(PIN);
+      pinRequest.public.should.equal(PUBLIC_KEY_BYTE_ARRAY)
     });
   });
 
@@ -480,7 +436,7 @@ describe("CothorityMessages", function () {
     it("should correctly create a pin request", function () {
       const fetchRequest = CothorityMessages.createFetchRequest(POP_DESC_ID);
 
-      fetchRequest.should.deep.equal(FETCH_REQUEST_ENCODED);
+      fetchRequest.id.should.equal(POP_DESC_ID);
     });
   });
 });

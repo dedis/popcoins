@@ -10,7 +10,7 @@ const StatusExtractor = require("../../../../shared/lib/dedjs/extractor/StatusEx
 
 const fields = {
   "system": {
-    "Status": {
+    "Generic": {
       "field": {
         "Available_Services": "CoSi,Identity,PoPServer,Skipchain,Status",
         "Host": "127.0.0.1",
@@ -94,7 +94,7 @@ describe("StatusExtractor", function () {
     it("should correctly get back the services", function () {
       const services = StatusExtractor.getServices(statusResponse);
 
-      services.should.equal(fields.system.Status.field.Available_Services);
+      services.should.equal(fields.system.Generic.field.Available_Services);
     });
   });
 
@@ -106,7 +106,7 @@ describe("StatusExtractor", function () {
     it("should correctly get back the system", function () {
       const system = StatusExtractor.getSystem(statusResponse);
 
-      system.should.equal(fields.system.Status.field.System);
+      system.should.equal(fields.system.Generic.field.System);
     });
   });
 
@@ -118,7 +118,7 @@ describe("StatusExtractor", function () {
     it("should correctly get back the host", function () {
       const host = StatusExtractor.getHost(statusResponse);
 
-      host.should.equal(fields.system.Status.field.Host);
+      host.should.equal(fields.system.Generic.field.Host);
     });
   });
 
@@ -130,7 +130,7 @@ describe("StatusExtractor", function () {
     it("should correctly get back the port", function () {
       const port = StatusExtractor.getPort(statusResponse);
 
-      port.should.equal(fields.system.Status.field.Port);
+      port.should.equal(fields.system.Generic.field.Port);
     });
   });
 
@@ -142,7 +142,7 @@ describe("StatusExtractor", function () {
     it("should correctly get back the connection type", function () {
       const connectionType = StatusExtractor.getConnectionType(statusResponse);
 
-      connectionType.should.equal(fields.system.Status.field.ConnType);
+      connectionType.should.equal(fields.system.Generic.field.ConnType);
     });
   });
 
@@ -154,7 +154,7 @@ describe("StatusExtractor", function () {
     it("should correctly get back the version", function () {
       const version = StatusExtractor.getVersion(statusResponse);
 
-      version.should.equal(fields.system.Status.field.Version);
+      version.should.equal(fields.system.Generic.field.Version);
     });
   });
 
@@ -166,7 +166,7 @@ describe("StatusExtractor", function () {
     it("should correctly get back the TX bytes", function () {
       const txBytes = StatusExtractor.getTXBytes(statusResponse);
 
-      txBytes.should.equal(fields.system.Status.field.TX_bytes);
+      txBytes.should.equal(fields.system.Generic.field.TX_bytes);
     });
   });
 
@@ -178,7 +178,7 @@ describe("StatusExtractor", function () {
     it("should correctly get back the RX bytes", function () {
       const rxBytes = StatusExtractor.getRXBytes(statusResponse);
 
-      rxBytes.should.equal(fields.system.Status.field.RX_bytes);
+      rxBytes.should.equal(fields.system.Generic.field.RX_bytes);
     });
   });
 
@@ -190,7 +190,7 @@ describe("StatusExtractor", function () {
     it("should correctly get back the uptime", function () {
       const upTime = StatusExtractor.getUptime(statusResponse);
 
-      upTime.should.equal(fields.system.Status.field.Uptime);
+      upTime.should.equal(fields.system.Generic.field.Uptime);
     });
   });
 });
