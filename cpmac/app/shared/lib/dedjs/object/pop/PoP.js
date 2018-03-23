@@ -233,7 +233,7 @@ class PoP {
 
     const oldPopToken = this.getPopToken().slice();
 
-    popToken.toHex = Convert.byteArrayToHex;
+    popToken.toBase64 = Convert.byteArrayToBase64;
     this.getPopToken().push(popToken);
 
     const newPopToken = this.getPopToken().slice();

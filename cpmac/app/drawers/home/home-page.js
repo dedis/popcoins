@@ -38,10 +38,10 @@ function deblockConodeList() {
 
 function conodeTapped(args) {
   const index = args.index;
-  const conodesId = Convert.byteArrayToHex(User.getRoster().list[index].id);
+  const conodesId = Convert.byteArrayToBase64(User.getRoster().list[index].id);
   let conodeAndStatusPair = undefined;
   User._roster.statusList.slice().forEach(object => {
-    if (Convert.byteArrayToHex(object.conode.id) === conodesId) {
+    if (Convert.byteArrayToBase64(object.conode.id) === conodesId) {
       conodeAndStatusPair = object;
     }
   });

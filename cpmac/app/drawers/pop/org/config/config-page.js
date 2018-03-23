@@ -258,9 +258,9 @@ function addScan() {
 
 function deleteConode(args) {
   // We do not get the index of the item swiped/clicked...
-  const conodeId = Convert.byteArrayToHex(args.object.bindingContext.id);
+  const conodeId = Convert.byteArrayToBase64(args.object.bindingContext.id);
   const conodesList = Org.getPopDesc().roster.list.map(server => {
-    return Convert.byteArrayToHex(server.id);
+    return Convert.byteArrayToBase64(server.id);
   });
 
   const index = conodesList.indexOf(conodeId);
@@ -332,7 +332,7 @@ function hashAndSave() {
       .then(descHash => {
         return Dialog.alert({
           title: "Successfully Hashed",
-          message: "The hash of you description is accessible in the organizers tab.\n\nHash:\n" + Convert.byteArrayToHex(descHash),
+          message: "The hash of you description is accessible in the organizers tab.\n\nHash:\n" + Convert.byteArrayToBase64(descHash),
           okButtonText: "Ok"
         });
       })

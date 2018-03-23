@@ -11,21 +11,21 @@
 
         <Label class="label-text" text="Public" row="1" col="0"/>
         <Label class="label-space" text=" - " row="1" col="1" colSpan="2"/>
-        <TextField class="text-field" text="{{ toHex(public) }}" hint="public" editable="false"
+        <TextField class="text-field" text="{{ toBase64(public) }}" hint="public" editable="false"
                    row="1"
                    col="3"
                    id="text-field-public"/>
 
         <Label class="label-text" text="Private" row="2" col="0"/>
         <Label class="label-space" text=" - " row="2" col="1" colSpan="2"/>
-        <TextField class="text-field" text="{{ toHex(private) }}" hint="private" editable="false"
+        <TextField class="text-field" text="{{ toBase64(private) }}" hint="private" editable="false"
                    row="2"
                    col="3"
                    id="text-field-private"/>
 
         <Label class="label-text" text="Public Complete" row="3" col="0"/>
         <Label class="label-space" text=" - " row="3" col="1" colSpan="2"/>
-        <TextField class="text-field" text="{{ toHex(publicComplete) }}" hint="public complete" editable="false"
+        <TextField class="text-field" text="{{ toBase64(publicComplete) }}" hint="public complete" editable="false"
                    row="3"
                    col="3"
                    id="text-field-public-complete"/>

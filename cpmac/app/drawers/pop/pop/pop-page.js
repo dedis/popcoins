@@ -61,7 +61,7 @@ function finalStatementTapped(args) {
         if (Org.isLinkedConodeSet()) {
           const object = {};
           object.conode = Org.getLinkedConode();
-          object.id = Convert.byteArrayToHex(descHash);
+          object.id = Convert.byteArrayToBase64(descHash);
 
           pageObject.showModal("shared/pages/qr-code/qr-code-page", {
             textToShow: Convert.objectToJson(object)
@@ -128,7 +128,7 @@ function scanFinalStatement() {
     .then(fetchConodeIdJson => {
       const object = Convert.jsonToObject(fetchConodeIdJson);
       const conode = Convert.parseJsonServerIdentity(Convert.objectToJson(object.conode));
-      const id = Convert.hexToByteArray(object.id);
+      const id = Convert.base64ToByteArray(object.id);
 
       return PoP.fetchFinalStatement(conode, id);
     })
