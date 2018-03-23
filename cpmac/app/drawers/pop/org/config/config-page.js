@@ -332,7 +332,7 @@ function hashAndSave() {
       .then(descHash => {
         return Dialog.alert({
           title: "Successfully Hashed",
-          message: "The hash of you description is accessible in the organizers tab.\n\nHash:\n" + Convert.byteArrayToBase64(descHash),
+          message: "The hash of you description is accessible in the organizers tab.\n\nHash:\n" + Convert.byteArrayToHex(descHash),
           okButtonText: "Ok"
         });
       })

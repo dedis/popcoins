@@ -46,9 +46,9 @@ function generateKeyPair() {
         return Dialog.alert({
           title: "New Key Pair",
           message: "The new key pair has been stored in your settings." +
-            "\n\nPublic:\n" + Convert.byteArrayToBase64(newKeyPair.public) +
-            "\n\nPrivate:\n" + Convert.byteArrayToBase64(newKeyPair.private) +
-            "\n\nPublic Complete:\n" + Convert.byteArrayToBase64(newKeyPair.publicComplete),
+            "\n\nPublic:\n" + Convert.byteArrayToHex(newKeyPair.public) +
+            "\n\nPrivate:\n" + Convert.byteArrayToHex(newKeyPair.private) +
+            "\n\nPublic Complete:\n" + Convert.byteArrayToHex(newKeyPair.publicComplete),
           okButtonText: "Ok"
         });
       })

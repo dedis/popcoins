@@ -25,14 +25,14 @@
 
         <Label class="label-text" text="Id" row="3" col="0"/>
         <Label class="label-space" text=" - " row="3" col="1" colSpan="2"/>
-        <TextField class="text-field" text="{{ toBase64(linkedConode.id) }}" hint="id" editable="false"
+        <TextField class="text-field" text="{{ toHex(linkedConode.id) }}" hint="id" editable="false"
                    row="3"
                    col="3"
                    id="text-field-id"/>
 
         <Label class="label-text" text="Public" row="4" col="0"/>
         <Label class="label-space" text=" - " row="4" col="1" colSpan="2"/>
-        <TextField class="text-field" text="{{ toBase64(linkedConode.public) }}" hint="public" editable="false"
+        <TextField class="text-field" text="{{ toHex(linkedConode.public) }}" hint="public" editable="false"
                    row="4"
                    col="3"
                    id="text-field-public"/>
@@ -41,7 +41,7 @@
 
         <Label class="label-text" text="Hash" row="6" col="0"/>
         <Label class="label-space" text=" - " row="6" col="1" colSpan="2"/>
-        <TextField class="text-field" text="{{ toBase64(hash.hash) }}" hint="hash" editable="false"
+        <TextField class="text-field" text="{{ toHex(hash.hash) }}" hint="hash" editable="false"
                    row="6"
                    col="3"
                    id="text-field-hash"/>

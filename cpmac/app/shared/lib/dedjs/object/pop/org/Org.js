@@ -237,7 +237,7 @@ class Org {
 
     this.emptyPopDescRosterList();
     popDesc.roster.list.forEach(server => {
-      server.toBase64 = Convert.byteArrayToBase64;
+      server.toHex = Convert.byteArrayToHex;
       popDescModule.roster.list.push(server);
     });
 
@@ -306,7 +306,7 @@ class Org {
 
     this.emptyRegisteredAttsArray();
     array.forEach(publicKey => {
-      publicKey.toBase64 = Convert.byteArrayToBase64;
+      publicKey.toHex = Convert.byteArrayToHex;
       this.getRegisteredAtts().push(publicKey);
     });
 
