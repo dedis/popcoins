@@ -51,3 +51,4 @@ function writeStringTo(filePath, string) {
 
 module.exports.getStringOf = getStringOf;
 module.exports.writeStringTo = writeStringTo;
+module.exports.join = FileSystem.path.join;

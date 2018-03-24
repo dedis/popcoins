@@ -4,12 +4,13 @@ const ObservableModule = require("data/observable");
 const Convert = require("../../../shared/lib/dedjs/Convert");
 
 const User = require("../../../shared/lib/dedjs/object/user/User").get;
-const Org = require("../../../shared/lib/dedjs/object/pop/org/Org").get;
+const OrgParty = require("../../../shared/lib/dedjs/object/pop/org/OrgParty");
+const Party = new OrgParty("MOCK");
 const PoP = require("../../../shared/lib/dedjs/object/pop/PoP").get;
 
 const viewModel = ObservableModule.fromObject({
-  linkedConode: Org.getLinkedConodeModule(),
-  hash: Org.getPopDescHashModule(),
+  linkedConode: Party.getLinkedConodeModule(),
+  hash: Party.getPopDescHashModule(),
   toHex: Convert.byteArrayToHex
 });
 
@@ -48,7 +49,7 @@ function linkToConode() {
       if (result !== "Cancel") {
         index = conodesNames.indexOf(result);
 
-        return Org.linkToConode(conodes[index], "")
+        return Party.linkToConode(conodes[index], "")
           .then(result => {
             return Dialog.prompt({
               title: "Requested PIN",
@@ -61,7 +62,7 @@ function linkToConode() {
           })
           .then(result => {
             if (result.result) {
-              return Org.linkToConode(conodes[index], result.text)
+              return Party.linkToConode(conodes[index], result.text)
                 .then(result => {
                   // This is to ensure that id and public will be updated in the UI when linking process is done.
                   page.bindingContext = undefined;
@@ -101,7 +102,10 @@ function linkToConode() {
  */
 function configButtonTapped() {
   Frame.topmost().navigate({
-    moduleName: "drawers/pop/org/config/config-page"
+    moduleName: "drawers/pop/org/config/config-page",
+    context: {
+      party: Party
+    }
   });
 }
 
@@ -110,7 +114,10 @@ function configButtonTapped() {
  */
 function registerButtonTapped() {
   Frame.topmost().navigate({
-    moduleName: "drawers/pop/org/register/register-page"
+    moduleName: "drawers/pop/org/register/register-page",
+    context: {
+      party: Party
+    }
   });
 }
 
@@ -119,7 +126,7 @@ function registerButtonTapped() {
  * @returns {*|Promise.<any>}
  */
 function fetchButtonTapped() {
-  if (!Org.isLinkedConodeSet()) {
+  if (!Party.isLinkedConodeSet()) {
     return Dialog.alert({
       title: "Not Linked to Conode",
       message: "Please link to a conode first.",
@@ -127,7 +134,7 @@ function fetchButtonTapped() {
     });
   }
 
-  const popDescId = Org.getPopDescHash();
+  const popDescId = Party.getPopDescHash();
   if (popDescId.length === 0) {
     return Dialog.alert({
       title: "PoP-Description Hash Missing",
@@ -136,7 +143,7 @@ function fetchButtonTapped() {
     });
   }
 
-  return PoP.fetchFinalStatement(Org.getLinkedConode(), popDescId)
+  return PoP.fetchFinalStatement(Party.getLinkedConode(), popDescId)
     .then(() => {
       return Dialog.alert({
         title: "Final Statement Saved",

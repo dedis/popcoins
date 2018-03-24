@@ -11,7 +11,7 @@ const CothorityMessages = require("../../../../../../shared/lib/dedjs/protobuf/b
 const User = require("../../../../../../shared/lib/dedjs/object/user/User").get;
 const PoP = require("../../../../../../shared/lib/dedjs/object/pop/PoP").get;
 
-const Org = require("../../../../../../shared/lib/dedjs/object/pop/org/Org").get;
+const Org = require("../../../../../../shared/lib/dedjs/object/pop/org/OrgParty").get;
 
 const CONODE_ADDRESS = "tls://10.0.2.2:7002";
 //const CONODE_ADDRESS = "tls://10.0.2.2:7004";
@@ -137,7 +137,7 @@ describe("Org", function () {
   });
 
   it("should be a singleton", function () {
-    const Org2 = require("../../../../../../shared/lib/dedjs/object/pop/org/Org").get;
+    const Org2 = require("../../../../../../shared/lib/dedjs/object/pop/org/OrgParty").get;
 
     (Org2 === Org).should.be.true;
   });

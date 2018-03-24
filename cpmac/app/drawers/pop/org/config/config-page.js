@@ -7,10 +7,10 @@ const Net = require("../../../../shared/lib/dedjs/Net");
 const ObjectType = require("../../../../shared/lib/dedjs/ObjectType");
 const ScanToReturn = require("../../../../shared/lib/scan-to-return/scan-to-return");
 
-const Org = require("../../../../shared/lib/dedjs/object/pop/org/Org").get;
 const User = require("../../../../shared/lib/dedjs/object/user/User").get;
 
-const viewModel = Org.getPopDescModule();
+let viewModel = undefined;
+let Party = undefined;
 
 const DateTimePicker = new ModalPicker();
 
@@ -24,6 +24,14 @@ let pageObject = undefined;
 
 function onLoaded(args) {
   const page = args.object;
+  const context = page.navigationContext;
+
+  if(context.party === undefined) {
+    throw new Error("Party should be given in the context");
+  }
+
+  Party = context.party;
+  viewModel = Party.getPopDescModule();
   pageObject = page.page;
   page.bindingContext = viewModel;
 
@@ -50,7 +58,7 @@ function loadViews(page) {
 }
 
 function onNameChangeHandler() {
-  return Org.setPopDescName(textFieldName.text)
+  return Party.setPopDescName(textFieldName.text)
     .catch(error => {
       console.log(error);
       console.dir(error);
@@ -67,7 +75,7 @@ function onNameChangeHandler() {
 }
 
 function onLocationChangeHandler() {
-  return Org.setPopDescLocation(textFieldLocation.text)
+  return Party.setPopDescLocation(textFieldLocation.text)
     .catch(error => {
       console.log(error);
       console.dir(error);
@@ -84,7 +92,7 @@ function onLocationChangeHandler() {
 }
 
 function setUpDate() {
-  const dateTimeString = Org.getPopDesc().dateTime;
+  const dateTimeString = Party.getPopDesc().dateTime;
   if (dateTimeString === "") {
     chosenDateTime = new Date(Date.now());
     chosenDateTime.setMilliseconds(0);
@@ -111,7 +119,7 @@ function setDate() {
 
         labelDate.text = chosenDateTime.toDateString();
 
-        return Org.setPopDescDateTime(chosenDateTime.toUTCString());
+        return Party.setPopDescDateTime(chosenDateTime.toUTCString());
       }
 
       return Promise.resolve();
@@ -144,7 +152,7 @@ function setTime() {
 
         labelTime.text = chosenDateTime.toTimeString();
 
-        return Org.setPopDescDateTime(chosenDateTime.toUTCString());
+        return Party.setPopDescDateTime(chosenDateTime.toUTCString());
       }
 
       return Promise.resolve();
@@ -174,7 +182,7 @@ function addManual() {
     }
 
     if (server !== undefined) {
-      return Org.addPopDescConode(server)
+      return Party.addPopDescConode(server)
         .catch(error => {
           console.log(error);
           console.dir(error);
@@ -205,7 +213,7 @@ function addManual() {
         return Promise.resolve();
       } else if (result === undefined) {
         // My Own
-        if (!Org.isLinkedConodeSet()) {
+        if (!Party.isLinkedConodeSet()) {
           return Dialog.alert({
             title: "Not Linked to Conode",
             message: "Please link to a conode first.",
@@ -213,7 +221,7 @@ function addManual() {
           });
         }
 
-        return Org.addPopDescConode(Org.getLinkedConode());
+        return Party.addPopDescConode(Party.getLinkedConode());
       } else {
         // Cancel
         return Promise.resolve();
@@ -239,7 +247,7 @@ function addScan() {
     .then(string => {
       const conode = Convert.parseJsonServerIdentity(string);
 
-      return Org.addPopDescConode(conode);
+      return Party.addPopDescConode(conode);
     })
     .catch(error => {
       console.log(error);
@@ -259,13 +267,13 @@ function addScan() {
 function deleteConode(args) {
   // We do not get the index of the item swiped/clicked...
   const conodeId = Convert.byteArrayToBase64(args.object.bindingContext.id);
-  const conodesList = Org.getPopDesc().roster.list.map(server => {
+  const conodesList = Party.getPopDesc().roster.list.map(server => {
     return Convert.byteArrayToBase64(server.id);
   });
 
   const index = conodesList.indexOf(conodeId);
 
-  return Org.removePopDescConodeByIndex(index)
+  return Party.removePopDescConodeByIndex(index)
     .then(() => {
       const listView = Frame.topmost().currentPage.getViewById("list-view-conodes");
       listView.notifySwipeToExecuteFinished();
@@ -311,7 +319,7 @@ function hashAndSave() {
       okButtonText: "Ok"
     });
   }
-  if (!Org.isPopDescComplete()) {
+  if (!Party.isPopDescComplete()) {
     return Dialog.alert({
       title: "Missing Information",
       message: "Please provide a name, date, time, location and the list (min 3) of conodes" +
@@ -319,7 +327,7 @@ function hashAndSave() {
       okButtonText: "Ok"
     });
   }
-  if (!Org.isLinkedConodeSet()) {
+  if (!Party.isLinkedConodeSet()) {
     return Dialog.alert({
       title: "Not Linked to Conode",
       message: "Please link to a conode first.",
@@ -328,7 +336,7 @@ function hashAndSave() {
   }
 
   function registerPopDesc() {
-    return Org.registerPopDesc()
+    return Party.registerPopDesc()
       .then(descHash => {
         return Dialog.alert({
           title: "Successfully Hashed",
@@ -351,7 +359,7 @@ function hashAndSave() {
       });
   }
 
-  const oldPopDescHash = Org.getPopDescHash();
+  const oldPopDescHash = Party.getPopDescHash();
   if (oldPopDescHash.length > 0) {
     return Dialog.confirm({
       title: "Old Description Hash Overwriting",
@@ -392,14 +400,14 @@ function manageDesc() {
           .then(popDescJson => {
             const popDesc = Convert.parseJsonPopDesc(popDescJson);
 
-            return Org.setPopDesc(popDesc, true)
+            return Party.setPopDesc(popDesc, true)
               .then(() => {
                 return setUpDate();
               });
           })
       } else if (result === undefined) {
         // Share
-        if (!Org.isPopDescComplete()) {
+        if (!Party.isPopDescComplete()) {
           return Dialog.alert({
             title: "Missing Information",
             message: "Please provide a name, date, time, location and the list (min 3) of conodes" +
@@ -409,7 +417,7 @@ function manageDesc() {
         }
 
         const PasteBin = new Net.PasteBin();
-        const popDescJson = JSON.stringify(Org.getPopDesc());
+        const popDescJson = JSON.stringify(Party.getPopDesc());
 
         return PasteBin.paste(popDescJson)
           .then(id => {

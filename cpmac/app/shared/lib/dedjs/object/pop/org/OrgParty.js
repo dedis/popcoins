@@ -6,10 +6,7 @@ const CURVE_ED25519_KYBER = new Kyber.curve.edwards25519.Curve;
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const HashJs = require("hash.js");
-const BigNumber = require("bn.js");
-const Package = require("../../../Package");
 const Convert = require("../../../Convert");
-const Crypto = require("../../../Crypto");
 const Helper = require("../../../Helper");
 const ObjectType = require("../../../ObjectType");
 const NetDedis = require("@dedis/cothority").net;
@@ -34,12 +31,18 @@ const EMPTY_SERVER_IDENTITY = CothorityMessages.createServerIdentity(new Uint8Ar
 const EMPTY_ROSTER = CothorityMessages.createRoster(new Uint8Array(), [], new Uint8Array());
 const EMPTY_POP_DESC = CothorityMessages.createPopDesc("", "", "", EMPTY_ROSTER);
 
-class Org {
+class OrgParty {
 
   /**
    * Constructor for the Org class.
+   * @param {string} dirname directory of the party data (directory is created if non existent)
    */
-  constructor() {
+  constructor(dirname) {
+    if (typeof dirname === "string") {
+      this._dirname = dirname;
+    } else {
+      throw new Error("dirname should be of type string or undefined");
+    }
     this._isLoaded = false;
     this._linkedConode = ObservableModule.fromObject({
       public: new Uint8Array(),
@@ -63,6 +66,8 @@ class Org {
     this._popDescHash = ObservableModule.fromObject({
       hash: new Uint8Array()
     });
+
+    this.load();
   }
 
   /**
@@ -138,7 +143,7 @@ class Org {
         toWrite = Convert.objectToJson(newLinkedConode);
       }
 
-      return FileIO.writeStringTo(FilesPath.POP_ORG_CONODE, toWrite)
+      return FileIO.writeStringTo(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_CONODE), toWrite)
         .catch((error) => {
           console.log(error);
           console.dir(error);
@@ -251,7 +256,7 @@ class Org {
         toWrite = Convert.objectToJson(newPopDesc);
       }
 
-      return FileIO.writeStringTo(FilesPath.POP_ORG_DESC, toWrite)
+      return FileIO.writeStringTo(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_DESC), toWrite)
         .catch((error) => {
           console.log(error);
           console.dir(error);
@@ -323,7 +328,7 @@ class Org {
         toWrite = Convert.objectToJson(object);
       }
 
-      return FileIO.writeStringTo(FilesPath.POP_ORG_ATTENDEES, toWrite)
+      return FileIO.writeStringTo(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_ATTENDEES), toWrite)
         .catch((error) => {
           console.log(error);
           console.dir(error);
@@ -386,7 +391,7 @@ class Org {
         toWrite = Convert.objectToJson(object);
       }
 
-      return FileIO.writeStringTo(FilesPath.POP_ORG_DESC_HASH, toWrite)
+      return FileIO.writeStringTo(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_DESC_HASH), toWrite)
         .catch((error) => {
           console.log(error);
           console.dir(error);
@@ -736,7 +741,7 @@ class Org {
 
   /**
    * Main load function.
-   * @returns {Promise} - a promise that gets resolved once everything belonging to Org has been loaded into memory
+   * @returns {Promise} - a promise that gets resolved once everything belonging to OrgParty has been loaded into memory
    */
   load() {
     this._isLoaded = false;
@@ -761,7 +766,7 @@ class Org {
    * @returns {Promise} - a promise that gets resolved once the linked conode has been loaded into memory
    */
   loadLinkedConode() {
-    return FileIO.getStringOf(FilesPath.POP_ORG_CONODE)
+    return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_CONODE))
       .then(jsonLinkedConode => {
         if (jsonLinkedConode.length > 0) {
           const linkedConode = Convert.parseJsonServerIdentity(jsonLinkedConode);
@@ -785,7 +790,7 @@ class Org {
    * @returns {Promise} - a promise that gets resolved once the PopDesc has been loaded into memory
    */
   loadPopDesc() {
-    return FileIO.getStringOf(FilesPath.POP_ORG_DESC)
+    return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_DESC))
       .then(jsonPopDesc => {
         if (jsonPopDesc.length > 0) {
           const popDesc = Convert.parseJsonPopDesc(jsonPopDesc);
@@ -809,7 +814,7 @@ class Org {
    * @returns {Promise} - a promise that gets resolved once all the registered attendees have been loaded into memory
    */
   loadRegisteredAtts() {
-    return FileIO.getStringOf(FilesPath.POP_ORG_ATTENDEES)
+    return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_ATTENDEES))
       .then(jsonRegisteredAtts => {
         if (jsonRegisteredAtts.length > 0) {
           const registeredAtts = Convert.parseJsonArrayOfKeys(jsonRegisteredAtts);
@@ -833,7 +838,7 @@ class Org {
    * @returns {Promise} - a promise that gets resolved once the PopDesc hash has been loaded into memory
    */
   loadPopDescHash() {
-    return FileIO.getStringOf(FilesPath.POP_ORG_DESC_HASH)
+    return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_DESC_HASH))
       .then(jsonPopDescHash => {
         if (jsonPopDescHash.length > 0) {
           const popDescHash = Convert.parseJsonPopDescHash(jsonPopDescHash);
@@ -853,40 +858,5 @@ class Org {
   }
 }
 
-/**
- * Now we create a singleton object for Org.
- */
-
-// The symbol key reference that the singleton will use.
-const ORG_PACKAGE_KEY = Symbol.for(Package.ORG);
-
-// We create the singleton if it hasn't been instanciated yet.
-const globalSymbols = Object.getOwnPropertySymbols(global);
-const orgExists = (globalSymbols.indexOf(ORG_PACKAGE_KEY) >= 0);
-
-if (!orgExists) {
-  global[ORG_PACKAGE_KEY] = (function () {
-    const newOrg = new Org();
-    newOrg.load();
-
-    return newOrg;
-  })();
-}
-
-// Singleton API
-const ORG = {};
-
-Object.defineProperty(ORG, "get", {
-  configurable: false,
-  enumerable: false,
-  get: function () {
-    return global[ORG_PACKAGE_KEY];
-  },
-  set: undefined
-});
-
-// We freeze the singleton.
-Object.freeze(ORG);
-
-// We export only the singleton API.
-module.exports = ORG;
+// We export the class.
+module.exports = OrgParty;
