@@ -688,9 +688,6 @@ class Org {
 
     hashToSign = Convert.hexToByteArray(hashToSign.digest("hex"));
     const privateKey = CURVE_ED25519_KYBER.scalar();
-    console.log("SKDEBUG signtre :");
-    console.log(User.getKeyPair().private);
-    console.dir(User.getKeyPair().private);
     privateKey.unmarshalBinary(User.getKeyPair().private);
     const signature = Schnorr.sign(CURVE_ED25519_KYBER, privateKey, hashToSign);
 

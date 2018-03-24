@@ -28,7 +28,7 @@ function addManual() {
     .then(args => {
       if (args.result && args.text !== undefined && args.text.length > 0) {
         // Add Key
-        return Org.registerAttendee(Convert.base64ToByteArray(args.text));
+        return Org.registerAttendee(Convert.hexToByteArray(args.text));
       } else if (args.result === undefined) {
         // Add Myself
         if (!User.isKeyPairSet()) {
