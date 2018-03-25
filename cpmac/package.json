@@ -5,16 +5,16 @@
   "repository": "<fill-your-repository-here>",
   "nativescript": {
     "id": "org.nativescript.cpmac",
-    "tns-ios": {
-      "version": "3.2.0"
-    },
-    "tns-android": {
-      "version": "3.2.0"
-    },
     "nodeify": {
       "global-dependencies": {
         "ws": "nativescript-websockets"
       }
+    },
+    "tns-android": {
+      "version": "3.4.2"
+    },
+    "tns-ios": {
+      "version": "3.4.1"
     }
   },
   "scripts": {},
