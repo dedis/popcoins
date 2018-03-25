@@ -66,3 +66,23 @@ ActionBar .action-bar-title {
 .list-view-label{
   padding:5px;
 }
+
+// Tab views
+TabView {
+  android-selected-tab-highlight-color: $accent-dark;
+  tab-background-color: $accent-light;
+  tab-text-color: $background-light;
+  selected-tab-text-color: $background-light;
+}
+
+// Basic list
+.basic-list {
+  border-bottom-width: 1;
+  border-color: #ced1d6;
+  padding: 20px;
+}
+
+.list-title {
+  font-weight: bold;
+  font-size: 15;
+}

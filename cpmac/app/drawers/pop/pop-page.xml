@@ -60,7 +60,7 @@
         -->
         <nsDrawer:RadSideDrawer.mainContent>
 
-            <TabView class="page-content" selectedIndex="0" selectedTabTextColor="black">
+            <TabView class="page-content" selectedIndex="1">
                 <TabView.items>
 
                     <TabViewItem title="POP">

@@ -13,8 +13,8 @@
 
         <ListView items="{{ statsList, statsList }}" row="0">
             <ListView.itemTemplate>
-                <GridLayout rows="auto,auto" columns="*">
-                    <Label text="{{ info.title }}" textAlignment="left" textWrap="true" row="0"/>
+                <GridLayout class="basic-list" rows="auto,auto" columns="*">
+                    <Label class="list-title" text="{{ info.title }}" textAlignment="left" textWrap="true" row="0"/>
                     <Label text="{{ info.info }}" textAlignment="left" textWrap="true" row="1"/>
                 </GridLayout>
             </ListView.itemTemplate>
