@@ -1,0 +1,34 @@
+<Page
+        class="page"
+        loaded="onLoaded"
+        xmlns:nsListView="nativescript-pro-ui/listview"
+        xmlns="http://www.nativescript.org/tns.xsd">
+
+    <GridLayout class="page-content" rows="*,auto" columns="*,*">
+        <nsListView:RadListView items="{{ partyListDescriptions }}" itemTap="partyTapped" row="0" colSpan="2"
+                                itemSwipeProgressStarted="onSwipeCellStarted"
+                                swipeActions="true"
+                                id="listView">
+
+            <nsListView:RadListView.itemSwipeTemplate>
+                <GridLayout rows="*" columns="*,auto">
+                    <StackLayout orientation="horizontal" col="0">
+                    </StackLayout>
+                    <StackLayout orientation="horizontal" col="1">
+                        <Button id="button-delete" text="Delete" tap="deleteParty" backgroundColor="red"/>
+                    </StackLayout>
+                </GridLayout>
+            </nsListView:RadListView.itemSwipeTemplate>
+
+            <nsListView:RadListView.itemTemplate>
+                <GridLayout id="grid-layout-org-party" rows="*,*,*,*,auto" columns="*" backgroundColor="white">
+                    <Label text="{{ getPopDescModule().name }}" row="0" textWrap="true"/>
+                    <Label text="{{ getPopDescModule().location }}" row="1" textWrap="true"/>
+                    <StackLayout row="4" height="1" backgroundColor="black"/>
+                </GridLayout>
+            </nsListView:RadListView.itemTemplate>
+        </nsListView:RadListView>
+
+        <ActivityIndicator busy="{{ isLoading }}" rowSpan="1" colSpan="2"/>
+    </GridLayout>
+</Page>

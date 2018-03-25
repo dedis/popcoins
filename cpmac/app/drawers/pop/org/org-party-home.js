@@ -4,20 +4,27 @@ const ObservableModule = require("data/observable");
 const Convert = require("../../../shared/lib/dedjs/Convert");
 
 const User = require("../../../shared/lib/dedjs/object/user/User").get;
-const OrgParty = require("../../../shared/lib/dedjs/object/pop/org/OrgParty");
-const Party = new OrgParty("MOCK");
-const PoP = require("../../../shared/lib/dedjs/object/pop/PoP").get;
+let Party = undefined;
 
-const viewModel = ObservableModule.fromObject({
-  linkedConode: Party.getLinkedConodeModule(),
-  hash: Party.getPopDescHashModule(),
-  toHex: Convert.byteArrayToHex
-});
+let viewModel = undefined;
 
 let page = undefined;
 
 function onLoaded(args) {
   page = args.object;
+
+  const context = page.navigationContext;
+
+  if(context.party === undefined) {
+    throw new Error("Party should be given in the context");
+  }
+
+  Party = context.party;
+  viewModel = ObservableModule.fromObject({
+    linkedConode: Party.getLinkedConodeModule(),
+    hash: Party.getPopDescHashModule(),
+    toHex: Convert.byteArrayToHex
+  });
 
   // This is to ensure that the hash will be updated in the UI when coming back from the config.
   page.bindingContext = undefined;

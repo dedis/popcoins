@@ -71,7 +71,7 @@
 
                     <TabViewItem title="ORG">
                         <TabViewItem.view>
-                            <org:org-party-home/>
+                            <org:org-party-list/>
                         </TabViewItem.view>
                     </TabViewItem>
 

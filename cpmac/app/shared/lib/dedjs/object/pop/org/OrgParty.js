@@ -41,7 +41,7 @@ class OrgParty {
     if (typeof dirname === "string") {
       this._dirname = dirname;
     } else {
-      throw new Error("dirname should be of type string or undefined");
+      throw new Error("dirname should be of type string");
     }
     this._isLoaded = false;
     this._linkedConode = ObservableModule.fromObject({
@@ -855,6 +855,14 @@ class OrgParty {
 
         return Promise.reject(error);
       });
+  }
+
+  /**
+   * Completely remove Party from disk
+   * @returns {Promise} a promise that gets resolved once the party is deleted
+   */
+  remove() {
+    return FileIO.removeFolder(__dirname);
   }
 }
 
