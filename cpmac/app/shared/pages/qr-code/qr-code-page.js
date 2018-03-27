@@ -6,12 +6,13 @@ const Dialog = require("ui/dialogs");
 
 const QRGenerator = new ZXing();
 
-let textView = undefined;
 let qrImage = undefined;
 
 let textToShow = undefined;
 
 let closeCallBackFunction = undefined;
+
+let scanMeLabel = undefined;
 
 function onShownModally(args) {
   closeCallBackFunction = args.closeCallback;
@@ -28,7 +29,9 @@ function onLoaded(args) {
   const page = args.object;
   loadViews(page);
 
-  if (textView === undefined || qrImage === undefined) {
+  scanMeLabel.android.setGravity(android.view.Gravity.CENTER);
+
+  if (qrImage === undefined) {
     throw new Error("a field is undefined, but is should not");
   }
 
@@ -40,20 +43,17 @@ function onLoaded(args) {
  * @param page -  the current page object
  */
 function loadViews(page) {
-  textView = page.getViewById("text-view");
   qrImage = page.getViewById("image");
+  scanMeLabel = page.getViewById("scan-me");
 }
 
 /**
  * We load the text and the QR code (after generating it) into the views.
  */
 function loadFields() {
-  if (textView === undefined || qrImage === undefined || textToShow === undefined) {
+  if (qrImage === undefined || textToShow === undefined) {
     return;
   }
-
-  // We set the text the text view.
-  textView.text = textToShow;
 
   // We generate the QR code image and set it to the image container in the XML.
   let sideLength = PlatformModule.screen.mainScreen.widthPixels / 4;
