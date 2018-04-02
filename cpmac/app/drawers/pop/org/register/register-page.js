@@ -8,6 +8,7 @@ const User = require("../../../../shared/lib/dedjs/object/user/User").get;
 let viewModel = undefined;
 let Party = undefined;
 
+
 function onLoaded(args) {
   const page = args.object;
   const context = page.navigationContext;
@@ -19,6 +20,10 @@ function onLoaded(args) {
   Party = context.party;
   viewModel = Party.getRegisteredAttsModule();
   page.bindingContext = viewModel;
+  let finalizeLabel = page.getViewById("finalize");
+  // Without this the text is not vertically centered in is own view
+  finalizeLabel.android.setGravity(android.view.Gravity.CENTER);
+
 }
 
 /**
@@ -200,9 +205,25 @@ function registerKeys() {
     });
 }
 
+function addNewKey() {
+  Dialog.action({
+    message: "How would you like to specify the key ?",
+    cancelButtonText: "Cancel",
+    actions: ["Scan QR", "Enter manually"]
+  }).then(function (result) {
+    console.log("Dialog result: " + result);
+    if(result == "Scan QR"){
+      addScan();
+    }else if(result == "Enter manually"){
+      addManual();
+    }
+  });
+}
+
 module.exports.onLoaded = onLoaded;
 module.exports.addManual = addManual;
 module.exports.addScan = addScan;
 module.exports.registerKeys = registerKeys;
 module.exports.deleteAttendee = deleteAttendee;
 module.exports.onSwipeCellStarted = onSwipeCellStarted;
+module.exports.addNewKey = addNewKey;

@@ -64,7 +64,8 @@ function finalStatementTapped(args) {
           object.id = Convert.byteArrayToBase64(descHash);
 
           pageObject.showModal("shared/pages/qr-code/qr-code-page", {
-            textToShow: Convert.objectToJson(object)
+            textToShow: Convert.objectToJson(object),
+            title: "Final Statement"
           }, () => { }, true);
 
           return Promise.resolve();

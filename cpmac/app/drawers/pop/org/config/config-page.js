@@ -425,7 +425,8 @@ function manageDesc() {
             object.id = id;
 
             pageObject.showModal("shared/pages/qr-code/qr-code-page", {
-              textToShow: Convert.objectToJson(object)
+              textToShow: Convert.objectToJson(object),
+              title: "Party informations"
             }, () => { }, true);
 
             return Promise.resolve();

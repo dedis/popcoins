@@ -36,7 +36,8 @@ function loadFunction(conodeStatus) {
  */
 function displayQrOfConode() {
   pageObject.showModal("shared/pages/qr-code/qr-code-page", {
-    textToShow: Convert.objectToJson(conode)
+    textToShow: Convert.objectToJson(conode),
+    title: "Conode informations"
   }, () => { }, true);
 }
 

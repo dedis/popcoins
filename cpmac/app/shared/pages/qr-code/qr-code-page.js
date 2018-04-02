@@ -10,16 +10,24 @@ let qrImage = undefined;
 
 let textToShow = undefined;
 
+let title = undefined;
+
 let closeCallBackFunction = undefined;
 
 let scanMeLabel = undefined;
 
+let titleLabel = undefined;
+
 function onShownModally(args) {
   closeCallBackFunction = args.closeCallback;
   textToShow = args.context.textToShow;
+  title = args.context.title;
 
   if (textToShow === undefined) {
     throw new Error("textToShow is undefined, but is should not");
+  }
+  if (typeof title !== "string") {
+    throw new Error("title must be of type string")
   }
 
   loadFields();
@@ -29,6 +37,7 @@ function onLoaded(args) {
   const page = args.object;
   loadViews(page);
 
+  // Without this the text is not vertically centered in is own view
   scanMeLabel.android.setGravity(android.view.Gravity.CENTER);
 
   if (qrImage === undefined) {
@@ -45,6 +54,7 @@ function onLoaded(args) {
 function loadViews(page) {
   qrImage = page.getViewById("image");
   scanMeLabel = page.getViewById("scan-me");
+  titleLabel = page.getViewById("page-name");
 }
 
 /**
@@ -57,6 +67,7 @@ function loadFields() {
 
   // We generate the QR code image and set it to the image container in the XML.
   let sideLength = PlatformModule.screen.mainScreen.widthPixels / 4;
+  titleLabel.text = title;
   const QR_CODE = QRGenerator.createBarcode({
     encode: textToShow,
     format: ZXing.QR_CODE,
