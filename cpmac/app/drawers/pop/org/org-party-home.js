@@ -2,6 +2,7 @@ const Frame = require("ui/frame");
 const Dialog = require("ui/dialogs");
 const ObservableModule = require("data/observable");
 const Convert = require("../../../shared/lib/dedjs/Convert");
+const Pop = require("../../../shared/lib/dedjs/object/pop/PoP").get;
 
 const User = require("../../../shared/lib/dedjs/object/user/User").get;
 let Party = undefined;
@@ -150,7 +151,7 @@ function fetchButtonTapped() {
     });
   }
 
-  return PoP.fetchFinalStatement(Party.getLinkedConode(), popDescId)
+  return Pop.fetchFinalStatement(Party.getLinkedConode(), popDescId)
     .then(() => {
       return Dialog.alert({
         title: "Final Statement Saved",
