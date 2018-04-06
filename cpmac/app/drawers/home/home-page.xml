@@ -1,8 +1,8 @@
 <Page
         class="page"
         navigatingTo="onNavigatingTo"
-        xmlns:nsDrawer="nativescript-pro-ui/sidedrawer"
-        xmlns:nsListView="nativescript-pro-ui/listview"
+        xmlns:nsDrawer="nativescript-ui-sidedrawer"
+        xmlns:nsListView="nativescript-ui-listview"
         xmlns:myDrawer="shared/my-drawer"
         xmlns="http://www.nativescript.org/tns.xsd">
 

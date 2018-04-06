@@ -1,7 +1,7 @@
 <Page
         class="page"
         loaded="onLoaded"
-        xmlns:nsListView="nativescript-pro-ui/listview">
+        xmlns:nsListView="nativescript-ui-listview">
 
     <ActionBar class="action-bar">
         <!-- TODO change goBack() method to correct one -->

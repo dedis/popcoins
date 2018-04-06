@@ -1,6 +1,6 @@
 <Page
         navigatingTo="onNavigatingTo"
-        xmlns:nsDrawer="nativescript-pro-ui/sidedrawer"
+        xmlns:nsDrawer="nativescript-ui-sidedrawer"
         xmlns:myDrawer="shared/my-drawer"
         xmlns:user="drawers/settings/user"
         xmlns:pop="drawers/settings/pop"
