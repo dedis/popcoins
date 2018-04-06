@@ -220,6 +220,10 @@ function addNewKey() {
   });
 }
 
+function goBack() {
+  topmost().goBack();
+}
+
 module.exports.onLoaded = onLoaded;
 module.exports.addManual = addManual;
 module.exports.addScan = addScan;
@@ -227,3 +231,4 @@ module.exports.registerKeys = registerKeys;
 module.exports.deleteAttendee = deleteAttendee;
 module.exports.onSwipeCellStarted = onSwipeCellStarted;
 module.exports.addNewKey = addNewKey;
+module.exports.goBack = goBack;

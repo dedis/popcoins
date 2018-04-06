@@ -1,175 +1,56 @@
 const Dialog = require("ui/dialogs");
 const Frame = require("ui/frame");
-const ModalPicker = require("nativescript-modal-datetimepicker").ModalDatetimepicker;
 const Helper = require("../../../../shared/lib/dedjs/Helper");
 const Convert = require("../../../../shared/lib/dedjs/Convert");
 const Net = require("../../../../shared/lib/dedjs/Net");
 const ObjectType = require("../../../../shared/lib/dedjs/ObjectType");
 const ScanToReturn = require("../../../../shared/lib/scan-to-return/scan-to-return");
-
+const Observable = require("tns-core-modules/data/observable");
 const User = require("../../../../shared/lib/dedjs/object/user/User").get;
+const topmost = require("ui/frame").topmost;
 
 let viewModel = undefined;
 let Party = undefined;
 
-const DateTimePicker = new ModalPicker();
-
-let textFieldName = undefined;
-let labelDate = undefined;
-let labelTime = undefined;
-let textFieldLocation = undefined;
-let chosenDateTime = undefined;
-
 let pageObject = undefined;
+
+let dataForm = Observable.fromObject({
+  name: "",
+  date: "",
+  time: "",
+  location: ""
+});
 
 function onLoaded(args) {
   const page = args.object;
   const context = page.navigationContext;
 
-  if(context.party === undefined) {
+  if (context.party === undefined) {
     throw new Error("Party should be given in the context");
   }
 
   Party = context.party;
-  viewModel = Party.getPopDescModule();
+
+  initDate();
+
+  viewModel = {};
+  viewModel.descModule = Party.getPopDescModule();
+  viewModel.dataForm = dataForm;
   pageObject = page.page;
   page.bindingContext = viewModel;
 
-  loadViews(page);
-  if (textFieldName === undefined || labelDate === undefined || labelTime === undefined || textFieldLocation === undefined) {
-    throw new Error("a field is undefined, but it shouldn't");
-  }
-
-  setUpDate();
 }
 
-/**
- * Loads the needed views into their variables.
- * @param page - the current page object
- */
-function loadViews(page) {
-  textFieldName = page.getViewById("text-field-name");
-  labelDate = page.getViewById("label-date");
-  labelTime = page.getViewById("label-time");
-  textFieldLocation = page.getViewById("text-field-location");
+function initDate() {
+  // TODO Update when v2 is all here
+  const desc = Party.getPopDesc();
+  dataForm.set("name", Party.getPopDesc().name);
+  dataForm.set("location", Party.getPopDesc().location);
 
-  textFieldName.on("textChange", onNameChangeHandler);
-  textFieldLocation.on("textChange", onLocationChangeHandler);
-}
+  let date = new Date(Date.parse(desc.dateTime));
 
-function onNameChangeHandler() {
-  return Party.setPopDescName(textFieldName.text)
-    .catch(error => {
-      console.log(error);
-      console.dir(error);
-      console.trace();
-
-      Dialog.alert({
-        title: "Error",
-        message: "An unexpected error occurred during the save process. - " + error,
-        okButtonText: "Ok"
-      });
-
-      return Promise.reject(error);
-    });
-}
-
-function onLocationChangeHandler() {
-  return Party.setPopDescLocation(textFieldLocation.text)
-    .catch(error => {
-      console.log(error);
-      console.dir(error);
-      console.trace();
-
-      Dialog.alert({
-        title: "Error",
-        message: "An unexpected error occurred during the save process. - " + error,
-        okButtonText: "Ok"
-      });
-
-      return Promise.reject(error);
-    });
-}
-
-function setUpDate() {
-  const dateTimeString = Party.getPopDesc().dateTime;
-  if (dateTimeString === "") {
-    chosenDateTime = new Date(Date.now());
-    chosenDateTime.setMilliseconds(0);
-    chosenDateTime.setSeconds(0);
-  } else {
-    chosenDateTime = new Date(Date.parse(dateTimeString));
-  }
-
-  labelDate.text = chosenDateTime.toDateString();
-  labelTime.text = chosenDateTime.toTimeString();
-}
-
-function setDate() {
-  return DateTimePicker.pickDate({
-    title: "Pick a Date for you PoP-Party"
-  })
-    .then(date => {
-      const newDate = new Date(date.year, date.month - 1, date.day, 0, 0, 0, 0);
-
-      if (newDate.toDateString() !== "Invalid Date") {
-        chosenDateTime.setYear(date.year);
-        chosenDateTime.setMonth(date.month - 1);
-        chosenDateTime.setDate(date.day);
-
-        labelDate.text = chosenDateTime.toDateString();
-
-        return Party.setPopDescDateTime(chosenDateTime.toUTCString());
-      }
-
-      return Promise.resolve();
-    })
-    .catch(error => {
-      console.log(error);
-      console.dir(error);
-      console.trace();
-
-      Dialog.alert({
-        title: "Error",
-        message: "An unexpected error occurred during the save process. - " + error,
-        okButtonText: "Ok"
-      });
-
-      return Promise.reject(error);
-    });
-}
-
-function setTime() {
-  return DateTimePicker.pickTime({
-    title: "Pick a Time for you PoP-Party"
-  })
-    .then(time => {
-      const newTime = new Date(0, 0, 0, time.hour, time.minute, 0, 0);
-
-      if (newTime.toDateString() !== "Invalid Date") {
-        chosenDateTime.setHours(time.hour);
-        chosenDateTime.setMinutes(time.minute);
-
-        labelTime.text = chosenDateTime.toTimeString();
-
-        return Party.setPopDescDateTime(chosenDateTime.toUTCString());
-      }
-
-      return Promise.resolve();
-    })
-    .catch(error => {
-      console.log(error);
-      console.dir(error);
-      console.trace();
-
-      Dialog.alert({
-        title: "Error",
-        message: "An unexpected error occurred during the save process. - " + error,
-        okButtonText: "Ok"
-      });
-
-      return Promise.reject(error);
-    });
+  dataForm.set("date", date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + (date.getDay() + 1));
+  dataForm.set("time", date.getHours() + ":" + date.getMinutes());
 }
 
 /**
@@ -242,6 +123,11 @@ function addManual() {
     });
 }
 
+/**
+ * Add a new conode by scanning it
+ *
+ * @returns {Promise}
+ */
 function addScan() {
   return ScanToReturn.scan()
     .then(string => {
@@ -308,31 +194,77 @@ function onSwipeCellStarted(args) {
 }
 
 /**
+ * Parse the date from the data form and save it into the Party
+ */
+function setDate() {
+  let date = viewModel.dataForm.date.split("-");
+  let time = viewModel.dataForm.time.split(":");
+
+  if (date.length !== 3 || time.length !== 2) {
+    Dialog.alert({
+      title: "Internal error",
+      message: "Cannot parse date or time.",
+      okButtonText: "Ok"
+    });
+
+    return Promise.reject("Cannot parse date or time");
+  }
+
+  date.map(parseInt);
+  time.map(parseInt);
+
+  let dateString = new Date(date[0], date[1] - 1, date[2] - 1, time[0], time[1], 0, 0).toString();
+
+  return Party.setPopDescDateTime(dateString);
+}
+
+/**
+ * Conclude the creation of the party : save all the infos and register
+ * on the conode
+ */
+function finish() {
+  let promises = [
+    Party.setPopDescLocation(viewModel.dataForm.location),
+    Party.setPopDescName(viewModel.dataForm.name),
+    setDate()
+  ];
+
+  Promise.all(promises).then(hashAndSave).then(goBack)
+}
+
+/**
  * Hashes and saves the config/description entered by the organizer of the PoP party.
  * @returns {Promise.<*[]>}
  */
 function hashAndSave() {
+
   if (!User.isKeyPairSet()) {
-    return Dialog.alert({
+    Dialog.alert({
       title: "Key Pair Missing",
       message: "Please generate a key pair.",
       okButtonText: "Ok"
     });
+
+    return Promise.reject("Key Pair Missing");
   }
   if (!Party.isPopDescComplete()) {
-    return Dialog.alert({
+    Dialog.alert({
       title: "Missing Information",
       message: "Please provide a name, date, time, location and the list (min 3) of conodes" +
-        " of the organizers of your PoP Party.",
+      " of the organizers of your PoP Party.",
       okButtonText: "Ok"
     });
+
+    return Promise.reject("Missing Information");
   }
   if (!Party.isLinkedConodeSet()) {
-    return Dialog.alert({
+    Dialog.alert({
       title: "Not Linked to Conode",
       message: "Please link to a conode first.",
       okButtonText: "Ok"
     });
+
+    return Promise.reject("Not Linked to Conode");
   }
 
   function registerPopDesc() {
@@ -359,24 +291,7 @@ function hashAndSave() {
       });
   }
 
-  const oldPopDescHash = Party.getPopDescHash();
-  if (oldPopDescHash.length > 0) {
-    return Dialog.confirm({
-      title: "Old Description Hash Overwriting",
-      message: "You already have a description hash stored. Do you really want to overwrite it?",
-      okButtonText: "Yes",
-      cancelButtonText: "Cancel"
-    })
-      .then(result => {
-        if (result) {
-          return registerPopDesc();
-        } else {
-          return Promise.resolve();
-        }
-      });
-  } else {
-    return registerPopDesc();
-  }
+  return registerPopDesc();
 }
 
 function manageDesc() {
@@ -411,7 +326,7 @@ function manageDesc() {
           return Dialog.alert({
             title: "Missing Information",
             message: "Please provide a name, date, time, location and the list (min 3) of conodes" +
-              " of the organizers of your PoP Party.",
+            " of the organizers of your PoP Party.",
             okButtonText: "Ok"
           });
         }
@@ -427,7 +342,8 @@ function manageDesc() {
             pageObject.showModal("shared/pages/qr-code/qr-code-page", {
               textToShow: Convert.objectToJson(object),
               title: "Party informations"
-            }, () => { }, true);
+            }, () => {
+            }, true);
 
             return Promise.resolve();
           });
@@ -450,13 +366,17 @@ function manageDesc() {
       return Promise.reject(error);
     });
 }
+function goBack() {
+  // Party.remove();
+  topmost().goBack();
+}
 
 module.exports.onLoaded = onLoaded;
-module.exports.setDate = setDate;
-module.exports.setTime = setTime;
 module.exports.hashAndSave = hashAndSave;
 module.exports.addManual = addManual;
 module.exports.addScan = addScan;
 module.exports.deleteConode = deleteConode;
 module.exports.onSwipeCellStarted = onSwipeCellStarted;
 module.exports.manageDesc = manageDesc;
+module.exports.goBack = goBack;
+module.exports.finish = finish;

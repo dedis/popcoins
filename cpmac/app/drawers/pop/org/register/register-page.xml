@@ -5,7 +5,7 @@
 
     <ActionBar class="action-bar">
         <!-- TODO change goBack() method to correct one -->
-        <NavigationButton text="Go Back" android:icon="res://ic_arrow_back" tap="goBack()"/>
+        <NavigationButton text="Go Back" android:icon="res://ic_arrow_back" tap="goBack"/>
         <Label class="action-bar-title" text="Public Keys"/>
         <ActionItem tap="addNewKey"
                     ios.systemIcon="4" ios.position="left"
