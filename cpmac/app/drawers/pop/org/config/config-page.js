@@ -371,6 +371,21 @@ function goBack() {
   topmost().goBack();
 }
 
+function addOrganizer() {
+  Dialog.action({
+    message: "How would you like to add the new organizer ?",
+    cancelButtonText: "Cancel",
+    actions: ["Scan QR", "Enter manually"]
+  }).then(function (result) {
+    console.log("Dialog result: " + result);
+    if(result == "Scan QR"){
+      addScan();
+    }else if(result == "Enter manually"){
+      addManual();
+    }
+  });
+}
+
 module.exports.onLoaded = onLoaded;
 module.exports.hashAndSave = hashAndSave;
 module.exports.addManual = addManual;
@@ -380,3 +395,4 @@ module.exports.onSwipeCellStarted = onSwipeCellStarted;
 module.exports.manageDesc = manageDesc;
 module.exports.goBack = goBack;
 module.exports.finish = finish;
+module.exports.addOrganizer = addOrganizer;

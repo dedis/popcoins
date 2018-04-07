@@ -12,9 +12,10 @@
                     android:icon="res://ic_done" android.position="actionBar"/>
     </ActionBar>
 
-    <GridLayout class="page-content" rows="auto, auto, auto,*,auto"
+    <GridLayout class="page-content" rows="auto, auto, auto,*"
                 columns="*,auto,*">
         <Label class="label-title" text="Description" row="0" col="0" colSpan="3"/>
+
 
         <nsDataForm:RadDataForm id="data-form" source="{{ dataForm }}" row="1" colSpan="3">
             <nsDataForm:RadaForm.properties>
@@ -34,8 +35,10 @@
                 <nsDataForm:EntityProperty name="_map" hidden="true"/>
             </nsDataForm:RadaForm.properties>
         </nsDataForm:RadDataForm>
-
-        <Label class="label-title" text="Organizers" row="2" col="0" colSpan="3"/>
+        <GridLayout id="org-list-header" rows="auto" columns="auto, *" row="2" colSpan="3">
+            <Label class="label-title" text="Organizers" row="0" col="0" colSpan="2"/>
+            <Label class="label-title" id="addOrg" text="+" tap="addOrganizer" row="0" col="1"/>
+        </GridLayout>
 
         <nsListView:RadListView items="{{ descModule.roster.list }}" id="list-view-conodes"
                                 itemSwipeProgressStarted="onSwipeCellStarted"
@@ -54,9 +57,6 @@
             </nsListView:RadListView.itemTemplate>
 
         </nsListView:RadListView>
-
-        <Button text="Manual" tap="addManual" row="4" col="0"/>
-        <Button text="Scan" tap="addScan" row="4" col="2"/>
     </GridLayout>
 
 </Page>

@@ -26,4 +26,21 @@ $case-padding: 10;
 
 .label-title {
   padding-top: 10;
+  padding-bottom: 5;
+  vertical-align: center;
+}
+
+#addOrg {
+  horizontal-align: right;
+  vertical-align: center;
+  font-size: 40;
+  padding-right: 20;
+}
+
+#org-list-header {
+  vertical-align: center;
+}
+
+#org-list-header * {
+  padding-bottom: 0;
 }
