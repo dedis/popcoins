@@ -15,6 +15,7 @@ const FileIO = require("../../../../../lib/file-io/file-io");
 const CothorityMessages = require("../../../protobuf/build/cothority-messages");
 const RequestPath = require("../../../RequestPath");
 const DecodeType = require("../../../DecodeType");
+const uuidv4 = require("uuid/v4");
 
 const User = require("../../user/User").get;
 const PoP = require("../../pop/PoP").get;
@@ -35,11 +36,14 @@ class OrgParty {
 
   /**
    * Constructor for the Org class.
-   * @param {string} dirname directory of the party data (directory is created if non existent)
+   * @param {string} [dirname] - directory of the party data (directory is created if non existent).
+   *  If no directory is specified, a unique random directory name is generated
    */
   constructor(dirname) {
     if (typeof dirname === "string") {
       this._dirname = dirname;
+    } else if (dirname === undefined){
+      this._dirname = uuidv4();
     } else {
       throw new Error("dirname should be of type string");
     }

@@ -112,6 +112,14 @@ TabView {
   font-size: 29;
 }
 
+//Floating Button
+.fab-button {
+  background-color: $accent-dark;
+  margin: 15;
+  vertical-align: bottom;
+  horizontal-align: right;
+}
+
 // Status text for Org Party List
 // TODO Change this as soon as possible (CSS selector is not recognized in the page's SCSS ?)
 .status-text {

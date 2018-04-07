@@ -2,6 +2,7 @@ const Dialog = require("ui/dialogs");
 const Frame = require("ui/frame");
 const Convert = require("../../../../shared/lib/dedjs/Convert");
 const ScanToReturn = require("../../../../shared/lib/scan-to-return/scan-to-return");
+const topmost = require("ui/frame").topmost;
 
 const User = require("../../../../shared/lib/dedjs/object/user/User").get;
 
@@ -190,6 +191,13 @@ function registerKeys() {
         okButtonText: "Ok"
       });
     })
+    .then(() => {
+      const navigationEntry = {
+        moduleName: "drawers/pop/pop-page",
+        clearHistory: true
+      };
+      topmost().navigate(navigationEntry);
+    })
     .catch(error => {
       console.log(error);
       console.dir(error);
@@ -212,9 +220,9 @@ function addNewKey() {
     actions: ["Scan QR", "Enter manually"]
   }).then(function (result) {
     console.log("Dialog result: " + result);
-    if(result == "Scan QR"){
+    if(result === "Scan QR"){
       addScan();
-    }else if(result == "Enter manually"){
+    }else if(result === "Enter manually"){
       addManual();
     }
   });

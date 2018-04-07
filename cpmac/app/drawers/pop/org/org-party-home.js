@@ -79,7 +79,7 @@ function linkToConode() {
                   return Dialog.alert({
                     title: "Success",
                     message: "Your are now linked to the conode.",
-                    okButtonText: "Nice"
+                    okButtonText: "Configure the party"
                   });
                 });
             } else {

@@ -378,9 +378,9 @@ function addOrganizer() {
     actions: ["Scan QR", "Enter manually"]
   }).then(function (result) {
     console.log("Dialog result: " + result);
-    if(result == "Scan QR"){
+    if(result === "Scan QR"){
       addScan();
-    }else if(result == "Enter manually"){
+    }else if(result === "Enter manually"){
       addManual();
     }
   });
