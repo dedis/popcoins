@@ -7,6 +7,8 @@ const Pop = require("../../../shared/lib/dedjs/object/pop/PoP").get;
 const User = require("../../../shared/lib/dedjs/object/user/User").get;
 let Party = undefined;
 
+const topmost = require("ui/frame").topmost;
+
 let viewModel = undefined;
 
 let page = undefined;
@@ -174,8 +176,14 @@ function fetchButtonTapped() {
     });
 }
 
+function removeButtonTapped() {
+  Party.remove();
+  topmost().goBack();
+}
+
 module.exports.onLoaded = onLoaded;
 module.exports.configButtonTapped = configButtonTapped;
 module.exports.registerButtonTapped = registerButtonTapped;
 module.exports.fetchButtonTapped = fetchButtonTapped;
 module.exports.linkToConode = linkToConode;
+module.exports.removeButtonTapped = removeButtonTapped;

@@ -11,6 +11,7 @@ const topmost = require("ui/frame").topmost;
 
 let viewModel = undefined;
 let Party = undefined;
+let newParty = undefined;
 
 let pageObject = undefined;
 
@@ -30,6 +31,7 @@ function onLoaded(args) {
   }
 
   Party = context.party;
+  newParty = context.newParty;
 
   initDate();
 
@@ -42,7 +44,6 @@ function onLoaded(args) {
 }
 
 function initDate() {
-  // TODO Update when v2 is all here
   const desc = Party.getPopDesc();
   dataForm.set("name", Party.getPopDesc().name);
   dataForm.set("location", Party.getPopDesc().location);
@@ -367,7 +368,17 @@ function manageDesc() {
     });
 }
 function goBack() {
-  // Party.remove();
+  if (newParty) {
+    Party.remove().then(() => {
+      topmost().goBack();
+    }).catch((error) => {
+      console.log("Party could not be deleted");
+      console.log(error);
+      console.trace();
+      topmost().goBack();
+    });
+    return;
+  }
   topmost().goBack();
 }
 

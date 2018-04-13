@@ -165,9 +165,12 @@ function addParty() {
     Frame.topmost().navigate({
       moduleName: "drawers/pop/org/config/config-page",
       context: {
-        party: newParty
+        party: newParty,
+        newParty: true
       }
     });
+  }).catch(() => {
+    newParty.remove();
   });
 
 }

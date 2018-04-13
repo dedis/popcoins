@@ -19,8 +19,8 @@
   },
   "scripts": {},
   "dependencies": {
-    "@dedis/cothority": "file:dedis-cothority-1.0.2.tgz",
-    "@dedis/kyber-js": "file:../../cothority/external/js/kyber/dedis-kyber-js-0.0.7.tgz",
+    "@dedis/cothority": "^1.1.0",
+    "@dedis/kyber-js": "0.0.7",
     "bn.js": "^4.11.8",
     "buffer": "^5.0.8",
     "chai-as-promised": "^7.1.1",

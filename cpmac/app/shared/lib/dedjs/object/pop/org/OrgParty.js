@@ -866,7 +866,7 @@ class OrgParty {
    * @returns {Promise} a promise that gets resolved once the party is deleted
    */
   remove() {
-    return FileIO.removeFolder(__dirname);
+    return FileIO.removeFolder(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname));
   }
 }
 
