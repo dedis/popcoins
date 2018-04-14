@@ -310,8 +310,11 @@ class CothorityMessages extends CothorityProtobuf {
     if (!(descId instanceof Uint8Array)) {
       throw new Error("descId must be an instance of Uint8Array");
     }
-    if (!(attendees instanceof Array && attendees[0] instanceof Uint8Array)) {
-      throw new Error("attendees must be an instance of Array[Uint8Array]");
+    if (!(attendees instanceof Array)) {
+      throw new Error("attendees must be an instance of Array");
+    }
+    if (attendees.length > 0 && !(attendees[0] instanceof Uint8Array)) {
+      throw new Error("attendees[i] must be an instance of Uint8Array");
     }
     if (!(signature instanceof Uint8Array)) {
       throw new Error("signature must be an instance of Uint8Array");
@@ -322,6 +325,31 @@ class CothorityMessages extends CothorityProtobuf {
       attendees: attendees,
       signature: signature
     };
+
+    return fields;
+  }
+
+  /**
+   * Creates a message to check a PoP Config status
+   * @param hash - has of a party
+   * @param attendees - array of attendees to the party
+   * @returns {{hash: Uint8Array, attendees: Array}}
+   */
+  createCheckConfigRequest(hash, attendees) {
+    if (!(hash instanceof Uint8Array)) {
+      throw new Error("has must be an instance of Uint8Array");
+    }
+    if (!(attendees instanceof Array)) {
+      throw new Error("attendees must be an instance of Array");
+    }
+    if (attendees.length > 0 && !(attendees[0] instanceof Uint8Array)) {
+      throw new Error("attendees[i] must be an instance of Uint8Array");
+    }
+
+    const fields = {
+      hash: hash,
+      attendees: attendees
+    }
 
     return fields;
   }

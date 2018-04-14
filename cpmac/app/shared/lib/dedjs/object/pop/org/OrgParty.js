@@ -21,7 +21,7 @@ const User = require("../../user/User").get;
 const PoP = require("../../pop/PoP").get;
 
 /**
- * This singleton represents the organizer of a PoP party. It contains everything related to the organizer.
+ * This class represents the organizer of a PoP party. It contains everything related to the organizer party.
  */
 
 /**
@@ -31,6 +31,8 @@ const PoP = require("../../pop/PoP").get;
 const EMPTY_SERVER_IDENTITY = CothorityMessages.createServerIdentity(new Uint8Array(), new Uint8Array(), "", "");
 const EMPTY_ROSTER = CothorityMessages.createRoster(new Uint8Array(), [], new Uint8Array());
 const EMPTY_POP_DESC = CothorityMessages.createPopDesc("", "", "", EMPTY_ROSTER);
+const POP_STATUS_NO_CONFIG = 0;
+const POP_STATUS_OK = 4;
 
 class OrgParty {
 
@@ -42,7 +44,7 @@ class OrgParty {
   constructor(dirname) {
     if (typeof dirname === "string") {
       this._dirname = dirname;
-    } else if (dirname === undefined){
+    } else if (dirname === undefined) {
       this._dirname = uuidv4();
     } else {
       throw new Error("dirname should be of type string");
@@ -69,6 +71,9 @@ class OrgParty {
     });
     this._popDescHash = ObservableModule.fromObject({
       hash: new Uint8Array()
+    });
+    this._status = ObservableModule.fromObject({
+      status: States.UNDEFINED
     });
 
     this.load();
@@ -157,6 +162,8 @@ class OrgParty {
             .then(() => {
               return Promise.reject(error);
             });
+        }).then(() => {
+          return this.loadStatus();
         });
     } else {
       return new Promise((resolve, reject) => {
@@ -270,6 +277,9 @@ class OrgParty {
             .then(() => {
               return Promise.reject(error);
             });
+        })
+        .then(() => {
+          return this.updatePopHash();
         });
     } else {
       return new Promise((resolve, reject) => {
@@ -367,6 +377,22 @@ class OrgParty {
   }
 
   /**
+   * Returns the pop status observable module
+   * @returns {ObservableModule}
+   */
+  getPopStatusModule() {
+    return this._status;
+  }
+
+  /**
+   * Returns the status of the party
+   * @returns {string} - value of the enum States
+   */
+  getPopStatus() {
+    return this.getPopStatusModule().status;
+  }
+
+  /**
    * Sets the pop description hash.
    * @param {Uint8Array} hash - the new hash to set
    * @param {boolean} save - if the new hash should be saved permanently
@@ -433,6 +459,18 @@ class OrgParty {
     while (this.getPopDescModule().roster.list.length > 0) {
       this.getPopDescModule().roster.list.pop();
     }
+  }
+
+  /**
+   * Set the status of the party
+   * @param {string} status - a value inside the Enum States
+   */
+  setPopStatus(status) {
+    if (!Object.values(States).includes(status)) {
+      throw new Error("status should be in enum States");
+    }
+
+    this.getPopStatusModule().status = status;
   }
 
   /**
@@ -614,8 +652,24 @@ class OrgParty {
   }
 
   /**
+   * Update the hash of the party using current stored informations
+   * @returns {Promise<Uint8Array>} - a promise that gets completed once the hash of the PopDesc has been saved
+   */
+  updatePopHash() {
+    const popDesc = this.getPopDesc();
+    const descHash = Convert.hexToByteArray(HashJs.sha256()
+      .update(popDesc.name)
+      .update(popDesc.dateTime)
+      .update(popDesc.location)
+      .update(popDesc.roster.aggregate)
+      .digest("hex"));
+
+    return this.setPopDescHash(descHash, true);
+  }
+
+  /**
    * Registers the local PopDesc on the linked conode. On success this will save the hash of the PopDesc for further usage.
-   * @returns {Promise} - a promise that gets completed once the hash of the PopDesc has been saved
+   * @returns {Promise} - a promise that gets completed once the party has been registered
    */
   registerPopDesc() {
     if (!User.isKeyPairSet()) {
@@ -629,12 +683,7 @@ class OrgParty {
     }
 
     const popDesc = this.getPopDesc();
-    const descHash = Convert.hexToByteArray(HashJs.sha256()
-      .update(popDesc.name)
-      .update(popDesc.dateTime)
-      .update(popDesc.location)
-      .update(popDesc.roster.aggregate)
-      .digest("hex"));
+    const descHash = this.getPopDescHash();
 
     const privateKey = CURVE_ED25519_KYBER.scalar();
     privateKey.unmarshalBinary(User.getKeyPair().private);
@@ -646,10 +695,7 @@ class OrgParty {
     return cothoritySocket.send(RequestPath.POP_STORE_CONFIG, DecodeType.STORE_CONFIG_REPLY, storeConfigMessage)
       .then(response => {
         if (Convert.byteArrayToBase64(response.id) === Convert.byteArrayToBase64(descHash)) {
-          return this.setPopDescHash(descHash, true)
-            .then(() => {
-              return Promise.resolve(descHash);
-            });
+          return Promise.resolve(descHash);
         } else {
           return Promise.reject("hash was different");
         }
@@ -750,9 +796,17 @@ class OrgParty {
   load() {
     this._isLoaded = false;
 
-    const promises = [this.loadLinkedConode(), this.loadPopDesc(), this.loadRegisteredAtts(), this.loadPopDescHash()];
+    const promises = [
+      this.loadLinkedConode(),
+      this.loadPopDesc(),
+      this.loadRegisteredAtts(),
+      this.loadPopDescHash()
+    ];
 
     return Promise.all(promises)
+      .then(() => {
+        return this.loadStatus();
+      })
       .then(() => {
         this._isLoaded = true;
       })
@@ -763,6 +817,73 @@ class OrgParty {
 
         return Promise.reject(error);
       });
+  }
+
+  /**
+   * Loads the status of the current party from the linked conode
+   * @returns {Promise} - a promise that gets resolved once the status is loaded
+   */
+  loadStatus() {
+    const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(this.getLinkedConode(), ""), RequestPath.POP);
+    /*const checkConfigRequest = CothorityMessages.createCheckConfigRequest(this.getPopDescHash(), this.getRegisteredAtts().slice());
+
+    console.log("SKDEBUG on envoie le premier");
+    return cothoritySocket.send(RequestPath.POP_CHECK_CONFIG, DecodeType.CHECK_CONFIG_REPLY, checkConfigRequest)
+      .then(response => {
+        if (response.PopStatus ===  POP_STATUS_NO_CONFIG) {
+          this.setPopStatus(States.CONFIGURATION);
+          throw POP_STATUS_NO_CONFIG;
+        }
+        this.setPopStatus(States.PUBLISHED);
+        console.log("SKDEBUG on envoie le deuxième (pos = premier then)");
+
+        const fetchRequest = CothorityMessages.createFetchRequest(this.getPopDescHash());
+        return cothoritySocket.send(RequestPath.POP_FETCH_REQUEST, DecodeType.FINALIZE_RESPONSE, fetchRequest);
+      })
+      .then(response => {
+        if (response.final !== undefined) {
+          this.setPopStatus(States.FINALIZED);
+        }
+        console.log("SKDEBUG  (pos = deuxième then)");
+
+        return Promise.resolve();
+      })
+      .catch(error => {
+        console.log("SKDEBUG  (pos = premier catch)");
+
+        if (error === POP_STATUS_NO_CONFIG) {
+          return Promise.resolve();
+        }
+
+        this.setPopStatus(States.ERROR);
+        console.log(error);
+        console.dir(error);
+        console.trace();
+        return Promise.reject(error);
+      });
+*/
+    const fetchRequest = CothorityMessages.createFetchRequest(this.getPopDescHash());
+
+    return cothoritySocket.send(RequestPath.POP_FETCH_REQUEST, DecodeType.FINALIZE_RESPONSE, fetchRequest)
+      .then(() => {
+        this.setPopStatus(States.FINALIZED);
+        return Promise.resolve();
+      })
+      .catch(error => {
+        if (error.message !== undefined && error.message.includes("Not all other conodes finalized yet")) {
+          this.setPopStatus(States.PUBLISHED);
+          return Promise.resolve();
+        } else if (error.message !== undefined && error.message.includes("No config found")) {
+          this.setPopStatus(States.CONFIGURATION);
+          return Promise.resolve();
+        }
+        this.setPopStatus(States.ERROR);
+        console.log(error);
+        console.dir(error);
+        console.trace();
+        return Promise.reject(error);
+      });
+
   }
 
   /**
@@ -870,5 +991,28 @@ class OrgParty {
   }
 }
 
+/**
+ * Enumerate the different possible state for a party
+ * @readonly
+ * @enum {string}
+ */
+const States = Object.freeze({
+  /** Status is loading **/
+  UNDEFINED: "loading",
+
+  /** Party is still being configured (not published to the conode) **/
+  CONFIGURATION: "configuration",
+
+  /** Party is publishde (Stored) on the conode but not yet finalized **/
+  PUBLISHED: "published",
+
+  /** Party is fianlized **/
+  FINALIZED: "finalized",
+
+  /** Used if the status connot be retrived **/
+  ERROR: "offline"
+});
+
 // We export the class.
-module.exports = OrgParty;
+module.exports.Party = OrgParty;
+module.exports.States = States;

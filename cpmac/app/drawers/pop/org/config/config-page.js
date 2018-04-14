@@ -48,7 +48,7 @@ function initDate() {
   dataForm.set("name", Party.getPopDesc().name);
   dataForm.set("location", Party.getPopDesc().location);
 
-  let date = new Date(Date.parse(desc.dateTime));
+  let date = new Date(desc.dateTime === "" ? Date.now() : Date.parse(desc.dateTime));
 
   dataForm.set("date", date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + (date.getDay() + 1));
   dataForm.set("time", date.getHours() + ":" + date.getMinutes());
@@ -230,7 +230,24 @@ function finish() {
     setDate()
   ];
 
-  Promise.all(promises).then(hashAndSave).then(goBack)
+  Promise.all(promises).then(hashAndSave).then(() => {
+    goBack(false);
+  })
+}
+
+/**
+ * Save the config back to the file
+ */
+function save() {
+  let promises = [
+    Party.setPopDescLocation(viewModel.dataForm.location),
+    Party.setPopDescName(viewModel.dataForm.name),
+    setDate()
+  ];
+
+  Promise.all(promises).then(() => {
+    return Party.updatePopHash();
+  }).then(goBack)
 }
 
 /**
@@ -367,7 +384,12 @@ function manageDesc() {
       return Promise.reject(error);
     });
 }
+
 function goBack() {
+  topmost().goBack();
+}
+
+function removeAndGoBack() {
   if (newParty) {
     Party.remove().then(() => {
       topmost().goBack();
@@ -379,7 +401,8 @@ function goBack() {
     });
     return;
   }
-  topmost().goBack();
+
+  goBack();
 }
 
 function addOrganizer() {
@@ -389,9 +412,9 @@ function addOrganizer() {
     actions: ["Scan QR", "Enter manually"]
   }).then(function (result) {
     console.log("Dialog result: " + result);
-    if(result === "Scan QR"){
+    if (result === "Scan QR") {
       addScan();
-    }else if(result === "Enter manually"){
+    } else if (result === "Enter manually") {
       addManual();
     }
   });
@@ -407,3 +430,5 @@ module.exports.manageDesc = manageDesc;
 module.exports.goBack = goBack;
 module.exports.finish = finish;
 module.exports.addOrganizer = addOrganizer;
+module.exports.removeAndGoBack = removeAndGoBack;
+module.exports.save = save;

@@ -4,9 +4,10 @@ const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const FileIO = require("../../../shared/lib/file-io/file-io");
 const FilePaths = require("../../../shared/res/files/files-path");
-const OrgParty = require("../../../shared/lib/dedjs/object/pop/org/OrgParty");
+const OrgParty = require("../../../shared/lib/dedjs/object/pop/org/OrgParty").Party;
 const User = require("../../../shared/lib/dedjs/object/user/User").get;
 const Convert = require("../../../shared/lib/dedjs/Convert");
+const PartyStates = require("../../../shared/lib/dedjs/object/pop/org/OrgParty").States;
 
 const CANCELED_BY_USER = "CANCELED_BY_USER_STRING";
 
@@ -16,8 +17,6 @@ const viewModel = ObservableModule.fromObject({
 });
 
 let page = undefined;
-let popParties = new Map();
-
 
 function onLoaded(args) {
   page = args.object;
@@ -29,21 +28,129 @@ function onLoaded(args) {
 
 function loadParties() {
   viewModel.isLoading = true;
-  viewModel.partyListDescriptions = new ObservableArray;
+  let party = undefined;
+  viewModel.partyListDescriptions.splice(0);
   FileIO.forEachFolderElement(FilePaths.POP_ORG_PATH, function (partyFolder) {
-    viewModel.partyListDescriptions.push(new OrgParty(partyFolder.name))
+    party = new OrgParty(partyFolder.name);
+    // Observables have to be nested to reflect changes
+    viewModel.partyListDescriptions.push(ObservableModule.fromObject({
+      party: party,
+      desc: party.getPopDescModule(),
+      status: party.getPopStatusModule()
+    }));
   });
   viewModel.isLoading = false;
 }
 
+function hashAndSave(party) {
+
+  if (!User.isKeyPairSet()) {
+    Dialog.alert({
+      title: "Key Pair Missing",
+      message: "Please generate a key pair.",
+      okButtonText: "Ok"
+    });
+
+    return Promise.reject("Key Pair Missing");
+  }
+  if (!party.isPopDescComplete()) {
+    Dialog.alert({
+      title: "Missing Information",
+      message: "Please provide a name, date, time, location and the list (min 3) of conodes" +
+      " of the organizers of your PoP Party.",
+      okButtonText: "Ok"
+    });
+
+    return Promise.reject("Missing Information");
+  }
+  if (!party.isLinkedConodeSet()) {
+    Dialog.alert({
+      title: "Not Linked to Conode",
+      message: "Please link to a conode first.",
+      okButtonText: "Ok"
+    });
+
+    return Promise.reject("Not Linked to Conode");
+  }
+
+  function registerPopDesc() {
+    return party.registerPopDesc()
+      .then(() => {
+        return party.loadStatus();
+      })
+      .then(() => {
+        return Dialog.alert({
+          title: "Successfully Registered",
+          message: "Your party has been correctly published ! You can now register the public key of each attendee.",
+          okButtonText: "Ok"
+        });
+      })
+      .catch(error => {
+        console.log(error);
+        console.dir(error);
+        console.trace();
+
+        Dialog.alert({
+          title: "Error",
+          message: "An error occured, please try again. - " + error,
+          okButtonText: "Ok"
+        });
+
+        return Promise.reject(error);
+      });
+  }
+
+  return registerPopDesc();
+}
+
+
 function partyTapped(args) {
   const index = args.index;
-  Frame.topmost().navigate({
-    moduleName: "drawers/pop/org/org-party-home",
-    context: {
-      party: viewModel.partyListDescriptions.getItem(index)
-    }
-  });
+  const status = viewModel.partyListDescriptions.getItem(index).status.status;
+  const party = viewModel.partyListDescriptions.getItem(index).party;
+  switch (status) {
+    case PartyStates.CONFIGURATION:
+
+      Dialog.action({
+        message: "What do you want to do ?",
+        cancelButtonText: "Cancel",
+        actions: ["Configure the party", "Publish the party"]
+      })
+        .then(result => {
+          if (result === "Configure the party") {
+            Frame.topmost().navigate({
+              moduleName: "drawers/pop/org/config/config-page",
+              context: {
+                party: party
+              }
+            });
+          } else if (result === "Publish the party") {
+            hashAndSave(party);
+          }
+        })
+        .catch((error) => {
+          Dialog.alert({
+            title: "Error",
+            message: "An error occured, please try again. - " + error,
+            okButtonText: "Ok"
+          });
+        });
+
+      break;
+    case PartyStates.PUBLISHED:
+      Frame.topmost().navigate({
+        moduleName: "drawers/pop/org/register/register-page",
+        context: {
+          party: party
+        }
+      });
+      break;
+    default:
+      Dialog.alert({
+        title: "Not implemented",
+        okButtonText: "Ok"
+      })
+  }
 
 }
 
@@ -128,11 +235,7 @@ function linkToConode(party) {
                   page.bindingContext = undefined;
                   page.bindingContext = viewModel;
 
-                  return Dialog.alert({
-                    title: "Success",
-                    message: "Your are now linked to the conode.",
-                    okButtonText: "Configure the party"
-                  });
+                  return Promise.resolve(conodes[index]);
                 });
             } else {
               return Promise.reject(CANCELED_BY_USER);
@@ -161,17 +264,43 @@ function linkToConode(party) {
 
 function addParty() {
   const newParty = new OrgParty();
-  linkToConode(newParty).then(result => {
-    Frame.topmost().navigate({
-      moduleName: "drawers/pop/org/config/config-page",
-      context: {
-        party: newParty,
-        newParty: true
+  let conode = undefined;
+  linkToConode(newParty)
+    .then((result) => {
+      conode = result;
+      return Dialog.action({
+        message: "Successfully linked to your conode ! What do you want to do ?",
+        cancelButtonText: "Cancel",
+        actions: ["Configure a new party", "List the proposals"]
+      })
+    })
+    .then(result => {
+      if (result === "Configure a new party") {
+        Frame.topmost().navigate({
+          moduleName: "drawers/pop/org/config/config-page",
+          context: {
+            party: newParty,
+            newParty: true
+          }
+        });
+      } else if (result === "List the proposals") {
+        Frame.topmost().navigate({
+          moduleName: "drawers/pop/org/proposals/org-party-proposals",
+          context: {
+            conode: conode,
+          }
+        });
+
+        return Promise.reject("New party is not needed anymore");
+      } else {
+        return Promise.reject("User canceled");
       }
+
+      return Promise.resolve()
+    })
+    .catch(() => {
+      newParty.remove();
     });
-  }).catch(() => {
-    newParty.remove();
-  });
 
 }
 

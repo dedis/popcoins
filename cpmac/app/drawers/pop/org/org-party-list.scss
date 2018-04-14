@@ -3,3 +3,9 @@
 fab {
   background-color: $accent-dark;
 }
+
+#status-text {
+  text-transform: uppercase;
+  text-align: right;
+  horizontal-align: right;
+}

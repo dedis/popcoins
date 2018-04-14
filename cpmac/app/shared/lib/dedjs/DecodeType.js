@@ -25,7 +25,9 @@ const GET_ALL_SKIPCHAINS_REPLY = "GetAllSkipchainsReply";
  */
 const STORE_CONFIG_REPLY = "StoreConfigReply";
 const FINALIZE_RESPONSE = "FinalizeResponse";
+const GET_PROPOSALS_REPLY = "GetProposalsReply";
 const FETCH_RESPONSE = FINALIZE_RESPONSE;
+const CHECK_CONFIG_REPLY = "CheckConfigReply";
 
 /**
  * CISC response types.
@@ -53,3 +55,5 @@ module.exports.DATA_UPDATE_REPLY = DATA_UPDATE_REPLY;
 module.exports.CONFIG_UPDATE_REPLY = CONFIG_UPDATE_REPLY;
 module.exports.PROPOSE_UPDATE_REPLY = PROPOSE_UPDATE_REPLY;
 module.exports.PROPOSE_VOTE_REPLY = PROPOSE_VOTE_REPLY;
+module.exports.GET_PROPOSALS_REPLY = GET_PROPOSALS_REPLY;
+module.exports.CHECK_CONFIG_REPLY = CHECK_CONFIG_REPLY;

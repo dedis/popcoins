@@ -1,7 +1,7 @@
 const Dialog = require("ui/dialogs");
 const PoP = require("../../../shared/lib/dedjs/object/pop/PoP").get;
 const Att = require("../../../shared/lib/dedjs/object/pop/att/Att").get;
-const Org = require("../../../shared/lib/dedjs/object/pop/org/OrgParty").get;
+const Org = require("../../../shared/lib/dedjs/object/pop/org/OrgParty").Party;
 
 function onLoaded(args) {
   const page = args.object;
