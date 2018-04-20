@@ -61,12 +61,12 @@ class CothorityMessages extends CothorityProtobuf {
    */
 
   /**
-  * Creates a KeyPair object from the given public and private keys.
-  * @param {Uint8Array} publicKey - the public key
-  * @param {Uint8Array} privateKey - the private key
-  * @param {Uint8Array} publicCompleteKey - the complete public key
-  * @returns {KeyPair} - the key pair created given the parameters
-  */
+   * Creates a KeyPair object from the given public and private keys.
+   * @param {Uint8Array} publicKey - the public key
+   * @param {Uint8Array} privateKey - the private key
+   * @param {Uint8Array} publicCompleteKey - the complete public key
+   * @returns {KeyPair} - the key pair created given the parameters
+   */
   createKeyPair(publicKey, privateKey, publicCompleteKey) {
     if (!(publicKey instanceof Uint8Array)) {
       throw new Error("publicKey must be an instance of Uint8Array");
@@ -379,15 +379,23 @@ class CothorityMessages extends CothorityProtobuf {
   /**
    * Creates an encoded FetchRequest for the pop party referenced by id.
    * @param {Uint8Array} id - the id of the config
+   * @param {boolean} returnUncomplete - a boolean to tell the conode if the final statement
+   * should be return even if it is uncomplete
    * @returns {*|Buffer|Uint8Array} - the encoded fetch request
    */
-  createFetchRequest(id) {
+  createFetchRequest(id, returnUncomplete) {
     if (!(id instanceof Uint8Array)) {
       throw new Error("id must be an instance of Uint8Array");
     }
 
+    if (returnUncomplete !== undefined && typeof returnUncomplete !== "boolean") {
+      throw new Error("returnUncomplete must be of type boolean or undefined but was " + typeof returnUncomplete);
+    }
+
+
     const fields = {
-      id: id
+      id: id,
+      returnUncomplete: returnUncomplete
     };
 
     return fields;

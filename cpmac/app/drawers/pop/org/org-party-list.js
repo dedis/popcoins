@@ -148,10 +148,24 @@ function partyTapped(args) {
     case PartyStates.ERROR:
       Dialog.alert({
         title: "Error",
-        message:"The linked conode is offline, please turn it on to retrieve the party infos",
+        message: "The linked conode is offline, please turn it on to retrieve the party infos",
         okButtonText: "Ok"
       });
-    break;
+      break;
+    case PartyStates.FINALIZING:
+      Dialog.alert({
+        title: "Finalizing",
+        message: "You have to wait until all the other organizers have finalized the party.",
+        okButtonText: "Ok"
+      });
+      break;
+    case PartyStates.FINALIZED:
+      Dialog.alert({
+        title: "Finalized",
+        message: "This party has been finalized by all the organizers.",
+        okButtonText: "Ok"
+      });
+      break;
     default:
       Dialog.alert({
         title: "Not implemented",

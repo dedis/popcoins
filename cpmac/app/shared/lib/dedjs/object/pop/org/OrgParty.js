@@ -832,21 +832,26 @@ class OrgParty {
    */
   loadStatus() {
     const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(this.getLinkedConode(), ""), RequestPath.POP);
-    const fetchRequest = CothorityMessages.createFetchRequest(this.getPopDescHash());
+    const fetchRequest = CothorityMessages.createFetchRequest(this.getPopDescHash(), true);
 
     return cothoritySocket.send(RequestPath.POP_FETCH_REQUEST, DecodeType.FINALIZE_RESPONSE, fetchRequest)
-      .then(() => {
-        this.setPopStatus(States.FINALIZED);
+      .then((response) => {
+        if (Object.keys(response.final.attendees).length === 0) {
+          this.setPopStatus(States.PUBLISHED);
+        } else if (response.final.signature.length === 0) {
+          this.setPopStatus(States.FINALIZING);
+        } else {
+          this.setPopStatus(States.FINALIZED);
+        }
+
         return Promise.resolve();
       })
       .catch(error => {
-        if (error.message !== undefined && error.message.includes("Not all other conodes finalized yet")) {
-          this.setPopStatus(States.PUBLISHED);
-        } else if (error.message !== undefined && error.message.includes("No config found")) {
+        if (error.message !== undefined && error.message.includes("No config found")) {
           this.setPopStatus(States.CONFIGURATION);
+        } else {
+          this.setPopStatus(States.ERROR);
         }
-        this.setPopStatus(States.ERROR);
-
         //Promise is resolved as the status is set to "error"
         return Promise.resolve(error);
       });
