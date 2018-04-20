@@ -34,7 +34,7 @@
         </nsListView:RadListView>
         <nsFloatingButton:fab tap="addParty"
                               row="0" col="3"
-                              icon="res://ic_add_white"
+                              icon="res://ic_add_white_48dp"
                               rippleColor="#f1f1f1"
                               class="fab-button"/>
 
