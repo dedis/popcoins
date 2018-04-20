@@ -47,7 +47,7 @@ class OrgParty {
     } else if (dirname === undefined) {
       this._dirname = uuidv4();
     } else {
-      throw new Error("dirname should be of type string");
+      throw new Error("dirname should be of type string or undefined");
     }
     this._isLoaded = false;
     this._linkedConode = ObservableModule.fromObject({
@@ -657,7 +657,7 @@ class OrgParty {
    */
   updatePopHash() {
     const popDesc = this.getPopDesc();
-    const descHash = Convert.hexToByteArray(HashJs.sha256()
+    const descHash = popDesc === {} ? [] : Convert.hexToByteArray(HashJs.sha256()
       .update(popDesc.name)
       .update(popDesc.dateTime)
       .update(popDesc.location)
@@ -755,6 +755,9 @@ class OrgParty {
         return PoP.addFinalStatement(response.final, true);
       })
       .catch(error => {
+        if (error.message !== undefined && error.message.includes("Not all other conodes finalized yet")) {
+          return Promise.resolve(States.FINALIZING);
+        }
         console.log(error);
         console.dir(error);
         console.trace();
@@ -774,11 +777,15 @@ class OrgParty {
   reset() {
     this._isLoaded = false;
 
-    const promises = [this.setLinkedConode(EMPTY_SERVER_IDENTITY, true), this.setPopDesc(EMPTY_POP_DESC, true), this.setRegisteredAtts([], true), this.setPopDescHash(new Uint8Array(), true)];
+    const promises = [this.setLinkedConode(EMPTY_SERVER_IDENTITY, true), this.setPopDesc(EMPTY_POP_DESC, true), this.setRegisteredAtts([], true)];
 
     return Promise.all(promises)
       .then(() => {
+        return this.setPopDescHash(new Uint8Array(), true);
+      })
+      .then(() => {
         this._isLoaded = true;
+        return Promise.resolve();
       })
       .catch(error => {
         console.log(error);
@@ -825,43 +832,6 @@ class OrgParty {
    */
   loadStatus() {
     const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(this.getLinkedConode(), ""), RequestPath.POP);
-    /*const checkConfigRequest = CothorityMessages.createCheckConfigRequest(this.getPopDescHash(), this.getRegisteredAtts().slice());
-
-    console.log("SKDEBUG on envoie le premier");
-    return cothoritySocket.send(RequestPath.POP_CHECK_CONFIG, DecodeType.CHECK_CONFIG_REPLY, checkConfigRequest)
-      .then(response => {
-        if (response.PopStatus ===  POP_STATUS_NO_CONFIG) {
-          this.setPopStatus(States.CONFIGURATION);
-          throw POP_STATUS_NO_CONFIG;
-        }
-        this.setPopStatus(States.PUBLISHED);
-        console.log("SKDEBUG on envoie le deuxième (pos = premier then)");
-
-        const fetchRequest = CothorityMessages.createFetchRequest(this.getPopDescHash());
-        return cothoritySocket.send(RequestPath.POP_FETCH_REQUEST, DecodeType.FINALIZE_RESPONSE, fetchRequest);
-      })
-      .then(response => {
-        if (response.final !== undefined) {
-          this.setPopStatus(States.FINALIZED);
-        }
-        console.log("SKDEBUG  (pos = deuxième then)");
-
-        return Promise.resolve();
-      })
-      .catch(error => {
-        console.log("SKDEBUG  (pos = premier catch)");
-
-        if (error === POP_STATUS_NO_CONFIG) {
-          return Promise.resolve();
-        }
-
-        this.setPopStatus(States.ERROR);
-        console.log(error);
-        console.dir(error);
-        console.trace();
-        return Promise.reject(error);
-      });
-*/
     const fetchRequest = CothorityMessages.createFetchRequest(this.getPopDescHash());
 
     return cothoritySocket.send(RequestPath.POP_FETCH_REQUEST, DecodeType.FINALIZE_RESPONSE, fetchRequest)
@@ -872,16 +842,13 @@ class OrgParty {
       .catch(error => {
         if (error.message !== undefined && error.message.includes("Not all other conodes finalized yet")) {
           this.setPopStatus(States.PUBLISHED);
-          return Promise.resolve();
         } else if (error.message !== undefined && error.message.includes("No config found")) {
           this.setPopStatus(States.CONFIGURATION);
-          return Promise.resolve();
         }
         this.setPopStatus(States.ERROR);
-        console.log(error);
-        console.dir(error);
-        console.trace();
-        return Promise.reject(error);
+
+        //Promise is resolved as the status is set to "error"
+        return Promise.resolve(error);
       });
 
   }
@@ -1008,6 +975,9 @@ const States = Object.freeze({
 
   /** Party is fianlized **/
   FINALIZED: "finalized",
+
+  /** Party is finalizing (not every nodes are finalized) **/
+  FINALIZING: "finalizing",
 
   /** Used if the status connot be retrived **/
   ERROR: "offline"

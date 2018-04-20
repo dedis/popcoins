@@ -30,6 +30,7 @@ function onLoaded(args) {
 }
 
 function retrieveProposals() {
+  viewModel.proposals.splice(0);
   const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(conodeAddress, ""), RequestPath.POP);
 
   return cothoritySocket.send(RequestPath.POP_GET_PROPOSALS, DecodeType.GET_PROPOSALS_REPLY, {})

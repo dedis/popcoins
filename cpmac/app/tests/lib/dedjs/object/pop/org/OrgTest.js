@@ -11,7 +11,9 @@ const CothorityMessages = require("../../../../../../shared/lib/dedjs/protobuf/b
 const User = require("../../../../../../shared/lib/dedjs/object/user/User").get;
 const PoP = require("../../../../../../shared/lib/dedjs/object/pop/PoP").get;
 
-const Org = require("../../../../../../shared/lib/dedjs/object/pop/org/OrgParty").Party;
+const OrgParty = require("../../../../../../shared/lib/dedjs/object/pop/org/OrgParty").Party;
+const PARTY_FOLDER = "TEST_PARTY";
+let Org = new OrgParty(PARTY_FOLDER);
 
 const CONODE_ADDRESS = "tls://10.0.2.2:7002";
 //const CONODE_ADDRESS = "tls://10.0.2.2:7004";
@@ -106,11 +108,15 @@ describe("Org", function () {
       return FileIO.writeStringTo(filePath, "");
     });
 
-    promises.push(Org.reset());
+    promises.push(Org.remove());
     promises.push(User.reset());
     promises.push(PoP.reset());
 
     return Promise.all(promises)
+      .then(() => {
+        Org = new OrgParty(PARTY_FOLDER);
+        return Promise.resolve();
+      })
       .catch(error => {
         console.log(error);
         console.dir(error);
@@ -136,12 +142,6 @@ describe("Org", function () {
     return clean();
   });
 
-  it("should be a singleton", function () {
-    const Org2 = require("../../../../../../shared/lib/dedjs/object/pop/org/OrgParty").Party;
-
-    (Org2 === Org).should.be.true;
-  });
-
   it("should correctly load empty linked conode", function () {
     const linkedConode = Org.getLinkedConode();
 
@@ -152,7 +152,7 @@ describe("Org", function () {
   });
 
   it("should correctly load linked conode", function () {
-    return FileIO.writeStringTo(FilesPath.POP_ORG_CONODE, Convert.objectToJson(SERVER_IDENTITY))
+    return FileIO.writeStringTo(FileIO.join(FilesPath.POP_ORG_PATH, PARTY_FOLDER, FilesPath.POP_ORG_CONODE), Convert.objectToJson(SERVER_IDENTITY))
       .then(() => {
         return Org.load();
       })
@@ -178,7 +178,7 @@ describe("Org", function () {
   });
 
   it("should correctly load PopDesc", function () {
-    return FileIO.writeStringTo(FilesPath.POP_ORG_DESC, Convert.objectToJson(POP_DESC))
+    return FileIO.writeStringTo(FileIO.join(FilesPath.POP_ORG_PATH, PARTY_FOLDER, FilesPath.POP_ORG_DESC), Convert.objectToJson(POP_DESC))
       .then(() => {
         return Org.load();
       })
@@ -209,7 +209,7 @@ describe("Org", function () {
   });
 
   it("should correctly load registered atts", function () {
-    return FileIO.writeStringTo(FilesPath.POP_ORG_ATTENDEES, REGISTERED_ATTS_JSON)
+    return FileIO.writeStringTo(FileIO.join(FilesPath.POP_ORG_PATH, PARTY_FOLDER, FilesPath.POP_ORG_ATTENDEES), REGISTERED_ATTS_JSON)
       .then(() => {
         return Org.load();
       })
@@ -229,7 +229,7 @@ describe("Org", function () {
   });
 
   it("should correctly load PopDesc hash", function () {
-    return FileIO.writeStringTo(FilesPath.POP_ORG_DESC_HASH, POP_DESC_HASH_JSON)
+    return FileIO.writeStringTo(FileIO.join(FilesPath.POP_ORG_PATH, PARTY_FOLDER, FilesPath.POP_ORG_DESC_HASH), POP_DESC_HASH_JSON)
       .then(() => {
         return Org.load();
       })
@@ -242,10 +242,10 @@ describe("Org", function () {
 
   it("should correctly reset", function () {
     const promises = [
-      FileIO.writeStringTo(FilesPath.POP_ORG_CONODE, Convert.objectToJson(SERVER_IDENTITY)),
-      FileIO.writeStringTo(FilesPath.POP_ORG_DESC, Convert.objectToJson(POP_DESC)),
-      FileIO.writeStringTo(FilesPath.POP_ORG_ATTENDEES, REGISTERED_ATTS_JSON),
-      FileIO.writeStringTo(FilesPath.POP_ORG_DESC_HASH, POP_DESC_HASH_JSON)
+      FileIO.writeStringTo(FileIO.join(FilesPath.POP_ORG_PATH, PARTY_FOLDER, FilesPath.POP_ORG_CONODE), Convert.objectToJson(SERVER_IDENTITY)),
+      FileIO.writeStringTo(FileIO.join(FilesPath.POP_ORG_PATH, PARTY_FOLDER, FilesPath.POP_ORG_DESC), Convert.objectToJson(POP_DESC)),
+      FileIO.writeStringTo(FileIO.join(FilesPath.POP_ORG_PATH, PARTY_FOLDER, FilesPath.POP_ORG_ATTENDEES), REGISTERED_ATTS_JSON),
+      FileIO.writeStringTo(FileIO.join(FilesPath.POP_ORG_PATH, PARTY_FOLDER, FilesPath.POP_ORG_DESC_HASH), POP_DESC_HASH_JSON)
     ];
 
     return Promise.all(promises)
@@ -254,10 +254,10 @@ describe("Org", function () {
       })
       .then(() => {
         const otherPromises = [
-          FileIO.getStringOf(FilesPath.POP_ORG_CONODE),
-          FileIO.getStringOf(FilesPath.POP_ORG_DESC),
-          FileIO.getStringOf(FilesPath.POP_ORG_ATTENDEES),
-          FileIO.getStringOf(FilesPath.POP_ORG_DESC_HASH)
+          FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, PARTY_FOLDER, FilesPath.POP_ORG_CONODE)),
+          FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, PARTY_FOLDER, FilesPath.POP_ORG_DESC)),
+          FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, PARTY_FOLDER, FilesPath.POP_ORG_ATTENDEES)),
+          FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, PARTY_FOLDER, FilesPath.POP_ORG_DESC_HASH))
         ];
 
         return Promise.all(otherPromises);
@@ -311,10 +311,10 @@ describe("Org", function () {
         popDescHash.should.be.empty;
 
         const otherPromises = [
-          FileIO.getStringOf(FilesPath.POP_ORG_CONODE),
-          FileIO.getStringOf(FilesPath.POP_ORG_DESC),
-          FileIO.getStringOf(FilesPath.POP_ORG_ATTENDEES),
-          FileIO.getStringOf(FilesPath.POP_ORG_DESC_HASH)
+          FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, PARTY_FOLDER, FilesPath.POP_ORG_CONODE)),
+          FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, PARTY_FOLDER, FilesPath.POP_ORG_DESC)),
+          FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, PARTY_FOLDER, FilesPath.POP_ORG_ATTENDEES)),
+          FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, PARTY_FOLDER, FilesPath.POP_ORG_DESC_HASH))
         ];
 
         return Promise.all(otherPromises);
@@ -401,7 +401,7 @@ describe("Org", function () {
           linkedConode.address.should.equal(CONODE_ADDRESS);
           linkedConode.description.should.equal(CONODE_DESCRIPTION);
 
-          return FileIO.getStringOf(FilesPath.POP_ORG_CONODE);
+          return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, PARTY_FOLDER, FilesPath.POP_ORG_CONODE));
         })
         .then(linkedConodeString => {
           linkedConodeString.should.equal(Convert.objectToJson(SERVER_IDENTITY));
@@ -418,7 +418,7 @@ describe("Org", function () {
           linkedConode.address.should.equal(CONODE_ADDRESS);
           linkedConode.description.should.equal(CONODE_DESCRIPTION);
 
-          return FileIO.getStringOf(FilesPath.POP_ORG_CONODE);
+          return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, PARTY_FOLDER, FilesPath.POP_ORG_CONODE));
         })
         .then(linkedConodeString => {
           linkedConodeString.should.be.empty;
@@ -491,7 +491,7 @@ describe("Org", function () {
 
           popDesc.roster.aggregate.should.deep.equal(POP_DESC_ROSTER.aggregate);
 
-          return FileIO.getStringOf(FilesPath.POP_ORG_DESC);
+          return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, PARTY_FOLDER, FilesPath.POP_ORG_DESC));
         })
         .then(popDescString => {
           popDescString.should.equal(Convert.objectToJson(POP_DESC));
@@ -518,7 +518,7 @@ describe("Org", function () {
 
           popDesc.roster.aggregate.should.deep.equal(POP_DESC_ROSTER.aggregate);
 
-          return FileIO.getStringOf(FilesPath.POP_ORG_DESC);
+          return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, PARTY_FOLDER, FilesPath.POP_ORG_DESC));
         })
         .then(popDescString => {
           popDescString.should.be.empty;
@@ -556,7 +556,7 @@ describe("Org", function () {
           registeredAtts.getItem(1).should.deep.equal(ATTENDEES[1]);
           registeredAtts.getItem(2).should.deep.equal(ATTENDEES[2]);
 
-          return FileIO.getStringOf(FilesPath.POP_ORG_ATTENDEES);
+          return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, PARTY_FOLDER, FilesPath.POP_ORG_ATTENDEES));
         })
         .then(registeredAttsString => {
           registeredAttsString.should.equal(REGISTERED_ATTS_JSON);
@@ -572,7 +572,7 @@ describe("Org", function () {
           registeredAtts.getItem(1).should.deep.equal(ATTENDEES[1]);
           registeredAtts.getItem(2).should.deep.equal(ATTENDEES[2]);
 
-          return FileIO.getStringOf(FilesPath.POP_ORG_ATTENDEES);
+          return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, PARTY_FOLDER, FilesPath.POP_ORG_ATTENDEES));
         })
         .then(registeredAttsString => {
           registeredAttsString.should.be.empty;
@@ -608,7 +608,7 @@ describe("Org", function () {
 
           popDescHash.should.deep.equal(POP_DESC_HASH_BYTE_ARRAY);
 
-          return FileIO.getStringOf(FilesPath.POP_ORG_DESC_HASH);
+          return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, PARTY_FOLDER, FilesPath.POP_ORG_DESC_HASH));
         })
         .then(popDescHashString => {
           popDescHashString.should.equal(POP_DESC_HASH_JSON);
@@ -622,7 +622,7 @@ describe("Org", function () {
 
           popDescHash.should.deep.equal(POP_DESC_HASH_BYTE_ARRAY);
 
-          return FileIO.getStringOf(FilesPath.POP_ORG_DESC_HASH);
+          return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, PARTY_FOLDER, FilesPath.POP_ORG_DESC_HASH));
         })
         .then(popDescHashString => {
           popDescHashString.should.be.empty;
@@ -645,7 +645,7 @@ describe("Org", function () {
 
           popDesc.name.should.equal("NEW_NAME");
 
-          return FileIO.getStringOf(FilesPath.POP_ORG_DESC);
+          return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, PARTY_FOLDER, FilesPath.POP_ORG_DESC));
         })
         .then(popDescString => {
           const popDescObject = Convert.jsonToObject(popDescString);
@@ -670,7 +670,7 @@ describe("Org", function () {
 
           popDesc.dateTime.should.equal("NEW_DATETIME");
 
-          return FileIO.getStringOf(FilesPath.POP_ORG_DESC);
+          return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, PARTY_FOLDER, FilesPath.POP_ORG_DESC));
         })
         .then(popDescString => {
           const popDescObject = Convert.jsonToObject(popDescString);
@@ -695,7 +695,7 @@ describe("Org", function () {
 
           popDesc.location.should.equal("NEW_LOCATION");
 
-          return FileIO.getStringOf(FilesPath.POP_ORG_DESC);
+          return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, PARTY_FOLDER, FilesPath.POP_ORG_DESC));
         })
         .then(popDescString => {
           const popDescObject = Convert.jsonToObject(popDescString);
@@ -720,7 +720,7 @@ describe("Org", function () {
 
           popDesc.roster.list.length.should.equal(POP_DESC_ROSTER.list.length + 1);
 
-          return FileIO.getStringOf(FilesPath.POP_ORG_DESC);
+          return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, PARTY_FOLDER, FilesPath.POP_ORG_DESC));
         })
         .then(popDescString => {
           const popDescObject = Convert.jsonToObject(popDescString);
@@ -736,6 +736,7 @@ describe("Org", function () {
     });
 
     it("should correctly add and save the new conode", function () {
+      console.log("SKDEBUG before : " + POP_DESC);
       return Org.setPopDesc(POP_DESC, true)
         .then(() => {
           Org.removePopDescConodeByIndex(1);
@@ -745,10 +746,11 @@ describe("Org", function () {
 
           popDesc.roster.list.length.should.equal(POP_DESC_ROSTER.list.length - 1);
 
-          return FileIO.getStringOf(FilesPath.POP_ORG_DESC);
+          return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, PARTY_FOLDER, FilesPath.POP_ORG_DESC));
         })
         .then(popDescString => {
           const popDescObject = Convert.jsonToObject(popDescString);
+          console.log("SKDEBUG after : " + popDescString);
 
           popDescObject.roster.list.length.should.equal(POP_DESC_ROSTER.list.length - 1);
         });
@@ -770,7 +772,7 @@ describe("Org", function () {
 
           registeredAttendees.length.should.equal(ATTENDEES.length + 1);
 
-          return FileIO.getStringOf(FilesPath.POP_ORG_ATTENDEES);
+          return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, PARTY_FOLDER, FilesPath.POP_ORG_ATTENDEES));
         })
         .then(registeredAttendeesString => {
           const registeredAttendeesObject = Convert.jsonToObject(registeredAttendeesString);
@@ -795,7 +797,7 @@ describe("Org", function () {
 
           registeredAttendees.length.should.equal(ATTENDEES.length - 1);
 
-          return FileIO.getStringOf(FilesPath.POP_ORG_ATTENDEES);
+          return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, PARTY_FOLDER, FilesPath.POP_ORG_ATTENDEES));
         })
         .then(registeredAttendeesString => {
           const registeredAttendeesObject = Convert.jsonToObject(registeredAttendeesString);

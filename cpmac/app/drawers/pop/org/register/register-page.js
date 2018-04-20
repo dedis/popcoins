@@ -3,6 +3,7 @@ const Frame = require("ui/frame");
 const Convert = require("../../../../shared/lib/dedjs/Convert");
 const ScanToReturn = require("../../../../shared/lib/scan-to-return/scan-to-return");
 const topmost = require("ui/frame").topmost;
+const PartyStates = require("../../../../shared/lib/dedjs/object/pop/org/OrgParty").States;
 
 const User = require("../../../../shared/lib/dedjs/object/user/User").get;
 
@@ -143,7 +144,7 @@ function deleteAttendee(args) {
 }
 
 /**
- * Function called when the button "register" is clicked. It starts the registration process with the organizers conode.
+ * Function called when the button "finalize" is clicked. It starts the registration process with the organizers conode.
  * @returns {Promise.<any>}
  */
 function registerKeys() {
@@ -184,7 +185,14 @@ function registerKeys() {
   }
 
   return Party.registerAttsAndFinalizeParty()
-    .then(() => {
+    .then((result) => {
+      if (result === PartyStates.FINALIZING) {
+        return Dialog.alert({
+          title: "Finalizing",
+          message: "Finalize order has been sent but not all other conodes finalized yet.",
+          okButtonText: "Ok"
+        });
+      }
       return Dialog.alert({
         title: "Success",
         message: "The final statement of you PoP-Party is accessible in the PoP tab.",

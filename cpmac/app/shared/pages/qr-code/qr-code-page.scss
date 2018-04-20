@@ -5,6 +5,10 @@ $box-width : 85%;
 $box-border-radius : 40;
 $text-box-height : 10%;
 
+.page-content {
+    background-color: $accent-light;
+}
+
 Label {
     color: "white"
 }

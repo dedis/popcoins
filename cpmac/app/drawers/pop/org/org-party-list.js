@@ -145,6 +145,13 @@ function partyTapped(args) {
         }
       });
       break;
+    case PartyStates.ERROR:
+      Dialog.alert({
+        title: "Error",
+        message:"The linked conode is offline, please turn it on to retrieve the party infos",
+        okButtonText: "Ok"
+      });
+    break;
     default:
       Dialog.alert({
         title: "Not implemented",
