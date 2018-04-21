@@ -41,6 +41,7 @@
         </GridLayout>
 
         <nsListView:RadListView items="{{ descModule.roster.list }}" id="list-view-conodes"
+                                itemTap="conodeTapped"
                                 itemSwipeProgressStarted="onSwipeCellStarted"
                                 swipeActions="true"
                                 row="3"

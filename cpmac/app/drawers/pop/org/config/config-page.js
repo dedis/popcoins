@@ -30,6 +30,7 @@ function onLoaded(args) {
     throw new Error("Party should be given in the context");
   }
 
+
   Party = context.party;
   newParty = context.newParty;
 
@@ -40,6 +41,25 @@ function onLoaded(args) {
   viewModel.dataForm = dataForm;
   pageObject = page.page;
   page.bindingContext = viewModel;
+
+  if (newParty && context.leader === undefined) {
+    throw new Error("Leader conode should be given in the context");
+  } else if (newParty) {
+    Party.addPopDescConode(context.leader)
+      .catch(error => {
+        console.log(error);
+        console.dir(error);
+        console.trace();
+
+        Dialog.alert({
+          title: "Error",
+          message: "An error occured, please try again. - " + error,
+          okButtonText: "Ok"
+        });
+      });
+
+  }
+
 
 }
 
@@ -94,20 +114,37 @@ function addManual() {
         pageObject.showModal("shared/pages/add-conode-manual/add-conode-manual", undefined, addManualCallBack, true);
         return Promise.resolve();
       } else if (result === undefined) {
-        // My Own
-        if (!Party.isLinkedConodeSet()) {
-          return Dialog.alert({
-            title: "Not Linked to Conode",
-            message: "Please link to a conode first.",
-            okButtonText: "Ok"
-          });
-        }
+        // My own
+        const conodes = User.getRoster().list;
+        const conodesNames = conodes.map(serverIdentity => {
+          return serverIdentity.description;
+        });
 
-        return Party.addPopDescConode(Party.getLinkedConode());
-      } else {
-        // Cancel
-        return Promise.resolve();
+        let index = undefined;
+
+        return Dialog.action({
+          message: "Choose a Conode",
+          cancelButtonText: "Cancel",
+          actions: conodesNames
+        })
+          .then(result => {
+            if (result !== "Cancel") {
+              index = conodesNames.indexOf(result);
+
+              return Party.addPopDescConode(conodes[index])
+            } else {
+              return Promise.resolve();
+            }
+          })
+          .catch(error => {
+            console.log(error);
+            console.dir(error);
+            console.trace();
+
+          });
+
       }
+
     })
     .catch(error => {
       console.log(error);
@@ -420,6 +457,38 @@ function addOrganizer() {
   });
 }
 
+function conodeTapped(args) {
+  const index = args.index;
+  Dialog
+    .action({
+      message: "What do you want to do ?",
+      cancelButtonText: "Cancel",
+      actions: ["Remove this organizer"]
+    })
+    .then(result => {
+      if (result === "Remove this organizer") {
+        if (index === 0) {
+          Dialog.alert({
+            title: "Error",
+            message: "You cannot remove the leader conode",
+            okButtonText: "Ok"
+          });
+
+          return Promise.resolve();
+        }
+        return Party.removePopDescConodeByIndex(index);
+      }
+    })
+    .catch((error) => {
+      Dialog.alert({
+        title: "Error",
+        message: "An error occured, please try again. - " + error,
+        okButtonText: "Ok"
+      });
+    });
+
+}
+
 module.exports.onLoaded = onLoaded;
 module.exports.hashAndSave = hashAndSave;
 module.exports.addManual = addManual;
@@ -432,3 +501,4 @@ module.exports.finish = finish;
 module.exports.addOrganizer = addOrganizer;
 module.exports.removeAndGoBack = removeAndGoBack;
 module.exports.save = save;
+module.exports.conodeTapped = conodeTapped;

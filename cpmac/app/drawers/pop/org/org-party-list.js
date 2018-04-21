@@ -111,11 +111,12 @@ function partyTapped(args) {
   switch (status) {
     case PartyStates.CONFIGURATION:
 
-      Dialog.action({
-        message: "What do you want to do ?",
-        cancelButtonText: "Cancel",
-        actions: ["Configure the party", "Publish the party"]
-      })
+      Dialog
+        .action({
+          message: "What do you want to do ?",
+          cancelButtonText: "Cancel",
+          actions: ["Configure the party", "Publish the party"]
+        })
         .then(result => {
           if (result === "Configure the party") {
             Frame.topmost().navigate({
@@ -301,6 +302,7 @@ function addParty() {
           moduleName: "drawers/pop/org/config/config-page",
           context: {
             party: newParty,
+            leader: conode,
             newParty: true
           }
         });
@@ -324,7 +326,6 @@ function addParty() {
     });
 
 }
-
 
 module.exports.onLoaded = onLoaded;
 module.exports.partyTapped = partyTapped;
