@@ -97,7 +97,8 @@ function displayQrOfPublicKey() {
     delete keyPair.private;
 
     pageObject.showModal("shared/pages/qr-code/qr-code-page", {
-      textToShow: Convert.objectToJson(keyPair)
+      textToShow: Convert.objectToJson(keyPair),
+      title: "Public Key"
     }, () => { }, true);
   } else {
     return Dialog.alert({

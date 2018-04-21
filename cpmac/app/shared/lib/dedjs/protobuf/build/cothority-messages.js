@@ -61,12 +61,12 @@ class CothorityMessages extends CothorityProtobuf {
    */
 
   /**
-  * Creates a KeyPair object from the given public and private keys.
-  * @param {Uint8Array} publicKey - the public key
-  * @param {Uint8Array} privateKey - the private key
-  * @param {Uint8Array} publicCompleteKey - the complete public key
-  * @returns {KeyPair} - the key pair created given the parameters
-  */
+   * Creates a KeyPair object from the given public and private keys.
+   * @param {Uint8Array} publicKey - the public key
+   * @param {Uint8Array} privateKey - the private key
+   * @param {Uint8Array} publicCompleteKey - the complete public key
+   * @returns {KeyPair} - the key pair created given the parameters
+   */
   createKeyPair(publicKey, privateKey, publicCompleteKey) {
     if (!(publicKey instanceof Uint8Array)) {
       throw new Error("publicKey must be an instance of Uint8Array");
@@ -310,8 +310,11 @@ class CothorityMessages extends CothorityProtobuf {
     if (!(descId instanceof Uint8Array)) {
       throw new Error("descId must be an instance of Uint8Array");
     }
-    if (!(attendees instanceof Array && attendees[0] instanceof Uint8Array)) {
-      throw new Error("attendees must be an instance of Array[Uint8Array]");
+    if (!(attendees instanceof Array)) {
+      throw new Error("attendees must be an instance of Array");
+    }
+    if (attendees.length > 0 && !(attendees[0] instanceof Uint8Array)) {
+      throw new Error("attendees[i] must be an instance of Uint8Array");
     }
     if (!(signature instanceof Uint8Array)) {
       throw new Error("signature must be an instance of Uint8Array");
@@ -322,6 +325,31 @@ class CothorityMessages extends CothorityProtobuf {
       attendees: attendees,
       signature: signature
     };
+
+    return fields;
+  }
+
+  /**
+   * Creates a message to check a PoP Config status
+   * @param hash - has of a party
+   * @param attendees - array of attendees to the party
+   * @returns {{hash: Uint8Array, attendees: Array}}
+   */
+  createCheckConfigRequest(hash, attendees) {
+    if (!(hash instanceof Uint8Array)) {
+      throw new Error("has must be an instance of Uint8Array");
+    }
+    if (!(attendees instanceof Array)) {
+      throw new Error("attendees must be an instance of Array");
+    }
+    if (attendees.length > 0 && !(attendees[0] instanceof Uint8Array)) {
+      throw new Error("attendees[i] must be an instance of Uint8Array");
+    }
+
+    const fields = {
+      hash: hash,
+      attendees: attendees
+    }
 
     return fields;
   }
@@ -351,15 +379,23 @@ class CothorityMessages extends CothorityProtobuf {
   /**
    * Creates an encoded FetchRequest for the pop party referenced by id.
    * @param {Uint8Array} id - the id of the config
+   * @param {boolean} returnUncomplete - a boolean to tell the conode if the final statement
+   * should be return even if it is uncomplete
    * @returns {*|Buffer|Uint8Array} - the encoded fetch request
    */
-  createFetchRequest(id) {
+  createFetchRequest(id, returnUncomplete) {
     if (!(id instanceof Uint8Array)) {
       throw new Error("id must be an instance of Uint8Array");
     }
 
+    if (returnUncomplete !== undefined && typeof returnUncomplete !== "boolean") {
+      throw new Error("returnUncomplete must be of type boolean or undefined but was " + typeof returnUncomplete);
+    }
+
+
     const fields = {
-      id: id
+      id: id,
+      returnUncomplete: returnUncomplete
     };
 
     return fields;

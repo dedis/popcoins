@@ -1,6 +1,6 @@
 <Page
         navigatingTo="onNavigatingTo"
-        xmlns:nsDrawer="nativescript-pro-ui/sidedrawer"
+        xmlns:nsDrawer="nativescript-ui-sidedrawer"
         xmlns:myDrawer="shared/my-drawer"
         xmlns:qr="drawers/cisc/qr"
         xmlns:home="drawers/cisc/home"
@@ -59,7 +59,7 @@
         Always wrap content in a layout component.
         -->
         <nsDrawer:RadSideDrawer.mainContent>
-            <TabView class="page-content" selectedIndex="1" selectedTabTextColor="black">
+            <TabView class="page-content" selectedIndex="1">
                 <TabView.items>
 
                     <TabViewItem title="QR">

@@ -34,10 +34,12 @@ const SKIPCHAIN_GET_ALL_SKIPCHAINS = `GetAllSkipchains`;
 /**
  * PoP Requests
  */
-const POP_STORE_CONFIG = `storeConfig`;
-const POP_FINALIZE_REQUEST = `finalizeRequest`;
-const POP_FETCH_REQUEST = `fetchRequest`;
+const POP_STORE_CONFIG = `StoreConfig`;
+const POP_FINALIZE_REQUEST = `FinalizeRequest`;
+const POP_FETCH_REQUEST = `FetchRequest`;
 const POP_PIN_REQUEST = `PinRequest`;
+const POP_GET_PROPOSALS = 'GetProposals';
+const POP_CHECK_CONFIG = 'CheckConfig';
 
 /**
  * CISC Requests
@@ -67,6 +69,8 @@ module.exports.POP_STORE_CONFIG = POP_STORE_CONFIG;
 module.exports.POP_FINALIZE_REQUEST = POP_FINALIZE_REQUEST;
 module.exports.POP_FETCH_REQUEST = POP_FETCH_REQUEST;
 module.exports.POP_PIN_REQUEST = POP_PIN_REQUEST;
+module.exports.POP_GET_PROPOSALS = POP_GET_PROPOSALS;
+module.exports.POP_CHECK_CONFIG = POP_CHECK_CONFIG;
 module.exports.CISC_CONFIG = CISC_CONFIG;
 module.exports.CISC_CONFIG_UPDATE = CISC_CONFIG_UPDATE;
 module.exports.CISC_DEVICE = CISC_DEVICE;

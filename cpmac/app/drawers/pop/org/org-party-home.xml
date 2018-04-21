@@ -53,7 +53,9 @@
         <Button text="Configuration" tap="configButtonTapped" row="9" col="0" colSpan="2"/>
         <Button text="Register Attendees" tap="registerButtonTapped" row="9" col="2" colSpan="2"/>
 
-        <Button text="Fetch PoP Party" tap="fetchButtonTapped" row="10" colSpan="4"/>
+        <Button text="Fetch PoP Party" tap="fetchButtonTapped" row="10" col="0" colSpan="2"/>
+        <Button text="Remove PoP Party" tap="removeButtonTapped" row="10" col="2" colSpan="2"/>
+
     </GridLayout>
 
 </Page>

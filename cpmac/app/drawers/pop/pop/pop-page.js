@@ -5,7 +5,7 @@ const Convert = require("../../../shared/lib/dedjs/Convert");
 const ScanToReturn = require("../../../shared/lib/scan-to-return/scan-to-return");
 const User = require("../../../shared/lib/dedjs/object/user/User").get;
 const PoP = require("../../../shared/lib/dedjs/object/pop/PoP").get;
-const Org = require("../../../shared/lib/dedjs/object/pop/org/Org").get;
+const Org = require("../../../shared/lib/dedjs/object/pop/org/OrgParty").Party;
 
 const FINAL_STATEMENT_OPTION_DELETE = "Delete";
 const FINAL_STATEMENT_OPTION_QR = "QR";
@@ -64,7 +64,8 @@ function finalStatementTapped(args) {
           object.id = Convert.byteArrayToBase64(descHash);
 
           pageObject.showModal("shared/pages/qr-code/qr-code-page", {
-            textToShow: Convert.objectToJson(object)
+            textToShow: Convert.objectToJson(object),
+            title: "Final Statement"
           }, () => { }, true);
 
           return Promise.resolve();

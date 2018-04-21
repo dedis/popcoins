@@ -14,10 +14,11 @@ const KEY_PAIR = "shared/res/files/user/keypair.json";
 const POP_FINAL_STATEMENTS = "shared/res/files/pop/final_statements.json";
 const POP_TOKEN = "shared/res/files/pop/token.json";
 
-const POP_ORG_CONODE = "shared/res/files/pop/org/conode.json";
-const POP_ORG_DESC = "shared/res/files/pop/org/description.json";
-const POP_ORG_DESC_HASH = "shared/res/files/pop/org/hash.json";
-const POP_ORG_ATTENDEES = "shared/res/files/pop/org/attendees.json";
+const POP_ORG_PATH = "shared/res/files/pop/org";
+const POP_ORG_CONODE = "conode.json";
+const POP_ORG_DESC = "description.json";
+const POP_ORG_DESC_HASH = "hash.json";
+const POP_ORG_ATTENDEES = "attendees.json";
 
 /**
  * CISC Files
@@ -29,6 +30,7 @@ module.exports.ROSTER = ROSTER;
 module.exports.KEY_PAIR = KEY_PAIR;
 module.exports.POP_FINAL_STATEMENTS = POP_FINAL_STATEMENTS;
 module.exports.POP_TOKEN = POP_TOKEN;
+module.exports.POP_ORG_PATH = POP_ORG_PATH;
 module.exports.POP_ORG_CONODE = POP_ORG_CONODE;
 module.exports.POP_ORG_DESC = POP_ORG_DESC;
 module.exports.POP_ORG_DESC_HASH = POP_ORG_DESC_HASH;

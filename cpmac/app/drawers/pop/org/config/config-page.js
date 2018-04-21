@@ -1,167 +1,77 @@
 const Dialog = require("ui/dialogs");
 const Frame = require("ui/frame");
-const ModalPicker = require("nativescript-modal-datetimepicker").ModalDatetimepicker;
 const Helper = require("../../../../shared/lib/dedjs/Helper");
 const Convert = require("../../../../shared/lib/dedjs/Convert");
 const Net = require("../../../../shared/lib/dedjs/Net");
 const ObjectType = require("../../../../shared/lib/dedjs/ObjectType");
 const ScanToReturn = require("../../../../shared/lib/scan-to-return/scan-to-return");
-
-const Org = require("../../../../shared/lib/dedjs/object/pop/org/Org").get;
+const Observable = require("tns-core-modules/data/observable");
 const User = require("../../../../shared/lib/dedjs/object/user/User").get;
+const topmost = require("ui/frame").topmost;
 
-const viewModel = Org.getPopDescModule();
-
-const DateTimePicker = new ModalPicker();
-
-let textFieldName = undefined;
-let labelDate = undefined;
-let labelTime = undefined;
-let textFieldLocation = undefined;
-let chosenDateTime = undefined;
+let viewModel = undefined;
+let Party = undefined;
+let newParty = undefined;
 
 let pageObject = undefined;
 
+let dataForm = Observable.fromObject({
+  name: "",
+  date: "",
+  time: "",
+  location: ""
+});
+
 function onLoaded(args) {
   const page = args.object;
+  const context = page.navigationContext;
+
+  if (context.party === undefined) {
+    throw new Error("Party should be given in the context");
+  }
+
+
+  Party = context.party;
+  newParty = context.newParty;
+
+  initDate();
+
+  viewModel = {};
+  viewModel.descModule = Party.getPopDescModule();
+  viewModel.dataForm = dataForm;
   pageObject = page.page;
   page.bindingContext = viewModel;
 
-  loadViews(page);
-  if (textFieldName === undefined || labelDate === undefined || labelTime === undefined || textFieldLocation === undefined) {
-    throw new Error("a field is undefined, but it shouldn't");
+  if (newParty && context.leader === undefined) {
+    throw new Error("Leader conode should be given in the context");
+  } else if (newParty) {
+    Party.addPopDescConode(context.leader)
+      .catch(error => {
+        console.log(error);
+        console.dir(error);
+        console.trace();
+
+        Dialog.alert({
+          title: "Error",
+          message: "An error occured, please try again. - " + error,
+          okButtonText: "Ok"
+        });
+      });
+
   }
 
-  setUpDate();
+
 }
 
-/**
- * Loads the needed views into their variables.
- * @param page - the current page object
- */
-function loadViews(page) {
-  textFieldName = page.getViewById("text-field-name");
-  labelDate = page.getViewById("label-date");
-  labelTime = page.getViewById("label-time");
-  textFieldLocation = page.getViewById("text-field-location");
+function initDate() {
+  const desc = Party.getPopDesc();
+  dataForm.set("name", Party.getPopDesc().name);
+  dataForm.set("location", Party.getPopDesc().location);
 
-  textFieldName.on("textChange", onNameChangeHandler);
-  textFieldLocation.on("textChange", onLocationChangeHandler);
-}
+  let date = new Date(desc.dateTime === "" ? Date.now() : Date.parse(desc.dateTime));
 
-function onNameChangeHandler() {
-  return Org.setPopDescName(textFieldName.text)
-    .catch(error => {
-      console.log(error);
-      console.dir(error);
-      console.trace();
-
-      Dialog.alert({
-        title: "Error",
-        message: "An unexpected error occurred during the save process. - " + error,
-        okButtonText: "Ok"
-      });
-
-      return Promise.reject(error);
-    });
-}
-
-function onLocationChangeHandler() {
-  return Org.setPopDescLocation(textFieldLocation.text)
-    .catch(error => {
-      console.log(error);
-      console.dir(error);
-      console.trace();
-
-      Dialog.alert({
-        title: "Error",
-        message: "An unexpected error occurred during the save process. - " + error,
-        okButtonText: "Ok"
-      });
-
-      return Promise.reject(error);
-    });
-}
-
-function setUpDate() {
-  const dateTimeString = Org.getPopDesc().dateTime;
-  if (dateTimeString === "") {
-    chosenDateTime = new Date(Date.now());
-    chosenDateTime.setMilliseconds(0);
-    chosenDateTime.setSeconds(0);
-  } else {
-    chosenDateTime = new Date(Date.parse(dateTimeString));
-  }
-
-  labelDate.text = chosenDateTime.toDateString();
-  labelTime.text = chosenDateTime.toTimeString();
-}
-
-function setDate() {
-  return DateTimePicker.pickDate({
-    title: "Pick a Date for you PoP-Party"
-  })
-    .then(date => {
-      const newDate = new Date(date.year, date.month - 1, date.day, 0, 0, 0, 0);
-
-      if (newDate.toDateString() !== "Invalid Date") {
-        chosenDateTime.setYear(date.year);
-        chosenDateTime.setMonth(date.month - 1);
-        chosenDateTime.setDate(date.day);
-
-        labelDate.text = chosenDateTime.toDateString();
-
-        return Org.setPopDescDateTime(chosenDateTime.toUTCString());
-      }
-
-      return Promise.resolve();
-    })
-    .catch(error => {
-      console.log(error);
-      console.dir(error);
-      console.trace();
-
-      Dialog.alert({
-        title: "Error",
-        message: "An unexpected error occurred during the save process. - " + error,
-        okButtonText: "Ok"
-      });
-
-      return Promise.reject(error);
-    });
-}
-
-function setTime() {
-  return DateTimePicker.pickTime({
-    title: "Pick a Time for you PoP-Party"
-  })
-    .then(time => {
-      const newTime = new Date(0, 0, 0, time.hour, time.minute, 0, 0);
-
-      if (newTime.toDateString() !== "Invalid Date") {
-        chosenDateTime.setHours(time.hour);
-        chosenDateTime.setMinutes(time.minute);
-
-        labelTime.text = chosenDateTime.toTimeString();
-
-        return Org.setPopDescDateTime(chosenDateTime.toUTCString());
-      }
-
-      return Promise.resolve();
-    })
-    .catch(error => {
-      console.log(error);
-      console.dir(error);
-      console.trace();
-
-      Dialog.alert({
-        title: "Error",
-        message: "An unexpected error occurred during the save process. - " + error,
-        okButtonText: "Ok"
-      });
-
-      return Promise.reject(error);
-    });
+  dataForm.set("date", date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + (date.getDay() + 1));
+  dataForm.set("time", date.getHours() + ":" + date.getMinutes());
 }
 
 /**
@@ -174,7 +84,7 @@ function addManual() {
     }
 
     if (server !== undefined) {
-      return Org.addPopDescConode(server)
+      return Party.addPopDescConode(server)
         .catch(error => {
           console.log(error);
           console.dir(error);
@@ -204,20 +114,37 @@ function addManual() {
         pageObject.showModal("shared/pages/add-conode-manual/add-conode-manual", undefined, addManualCallBack, true);
         return Promise.resolve();
       } else if (result === undefined) {
-        // My Own
-        if (!Org.isLinkedConodeSet()) {
-          return Dialog.alert({
-            title: "Not Linked to Conode",
-            message: "Please link to a conode first.",
-            okButtonText: "Ok"
-          });
-        }
+        // My own
+        const conodes = User.getRoster().list;
+        const conodesNames = conodes.map(serverIdentity => {
+          return serverIdentity.description;
+        });
 
-        return Org.addPopDescConode(Org.getLinkedConode());
-      } else {
-        // Cancel
-        return Promise.resolve();
+        let index = undefined;
+
+        return Dialog.action({
+          message: "Choose a Conode",
+          cancelButtonText: "Cancel",
+          actions: conodesNames
+        })
+          .then(result => {
+            if (result !== "Cancel") {
+              index = conodesNames.indexOf(result);
+
+              return Party.addPopDescConode(conodes[index])
+            } else {
+              return Promise.resolve();
+            }
+          })
+          .catch(error => {
+            console.log(error);
+            console.dir(error);
+            console.trace();
+
+          });
+
       }
+
     })
     .catch(error => {
       console.log(error);
@@ -234,12 +161,17 @@ function addManual() {
     });
 }
 
+/**
+ * Add a new conode by scanning it
+ *
+ * @returns {Promise}
+ */
 function addScan() {
   return ScanToReturn.scan()
     .then(string => {
       const conode = Convert.parseJsonServerIdentity(string);
 
-      return Org.addPopDescConode(conode);
+      return Party.addPopDescConode(conode);
     })
     .catch(error => {
       console.log(error);
@@ -259,13 +191,13 @@ function addScan() {
 function deleteConode(args) {
   // We do not get the index of the item swiped/clicked...
   const conodeId = Convert.byteArrayToBase64(args.object.bindingContext.id);
-  const conodesList = Org.getPopDesc().roster.list.map(server => {
+  const conodesList = Party.getPopDesc().roster.list.map(server => {
     return Convert.byteArrayToBase64(server.id);
   });
 
   const index = conodesList.indexOf(conodeId);
 
-  return Org.removePopDescConodeByIndex(index)
+  return Party.removePopDescConodeByIndex(index)
     .then(() => {
       const listView = Frame.topmost().currentPage.getViewById("list-view-conodes");
       listView.notifySwipeToExecuteFinished();
@@ -300,35 +232,98 @@ function onSwipeCellStarted(args) {
 }
 
 /**
+ * Parse the date from the data form and save it into the Party
+ */
+function setDate() {
+  let date = viewModel.dataForm.date.split("-");
+  let time = viewModel.dataForm.time.split(":");
+
+  if (date.length !== 3 || time.length !== 2) {
+    Dialog.alert({
+      title: "Internal error",
+      message: "Cannot parse date or time.",
+      okButtonText: "Ok"
+    });
+
+    return Promise.reject("Cannot parse date or time");
+  }
+
+  date.map(parseInt);
+  time.map(parseInt);
+
+  let dateString = new Date(date[0], date[1] - 1, date[2] - 1, time[0], time[1], 0, 0).toString();
+
+  return Party.setPopDescDateTime(dateString);
+}
+
+/**
+ * Conclude the creation of the party : save all the infos and register
+ * on the conode
+ */
+function finish() {
+  let promises = [
+    Party.setPopDescLocation(viewModel.dataForm.location),
+    Party.setPopDescName(viewModel.dataForm.name),
+    setDate()
+  ];
+
+  Promise.all(promises).then(hashAndSave).then(() => {
+    goBack(false);
+  })
+}
+
+/**
+ * Save the config back to the file
+ */
+function save() {
+  let promises = [
+    Party.setPopDescLocation(viewModel.dataForm.location),
+    Party.setPopDescName(viewModel.dataForm.name),
+    setDate()
+  ];
+
+  Promise.all(promises).then(() => {
+    return Party.updatePopHash();
+  }).then(goBack)
+}
+
+/**
  * Hashes and saves the config/description entered by the organizer of the PoP party.
  * @returns {Promise.<*[]>}
  */
 function hashAndSave() {
+
   if (!User.isKeyPairSet()) {
-    return Dialog.alert({
+    Dialog.alert({
       title: "Key Pair Missing",
       message: "Please generate a key pair.",
       okButtonText: "Ok"
     });
+
+    return Promise.reject("Key Pair Missing");
   }
-  if (!Org.isPopDescComplete()) {
-    return Dialog.alert({
+  if (!Party.isPopDescComplete()) {
+    Dialog.alert({
       title: "Missing Information",
       message: "Please provide a name, date, time, location and the list (min 3) of conodes" +
-        " of the organizers of your PoP Party.",
+      " of the organizers of your PoP Party.",
       okButtonText: "Ok"
     });
+
+    return Promise.reject("Missing Information");
   }
-  if (!Org.isLinkedConodeSet()) {
-    return Dialog.alert({
+  if (!Party.isLinkedConodeSet()) {
+    Dialog.alert({
       title: "Not Linked to Conode",
       message: "Please link to a conode first.",
       okButtonText: "Ok"
     });
+
+    return Promise.reject("Not Linked to Conode");
   }
 
   function registerPopDesc() {
-    return Org.registerPopDesc()
+    return Party.registerPopDesc()
       .then(descHash => {
         return Dialog.alert({
           title: "Successfully Hashed",
@@ -351,24 +346,7 @@ function hashAndSave() {
       });
   }
 
-  const oldPopDescHash = Org.getPopDescHash();
-  if (oldPopDescHash.length > 0) {
-    return Dialog.confirm({
-      title: "Old Description Hash Overwriting",
-      message: "You already have a description hash stored. Do you really want to overwrite it?",
-      okButtonText: "Yes",
-      cancelButtonText: "Cancel"
-    })
-      .then(result => {
-        if (result) {
-          return registerPopDesc();
-        } else {
-          return Promise.resolve();
-        }
-      });
-  } else {
-    return registerPopDesc();
-  }
+  return registerPopDesc();
 }
 
 function manageDesc() {
@@ -392,24 +370,24 @@ function manageDesc() {
           .then(popDescJson => {
             const popDesc = Convert.parseJsonPopDesc(popDescJson);
 
-            return Org.setPopDesc(popDesc, true)
+            return Party.setPopDesc(popDesc, true)
               .then(() => {
                 return setUpDate();
               });
           })
       } else if (result === undefined) {
         // Share
-        if (!Org.isPopDescComplete()) {
+        if (!Party.isPopDescComplete()) {
           return Dialog.alert({
             title: "Missing Information",
             message: "Please provide a name, date, time, location and the list (min 3) of conodes" +
-              " of the organizers of your PoP Party.",
+            " of the organizers of your PoP Party.",
             okButtonText: "Ok"
           });
         }
 
         const PasteBin = new Net.PasteBin();
-        const popDescJson = JSON.stringify(Org.getPopDesc());
+        const popDescJson = JSON.stringify(Party.getPopDesc());
 
         return PasteBin.paste(popDescJson)
           .then(id => {
@@ -417,8 +395,10 @@ function manageDesc() {
             object.id = id;
 
             pageObject.showModal("shared/pages/qr-code/qr-code-page", {
-              textToShow: Convert.objectToJson(object)
-            }, () => { }, true);
+              textToShow: Convert.objectToJson(object),
+              title: "Party informations"
+            }, () => {
+            }, true);
 
             return Promise.resolve();
           });
@@ -442,12 +422,83 @@ function manageDesc() {
     });
 }
 
+function goBack() {
+  topmost().goBack();
+}
+
+function removeAndGoBack() {
+  if (newParty) {
+    Party.remove().then(() => {
+      topmost().goBack();
+    }).catch((error) => {
+      console.log("Party could not be deleted");
+      console.log(error);
+      console.trace();
+      topmost().goBack();
+    });
+    return;
+  }
+
+  goBack();
+}
+
+function addOrganizer() {
+  Dialog.action({
+    message: "How would you like to add the new organizer ?",
+    cancelButtonText: "Cancel",
+    actions: ["Scan QR", "Enter manually"]
+  }).then(function (result) {
+    console.log("Dialog result: " + result);
+    if (result === "Scan QR") {
+      addScan();
+    } else if (result === "Enter manually") {
+      addManual();
+    }
+  });
+}
+
+function conodeTapped(args) {
+  const index = args.index;
+  Dialog
+    .action({
+      message: "What do you want to do ?",
+      cancelButtonText: "Cancel",
+      actions: ["Remove this organizer"]
+    })
+    .then(result => {
+      if (result === "Remove this organizer") {
+        if (index === 0) {
+          Dialog.alert({
+            title: "Error",
+            message: "You cannot remove the leader conode",
+            okButtonText: "Ok"
+          });
+
+          return Promise.resolve();
+        }
+        return Party.removePopDescConodeByIndex(index);
+      }
+    })
+    .catch((error) => {
+      Dialog.alert({
+        title: "Error",
+        message: "An error occured, please try again. - " + error,
+        okButtonText: "Ok"
+      });
+    });
+
+}
+
 module.exports.onLoaded = onLoaded;
-module.exports.setDate = setDate;
-module.exports.setTime = setTime;
 module.exports.hashAndSave = hashAndSave;
 module.exports.addManual = addManual;
 module.exports.addScan = addScan;
 module.exports.deleteConode = deleteConode;
 module.exports.onSwipeCellStarted = onSwipeCellStarted;
 module.exports.manageDesc = manageDesc;
+module.exports.goBack = goBack;
+module.exports.finish = finish;
+module.exports.addOrganizer = addOrganizer;
+module.exports.removeAndGoBack = removeAndGoBack;
+module.exports.save = save;
+module.exports.conodeTapped = conodeTapped;

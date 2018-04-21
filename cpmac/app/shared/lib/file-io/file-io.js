@@ -49,5 +49,49 @@ function writeStringTo(filePath, string) {
     });
 }
 
+/**
+ * Execute a given function on each element of a folder.
+ * @param {string} folder - the path to the folder
+ * @param {function} closure - the function that will be exeuted on each element. It has to be of type
+ * function (elementName: string)
+ */
+function forEachFolderElement(folder, closure) {
+  if (typeof folder !== "string") {
+    throw new Error("folder must be of type string");
+  }
+
+  if (typeof closure !== "function") {
+    throw new Error("closure must be of type function");
+  }
+
+  Documents.getFolder(folder).eachEntity(function (entity) {
+    closure(entity);
+
+    // continue until the last file
+    return true;
+  })
+}
+
+/**
+ * Remove the specified fodler
+ * @param {string} folder
+ * @retuns {Promise} - a promise that gets resolved once the folder has been deleted
+ */
+function removeFolder(folder) {
+  if (typeof folder !== "string") {
+    throw new Error("folder must be of type string");
+  }
+
+  return Documents.getFolder(folder).remove().catch((error) => {
+    console.log("REMOVING ERROR :");
+    console.log(error);
+    console.dir(error);
+    console.trace();
+  });
+}
+
 module.exports.getStringOf = getStringOf;
 module.exports.writeStringTo = writeStringTo;
+module.exports.forEachFolderElement = forEachFolderElement;
+module.exports.removeFolder = removeFolder;
+module.exports.join = FileSystem.path.join;

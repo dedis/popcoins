@@ -1,77 +1,63 @@
 <Page
         class="page"
         loaded="onLoaded"
-        xmlns:nsListView="nativescript-pro-ui/listview">
+        xmlns:nsListView="nativescript-ui-listview"
+        xmlns:nsDataForm="nativescript-ui-dataform">
 
     <ActionBar class="action-bar">
+        <NavigationButton text="Go Back" android:icon="res://ic_arrow_back" tap="removeAndGoBack"/>
         <Label class="action-bar-title" text="Configuration"/>
-        <ActionItem tap="manageDesc"
-                    ios.systemIcon="2" ios.position="right"
-                    text="Manage Description" android.position="popup"/>
+        <ActionItem tap="save"
+                    ios.systemIcon="0" ios.position="right"
+                    android:icon="res://ic_done" android.position="actionBar"/>
     </ActionBar>
 
-    <GridLayout class="page-content" rows="auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,*,auto"
+    <GridLayout class="page-content" rows="auto, auto, auto,*"
                 columns="*,auto,*">
-        <Label class="label-space" text="Name" row="0" col="0" colSpan="3"/>
-        <Label class="label-title" text=" - " row="1" col="0" colSpan="3"/>
-        <TextField class="text-field" text="{{ name }}" hint="name" autocorrect="true" autocapitalizationType="words"
-                   returnKeyType="next"
-                   row="2"
-                   col="0"
-                   colSpan="3"
-                   id="text-field-name"/>
+        <Label class="label-title" text="Description" row="0" col="0" colSpan="3"/>
 
-        <Label class="label-space" text="Date" row="3" col="0" colSpan="3"/>
-        <Label class="label-title" text=" - " row="4" col="0" colSpan="3"/>
-        <Label tap="setDate" row="5" col="0" colSpan="3" id="label-date"/>
 
-        <Label class="label-space" text="Time" row="6" col="0" colSpan="3"/>
-        <Label class="label-title" text=" - " row="7" col="0" colSpan="3"/>
-        <Label tap="setTime" row="8" col="0" colSpan="3" id="label-time"/>
+        <nsDataForm:RadDataForm id="data-form" source="{{ dataForm }}" row="1" colSpan="3">
+            <nsDataForm:RadaForm.properties>
+                <nsDataForm:EntityProperty name="name" index="0"/>
+                <nsDataForm:EntityProperty name="date" index="1">
+                    <nsDataForm:PropertyEditor.editor>
+                        <nsDataForm:PropertyEditor type="DatePicker"/>
+                    </nsDataForm:PropertyEditor.editor>
+                </nsDataForm:EntityProperty>
+                <nsDataForm:EntityProperty name="time" index="2">
+                    <nsDataForm:PropertyEditor.editor>
+                        <nsDataForm:PropertyEditor type="TimePicker"/>
+                    </nsDataForm:PropertyEditor.editor>
+                </nsDataForm:EntityProperty>
+                <nsDataForm:EntityProperty name="location" index="3"/>
+                <nsDataForm:EntityProperty name="_observers" hidden="true"/>
+                <nsDataForm:EntityProperty name="_map" hidden="true"/>
+            </nsDataForm:RadaForm.properties>
+        </nsDataForm:RadDataForm>
+        <GridLayout id="org-list-header" rows="auto" columns="auto, *" row="2" colSpan="3">
+            <Label class="label-title" text="Organizers" row="0" col="0" colSpan="2"/>
+            <Label class="label-title" id="addOrg" text="+" tap="addOrganizer" row="0" col="1"/>
+        </GridLayout>
 
-        <Label class="label-space" text="Location" row="9" col="0" colSpan="3"/>
-        <Label class="label-title" text=" - " row="10" col="0" colSpan="3"/>
-        <TextField class="text-field" text="{{ location }}" hint="location" autocorrect="true" autocapitalizationType="words"
-                   returnKeyType="done"
-                   row="11"
-                   col="0"
-                   colSpan="3"
-                   id="text-field-location"/>
-
-        <Label class="label-title" text="Conodes" row="12" col="0" colSpan="3"/>
-
-        <nsListView:RadListView items="{{ roster.list }}" id="list-view-conodes"
-                  itemSwipeProgressStarted="onSwipeCellStarted"
-                  swipeActions="true"
-                  row="13"
-                  col="0"
-                  colSpan="3">
-
-            <nsListView:RadListView.itemSwipeTemplate>
-                <GridLayout rows="*" columns="*,auto">
-                    <StackLayout orientation="horizontal" col="0">
-                    </StackLayout>
-                    <StackLayout orientation="horizontal" col="1">
-                        <Button id="button-delete" text="Delete" tap="deleteConode" backgroundColor="red"/>
-                    </StackLayout>
-                </GridLayout>
-            </nsListView:RadListView.itemSwipeTemplate>
+        <nsListView:RadListView items="{{ descModule.roster.list }}" id="list-view-conodes"
+                                itemTap="conodeTapped"
+                                itemSwipeProgressStarted="onSwipeCellStarted"
+                                swipeActions="true"
+                                row="3"
+                                col="0"
+                                colSpan="3">
+            <nsListView:RadListView.listViewLayout>
+                <nsListView:ListViewGridLayout scrollDirection="vertical" spanCount="3"/>
+            </nsListView:RadListView.listViewLayout>
 
             <nsListView:RadListView.itemTemplate>
-                <GridLayout rows="*,*,*,*,*" columns="*" backgroundColor="white">
-                    <Label text="{{ description }}" row="0" textAlignment="left" textWrap="true"/>
-                    <Label text="{{ address }}" row="1" textAlignment="left" textWrap="true"/>
-                    <Label text="{{ toHex(public) }}" row="2" textAlignment="left" textWrap="true"/>
-                    <Label text="{{ toHex(id) }}" row="3" textAlignment="left" textWrap="true"/>
-                    <StackLayout row="4" height="1" backgroundColor="black"/>
-                </GridLayout>
+                <StackLayout class="grid-list">
+                    <Label class="grid-list-text" text="{{ description }}" textWrap="false"/>
+                </StackLayout>
             </nsListView:RadListView.itemTemplate>
 
         </nsListView:RadListView>
-
-        <Button text="Manual" tap="addManual" row="14" col="0"/>
-        <Button text="Hash &amp; Save" tap="hashAndSave" row="14" col="1"/>
-        <Button text="Scan" tap="addScan" row="14" col="2"/>
     </GridLayout>
 
 </Page>

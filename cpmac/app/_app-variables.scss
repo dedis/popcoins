@@ -8,8 +8,8 @@ $blue-50: rgba($blue-dark, 0.5) !default;
 $blue-20: rgba($blue-dark, 0.2) !default;
 $blue-10: rgba($blue-dark, 0.1) !default;
 
-$accent-dark: #3A53FF !default;
-$accent-light: #4781FE !default;
+$accent-dark: #8190a4 !default;
+$accent-light: #c0ccd9 !default;
 
 $success-dark: #06CE6A !default;
 $success-light: #00E676 !default;
@@ -41,7 +41,7 @@ $label-title-font-size: 19;
  **/
 
 // ActionBar
-$ab-background: $accent-dark;
+$ab-background: $accent-light;
 $ab-color: $background-light;
 
 $item-active-color: $accent-dark;

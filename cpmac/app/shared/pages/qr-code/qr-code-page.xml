@@ -1,18 +1,14 @@
 <Page
         class="page"
         loaded="onLoaded"
-        shownModally="onShownModally">>
+        shownModally="onShownModally">
 
-    <ActionBar class="action-bar">
-        <Label class="action-bar-title" text="QR Code"/>
-    </ActionBar>
 
-    <GridLayout class="page-content" rows="*,*,auto" columns="*">
-        <Image id="image" stretch="aspectFit" row="0" tap="copyToClipboard"/>
-        <TextView class="label-title" editable="false"
-          row="1"
-          id="text-view"/>
-        <Button text="Done" tap="onDone" row="2"/>
+    <GridLayout class="page-content" rows="auto, *" columns="*">
+        <Label id="page-name" text="{{ title }}"/>
+        <Label vertical-align="center" tap="onDone" class="fa" text="&#xf060;" color="white" font-weight="light" row="0" column="0"/>
+        <Image id="image" stretch="aspectFit" tap="copyToClipboard" row="1" column="0" />
+        <Label id="scan-me" text="SCAN ME" row="1" column="0"/>
     </GridLayout>
 
 </Page>

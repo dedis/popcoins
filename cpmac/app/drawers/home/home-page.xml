@@ -1,8 +1,8 @@
 <Page
         class="page"
         navigatingTo="onNavigatingTo"
-        xmlns:nsDrawer="nativescript-pro-ui/sidedrawer"
-        xmlns:nsListView="nativescript-pro-ui/listview"
+        xmlns:nsDrawer="nativescript-ui-sidedrawer"
+        xmlns:nsListView="nativescript-ui-listview"
         xmlns:myDrawer="shared/my-drawer"
         xmlns="http://www.nativescript.org/tns.xsd">
 
@@ -22,7 +22,7 @@
         <Label class="action-bar-title" text="Home"/>
         <ActionItem tap="addConode"
                     ios.systemIcon="4" ios.position="right"
-                    text="Add Conode" android.position="popup"/>
+                    icon="res://ic_add_white" android.position="actionBar"/>
     </ActionBar>
 
     <!--
@@ -68,7 +68,7 @@
                           id="listView">
 
                     <nsListView:RadListView.itemSwipeTemplate>
-                        <GridLayout rows="*" columns="*,auto">
+                        <GridLayout class="basic-list-decorated" rows="*" columns="*,auto">
                             <StackLayout orientation="horizontal" col="0">
                             </StackLayout>
                             <StackLayout orientation="horizontal" col="1">
@@ -78,12 +78,9 @@
                     </nsListView:RadListView.itemSwipeTemplate>
 
                     <nsListView:RadListView.itemTemplate>
-                        <GridLayout id="grid-layout-conode-stats" rows="*,*,*,*,auto" columns="*" backgroundColor="white">
-                            <Label text="{{ description }}" row="0" textWrap="true"/>
+                        <GridLayout class="basic-list-decorated" id="grid-layout-conode-stats" rows="*,*" columns="*">
+                            <Label class="list-title" text="{{ description }}" row="0" textWrap="true"/>
                             <Label text="{{ address }}" row="1" textWrap="true"/>
-                            <Label text="{{ toHex(id) }}" row="2" textWrap="true"/>
-                            <Label text="{{ toHex(public) }}" row="3" textWrap="true"/>
-                            <StackLayout row="4" height="1" backgroundColor="black"/>
                         </GridLayout>
                     </nsListView:RadListView.itemTemplate>
                 </nsListView:RadListView>

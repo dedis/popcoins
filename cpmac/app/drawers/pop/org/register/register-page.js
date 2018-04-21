@@ -2,15 +2,30 @@ const Dialog = require("ui/dialogs");
 const Frame = require("ui/frame");
 const Convert = require("../../../../shared/lib/dedjs/Convert");
 const ScanToReturn = require("../../../../shared/lib/scan-to-return/scan-to-return");
+const topmost = require("ui/frame").topmost;
+const PartyStates = require("../../../../shared/lib/dedjs/object/pop/org/OrgParty").States;
 
-const Org = require("../../../../shared/lib/dedjs/object/pop/org/Org").get;
 const User = require("../../../../shared/lib/dedjs/object/user/User").get;
 
-const viewModel = Org.getRegisteredAttsModule()
+let viewModel = undefined;
+let Party = undefined;
+
 
 function onLoaded(args) {
   const page = args.object;
+  const context = page.navigationContext;
+
+  if(context.party === undefined) {
+    throw new Error("Party should be given in the context");
+  }
+
+  Party = context.party;
+  viewModel = Party.getRegisteredAttsModule();
   page.bindingContext = viewModel;
+  let finalizeLabel = page.getViewById("finalize");
+  // Without this the text is not vertically centered in is own view
+  finalizeLabel.android.setGravity(android.view.Gravity.CENTER);
+
 }
 
 /**
@@ -28,7 +43,7 @@ function addManual() {
     .then(args => {
       if (args.result && args.text !== undefined && args.text.length > 0) {
         // Add Key
-        return Org.registerAttendee(Convert.hexToByteArray(args.text));
+        return Party.registerAttendee(Convert.hexToByteArray(args.text));
       } else if (args.result === undefined) {
         // Add Myself
         if (!User.isKeyPairSet()) {
@@ -39,7 +54,7 @@ function addManual() {
           });
         }
 
-        return Org.registerAttendee(User.getKeyPair().public);
+        return Party.registerAttendee(User.getKeyPair().public);
       } else {
         // Cancel
         return Promise.resolve();
@@ -68,7 +83,7 @@ function addScan() {
     .then(keyPairJson => {
       const keyPair = Convert.parseJsonKeyPair(keyPairJson);
 
-      return Org.registerAttendee(keyPair.public);
+      return Party.registerAttendee(keyPair.public);
     })
     .catch(error => {
       console.log(error);
@@ -100,13 +115,13 @@ function onSwipeCellStarted(args) {
 function deleteAttendee(args) {
   // We do not get the index of the item swiped/clicked...
   const attendee = Convert.byteArrayToBase64(args.object.bindingContext);
-  const attendeeList = Org.getRegisteredAtts().slice().map(attendee => {
+  const attendeeList = Party.getRegisteredAtts().slice().map(attendee => {
     return Convert.byteArrayToBase64(attendee);
   });
 
   const index = attendeeList.indexOf(attendee);
 
-  return Org.unregisterAttendeeByIndex(index)
+  return Party.unregisterAttendeeByIndex(index)
     .then(() => {
       const listView = Frame.topmost().currentPage.getViewById("list-view-registered-keys");
       listView.notifySwipeToExecuteFinished();
@@ -129,7 +144,7 @@ function deleteAttendee(args) {
 }
 
 /**
- * Function called when the button "register" is clicked. It starts the registration process with the organizers conode.
+ * Function called when the button "finalize" is clicked. It starts the registration process with the organizers conode.
  * @returns {Promise.<any>}
  */
 function registerKeys() {
@@ -140,28 +155,28 @@ function registerKeys() {
       okButtonText: "Ok"
     });
   }
-  if (!Org.isPopDescComplete()) {
+  if (!Party.isPopDescComplete()) {
     return Dialog.alert({
       title: "No PopDesc",
       message: "Please configure the PopDesc first.",
       okButtonText: "Ok"
     });
   }
-  if (Org.getPopDescHash().length === 0) {
+  if (Party.getPopDescHash().length === 0) {
     return Dialog.alert({
       title: "No PopDesc Hash",
       message: "Please register you PopDesc on your conode first.",
       okButtonText: "Ok"
     });
   }
-  if (!Org.isLinkedConodeSet()) {
+  if (!Party.isLinkedConodeSet()) {
     return Dialog.alert({
       title: "Not Linked to Conode",
       message: "Please link to a conode first.",
       okButtonText: "Ok"
     });
   }
-  if (Org.getRegisteredAtts().length === 0) {
+  if (Party.getRegisteredAtts().length === 0) {
     return Dialog.alert({
       title: "No Attendee to Register",
       message: "Please add some attendees first.",
@@ -169,13 +184,27 @@ function registerKeys() {
     });
   }
 
-  return Org.registerAttsAndFinalizeParty()
-    .then(() => {
+  return Party.registerAttsAndFinalizeParty()
+    .then((result) => {
+      if (result === PartyStates.FINALIZING) {
+        return Dialog.alert({
+          title: "Finalizing",
+          message: "Finalize order has been sent but not all other conodes finalized yet.",
+          okButtonText: "Ok"
+        });
+      }
       return Dialog.alert({
         title: "Success",
         message: "The final statement of you PoP-Party is accessible in the PoP tab.",
         okButtonText: "Ok"
       });
+    })
+    .then(() => {
+      const navigationEntry = {
+        moduleName: "drawers/pop/pop-page",
+        clearHistory: true
+      };
+      topmost().navigate(navigationEntry);
     })
     .catch(error => {
       console.log(error);
@@ -192,9 +221,30 @@ function registerKeys() {
     });
 }
 
+function addNewKey() {
+  Dialog.action({
+    message: "How would you like to specify the key ?",
+    cancelButtonText: "Cancel",
+    actions: ["Scan QR", "Enter manually"]
+  }).then(function (result) {
+    console.log("Dialog result: " + result);
+    if(result === "Scan QR"){
+      addScan();
+    }else if(result === "Enter manually"){
+      addManual();
+    }
+  });
+}
+
+function goBack() {
+  topmost().goBack();
+}
+
 module.exports.onLoaded = onLoaded;
 module.exports.addManual = addManual;
 module.exports.addScan = addScan;
 module.exports.registerKeys = registerKeys;
 module.exports.deleteAttendee = deleteAttendee;
 module.exports.onSwipeCellStarted = onSwipeCellStarted;
+module.exports.addNewKey = addNewKey;
+module.exports.goBack = goBack;

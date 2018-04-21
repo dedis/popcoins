@@ -6,10 +6,7 @@ const CURVE_ED25519_KYBER = new Kyber.curve.edwards25519.Curve;
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const HashJs = require("hash.js");
-const BigNumber = require("bn.js");
-const Package = require("../../../Package");
 const Convert = require("../../../Convert");
-const Crypto = require("../../../Crypto");
 const Helper = require("../../../Helper");
 const ObjectType = require("../../../ObjectType");
 const NetDedis = require("@dedis/cothority").net;
@@ -18,12 +15,13 @@ const FileIO = require("../../../../../lib/file-io/file-io");
 const CothorityMessages = require("../../../protobuf/build/cothority-messages");
 const RequestPath = require("../../../RequestPath");
 const DecodeType = require("../../../DecodeType");
+const uuidv4 = require("uuid/v4");
 
 const User = require("../../user/User").get;
 const PoP = require("../../pop/PoP").get;
 
 /**
- * This singleton represents the organizer of a PoP party. It contains everything related to the organizer.
+ * This class represents the organizer of a PoP party. It contains everything related to the organizer party.
  */
 
 /**
@@ -34,12 +32,21 @@ const EMPTY_SERVER_IDENTITY = CothorityMessages.createServerIdentity(new Uint8Ar
 const EMPTY_ROSTER = CothorityMessages.createRoster(new Uint8Array(), [], new Uint8Array());
 const EMPTY_POP_DESC = CothorityMessages.createPopDesc("", "", "", EMPTY_ROSTER);
 
-class Org {
+class OrgParty {
 
   /**
    * Constructor for the Org class.
+   * @param {string} [dirname] - directory of the party data (directory is created if non existent).
+   *  If no directory is specified, a unique random directory name is generated
    */
-  constructor() {
+  constructor(dirname) {
+    if (typeof dirname === "string") {
+      this._dirname = dirname;
+    } else if (dirname === undefined) {
+      this._dirname = uuidv4();
+    } else {
+      throw new Error("dirname should be of type string or undefined");
+    }
     this._isLoaded = false;
     this._linkedConode = ObservableModule.fromObject({
       public: new Uint8Array(),
@@ -63,6 +70,11 @@ class Org {
     this._popDescHash = ObservableModule.fromObject({
       hash: new Uint8Array()
     });
+    this._status = ObservableModule.fromObject({
+      status: States.UNDEFINED
+    });
+
+    this.load();
   }
 
   /**
@@ -138,7 +150,7 @@ class Org {
         toWrite = Convert.objectToJson(newLinkedConode);
       }
 
-      return FileIO.writeStringTo(FilesPath.POP_ORG_CONODE, toWrite)
+      return FileIO.writeStringTo(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_CONODE), toWrite)
         .catch((error) => {
           console.log(error);
           console.dir(error);
@@ -148,6 +160,8 @@ class Org {
             .then(() => {
               return Promise.reject(error);
             });
+        }).then(() => {
+          return this.loadStatus();
         });
     } else {
       return new Promise((resolve, reject) => {
@@ -251,7 +265,7 @@ class Org {
         toWrite = Convert.objectToJson(newPopDesc);
       }
 
-      return FileIO.writeStringTo(FilesPath.POP_ORG_DESC, toWrite)
+      return FileIO.writeStringTo(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_DESC), toWrite)
         .catch((error) => {
           console.log(error);
           console.dir(error);
@@ -261,6 +275,9 @@ class Org {
             .then(() => {
               return Promise.reject(error);
             });
+        })
+        .then(() => {
+          return this.updatePopHash();
         });
     } else {
       return new Promise((resolve, reject) => {
@@ -323,7 +340,7 @@ class Org {
         toWrite = Convert.objectToJson(object);
       }
 
-      return FileIO.writeStringTo(FilesPath.POP_ORG_ATTENDEES, toWrite)
+      return FileIO.writeStringTo(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_ATTENDEES), toWrite)
         .catch((error) => {
           console.log(error);
           console.dir(error);
@@ -358,6 +375,22 @@ class Org {
   }
 
   /**
+   * Returns the pop status observable module
+   * @returns {ObservableModule}
+   */
+  getPopStatusModule() {
+    return this._status;
+  }
+
+  /**
+   * Returns the status of the party
+   * @returns {string} - value of the enum States
+   */
+  getPopStatus() {
+    return this.getPopStatusModule().status;
+  }
+
+  /**
    * Sets the pop description hash.
    * @param {Uint8Array} hash - the new hash to set
    * @param {boolean} save - if the new hash should be saved permanently
@@ -386,7 +419,7 @@ class Org {
         toWrite = Convert.objectToJson(object);
       }
 
-      return FileIO.writeStringTo(FilesPath.POP_ORG_DESC_HASH, toWrite)
+      return FileIO.writeStringTo(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_DESC_HASH), toWrite)
         .catch((error) => {
           console.log(error);
           console.dir(error);
@@ -424,6 +457,18 @@ class Org {
     while (this.getPopDescModule().roster.list.length > 0) {
       this.getPopDescModule().roster.list.pop();
     }
+  }
+
+  /**
+   * Set the status of the party
+   * @param {string} status - a value inside the Enum States
+   */
+  setPopStatus(status) {
+    if (!Object.values(States).includes(status)) {
+      throw new Error("status should be in enum States");
+    }
+
+    this.getPopStatusModule().status = status;
   }
 
   /**
@@ -605,8 +650,24 @@ class Org {
   }
 
   /**
+   * Update the hash of the party using current stored informations
+   * @returns {Promise<Uint8Array>} - a promise that gets completed once the hash of the PopDesc has been saved
+   */
+  updatePopHash() {
+    const popDesc = this.getPopDesc();
+    const descHash = popDesc === {} ? [] : Convert.hexToByteArray(HashJs.sha256()
+      .update(popDesc.name)
+      .update(popDesc.dateTime)
+      .update(popDesc.location)
+      .update(popDesc.roster.aggregate)
+      .digest("hex"));
+
+    return this.setPopDescHash(descHash, true);
+  }
+
+  /**
    * Registers the local PopDesc on the linked conode. On success this will save the hash of the PopDesc for further usage.
-   * @returns {Promise} - a promise that gets completed once the hash of the PopDesc has been saved
+   * @returns {Promise} - a promise that gets completed once the party has been registered
    */
   registerPopDesc() {
     if (!User.isKeyPairSet()) {
@@ -620,12 +681,7 @@ class Org {
     }
 
     const popDesc = this.getPopDesc();
-    const descHash = Convert.hexToByteArray(HashJs.sha256()
-      .update(popDesc.name)
-      .update(popDesc.dateTime)
-      .update(popDesc.location)
-      .update(popDesc.roster.aggregate)
-      .digest("hex"));
+    const descHash = this.getPopDescHash();
 
     const privateKey = CURVE_ED25519_KYBER.scalar();
     privateKey.unmarshalBinary(User.getKeyPair().private);
@@ -637,10 +693,7 @@ class Org {
     return cothoritySocket.send(RequestPath.POP_STORE_CONFIG, DecodeType.STORE_CONFIG_REPLY, storeConfigMessage)
       .then(response => {
         if (Convert.byteArrayToBase64(response.id) === Convert.byteArrayToBase64(descHash)) {
-          return this.setPopDescHash(descHash, true)
-            .then(() => {
-              return Promise.resolve(descHash);
-            });
+          return Promise.resolve(descHash);
         } else {
           return Promise.reject("hash was different");
         }
@@ -700,6 +753,9 @@ class Org {
         return PoP.addFinalStatement(response.final, true);
       })
       .catch(error => {
+        if (error.message !== undefined && error.message.includes("Not all other conodes finalized yet")) {
+          return Promise.resolve(States.FINALIZING);
+        }
         console.log(error);
         console.dir(error);
         console.trace();
@@ -719,11 +775,15 @@ class Org {
   reset() {
     this._isLoaded = false;
 
-    const promises = [this.setLinkedConode(EMPTY_SERVER_IDENTITY, true), this.setPopDesc(EMPTY_POP_DESC, true), this.setRegisteredAtts([], true), this.setPopDescHash(new Uint8Array(), true)];
+    const promises = [this.setLinkedConode(EMPTY_SERVER_IDENTITY, true), this.setPopDesc(EMPTY_POP_DESC, true), this.setRegisteredAtts([], true)];
 
     return Promise.all(promises)
       .then(() => {
+        return this.setPopDescHash(new Uint8Array(), true);
+      })
+      .then(() => {
         this._isLoaded = true;
+        return Promise.resolve();
       })
       .catch(error => {
         console.log(error);
@@ -736,14 +796,22 @@ class Org {
 
   /**
    * Main load function.
-   * @returns {Promise} - a promise that gets resolved once everything belonging to Org has been loaded into memory
+   * @returns {Promise} - a promise that gets resolved once everything belonging to OrgParty has been loaded into memory
    */
   load() {
     this._isLoaded = false;
 
-    const promises = [this.loadLinkedConode(), this.loadPopDesc(), this.loadRegisteredAtts(), this.loadPopDescHash()];
+    const promises = [
+      this.loadLinkedConode(),
+      this.loadPopDesc(),
+      this.loadRegisteredAtts(),
+      this.loadPopDescHash()
+    ];
 
     return Promise.all(promises)
+      .then(() => {
+        return this.loadStatus();
+      })
       .then(() => {
         this._isLoaded = true;
       })
@@ -757,11 +825,43 @@ class Org {
   }
 
   /**
+   * Loads the status of the current party from the linked conode
+   * @returns {Promise} - a promise that gets resolved once the status is loaded
+   */
+  loadStatus() {
+    const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(this.getLinkedConode(), ""), RequestPath.POP);
+    const fetchRequest = CothorityMessages.createFetchRequest(this.getPopDescHash(), true);
+
+    return cothoritySocket.send(RequestPath.POP_FETCH_REQUEST, DecodeType.FINALIZE_RESPONSE, fetchRequest)
+      .then((response) => {
+        if (Object.keys(response.final.attendees).length === 0) {
+          this.setPopStatus(States.PUBLISHED);
+        } else if (response.final.signature.length === 0) {
+          this.setPopStatus(States.FINALIZING);
+        } else {
+          this.setPopStatus(States.FINALIZED);
+        }
+
+        return Promise.resolve();
+      })
+      .catch(error => {
+        if (error.message !== undefined && error.message.includes("No config found")) {
+          this.setPopStatus(States.CONFIGURATION);
+        } else {
+          this.setPopStatus(States.ERROR);
+        }
+        //Promise is resolved as the status is set to "error"
+        return Promise.resolve(error);
+      });
+
+  }
+
+  /**
    * Loads the linked conode into memory.
    * @returns {Promise} - a promise that gets resolved once the linked conode has been loaded into memory
    */
   loadLinkedConode() {
-    return FileIO.getStringOf(FilesPath.POP_ORG_CONODE)
+    return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_CONODE))
       .then(jsonLinkedConode => {
         if (jsonLinkedConode.length > 0) {
           const linkedConode = Convert.parseJsonServerIdentity(jsonLinkedConode);
@@ -785,7 +885,7 @@ class Org {
    * @returns {Promise} - a promise that gets resolved once the PopDesc has been loaded into memory
    */
   loadPopDesc() {
-    return FileIO.getStringOf(FilesPath.POP_ORG_DESC)
+    return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_DESC))
       .then(jsonPopDesc => {
         if (jsonPopDesc.length > 0) {
           const popDesc = Convert.parseJsonPopDesc(jsonPopDesc);
@@ -809,7 +909,7 @@ class Org {
    * @returns {Promise} - a promise that gets resolved once all the registered attendees have been loaded into memory
    */
   loadRegisteredAtts() {
-    return FileIO.getStringOf(FilesPath.POP_ORG_ATTENDEES)
+    return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_ATTENDEES))
       .then(jsonRegisteredAtts => {
         if (jsonRegisteredAtts.length > 0) {
           const registeredAtts = Convert.parseJsonArrayOfKeys(jsonRegisteredAtts);
@@ -833,7 +933,7 @@ class Org {
    * @returns {Promise} - a promise that gets resolved once the PopDesc hash has been loaded into memory
    */
   loadPopDescHash() {
-    return FileIO.getStringOf(FilesPath.POP_ORG_DESC_HASH)
+    return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_DESC_HASH))
       .then(jsonPopDescHash => {
         if (jsonPopDescHash.length > 0) {
           const popDescHash = Convert.parseJsonPopDescHash(jsonPopDescHash);
@@ -851,42 +951,41 @@ class Org {
         return Promise.reject(error);
       });
   }
+
+  /**
+   * Completely remove Party from disk
+   * @returns {Promise} a promise that gets resolved once the party is deleted
+   */
+  remove() {
+    return FileIO.removeFolder(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname));
+  }
 }
 
 /**
- * Now we create a singleton object for Org.
+ * Enumerate the different possible state for a party
+ * @readonly
+ * @enum {string}
  */
+const States = Object.freeze({
+  /** Status is loading **/
+  UNDEFINED: "loading",
 
-// The symbol key reference that the singleton will use.
-const ORG_PACKAGE_KEY = Symbol.for(Package.ORG);
+  /** Party is still being configured (not published to the conode) **/
+  CONFIGURATION: "configuration",
 
-// We create the singleton if it hasn't been instanciated yet.
-const globalSymbols = Object.getOwnPropertySymbols(global);
-const orgExists = (globalSymbols.indexOf(ORG_PACKAGE_KEY) >= 0);
+  /** Party is publishde (Stored) on the conode but not yet finalized **/
+  PUBLISHED: "published",
 
-if (!orgExists) {
-  global[ORG_PACKAGE_KEY] = (function () {
-    const newOrg = new Org();
-    newOrg.load();
+  /** Party is fianlized **/
+  FINALIZED: "finalized",
 
-    return newOrg;
-  })();
-}
+  /** Party is finalizing (not every nodes are finalized) **/
+  FINALIZING: "finalizing",
 
-// Singleton API
-const ORG = {};
-
-Object.defineProperty(ORG, "get", {
-  configurable: false,
-  enumerable: false,
-  get: function () {
-    return global[ORG_PACKAGE_KEY];
-  },
-  set: undefined
+  /** Used if the status connot be retrived **/
+  ERROR: "offline"
 });
 
-// We freeze the singleton.
-Object.freeze(ORG);
-
-// We export only the singleton API.
-module.exports = ORG;
+// We export the class.
+module.exports.Party = OrgParty;
+module.exports.States = States;
