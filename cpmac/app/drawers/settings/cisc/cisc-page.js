@@ -1,8 +1,9 @@
 const Dialog = require("ui/dialogs");
 
-const Cisc = require("~/shared/lib/dedjs/object/cisc/Cisc").get;
+const Cisc = require("~/shared/lib/dedjs/object/cisc/Cisc");
+const mockCisc = new Cisc("MOCK");
 
-const viewModel = Cisc.getVMModule();
+const viewModel = mockCisc.getVMModule();
 
 function onLoaded(args) {
   const page = args.object;
@@ -35,7 +36,7 @@ function resetCisc() {
             console.dir(error);
             console.trace();
 
-            return Dialog.alert({
+            Dialog.alert({
                 title: "Error",
                 message: "An unexpected error occurred. Please try again.",
                 okButtonText: "Ok"
@@ -46,7 +47,7 @@ function resetCisc() {
 }
 
 function disconnectCisc(){
-    return Cisc.setIsConnected(false);
+    return mockCisc.setIsConnected(false);
 }
 
 function chooseName() {
@@ -57,7 +58,7 @@ function chooseName() {
             okButtonText: "OK"
         });
     }
-    Cisc.setName(viewModel.name,true)
+    mockCisc.setName(viewModel.name,true)
         .then(() => Dialog.alert({
             title: "Name successfully changed",
             message: `Your're name has been set to "${viewModel.name}"`,

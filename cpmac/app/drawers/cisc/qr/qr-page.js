@@ -5,7 +5,8 @@ const PlatformModule = require("tns-core-modules/platform");
 
 const QRGenerator = new ZXing();
 
-const Cisc = require("../../../shared/lib/dedjs/object/cisc/Cisc").get;
+const Cisc = require("../../../shared/lib/dedjs/object/cisc/Cisc");
+const mockCisc = new Cisc("MOCK");
 
 let viewModel;
 let image;
@@ -24,7 +25,7 @@ function onLoaded(args) {
         return;
     }
     const page = args.object;
-    page.bindingContext = Cisc.getVMModule();
+    page.bindingContext = mockCisc.getVMModule();
     viewModel = page.bindingContext;
     loadViews(page);
     setTimeout(() => {
@@ -33,8 +34,8 @@ function onLoaded(args) {
 }
 
 function updateImage() {
-    if (Cisc.getIdentity().address !== "" && Cisc.getIsConnected()) {
-        label.text = Cisc.getIdentity().label;
+    if (mockCisc.getIdentity().address !== "" && mockCisc.getIsConnected()) {
+        label.text = mockCisc.getIdentity().label;
         const sideLength = PlatformModule.screen.mainScreen.widthPixels;
         const QR_CODE = QRGenerator.createBarcode({
             encode: label.text,

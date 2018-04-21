@@ -1,5 +1,5 @@
 const frameModule = require("ui/frame");
-const Cisc = require("../../shared/lib/dedjs/object/cisc/Cisc").get;
+const Cisc = require("../../shared/lib/dedjs/object/cisc/Cisc");
 
 
 /* ***********************************************************
@@ -16,7 +16,8 @@ function onNavigatingTo(args) {
     }
 
     const page = args.object;
-    page.bindingContext = Cisc.getVMModule();
+    const mockCisc = new Cisc("MOCK");
+    page.bindingContext = mockCisc.getVMModule();
 }
 
 /* ***********************************************************

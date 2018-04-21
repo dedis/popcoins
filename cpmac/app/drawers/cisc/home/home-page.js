@@ -7,7 +7,8 @@ const DedisJsNet = require("~/shared/lib/dedjs/Net");
 const Convert = require("~/shared/lib/dedjs/Convert");
 const BarcodeScanner = require("nativescript-barcodescanner").BarcodeScanner;
 const Helper = require("~/shared/lib/dedjs/Helper");
-const Cisc = require("~/shared/lib/dedjs/object/cisc/Cisc").get;
+const Cisc = require("~/shared/lib/dedjs/object/cisc/Cisc");
+const mockCisc = new Cisc("MOCK");
 const User = require("~/shared/lib/dedjs/object/user/User").get;
 const NetDedis = require("@dedis/cothority").net;
 
@@ -28,7 +29,7 @@ function onLoaded(args) {
     }
 
     page = args.object;
-    page.bindingContext = Cisc.getVMModule();
+    page.bindingContext = mockCisc.getVMModule();
     viewmodel = page.bindingContext;
 }
 
@@ -54,10 +55,10 @@ function toggleProposed() {
     let proposedDevice = page.getViewById("proposedDevice");
     let proposedDeviceLabel = page.getViewById("proposedDeviceLabel");
 
-    Cisc.updateAll()
+    mockCisc.updateAll()
         .then(() => {
             if (proposedStorage.visibility === "collapse") {
-                if (JSON.stringify(Cisc.getProposedData()) === "{}" ){
+                if (JSON.stringify(mockCisc.getProposedData()) === "{}" ){
                     Dialog.alert({
                         title: "No data",
                         message: `There is no proposed data`,
@@ -74,7 +75,7 @@ function toggleProposed() {
 
 function voteForProposed() {
 
-    Cisc.voteForProposed()
+    mockCisc.voteForProposed()
         .then(() => {
             viewmodel.isOnProposed = false;
         })
@@ -92,7 +93,7 @@ function voteForProposed() {
 
 function connectButtonTapped(args) {
     const barcodescanner = new BarcodeScanner();
-    if (Cisc.getName() === null || Cisc.getName() === undefined || Cisc.getName() === "") {
+    if (mockCisc.getName() === null || mockCisc.getName() === undefined || mockCisc.getName() === "") {
         throw new Error("Go to the settings to set your name")
     }
     if (!(User.isKeyPairSet())) {
@@ -144,7 +145,7 @@ function connectButtonTapped(args) {
                 let id = `${splitSlash[1]}`;
 
 
-                Cisc.setIdentity(id, address, label, true)
+                mockCisc.setIdentity(id, address, label, true)
                     .then(() => askForDevice());
             })
             .catch(
@@ -166,12 +167,12 @@ function connectButtonTapped(args) {
 }
 
 function askForDevice() {
-    return Cisc.updateAll().then(() => {
+    return mockCisc.updateAll().then(() => {
         console.log("checking for device");
         let isIn = false;
-        for (let i = 0; i < Cisc.getDevices().length; i++) {
-            let device = Cisc.getDevices().getItem("" + i).device;
-            if (device.id === Cisc.getName() && device.point === Convert.byteArrayToHex(User.getKeyPairModule().public)) {
+        for (let i = 0; i < mockCisc.getDevices().length; i++) {
+            let device = mockCisc.getDevices().getItem("" + i).device;
+            if (device.id === mockCisc.getName() && device.point === Convert.byteArrayToHex(User.getKeyPairModule().public)) {
                 isIn = true;
             }
         }
@@ -200,14 +201,14 @@ function askForDevice() {
 }
 
 function addDevice() {
-    let data = Helper.deepCopy(Cisc.getData());
-    data.device[Cisc.getName()] = CothorityMessages.createDevice(User.getKeyPairModule().public);
+    let data = Helper.deepCopy(mockCisc.getData());
+    data.device[mockCisc.getName()] = CothorityMessages.createDevice(User.getKeyPairModule().public);
     data.votes = {};
     console.dir(data);
 
-    let proposeSendMessage = CothorityMessages.createProposeSend(Convert.hexToByteArray(Cisc.getIdentity().id), data);
-    console.log(Cisc.getIdentity().id);
-    const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(Cisc.getIdentity().address, ""), RequestPath.IDENTITY);
+    let proposeSendMessage = CothorityMessages.createProposeSend(Convert.hexToByteArray(mockCisc.getIdentity().id), data);
+    console.log(mockCisc.getIdentity().id);
+    const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(mockCisc.getIdentity().address, ""), RequestPath.IDENTITY);
     cothoritySocket.send(RequestPath.IDENTITY_PROPOSE_SEND, DecodeType.DATA_UPDATE_REPLY, proposeSendMessage)
         .then((response) => {
             console.log(response);
