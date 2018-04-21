@@ -251,12 +251,12 @@ function linkToConode(party) {
           })
           .then(result => {
             if (result.result) {
+              console.log("SKDEBUG TEXT = " + result.result.text);
+              if (result.result.text === undefined) {
+                return Promise.reject("PIN should not be empty");
+              }
               return party.linkToConode(conodes[index], result.text)
                 .then(result => {
-                  // This is to ensure that id and public will be updated in the UI when linking process is done.
-                  page.bindingContext = undefined;
-                  page.bindingContext = viewModel;
-
                   return Promise.resolve(conodes[index]);
                 });
             } else {
