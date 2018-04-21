@@ -256,7 +256,7 @@ function linkToConode(party) {
                 return Promise.reject("PIN should not be empty");
               }
               return party.linkToConode(conodes[index], result.text)
-                .then(result => {
+                .then(() => {
                   return Promise.resolve(conodes[index]);
                 });
             } else {

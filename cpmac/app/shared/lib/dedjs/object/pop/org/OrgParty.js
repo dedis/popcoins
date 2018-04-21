@@ -31,8 +31,6 @@ const PoP = require("../../pop/PoP").get;
 const EMPTY_SERVER_IDENTITY = CothorityMessages.createServerIdentity(new Uint8Array(), new Uint8Array(), "", "");
 const EMPTY_ROSTER = CothorityMessages.createRoster(new Uint8Array(), [], new Uint8Array());
 const EMPTY_POP_DESC = CothorityMessages.createPopDesc("", "", "", EMPTY_ROSTER);
-const POP_STATUS_NO_CONFIG = 0;
-const POP_STATUS_OK = 4;
 
 class OrgParty {
 
