@@ -200,7 +200,7 @@ describe("User", function () {
   });
 
   it("should correctly load key pair", function () {
-    return FileIO.writeStringTo(FilesPath.KEY_PAIR, JSON_KEY_PAIR)
+    return FileIO.writeStringTo(FileIO.join(FilesPath.USER_PATH, FilesPath.KEY_PAIR), JSON_KEY_PAIR)
       .then(() => {
         return User.load();
       })
@@ -234,7 +234,7 @@ describe("User", function () {
   });
 
   it("should correctly reset files and memory", function () {
-    return FileIO.writeStringTo(FilesPath.KEY_PAIR, JSON_KEY_PAIR)
+    return FileIO.writeStringTo(FileIO.join(FilesPath.USER_PATH, FilesPath.KEY_PAIR), JSON_KEY_PAIR)
       .then(() => {
         return FileIO.writeStringTo(FilesPath.ROSTER, JSON_ROSTER_FULL);
       })
@@ -245,7 +245,7 @@ describe("User", function () {
           });
       })
       .then(() => {
-        return FileIO.getStringOf(FilesPath.KEY_PAIR)
+        return FileIO.getStringOf(FileIO.join(FilesPath.USER_PATH, FilesPath.KEY_PAIR))
           .then(string => {
             string.should.be.empty;
 
@@ -619,7 +619,7 @@ describe("User", function () {
     it("should save if save is true", function () {
       return User.setKeyPair(KEY_PAIR, true)
         .then(() => {
-          return FileIO.getStringOf(FilesPath.KEY_PAIR);
+          return FileIO.getStringOf(FileIO.join(FilesPath.USER_PATH, FilesPath.KEY_PAIR));
         })
         .then(keyPairString => {
           const expectedKeyPair = Convert.objectToJson(KEY_PAIR);
@@ -631,7 +631,7 @@ describe("User", function () {
     it("should not save if save is false", function () {
       return User.setKeyPair(KEY_PAIR, false)
         .then(() => {
-          return FileIO.getStringOf(FilesPath.KEY_PAIR);
+          return FileIO.getStringOf(FileIO.join(FilesPath.USER_PATH, FilesPath.KEY_PAIR));
         })
         .then(keyPairString => {
           keyPairString.should.equal("");
@@ -686,20 +686,14 @@ describe("User", function () {
     });
   });
 
-  describe("#getKeyPairModule", function () {
-    it("should return the reference to the key pair module", function () {
-      (User.getKeyPairModule() === User._keyPair).should.be.true;
-    });
-  });
-
   describe("#isKeyPairSet", function () {
     it("should return true if and only if public and private are not empty", function () {
       User.isKeyPairSet().should.be.false;
 
-      User._keyPair.public = PUBLIC_KEY_BYTE_ARRAY;
+      User.getKeyPairModule().public = PUBLIC_KEY_BYTE_ARRAY;
       User.isKeyPairSet().should.be.false;
 
-      User._keyPair.private = PRIVATE_KEY_BYTE_ARRAY;
+      User.getKeyPairModule().private = PRIVATE_KEY_BYTE_ARRAY;
       User.isKeyPairSet().should.be.true;
     });
   });

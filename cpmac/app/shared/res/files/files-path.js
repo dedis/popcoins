@@ -6,7 +6,8 @@
  * General settings files.
  */
 const ROSTER = "shared/res/files/user/roster.json";
-const KEY_PAIR = "shared/res/files/user/keypair.json";
+const KEY_PAIR = "keypair.json";
+
 
 /**
  * PoP Files
@@ -26,6 +27,12 @@ const POP_ORG_ATTENDEES = "attendees.json";
 const CISC_IDENTITY_LINK = "shared/res/files/cisc/identity_link.json";
 const CISC_NAME = "shared/res/files/cisc/name.json";
 
+/**
+ * USER files
+ */
+const USER_PATH = "shared/res/files/user";
+
+
 module.exports.ROSTER = ROSTER;
 module.exports.KEY_PAIR = KEY_PAIR;
 module.exports.POP_FINAL_STATEMENTS = POP_FINAL_STATEMENTS;
@@ -37,3 +44,4 @@ module.exports.POP_ORG_DESC_HASH = POP_ORG_DESC_HASH;
 module.exports.POP_ORG_ATTENDEES = POP_ORG_ATTENDEES;
 module.exports.CISC_IDENTITY_LINK = CISC_IDENTITY_LINK;
 module.exports.CISC_NAME = CISC_NAME;
+module.exports.USER_PATH = USER_PATH;
