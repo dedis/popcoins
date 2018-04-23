@@ -21,6 +21,9 @@ const POP_ORG_DESC = "description.json";
 const POP_ORG_DESC_HASH = "hash.json";
 const POP_ORG_ATTENDEES = "attendees.json";
 
+const POP_ATT_PATH = "shared/res/files/pop/att";
+const POP_ATT_FINAL = "final_statements.json";
+
 /**
  * CISC Files
  */
@@ -45,3 +48,5 @@ module.exports.POP_ORG_ATTENDEES = POP_ORG_ATTENDEES;
 module.exports.CISC_IDENTITY_LINK = CISC_IDENTITY_LINK;
 module.exports.CISC_NAME = CISC_NAME;
 module.exports.USER_PATH = USER_PATH;
+module.exports.POP_ATT_PATH = POP_ATT_PATH;
+module.exports.POP_ATT_FINAL = POP_ATT_FINAL;

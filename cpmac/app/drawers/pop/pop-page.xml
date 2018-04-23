@@ -3,7 +3,7 @@
         navigatingTo="onNavigatingTo"
         xmlns:nsDrawer="nativescript-ui-sidedrawer"
         xmlns:myDrawer="shared/my-drawer"
-        xmlns:pop="drawers/pop/pop"
+        xmlns:att="drawers/pop/att"
         xmlns:org="drawers/pop/org"
         xmlns="http://www.nativescript.org/tns.xsd">
 
@@ -65,7 +65,7 @@
 
                     <TabViewItem title="Attendee">
                         <TabViewItem.view>
-                            <pop:pop-page/>
+                            <att:att-party-list/>
                         </TabViewItem.view>
                     </TabViewItem>
 

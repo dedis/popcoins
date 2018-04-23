@@ -355,7 +355,6 @@ class User {
       const cothoritySocket = new NetDedis.Socket(address, RequestPath.STATUS);
       return cothoritySocket.send(RequestPath.STATUS_REQUEST, DecodeType.STATUS_RESPONSE, statusRequestMessage)
         .then(statusResponse => {
-          console.dir(statusResponse);
           this.getRosterModule().statusList.push({
             conode: server,
             conodeStatus: statusResponse

@@ -95,3 +95,5 @@ module.exports.writeStringTo = writeStringTo;
 module.exports.forEachFolderElement = forEachFolderElement;
 module.exports.removeFolder = removeFolder;
 module.exports.join = FileSystem.path.join;
+module.exports.folderExists = FileSystem.Folder.exists;
+module.exports.fileExists = FileSystem.File.exists;

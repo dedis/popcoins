@@ -201,7 +201,7 @@ function tlsToWebsocket(serverIdentity, path) {
   } else if (typeof serverIdentity === "string") {
     address = serverIdentity;
   } else {
-    throw new Error("serverIdentity must be of type ServerIdentity");
+    throw new Error("serverIdentity must be of type ServerIdentity or string");
   }
   if (typeof path !== "string") {
     throw new Error("path must be of type string");
