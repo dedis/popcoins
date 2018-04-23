@@ -5,9 +5,11 @@ const PlatformModule = require("tns-core-modules/platform");
 
 const QRGenerator = new ZXing();
 
-const Cisc = require("../../../shared/lib/dedjs/object/cisc/Cisc");
-const mockCisc = new Cisc("MOCK");
+const Cisc = require("../../../shared/lib/dedjs/object/cisc/Cisc").Skipchain;
+const SkipPage = require("../skipchain-page");
+//const skipchain = new Cisc("MOCK");
 
+let skipchain;
 let viewModel;
 let image;
 let label;
@@ -25,7 +27,8 @@ function onLoaded(args) {
         return;
     }
     const page = args.object;
-    page.bindingContext = mockCisc.getVMModule();
+    skipchain = SkipPage.skipchain.elem;
+    page.bindingContext = skipchain.getVMModule();
     viewModel = page.bindingContext;
     loadViews(page);
     setTimeout(() => {
@@ -34,8 +37,8 @@ function onLoaded(args) {
 }
 
 function updateImage() {
-    if (mockCisc.getIdentity().address !== "" && mockCisc.getIsConnected()) {
-        label.text = mockCisc.getIdentity().label;
+    if (skipchain.getIdentity().address !== "" && skipchain.getIsConnected()) {
+        label.text = skipchain.getIdentity().label;
         const sideLength = PlatformModule.screen.mainScreen.widthPixels;
         const QR_CODE = QRGenerator.createBarcode({
             encode: label.text,

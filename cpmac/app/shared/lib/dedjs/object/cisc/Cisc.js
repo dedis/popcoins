@@ -46,11 +46,11 @@ class Cisc {
       throw new Error("dirname should be of type string or undefined");
     }
     this._isLoaded = false;
-    this._identity = {
+    this._identity = ObservableModule.fromObjectRecursive({
       "address": "",
       "id": "",
       "label": ""
-    };
+    });
     this._viewModel = ObservableModule.fromObject({
       devices: new ObservableArray(),
       proposedDevices: new ObservableArray(),
@@ -819,4 +819,5 @@ class Cisc {
 
 }
 
-module.exports = Cisc;
+//module.exports = Cisc;
+module.exports.Skipchain = Cisc;

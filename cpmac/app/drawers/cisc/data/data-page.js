@@ -6,11 +6,11 @@ const DecodeType = require("~/shared/lib/dedjs/DecodeType");
 const DedisJsNet = require("~/shared/lib/dedjs/Net");
 const Convert = require("~/shared/lib/dedjs/Convert");
 const Helper = require("~/shared/lib/dedjs/Helper");
-const Cisc = require("~/shared/lib/dedjs/object/cisc/Cisc");
+const Cisc = require("~/shared/lib/dedjs/object/cisc/Cisc").Skipchain;
 const NetDedis = require("@dedis/cothority").net;
-const mockCisc = new Cisc("MOCK");
+const SkipPage = require("../skipchain-page");
 
-
+let skipchain;
 let viewmodel;
 let Page;
 
@@ -27,9 +27,10 @@ function onLoaded(args) {
         return;
     }
 
+    skipchain = SkipPage.skipchain.elem;
     const page = args.object;
     Page = page.page;
-    page.bindingContext = mockCisc.getVMModule();
+    page.bindingContext = skipchain.getVMModule();
     viewmodel = page.bindingContext;
 }
 
@@ -61,20 +62,20 @@ function addKeyValue() {
         .then((response) => {
             if (response.result) {
                 value = response.text;
-                edited = Helper.deepCopy(mockCisc.getData());
+                edited = Helper.deepCopy(skipchain.getData());
                 if (edited.storage === null || edited.storage === undefined) {
                     edited.storage = {};
                 }
                 edited.storage[key]=value;
                 edited.votes = null;
-                proposeSendMessage = CothorityMessages.createProposeSend(Convert.hexToByteArray(mockCisc.getIdentity().id), edited);
-                let node = CothorityMessages.createServerIdentity(new Uint8Array({}), new Uint8Array({}), mockCisc.getIdentity().address,"lelele");
+                proposeSendMessage = CothorityMessages.createProposeSend(Convert.hexToByteArray(skipchain.getIdentity().id), edited);
+                let node = CothorityMessages.createServerIdentity(new Uint8Array({}), new Uint8Array({}), skipchain.getIdentity().address,"lelele");
                 const cothoritySocket = new NetDedis.Socket(node, RequestPath.IDENTITY);
                 return cothoritySocket.send(RequestPath.IDENTITY_PROPOSE_SEND, DecodeType.DATA_UPDATE_REPLY, proposeSendMessage)
             }
         })
         .then(()=>{
-            mockCisc.updateAll().then(()=>mockCisc.voteForProposed());
+            skipchain.updateAll().then(()=>skipchain.voteForProposed());
         })
         .catch((error) => console.log(`There was an error: ${error}`));
 }
