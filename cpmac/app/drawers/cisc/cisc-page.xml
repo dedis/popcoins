@@ -75,7 +75,7 @@
                                 <StackLayout orientation="horizontal" col="0">
                                 </StackLayout>
                                 <StackLayout orientation="horizontal" col="1">
-                                    <Button id="button-delete" text="Delete" backgroundColor="red"/>
+                                    <Button id="button-delete" text="Delete" tap="disconnectSkipchain" backgroundColor="red"/>
                                 </StackLayout>
                             </GridLayout>
                         </nsListView:RadListView.itemSwipeTemplate>

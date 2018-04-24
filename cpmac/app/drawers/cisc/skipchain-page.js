@@ -16,8 +16,7 @@ function onNavigatingTo(args) {
 
     page = args.object;
     const context = page.navigationContext;
-    //skipchain.push(context.skipchain);
-    //const skipchainn = context.skipchain;
+
     skipchain.elem = context.skipchain;
 
     viewmodel = skipchain.elem.getVMModule();

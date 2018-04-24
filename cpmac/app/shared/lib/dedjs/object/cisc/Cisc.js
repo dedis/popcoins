@@ -62,7 +62,9 @@ class Cisc {
     });
     this._data = {};
     this._proposedData = {};
-    this.load();
+    if (!(dirname === undefined)) {
+      this.load();
+    }
   }
 
   /**
@@ -754,6 +756,15 @@ class Cisc {
     return this.setIdentity("", "", "", true);
   }
 
+    /**
+   * Completely removes a Skipchain from disk
+   * @returns {Promise} a promise that gets resolved once the Skipchain is removed
+   */
+  remove() {
+    this.reset();
+    return FileIO.removeFolder(FileIO.join(FilesPath.CISC_PATH, this._dirname));
+  }
+
   /**
    * Main load function.
    * @returns {Promise} - a promise that gets resolved once everything belonging to Cisc has been loaded into memory
@@ -819,5 +830,4 @@ class Cisc {
 
 }
 
-//module.exports = Cisc;
 module.exports.Skipchain = Cisc;
