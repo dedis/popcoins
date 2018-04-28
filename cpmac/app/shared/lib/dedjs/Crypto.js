@@ -57,8 +57,8 @@ function generateRandomKeyPair() {
 class KeyPair {
   /**
    * Constructor for the Org class.
-   * @param {string} dirname - directory of the key pair data
-   *  The key pair will be stored under dirname/keypair.json
+   * @param {string} dirname - directory of the key pair data. If the data doesn't exist, a random key pair
+   *  is generated. The key pair will be stored under dirname/keypair.json
    */
   constructor(dirname) {
     if (typeof dirname !== "string") {
@@ -179,14 +179,12 @@ class KeyPair {
     return FileIO.getStringOf(FileIO.join(this._dirname, FilesPath.KEY_PAIR))
       .then(jsonKeyPair => {
         if (jsonKeyPair.length > 0) {
-          return Convert.parseJsonKeyPair(jsonKeyPair);
+          return this.setKeyPair(Convert.parseJsonKeyPair(jsonKeyPair), false);
         } else {
-          return EMPTY_KEYPAIR;
+          return this.randomize();
         }
       })
-      .then(keyPair => {
-        return this.setKeyPair(keyPair, false);
-      })
+
       .catch(error => {
         console.log(error);
         console.dir(error);

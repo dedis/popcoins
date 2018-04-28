@@ -10,7 +10,6 @@ const CothorityMessages = require("../../../protobuf/build/cothority-messages");
 const RequestPath = require("../../../RequestPath");
 const DecodeType = require("../../../DecodeType");
 
-
 /**
  * This singleton represents the attendee of a PoP party. It contains everything related to the attendee.
  */
@@ -104,7 +103,6 @@ class AttParty {
     return FileIO.getStringOf(FileIO.join(FilePath.POP_ATT_PATH, this._folderName, FilePath.POP_ATT_FINAL))
       .then(string => {
         this._finalStatement = Convert.jsonToObject(string);
-        console.dir(this._finalStatement);
         return Promise.resolve();
       })
       .catch(error => {
@@ -161,6 +159,14 @@ class AttParty {
   }
 
   /**
+   * Randomize the key par associated with this party
+   * @returns {Promise} - a promise that gets resolved once the key pair has been saved
+   */
+  randomizeKeyPair() {
+    return this._keyPair.randomize();
+  }
+
+  /**
    * Load everyhting needed to the party :
    *  - download the final statement if need
    *  - cache it on the disk
@@ -199,6 +205,18 @@ class AttParty {
     }
   }
 
+  isAttendee(publicKey) {
+    let attendees = this._finalStatement.attendees;
+    let publicKeyHexString = Convert.byteArrayToHex(publicKey);
+    for(let i = 0; i < attendees.length; i++) {
+      if (Convert.byteArrayToHex(attendees[i]) === publicKeyHexString) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   /**
    * Returns the observable module for the description of the party
    * @returns {ObservableModule}
@@ -213,6 +231,29 @@ class AttParty {
    */
   getPopStatusModule() {
     return this._status;
+  }
+
+  /**
+   * Returns the key pair associated with this party
+   * @returns {KeyPair}
+   */
+  getKeyPair() {
+    return this._keyPair.getKeyPair();
+  }
+
+  /**
+   * Return the current finalStatement of the party
+   * Be careful, if no final statement retrieval has been operated, it could be
+   * not up-to-date
+   * @returns {FinalStatement}
+   */
+  getFinalStatement() {
+    return CothorityMessages.createFinalStatement(
+      this._finalStatement.desc,
+      this._finalStatement.attendees,
+      this._finalStatement.signature,
+      this._finalStatement.merged
+    );
   }
 
   /**

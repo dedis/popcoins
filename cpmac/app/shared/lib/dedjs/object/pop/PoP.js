@@ -265,6 +265,22 @@ class PoP {
     }
   }
 
+  addPopTokenFromFinalStatement(finalStatement, keyPair, save) {
+    if (!Helper.isOfType(finalStatement, ObjectType.FINAL_STATEMENT)) {
+      throw new Error("finalStatement must be an instance of FinalStatement");
+    }
+    if (typeof save !== "boolean") {
+      throw new Error("save must be of type boolean");
+    }
+    if(!Helper.isOfType(keyPair, ObjectType.KEY_PAIR)){
+      throw new Error("keyPair must be an instance of KeyPair");
+    }
+
+    const popToken = CothorityMessages.createPopToken(finalStatement, keyPair.private, keyPair.public);
+
+    return this.addPopToken(popToken, save);
+  }
+
   /**
    * Removes the final statement corresponding to the index given as parameter.
    * @param {number} index - the index of the final statement to remove
@@ -354,10 +370,7 @@ class PoP {
       throw new Error("index is not in the range of the final statements list");
     }
 
-    const keyPair = User.getKeyPair();
-    const popToken = CothorityMessages.createPopToken(this.getFinalStatements().getItem(index), keyPair.private, keyPair.public);
-
-    return this.addPopToken(popToken, true)
+    return this.addPopTokenFromFinalStatement(this.getFinalStatements().getItem(index), User.getKeyPair(), true)
       .then(() => {
         return this.deleteFinalStatementByIndex(index);
       });

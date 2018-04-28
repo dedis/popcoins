@@ -1,13 +1,15 @@
 const ScanToReturn = require("../../../shared/lib/scan-to-return/scan-to-return");
 const Frame = require("ui/frame");
 const Dialog = require("ui/dialogs");
+const Timer = require("timer");
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const FileIO = require("../../../shared/lib/file-io/file-io");
 const FilePaths = require("../../../shared/res/files/files-path");
 const AttParty = require("../../../shared/lib/dedjs/object/pop/att/AttParty").Party;
 const Convert = require("../../../shared/lib/dedjs/Convert");
-const PartyStates = require("../../../shared/lib/dedjs/object/pop/org/OrgParty").States;
+const PartyStates = require("../../../shared/lib/dedjs/object/pop/att/AttParty").States;
+const PoP = require("../../../shared/lib/dedjs/object/pop/PoP").get;
 
 let loaded = false;
 const viewModel = ObservableModule.fromObject({
@@ -16,6 +18,12 @@ const viewModel = ObservableModule.fromObject({
 });
 
 let page = undefined;
+let timerId = undefined;
+let pageObject = undefined;
+
+function onNavigatingTo(args) {
+  pageObject = args.object.page;
+}
 
 function onLoaded(args) {
   page = args.object;
@@ -26,6 +34,16 @@ function onLoaded(args) {
     loadParties();
     loaded = true;
   }
+
+  // Poll the status every 3s
+  timerId = Timer.setInterval(() => {
+    reloadStatuses();
+  }, 5000)
+}
+
+function onUnloaded(args) {
+  // remove polling when page is leaved
+  Timer.clearInterval(timerId);
 }
 
 function loadParties() {
@@ -58,14 +76,79 @@ function partyTapped(args) {
       break;
     case PartyStates.PUBLISHED:
     case PartyStates.FINALIZING:
-      // TODO handles the case when a party is running
+      Dialog
+        .action({
+          message: "What do you want to do ?",
+          cancelButtonText: "Cancel",
+          actions: ["Generate a new key pair", "Show the QR Code of my key pair", "Display Party Info"]
+        })
+        .then(result => {
+          if (result === "Generate a new key pair") {
+            return party.randomizeKeyPair()
+              .then(() => {
+                return Dialog.alert({
+                  title: "A new key pair has been generated !",
+                  message: "You can now use it to register to this party.",
+                  okButtonText: "Ok"
+                })
+              })
+          } else if (result === "Show the QR Code of my key pair") {
+            Frame.topmost().currentPage.showModal("shared/pages/qr-code/qr-code-page", {
+              textToShow: Convert.objectToJson(party.getKeyPair()),
+              title: "Key Pair"
+            }, () => {
+            }, true);
+          } else if (result === "Display Party Info") {
+
+          }
+        })
+        .catch((error) => {
+          Dialog.alert({
+            title: "Error",
+            message: "An error occured, please try again. - " + error,
+            okButtonText: "Ok"
+          });
+          console.log(error);
+          console.dir(error);
+          console.trace(error);
+        });
       break;
     case PartyStates.FINALIZED:
-      Dialog.alert({
-        title: "Finalized",
-        message: "This party has been finalized by all the organizers.",
-        okButtonText: "Ok"
-      });
+      Dialog
+        .action({
+          message: "The party is finished ! What do you want to do ?",
+          cancelButtonText: "Cancel",
+          actions: ["Generate my PoP-Token"]
+        })
+        .then(result => {
+          if (result === "Generate my PoP-Token") {
+            if (!party.isAttendee(party.getKeyPair().public)) {
+              return Promise.reject("You are not part of the attendees.");
+            }
+            return PoP.addPopTokenFromFinalStatement(party.getFinalStatement(), party.getKeyPair(), true)
+              .then(() => {
+                // return party.remove();
+                return Promise.resolve();
+              })
+              .then(() => {
+                viewModel.partyListDescriptions.splice(index, 1);
+                return Dialog.alert({
+                  title: "Your Token is now accessible under \"My Tokens\".",
+                  okButtonText: "Ok"
+                });
+              });
+          }
+        })
+        .catch((error) => {
+          Dialog.alert({
+            title: "Error",
+            message: error,
+            okButtonText: "Ok"
+          });
+          console.log(error);
+          console.dir(error);
+          console.trace(error);
+        });
       break;
     default:
       Dialog.alert({
@@ -73,7 +156,6 @@ function partyTapped(args) {
         okButtonText: "Ok"
       })
   }
-
 }
 
 function deleteParty(args) {
@@ -142,8 +224,17 @@ function addParty() {
 
 }
 
+function reloadStatuses() {
+  viewModel.partyListDescriptions.forEach(model => {
+    model.party.retrieveFinalStatementAndStatus();
+  })
+}
+
+
 module.exports.onLoaded = onLoaded;
 module.exports.partyTapped = partyTapped;
 module.exports.onSwipeCellStarted = onSwipeCellStarted;
 module.exports.deleteParty = deleteParty;
 module.exports.addParty = addParty;
+module.exports.onUnloaded = onUnloaded;
+module.exports.onNavigatingTo = onNavigatingTo;

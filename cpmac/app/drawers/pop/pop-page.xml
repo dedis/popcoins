@@ -5,6 +5,7 @@
         xmlns:myDrawer="shared/my-drawer"
         xmlns:att="drawers/pop/att"
         xmlns:org="drawers/pop/org"
+        xmlns:pop="drawers/pop/pop"
         xmlns="http://www.nativescript.org/tns.xsd">
 
     <ActionBar class="action-bar">
@@ -72,6 +73,12 @@
                     <TabViewItem title="Organizer">
                         <TabViewItem.view>
                             <org:org-party-list/>
+                        </TabViewItem.view>
+                    </TabViewItem>
+
+                    <TabViewItem title="My Tokens">
+                        <TabViewItem.view>
+                            <pop:pop-page/>
                         </TabViewItem.view>
                     </TabViewItem>
 

@@ -1,5 +1,6 @@
 const Frame = require("ui/frame");
 const Dialog = require("ui/dialogs");
+const Timer = require("timer");
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const FileIO = require("../../../shared/lib/file-io/file-io");
@@ -17,6 +18,7 @@ const viewModel = ObservableModule.fromObject({
 });
 
 let page = undefined;
+let timerId = undefined;
 
 function onLoaded(args) {
   page = args.object;
@@ -24,6 +26,17 @@ function onLoaded(args) {
   page.bindingContext = viewModel;
 
   loadParties();
+
+  // Poll the status every 3s
+  timerId = Timer.setInterval(() => {
+    reloadStatuses();
+  }, 5000)
+
+}
+
+function onUnloaded(args) {
+  // remove polling when page is leaved
+  Timer.clearInterval(timerId);
 }
 
 function loadParties() {
@@ -327,8 +340,15 @@ function addParty() {
 
 }
 
+function reloadStatuses() {
+  viewModel.partyListDescriptions.forEach(model => {
+    model.party.loadStatus();
+  })
+}
+
 module.exports.onLoaded = onLoaded;
 module.exports.partyTapped = partyTapped;
 module.exports.onSwipeCellStarted = onSwipeCellStarted;
 module.exports.deleteParty = deleteParty;
 module.exports.addParty = addParty;
+module.exports.onUnloaded = onUnloaded;

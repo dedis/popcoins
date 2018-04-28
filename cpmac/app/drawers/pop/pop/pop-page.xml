@@ -7,38 +7,18 @@
         <Label class="action-bar-title" text="PoP"/>
     </ActionBar>
 
-    <GridLayout class="page-content" rows="auto,*,auto,*" columns="*,auto">
+    <GridLayout class="page-content" rows="*" columns="*">
 
-        <Label class="label-title" text="Final Statements" row="0" colSpan="2"/>
-        <Button text="Add" tap="scanFinalStatement" row="0" col="1"/>
-        <nsListView:RadListView items="{{ finalStatements }}" itemTap="finalStatementTapped" row="1" colSpan="2"
-                  itemSwipeProgressStarted="onSwipeCellStartedFinalStatement"
-                  swipeActions="true"
-                  id="list-view-final-statements">
-
-            <nsListView:RadListView.itemTemplate>
-                <GridLayout id="grid-layout-final-statement" rows="*,*,*,auto" columns="*" backgroundColor="white">
-                    <Label text="{{ desc.name }}" row="0" textWrap="true"/>
-                    <Label text="{{ desc.dateTime }}" row="1" textWrap="true"/>
-                    <Label text="{{ desc.location }}" row="2" textWrap="true"/>
-                    <StackLayout row="3" height="1" backgroundColor="black"/>
-                </GridLayout>
-            </nsListView:RadListView.itemTemplate>
-        </nsListView:RadListView>
-
-        <Label class="label-title" text="PoP-Token" row="2" colSpan="2"/>
         <nsListView:RadListView items="{{ popToken }}" itemTap="popTokenTapped" row="3" colSpan="2"
                   itemSwipeProgressStarted="onSwipeCellStartedPopToken"
                   swipeActions="true"
                   id="list-view-pop-token">
 
             <nsListView:RadListView.itemTemplate>
-                <GridLayout id="grid-layout-pop-token" rows="*,*,*,*,auto" columns="*" backgroundColor="white">
-                    <Label text="{{ final.desc.name }}" row="0" textWrap="true"/>
+                <GridLayout id="grid-layout-pop-token" rows="*,*,*,*,auto" columns="*" class="basic-list-decorated">
+                    <Label text="{{ final.desc.name }}" class="list-title" row="0" textWrap="true"/>
                     <Label text="{{ final.desc.dateTime }}" row="1" textWrap="true"/>
                     <Label text="{{ final.desc.location }}" row="2" textWrap="true"/>
-                    <Label text="{{ toHex(public) }}" row="3" textWrap="true"/>
-                    <StackLayout row="4" height="1" backgroundColor="black"/>
                 </GridLayout>
             </nsListView:RadListView.itemTemplate>
         </nsListView:RadListView>

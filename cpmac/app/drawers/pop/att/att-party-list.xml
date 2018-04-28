@@ -1,6 +1,8 @@
 <Page
         class="page"
         loaded="onLoaded"
+        unloaded="onUnloaded"
+        navigatingTo="onNavigatingTo"
         xmlns:nsListView="nativescript-ui-listview"
         xmlns:nsFloatingButton="nativescript-floatingactionbutton"
         xmlns="http://www.nativescript.org/tns.xsd">
