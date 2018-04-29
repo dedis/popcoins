@@ -6,8 +6,13 @@ const ObjectType = require("../../shared/lib/dedjs/ObjectType");
 const CothorityMessages = require("../../shared/lib/dedjs/protobuf/build/cothority-messages");
 const ScanToReturn = require("../../shared/lib/scan-to-return/scan-to-return");
 const User = require("../../shared/lib/dedjs/object/user/User").get;
+const ObservableModule = require("data/observable");
+const ObservableArray = require("data/observable-array").ObservableArray;
 
-const viewModel = User.getRosterModule();
+const viewModel = ObservableModule.fromObject({
+  rosterModule: User.getRosterModule(),
+  isRosterEmpty: true
+});
 
 let pageObject = undefined;
 
@@ -16,7 +21,14 @@ function onNavigatingTo(args) {
   pageObject = page.page;
   page.bindingContext = viewModel;
 
-  if (viewModel.statusList.length !== viewModel.list.length) {
+  // Bind isEmpty to the length of the array
+  viewModel.isRosterEmpty = viewModel.rosterModule.list.length === 0;
+  viewModel.rosterModule.list.on(ObservableArray.changeEvent, () => {
+    console.log("SKDEBUG TRIGGERED");
+    viewModel.set('isRosterEmpty', viewModel.rosterModule.list.length === 0);
+  });
+
+  if (viewModel.rosterModule.statusList.length !== viewModel.rosterModule.list.length) {
     loadConodeList();
   }
 }
