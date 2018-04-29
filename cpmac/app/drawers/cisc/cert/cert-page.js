@@ -12,6 +12,7 @@ const LabelModule = require("tns-core-modules/ui/label");
 const SkipPage = require("../skipchain-page");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const ObservableModule = require("data/observable");
+//const SSL = require('ssl-utils'); 
 
 let Page;
 let page;
@@ -90,7 +91,6 @@ function onDrawerButtonTap(args) {
 }
 
 exports.certTapped = certTapped;
-exports.certAdd = certAdd;
 exports.onLoaded = onLoaded;
 exports.onDrawerButtonTap = onDrawerButtonTap;
 
