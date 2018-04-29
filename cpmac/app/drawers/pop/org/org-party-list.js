@@ -14,7 +14,8 @@ const CANCELED_BY_USER = "CANCELED_BY_USER_STRING";
 
 const viewModel = ObservableModule.fromObject({
   partyListDescriptions: new ObservableArray(),
-  isLoading: false
+  isLoading: false,
+  isEmpty: true
 });
 
 let page = undefined;
@@ -41,6 +42,12 @@ function onUnloaded(args) {
 
 function loadParties() {
   viewModel.isLoading = true;
+
+  // Bind isEmpty to the length of the array
+  viewModel.partyListDescriptions.on(ObservableArray.changeEvent, () => {
+    viewModel.set('isEmpty', viewModel.partyListDescriptions.length === 0);
+  });
+
   let party = undefined;
   viewModel.partyListDescriptions.splice(0);
   FileIO.forEachFolderElement(FilePaths.POP_ORG_PATH, function (partyFolder) {
@@ -128,7 +135,7 @@ function partyTapped(args) {
         .action({
           message: "What do you want to do ?",
           cancelButtonText: "Cancel",
-          actions: ["Configure the party", "Publish the party"]
+          actions: ["Configure the party", "Publish the party", "Remove the party"]
         })
         .then(result => {
           if (result === "Configure the party") {
@@ -140,6 +147,12 @@ function partyTapped(args) {
             });
           } else if (result === "Publish the party") {
             hashAndSave(party);
+          } else if (result === "Remove the party") {
+            return party.remove()
+              .then(() => {
+                viewModel.partyListDescriptions.splice(index, 1);
+                return Promise.resolve();
+              });
           }
         })
         .catch((error) => {

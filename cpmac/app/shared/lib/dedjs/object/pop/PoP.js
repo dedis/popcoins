@@ -131,7 +131,7 @@ class PoP {
       throw new Error("save must be of type boolean");
     }
 
-    this.emptyPopTokenArray()
+    this.emptyPopTokenArray();
 
     if (array.length === 1) {
       return this.addPopToken(array[0], save);

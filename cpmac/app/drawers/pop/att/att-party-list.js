@@ -14,7 +14,8 @@ const PoP = require("../../../shared/lib/dedjs/object/pop/PoP").get;
 let loaded = false;
 const viewModel = ObservableModule.fromObject({
   partyListDescriptions: new ObservableArray(),
-  isLoading: false
+  isLoading: false,
+  isEmpty: true
 });
 
 let page = undefined;
@@ -35,6 +36,7 @@ function onLoaded(args) {
     loaded = true;
   }
 
+
   // Poll the status every 3s
   timerId = Timer.setInterval(() => {
     reloadStatuses();
@@ -48,6 +50,12 @@ function onUnloaded(args) {
 
 function loadParties() {
   viewModel.isLoading = true;
+
+  // Bind isEmpty to the length of the array
+  viewModel.partyListDescriptions.on(ObservableArray.changeEvent, () => {
+    viewModel.set('isEmpty', viewModel.partyListDescriptions.length === 0);
+  });
+
   let party = undefined;
   viewModel.partyListDescriptions.splice(0);
   FileIO.forEachFolderElement(FilePaths.POP_ATT_PATH, function (partyFolder) {
@@ -127,13 +135,14 @@ function partyTapped(args) {
             }
             return PoP.addPopTokenFromFinalStatement(party.getFinalStatement(), party.getKeyPair(), true)
               .then(() => {
-                // return party.remove();
+                // return party.remove(); TODO remove
                 return Promise.resolve();
               })
               .then(() => {
-                viewModel.partyListDescriptions.splice(index, 1);
+                viewModel.partyListDescriptions.splice(index, 1); // TODO and this
                 return Dialog.alert({
-                  title: "Your Token is now accessible under \"My Tokens\".",
+                  title: "Success !",
+                  message: "Your Token is now accessible under \"My Tokens\".",
                   okButtonText: "Ok"
                 });
               });

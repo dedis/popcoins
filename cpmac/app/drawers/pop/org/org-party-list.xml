@@ -7,6 +7,13 @@
         xmlns="http://www.nativescript.org/tns.xsd">
 
     <GridLayout class="page-content" rows="*" columns="*,*,auto">
+        <Label text="You don't have any party. Start by creating one !"
+               textWrap="true"
+               class="empty-list-label"
+               colSpan="3"
+               visibility="{{ isEmpty ? 'visible' : 'collapsed' }}"
+        />
+
         <nsListView:RadListView items="{{ partyListDescriptions }}" itemTap="partyTapped" row="0" colSpan="3"
                                 itemSwipeProgressStarted="onSwipeCellStarted"
                                 swipeActions="true"

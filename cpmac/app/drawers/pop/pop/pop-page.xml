@@ -9,7 +9,13 @@
 
     <GridLayout class="page-content" rows="*" columns="*">
 
-        <nsListView:RadListView items="{{ popToken }}" itemTap="popTokenTapped" row="3" colSpan="2"
+        <Label text="You don't have any PoP-Tokens. Attend or organize a party to generate some !"
+               textWrap="true"
+               class="empty-list-label"
+               visibility="{{ isPopTokenEmpty ? 'visible' : 'collapsed' }}"
+        />
+
+        <nsListView:RadListView items="{{ popToken }}" itemTap="popTokenTapped"
                   itemSwipeProgressStarted="onSwipeCellStartedPopToken"
                   swipeActions="true"
                   id="list-view-pop-token">
