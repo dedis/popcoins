@@ -1,0 +1,26 @@
+<Page
+        class="page"
+        navigatingTo="onNavigatingTo"
+        xmlns:nsDrawer="nativescript-ui-sidedrawer"
+        xmlns:myDrawer="shared/my-drawer"
+        xmlns="http://www.nativescript.org/tns.xsd"
+        xmlns:nsListView="nativescript-ui-listview"
+        xmlns:nsListView="nativescript-pro-ui/listview">
+
+    <ActionBar class="action-bar">
+
+        <NavigationButton ios:visibility="collapsed" icon="res://menu" tap="onDrawerButtonTap"></NavigationButton>
+
+        <ActionItem icon="res://navigation/menu"
+                    android:visibility="collapsed"
+                    tap="onDrawerButtonTap"
+                    ios.position="left">
+        </ActionItem>
+        <Label class="action-bar-title" text="Cisc"></Label>
+    </ActionBar>
+
+    <StackLayout>
+        <Label id="storageLabel" class="label-title" text="Certificate Value"/>
+        <Label id="cert" text="{{ cert }}"/>
+    </StackLayout>
+</Page>

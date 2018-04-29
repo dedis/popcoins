@@ -2,9 +2,6 @@
         navigatingTo="onNavigatingTo"
         xmlns:nsDrawer="nativescript-ui-sidedrawer"
         xmlns:myDrawer="shared/my-drawer"
-        xmlns:qr="drawers/cisc/qr"
-        xmlns:home="drawers/cisc/home"
-        xmlns:data="drawers/cisc/data"
         xmlns="http://www.nativescript.org/tns.xsd"
         xmlns:nsListView="nativescript-ui-listview"
         xmlns:nsFloatingButton="nativescript-floatingactionbutton">
