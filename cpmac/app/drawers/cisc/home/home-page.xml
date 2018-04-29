@@ -7,8 +7,8 @@
     </ActionBar>
 
     <StackLayout>
-        <Button text="Connect to ID" tap="connectButtonTapped" visibility="{{ isConnected ? 'collapsed' : 'visible' }}"/>
         <StackLayout visibility="{{ isConnected ? 'visible' : 'collapsed' }}">
+            <Label class ="label-title" text="Skipchain ID"/>
             <Label id="storageLabel" class="label-title" text="Actual Data" visibility="{{ isOnProposed ? 'collapsed' : 'visible' }}"/>
             <ListView id="storage" items="{{ storage }}" orientation="vertical" visibility="{{ isOnProposed ? 'collapsed' : 'visible' }}">
                 <ListView.itemTemplate>

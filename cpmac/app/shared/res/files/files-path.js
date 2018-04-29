@@ -27,8 +27,9 @@ const POP_ATT_FINAL = "final_statements.json";
 /**
  * CISC Files
  */
-const CISC_IDENTITY_LINK = "shared/res/files/cisc/identity_link.json";
-const CISC_NAME = "shared/res/files/cisc/name.json";
+const CISC_PATH = "shared/res/files/cisc";
+const CISC_IDENTITY_LINK = "identity_link.json";
+const CISC_NAME = "name.json";
 
 /**
  * USER files
@@ -50,3 +51,4 @@ module.exports.CISC_NAME = CISC_NAME;
 module.exports.USER_PATH = USER_PATH;
 module.exports.POP_ATT_PATH = POP_ATT_PATH;
 module.exports.POP_ATT_FINAL = POP_ATT_FINAL;
+module.exports.CISC_PATH = CISC_PATH;
