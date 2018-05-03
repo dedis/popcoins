@@ -266,6 +266,10 @@ function linkToConode(party) {
 
         return party.linkToConode(conodes[index], "")
           .then(result => {
+            if (result.alreadyLinked !== undefined && result.alreadyLinked) {
+              return Promise.resolve()
+            }
+
             return Dialog.prompt({
               title: "Requested PIN",
               message: result,
@@ -274,21 +278,22 @@ function linkToConode(party) {
               defaultText: "",
               inputType: Dialog.inputType.text
             })
+              .then(result => {
+                if (result.result) {
+                  /*console.log("SKDEBUG TEXT = " + result.result.text);
+                  if (result.result.text === undefined) {
+                    return Promise.reject("PIN should not be empty");
+                  }*/
+                  return party.linkToConode(conodes[index], result.text)
+                    .then(() => {
+                      return Promise.resolve(conodes[index]);
+                    });
+                } else {
+                  return Promise.reject(CANCELED_BY_USER);
+                }
+              });
+
           })
-          .then(result => {
-            if (result.result) {
-              /*console.log("SKDEBUG TEXT = " + result.result.text);
-              if (result.result.text === undefined) {
-                return Promise.reject("PIN should not be empty");
-              }*/
-              return party.linkToConode(conodes[index], result.text)
-                .then(() => {
-                  return Promise.resolve(conodes[index]);
-                });
-            } else {
-              return Promise.reject(CANCELED_BY_USER);
-            }
-          });
       } else {
         return Promise.reject(CANCELED_BY_USER);
       }
@@ -317,7 +322,7 @@ function addParty() {
     .then((result) => {
       conode = result;
       return Dialog.action({
-        message: "Successfully linked to your conode ! What do you want to do ?",
+        message: "You are linked to your conode ! What do you want to do ?",
         cancelButtonText: "Cancel",
         actions: ["Configure a new party", "List the proposals"]
       })

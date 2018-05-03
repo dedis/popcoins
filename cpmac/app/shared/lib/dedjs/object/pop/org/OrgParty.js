@@ -34,6 +34,7 @@ const EMPTY_POP_DESC = CothorityMessages.createPopDesc("", "", "", EMPTY_ROSTER)
 
 class OrgParty {
 
+
   /**
    * Constructor for the Org class.
    * @param {string} [dirname] - directory of the party data (directory is created if non existent).
@@ -609,11 +610,13 @@ class OrgParty {
   }
 
   /**
-   * Sends a link request to the conode given as parameter. If the pin is not empty and the link request succeeds, the conode will be
-   * stored as the linked conode.
+   * Sends a link request to the conode given as parameter. If the pin is not empty and the link request succeeds
+   * or if the public key of the user is already registered, the conode will be stored as the linked conode.
    * @param {ServerIdentity} conode - the conode to which send the link request
    * @param {string} pin - the pin received from the conode
    * @returns {Promise} - a promise that gets completed once the link request has been sent and a response received
+   * @property {boolean} alreadyLinked -  a property of the object returned by the promise that tells if
+   * the public key of the user were already registered (thus it won't need to ask PIN in the future)
    */
   linkToConode(conode, pin) {
     if (!Helper.isOfType(conode, ObjectType.SERVER_IDENTITY)) {
@@ -625,17 +628,28 @@ class OrgParty {
     if (!User.isKeyPairSet()) {
       throw new Error("user should generate a key pair before linking to a conode");
     }
-
+    const ALREADY_LINKED = "ALREADY_LINKED_STRING";
     const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(conode, ""), RequestPath.POP);
     const pinRequestMessage = CothorityMessages.createPinRequest(pin, User.getKeyPair().public);
+    const verifyLinkMessage = CothorityMessages.createVerifyLinkMessage(User.getKeyPair().public);
 
     // TODO change status request return type
-    return cothoritySocket.send(RequestPath.POP_PIN_REQUEST, RequestPath.STATUS_REQUEST, pinRequestMessage)
+
+    return cothoritySocket.send(RequestPath.POP_VERIFY_LINK, DecodeType.VERIFY_LINK_REPLY, verifyLinkMessage)
+      .then(alreadyLinked => {
+        return alreadyLinked ?
+          Promise.resolve(ALREADY_LINKED) :
+          cothoritySocket.send(RequestPath.POP_PIN_REQUEST, RequestPath.STATUS_REQUEST, pinRequestMessage)
+      })
       .then(response => {
         return this.setLinkedConode(conode, true)
           .then(() => {
-            return Promise.resolve("PIN Accepted");
-          });
+            const fields = {
+              alreadyLinked: response === ALREADY_LINKED
+            };
+            return Promise.resolve(fields);
+          })
+
       })
       .catch(error => {
         if (error.message === CothorityMessages.READ_PIN_ERROR) {

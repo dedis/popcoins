@@ -40,6 +40,7 @@ const POP_FETCH_REQUEST = `FetchRequest`;
 const POP_PIN_REQUEST = `PinRequest`;
 const POP_GET_PROPOSALS = 'GetProposals';
 const POP_CHECK_CONFIG = 'CheckConfig';
+const POP_VERIFY_LINK = 'VerifyLink';
 
 /**
  * CISC Requests
@@ -79,3 +80,4 @@ module.exports.CISC_PROPOSE_SEND = CISC_PROPOSE_SEND;
 module.exports.CISC_PROPOSE_UPDATE = CISC_PROPOSE_UPDATE;
 module.exports.CISC_SCHNORR_SIG = CISC_SCHNORR_SIG;
 module.exports.IDENTITY_PROPOSE_VOTE = IDENTITY_PROPOSE_VOTE;
+module.exports.POP_VERIFY_LINK = POP_VERIFY_LINK;

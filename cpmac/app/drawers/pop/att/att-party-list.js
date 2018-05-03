@@ -92,13 +92,22 @@ function partyTapped(args) {
         })
         .then(result => {
           if (result === "Generate a new key pair") {
-            return party.randomizeKeyPair()
-              .then(() => {
-                return Dialog.alert({
-                  title: "A new key pair has been generated !",
-                  message: "You can now use it to register to this party.",
-                  okButtonText: "Ok"
-                })
+            return Dialog.confirm({
+              title: "Warning !",
+              message: "The current key pair will by overwritten, so will need to get the new one " +
+              "registered by the organizers. Are you sure you want to continue ?",
+              okButtonText: "Yes",
+              cancelButtonText: "No",
+            })
+              .then(accepted => {
+                return !accepted ? Promise.resolve() : party.randomizeKeyPair()
+                  .then(() => {
+                    return Dialog.alert({
+                      title: "A new key pair has been generated !",
+                      message: "You can now use it to register to this party.",
+                      okButtonText: "Ok"
+                    })
+                  })
               })
           } else if (result === "Show the QR Code of my key pair") {
             Frame.topmost().currentPage.showModal("shared/pages/qr-code/qr-code-page", {
