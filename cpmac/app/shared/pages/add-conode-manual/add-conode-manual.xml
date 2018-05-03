@@ -18,12 +18,13 @@
                    colSpan="2"
                    id="text-view-conode-address"/>
 
-        <Label class="label-title" text="Conode Public Key" row="3" colSpan="2"/>
+        <Label class="label-title" text="Conode Public Key" row="3" colSpan="2" visibility="collapsed"/>
         <TextField class="text-field" hint="hex" autocorrect="false"
                    autocapitalizationType="none"
                    returnKeyType="next"
                    row="4"
                    colSpan="2"
+                   visibility="collapsed"
                    id="text-view-conode-public-key"/>
 
         <Label class="label-title" text="Conode Description" row="5" colSpan="2"/>

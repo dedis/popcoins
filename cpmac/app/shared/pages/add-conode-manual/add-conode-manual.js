@@ -1,7 +1,11 @@
 const Dialog = require("ui/dialogs");
 const Convert = require("../../lib/dedjs/Convert");
 const Helper = require("../../lib/dedjs/Helper");
+const NetDedis = require("@dedis/cothority").net;
+const RequestPath = require("../../lib/dedjs/RequestPath");
+const DecodeType = require("../../lib/dedjs/DecodeType");
 const CothorityMessages = require("../../lib/dedjs/protobuf/build/cothority-messages");
+const StatusExtractor = require("../../lib/dedjs/extractor/StatusExtractor");
 
 let textFieldAddress = undefined;
 let textFieldPublicKey = undefined;
@@ -46,8 +50,39 @@ function addManual() {
   let publicKey = textFieldPublicKey.text;
   const description = textFieldDescription.text;
 
-  if (address.length > 0 && publicKey.length > 0 && description.length > 0) {
+  if (address.length > 0 && description.length > 0) {
     try {
+      console.log("SKDEBUG HEREEEE 1 " + publicKey);
+      if (publicKey.length === 0) {
+        console.log("SKDEBUG HEREEEE 2 " + publicKey);
+        if(!Helper.isValidAddress(address)) {
+          return Dialog.alert({
+            title: "Address or server incorrect",
+            message: "Please double check your address.",
+            okButtonText: "Ok"
+          });
+        }
+        const statusRequestMessage = CothorityMessages.createStatusRequest();
+        const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(address, ""), RequestPath.STATUS);
+        return cothoritySocket.send(RequestPath.STATUS_REQUEST, DecodeType.STATUS_RESPONSE, statusRequestMessage)
+          .then(statusResponse => {
+            const hexKey = StatusExtractor.getPublicKey(statusResponse);
+            const server = Convert.toServerIdentity(address, Convert.hexToByteArray(hexKey), description, undefined);
+
+            closeCallBackFunction(server);
+          })
+          .catch(error =>  {
+            console.log(error);
+            console.dir(error);
+
+            return Dialog.alert({
+              title: "Address or server incorrect",
+              message: "Please double check your address.",
+              okButtonText: "Ok"
+            });
+
+          })
+      }
       publicKey = Convert.hexToByteArray(publicKey);
       const server = Convert.toServerIdentity(address, publicKey, description, undefined);
 
