@@ -4,12 +4,12 @@ const Package = require("../../Package");
 const ObjectType = require("../../ObjectType");
 const Helper = require("../../Helper");
 const Convert = require("../../Convert");
-const RequestPath = require("../../RequestPath");
-const DecodeType = require("../../DecodeType");
+const RequestPath = require("../../network/RequestPath");
+const DecodeType = require("../../network/DecodeType");
 const NetDedis = require("@dedis/cothority").net;
 const FilesPath = require("../../../../res/files/files-path");
 const FileIO = require("../../../../lib/file-io/file-io");
-const CothorityMessages = require("../../protobuf/build/cothority-messages");
+const CothorityMessages = require("../../network/cothority-messages");
 
 const User = require("../user/User").get;
 

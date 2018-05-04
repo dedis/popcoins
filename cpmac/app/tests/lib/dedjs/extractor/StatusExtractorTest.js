@@ -2,7 +2,7 @@ const ChaiAsPromised = require("chai-as-promised");
 chai.use(ChaiAsPromised);
 chai.should();
 
-const CothorityMessages = require("../../../../shared/lib/dedjs/protobuf/build/cothority-messages");
+const CothorityMessages = require("../../../../shared/lib/dedjs/network/cothority-messages");
 const ObjectType = require("../../../../shared/lib/dedjs/ObjectType");
 const Convert = require("../../../../shared/lib/dedjs/Convert");
 

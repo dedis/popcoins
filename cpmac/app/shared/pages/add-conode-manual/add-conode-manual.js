@@ -1,7 +1,7 @@
 const Dialog = require("ui/dialogs");
 const Convert = require("../../lib/dedjs/Convert");
 const Helper = require("../../lib/dedjs/Helper");
-const CothorityMessages = require("../../lib/dedjs/protobuf/build/cothority-messages");
+const CothorityMessages = require("../../lib/dedjs/network/cothority-messages");
 
 let textFieldAddress = undefined;
 let textFieldPublicKey = undefined;

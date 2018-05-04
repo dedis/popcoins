@@ -3,8 +3,8 @@ const ObservableArray = require("data/observable-array").ObservableArray;
 const topmost = require("ui/frame").topmost;
 const NetDedis = require("@dedis/cothority").net;
 const Convert = require("../../../../shared/lib/dedjs/Convert");
-const DecodeType = require("../../../../shared/lib/dedjs/DecodeType");
-const RequestPath = require("../../../../shared/lib/dedjs/RequestPath");
+const DecodeType = require("../../../../shared/lib/dedjs/network/DecodeType");
+const RequestPath = require("../../../../shared/lib/dedjs/network/RequestPath");
 const OrgParty = require("../../../../shared/lib/dedjs/object/pop/org/OrgParty").Party;
 
 let conodeAddress = undefined;

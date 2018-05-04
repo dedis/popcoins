@@ -9,7 +9,7 @@ const Crypto = require("./Crypto");
 const TomlParser = require("toml");
 const Tomlify = require('tomlify-j0.4');
 const UUID = require("pure-uuid");
-const CothorityMessages = require("./protobuf/build/cothority-messages");
+const CothorityMessages = require("./network/cothority-messages");
 
 const HEX_KEYWORD = "hex";
 const BASE64_KEYWORD = "base64";

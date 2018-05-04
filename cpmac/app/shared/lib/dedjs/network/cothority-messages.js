@@ -38,8 +38,8 @@ class CothorityProtobuf {
   }
 }
 
-const Helper$1 = require("../../Helper");
-const ObjectType = require("../../ObjectType");
+const Helper$1 = require("../Helper");
+const ObjectType = require("../ObjectType");
 
 /**
  * Helpers to encode and decode messages of the Cothority

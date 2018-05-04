@@ -12,9 +12,9 @@ const ObjectType = require("../../../ObjectType");
 const NetDedis = require("@dedis/cothority").net;
 const FilesPath = require("../../../../../res/files/files-path");
 const FileIO = require("../../../../../lib/file-io/file-io");
-const CothorityMessages = require("../../../protobuf/build/cothority-messages");
-const RequestPath = require("../../../RequestPath");
-const DecodeType = require("../../../DecodeType");
+const CothorityMessages = require("../../../network/cothority-messages");
+const RequestPath = require("../../../network/RequestPath");
+const DecodeType = require("../../../network/DecodeType");
 const uuidv4 = require("uuid/v4");
 
 const User = require("../../user/User").get;

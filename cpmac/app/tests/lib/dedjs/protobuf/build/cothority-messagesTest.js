@@ -6,7 +6,7 @@ const ObjectType = require("../../../../../shared/lib/dedjs/ObjectType");
 const Convert = require("../../../../../shared/lib/dedjs/Convert");
 const Helper = require("../../../../../shared/lib/dedjs/Helper");
 
-const CothorityMessages = require("../../../../../shared/lib/dedjs/protobuf/build/cothority-messages");
+const CothorityMessages = require("../../../../../shared/lib/dedjs/network/cothority-messages");
 
 const CONODE_ADDRESS = "tls://10.0.2.2:7002";
 const CONODE_PUBLIC_KEY = "HkDzpR5Imd7WNx8kl2lJcIVRVn8gfDByJnmlfrYh/zU=";

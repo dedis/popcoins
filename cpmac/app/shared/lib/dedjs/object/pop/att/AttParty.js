@@ -6,9 +6,9 @@ const FileIO = require("../../../../file-io/file-io");
 const FilePath = require("../../../../../res/files/files-path");
 const Convert = require("../../../Convert");
 const NetDedis = require("@dedis/cothority").net;
-const CothorityMessages = require("../../../protobuf/build/cothority-messages");
-const RequestPath = require("../../../RequestPath");
-const DecodeType = require("../../../DecodeType");
+const CothorityMessages = require("../../../network/cothority-messages");
+const RequestPath = require("../../../network/RequestPath");
+const DecodeType = require("../../../network/DecodeType");
 
 /**
  * This singleton represents the attendee of a PoP party. It contains everything related to the attendee.
