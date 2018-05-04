@@ -72,9 +72,11 @@ function initDate() {
   dataForm.set("name", Party.getPopDesc().name);
   dataForm.set("location", Party.getPopDesc().location);
 
-  let date = new Date(desc.dateTime === "" ? Date.now() : Date.parse(desc.dateTime));
+  let todayDate = desc.dateTime === "";
 
-  dataForm.set("date", date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + (date.getDay() + 1));
+  let date = new Date(todayDate ? Date.now() : Date.parse(desc.dateTime));
+
+  dataForm.set("date", date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate());
   dataForm.set("time", date.getHours() + ":" + date.getMinutes());
 }
 
@@ -255,7 +257,7 @@ function setDate() {
   date.map(parseInt);
   time.map(parseInt);
 
-  let dateString = new Date(date[0], date[1] - 1, date[2] - 1, time[0], time[1], 0, 0).toString();
+  let dateString = new Date(date[0], date[1], date[2], time[0], time[1], 0, 0).toString();
 
   return Party.setPopDescDateTime(dateString);
 }
