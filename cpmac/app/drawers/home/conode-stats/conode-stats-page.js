@@ -1,6 +1,7 @@
 const Frame = require("ui/frame");
 const Convert = require("../../../shared/lib/dedjs/Convert");
 const ConodeStatsViewModel = require("./conode-stats-view-model");
+const topmost = require("ui/frame").topmost;
 
 const conodeStatsViewModel = new ConodeStatsViewModel();
 
@@ -41,5 +42,14 @@ function displayQrOfConode() {
   }, () => { }, true);
 }
 
+/**
+ * Go back to the previous page
+ */
+function goBack() {
+  topmost().goBack();
+}
+
+
 module.exports.onNavigatingTo = onNavigatingTo;
 module.exports.displayQrOfConode = displayQrOfConode;
+module.exports.goBack = goBack;
