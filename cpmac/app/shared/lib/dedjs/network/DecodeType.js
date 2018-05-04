@@ -1,3 +1,5 @@
+const RequestPath = require("./RequestPath");
+
 /**
  * @file File containing the different message types to decode for the Cothority.
  */
@@ -38,6 +40,12 @@ const CONFIG_UPDATE_REPLY = "ConfigUpdateReply";
 const PROPOSE_UPDATE_REPLY = "ProposeUpdateReply";
 const PROPOSE_VOTE_REPLY = "ProposeVoteReply";
 
+/**
+ * MISC response types.
+ */
+  // This points to an empty message type as cothority doesn't provide one by default
+const EMPTY_REPLY = RequestPath.STATUS_REQUEST;
+
 // Exports --------------------------------------------------------------------
 module.exports.STATUS_RESPONSE = STATUS_RESPONSE;
 module.exports.RANDOM_RESPONSE = RANDOM_RESPONSE;
@@ -59,3 +67,4 @@ module.exports.PROPOSE_VOTE_REPLY = PROPOSE_VOTE_REPLY;
 module.exports.GET_PROPOSALS_REPLY = GET_PROPOSALS_REPLY;
 module.exports.CHECK_CONFIG_REPLY = CHECK_CONFIG_REPLY;
 module.exports.VERIFY_LINK_REPLY = VERIFY_LINK_REPLY;
+module.exports.EMPTY_REPLY = EMPTY_REPLY;

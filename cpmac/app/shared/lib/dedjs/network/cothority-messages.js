@@ -50,7 +50,11 @@ const ObjectType = require("../ObjectType");
  */
 class CothorityMessages extends CothorityProtobuf {
 
-  // TODO return undefined
+  /**
+   * Error return from the server when PIN is shown in the log
+   *
+   * @return {string} - the error
+   */
   get READ_PIN_ERROR() {
     return 'Read PIN in server-log';
   }

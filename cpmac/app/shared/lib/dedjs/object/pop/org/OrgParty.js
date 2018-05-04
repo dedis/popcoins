@@ -9,7 +9,7 @@ const HashJs = require("hash.js");
 const Convert = require("../../../Convert");
 const Helper = require("../../../Helper");
 const ObjectType = require("../../../ObjectType");
-const NetDedis = require("@dedis/cothority").net;
+const Net = require("@dedis/cothority").net;
 const FilesPath = require("../../../../../res/files/files-path");
 const FileIO = require("../../../../../lib/file-io/file-io");
 const CothorityMessages = require("../../../network/cothority-messages");
@@ -629,18 +629,11 @@ class OrgParty {
       throw new Error("user should generate a key pair before linking to a conode");
     }
     const ALREADY_LINKED = "ALREADY_LINKED_STRING";
-    const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(conode, ""), RequestPath.POP);
+    const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(conode, ""), RequestPath.POP);
     const pinRequestMessage = CothorityMessages.createPinRequest(pin, User.getKeyPair().public);
     const verifyLinkMessage = CothorityMessages.createVerifyLinkMessage(User.getKeyPair().public);
 
-    // TODO change status request return type
-
-    return cothoritySocket.send(RequestPath.POP_VERIFY_LINK, DecodeType.VERIFY_LINK_REPLY, verifyLinkMessage)
-      .then(alreadyLinked => {
-        return alreadyLinked ?
-          Promise.resolve(ALREADY_LINKED) :
-          cothoritySocket.send(RequestPath.POP_PIN_REQUEST, RequestPath.STATUS_REQUEST, pinRequestMessage)
-      })
+    return cothoritySocket.send(RequestPath.POP_PIN_REQUEST, DecodeType.EMPTY_REPLY, pinRequestMessage)
       .then(response => {
         return this.setLinkedConode(conode, true)
           .then(() => {
@@ -701,7 +694,7 @@ class OrgParty {
     privateKey.unmarshalBinary(User.getKeyPair().private);
     const signature = Schnorr.sign(CURVE_ED25519_KYBER, privateKey, descHash);
 
-    const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(this.getLinkedConode(), ""), RequestPath.POP);
+    const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(this.getLinkedConode(), ""), RequestPath.POP);
     const storeConfigMessage = CothorityMessages.createStoreConfig(popDesc, signature);
 
     return cothoritySocket.send(RequestPath.POP_STORE_CONFIG, DecodeType.STORE_CONFIG_REPLY, storeConfigMessage)
@@ -759,7 +752,7 @@ class OrgParty {
     const signature = Schnorr.sign(CURVE_ED25519_KYBER, privateKey, hashToSign);
 
 
-    const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(this.getLinkedConode(), ""), RequestPath.POP);
+    const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(this.getLinkedConode(), ""), RequestPath.POP);
     const finalizeRequestMessage = CothorityMessages.createFinalizeRequest(descId, attendees, signature);
 
     return cothoritySocket.send(RequestPath.POP_FINALIZE_REQUEST, DecodeType.FINALIZE_RESPONSE, finalizeRequestMessage)
@@ -843,7 +836,7 @@ class OrgParty {
    * @returns {Promise} - a promise that gets resolved once the status is loaded
    */
   loadStatus() {
-    const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(this.getLinkedConode(), ""), RequestPath.POP);
+    const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(this.getLinkedConode(), ""), RequestPath.POP);
     const fetchRequest = CothorityMessages.createFetchRequest(this.getPopDescHash(), true);
 
     return cothoritySocket.send(RequestPath.POP_FETCH_REQUEST, DecodeType.FINALIZE_RESPONSE, fetchRequest)

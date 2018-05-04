@@ -10,7 +10,7 @@ const User = require("~/shared/lib/dedjs/object/user/User").get;
 const Dialog = require("ui/dialogs");
 const Helper = require("~/shared/lib/dedjs/Helper");
 const Convert = require("~/shared/lib/dedjs/Convert");
-const NetDedis = require("@dedis/cothority").net;
+const Net = require("@dedis/cothority").net;
 const RequestPath = require("~/shared/lib/dedjs/RequestPath");
 const DecodeType = require("~/shared/lib/dedjs/DecodeType");
 
@@ -204,7 +204,7 @@ function addDevice(newSkipchain) {
 
     let proposeSendMessage = CothorityMessages.createProposeSend(Convert.hexToByteArray(newSkipchain.getIdentity().id), data);
     console.log(newSkipchain.getIdentity().id);
-    const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(newSkipchain.getIdentity().address, ""), RequestPath.IDENTITY);
+    const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(newSkipchain.getIdentity().address, ""), RequestPath.IDENTITY);
     cothoritySocket.send(RequestPath.IDENTITY_PROPOSE_SEND, DecodeType.DATA_UPDATE_REPLY, proposeSendMessage)
         .then((response) => {
             console.log(response);

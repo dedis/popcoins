@@ -5,7 +5,7 @@ const KeyPair = require("../../../Crypto").KeyPair;
 const FileIO = require("../../../../file-io/file-io");
 const FilePath = require("../../../../../res/files/files-path");
 const Convert = require("../../../Convert");
-const NetDedis = require("@dedis/cothority").net;
+const Net = require("@dedis/cothority").net;
 const CothorityMessages = require("../../../network/cothority-messages");
 const RequestPath = require("../../../network/RequestPath");
 const DecodeType = require("../../../network/DecodeType");
@@ -69,7 +69,7 @@ class AttParty {
    * @returns {Promise} - a promise that gets solved once the final statement is retrieved and the status updated
    */
   retrieveFinalStatementAndStatus() {
-    const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(this._address, ""), RequestPath.POP);
+    const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(this._address, ""), RequestPath.POP);
     const fetchRequest = CothorityMessages.createFetchRequest(this._id, true);
 
     return cothoritySocket.send(RequestPath.POP_FETCH_REQUEST, DecodeType.FINALIZE_RESPONSE, fetchRequest)

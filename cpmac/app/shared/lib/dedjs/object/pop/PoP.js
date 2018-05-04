@@ -6,7 +6,7 @@ const Helper = require("../../Helper");
 const Convert = require("../../Convert");
 const RequestPath = require("../../network/RequestPath");
 const DecodeType = require("../../network/DecodeType");
-const NetDedis = require("@dedis/cothority").net;
+const Net = require("@dedis/cothority").net;
 const FilesPath = require("../../../../res/files/files-path");
 const FileIO = require("../../../../lib/file-io/file-io");
 const CothorityMessages = require("../../network/cothority-messages");
@@ -390,7 +390,7 @@ class PoP {
       throw new Error("descId must be an instance of Uint8Array and not empty");
     }
 
-    const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(conode, ""), RequestPath.POP);
+    const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(conode, ""), RequestPath.POP);
     const fetchRequestMessage = CothorityMessages.createFetchRequest(descId);
 
     return cothoritySocket.send(RequestPath.POP_FETCH_REQUEST, DecodeType.FETCH_RESPONSE, fetchRequestMessage)

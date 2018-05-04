@@ -7,7 +7,7 @@ const DedisJsNet = require("~/shared/lib/dedjs/Net");
 const Convert = require("~/shared/lib/dedjs/Convert");
 const Helper = require("~/shared/lib/dedjs/Helper");
 const Cisc = require("~/shared/lib/dedjs/object/cisc/Cisc").Skipchain;
-const NetDedis = require("@dedis/cothority").net;
+const Net = require("@dedis/cothority").net;
 const SkipPage = require("../skipchain-page");
 
 let skipchain;
@@ -70,7 +70,7 @@ function addKeyValue() {
                 edited.votes = null;
                 proposeSendMessage = CothorityMessages.createProposeSend(Convert.hexToByteArray(skipchain.getIdentity().id), edited);
                 let node = CothorityMessages.createServerIdentity(new Uint8Array({}), new Uint8Array({}), skipchain.getIdentity().address,"lelele");
-                const cothoritySocket = new NetDedis.Socket(node, RequestPath.IDENTITY);
+                const cothoritySocket = new Net.Socket(node, RequestPath.IDENTITY);
                 return cothoritySocket.send(RequestPath.IDENTITY_PROPOSE_SEND, DecodeType.DATA_UPDATE_REPLY, proposeSendMessage)
             }
         })

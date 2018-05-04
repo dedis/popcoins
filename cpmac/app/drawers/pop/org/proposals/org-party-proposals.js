@@ -1,7 +1,7 @@
 const Dialog = require("ui/dialogs");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const topmost = require("ui/frame").topmost;
-const NetDedis = require("@dedis/cothority").net;
+const Net = require("@dedis/cothority").net;
 const Convert = require("../../../../shared/lib/dedjs/Convert");
 const DecodeType = require("../../../../shared/lib/dedjs/network/DecodeType");
 const RequestPath = require("../../../../shared/lib/dedjs/network/RequestPath");
@@ -31,7 +31,7 @@ function onLoaded(args) {
 
 function retrieveProposals() {
   viewModel.proposals.splice(0);
-  const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(conodeAddress, ""), RequestPath.POP);
+  const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(conodeAddress, ""), RequestPath.POP);
 
   return cothoritySocket.send(RequestPath.POP_GET_PROPOSALS, DecodeType.GET_PROPOSALS_REPLY, {})
     .then(response => {
