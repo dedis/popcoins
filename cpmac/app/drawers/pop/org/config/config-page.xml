@@ -1,6 +1,6 @@
 <Page
         class="page"
-        loaded="onLoaded"
+        navigatingTo="onNavigatingTo"
         xmlns:nsListView="nativescript-ui-listview"
         xmlns:nsDataForm="nativescript-ui-dataform">
 

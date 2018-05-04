@@ -22,7 +22,11 @@ let dataForm = Observable.fromObject({
   location: ""
 });
 
-function onLoaded(args) {
+function onNavigatingTo(args) {
+  if (args.isBackNavigation) {
+    return;
+  }
+
   const page = args.object;
   const context = page.navigationContext;
 
@@ -489,7 +493,7 @@ function conodeTapped(args) {
 
 }
 
-module.exports.onLoaded = onLoaded;
+module.exports.onNavigatingTo = onNavigatingTo;
 module.exports.hashAndSave = hashAndSave;
 module.exports.addManual = addManual;
 module.exports.addScan = addScan;
