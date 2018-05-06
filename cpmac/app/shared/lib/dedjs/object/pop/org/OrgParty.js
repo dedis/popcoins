@@ -633,7 +633,14 @@ class OrgParty {
     const pinRequestMessage = CothorityMessages.createPinRequest(pin, User.getKeyPair().public);
     const verifyLinkMessage = CothorityMessages.createVerifyLinkMessage(User.getKeyPair().public);
 
-    return cothoritySocket.send(RequestPath.POP_PIN_REQUEST, DecodeType.EMPTY_REPLY, pinRequestMessage)
+    // TODO change status request return type
+
+    return cothoritySocket.send(RequestPath.POP_VERIFY_LINK, DecodeType.VERIFY_LINK_REPLY, verifyLinkMessage)
+      .then(alreadyLinked => {
+        return alreadyLinked.exists ?
+          Promise.resolve(ALREADY_LINKED) :
+          cothoritySocket.send(RequestPath.POP_PIN_REQUEST, RequestPath.STATUS_REQUEST, pinRequestMessage)
+      })
       .then(response => {
         return this.setLinkedConode(conode, true)
           .then(() => {
