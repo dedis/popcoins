@@ -280,10 +280,9 @@ function linkToConode(party) {
             })
               .then(result => {
                 if (result.result) {
-                  /*console.log("SKDEBUG TEXT = " + result.result.text);
-                  if (result.result.text === undefined) {
+                  if (result.text === "") {
                     return Promise.reject("PIN should not be empty");
-                  }*/
+                  }
                   return party.linkToConode(conodes[index], result.text)
                     .then(() => {
                       return Promise.resolve(conodes[index]);
