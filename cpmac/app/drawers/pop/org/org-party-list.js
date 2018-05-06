@@ -267,7 +267,7 @@ function linkToConode(party) {
         return party.linkToConode(conodes[index], "")
           .then(result => {
             if (result.alreadyLinked !== undefined && result.alreadyLinked) {
-              return Promise.resolve()
+              return Promise.resolve(conodes[index])
             }
 
             return Dialog.prompt({
