@@ -16,6 +16,7 @@ const CothorityMessages = require("../../../network/cothority-messages");
 const RequestPath = require("../../../network/RequestPath");
 const DecodeType = require("../../../network/DecodeType");
 const uuidv4 = require("uuid/v4");
+const Party = require("../Party");
 
 const User = require("../../user/User").get;
 const PoP = require("../../pop/PoP").get;
@@ -23,16 +24,11 @@ const PoP = require("../../pop/PoP").get;
 /**
  * This class represents the organizer of a PoP party. It contains everything related to the organizer party.
  */
-
-/**
- * We define the Org class which is the object representing the organizer.
- */
-
 const EMPTY_SERVER_IDENTITY = CothorityMessages.createServerIdentity(new Uint8Array(), new Uint8Array(), "", "");
 const EMPTY_ROSTER = CothorityMessages.createRoster(new Uint8Array(), [], new Uint8Array());
 const EMPTY_POP_DESC = CothorityMessages.createPopDesc("", "", "", EMPTY_ROSTER);
 
-class OrgParty {
+class OrgParty extends Party {
 
 
   /**
@@ -41,6 +37,7 @@ class OrgParty {
    *  If no directory is specified, a unique random directory name is generated
    */
   constructor(dirname) {
+    super();
     if (typeof dirname === "string") {
       this._dirname = dirname;
     } else if (dirname === undefined) {
@@ -54,16 +51,6 @@ class OrgParty {
       id: new Uint8Array(),
       address: "",
       description: ""
-    });
-    this._popDesc = ObservableModule.fromObjectRecursive({
-      name: "",
-      dateTime: "",
-      location: "",
-      roster: {
-        id: new Uint8Array(),
-        list: new ObservableArray(),
-        aggregate: new Uint8Array()
-      }
     });
     this._registeredAtts = ObservableModule.fromObject({
       array: new ObservableArray()
@@ -171,35 +158,6 @@ class OrgParty {
     }
   }
 
-  /**
-   * Returns the observable module for the pop description.
-   * @returns {ObservableModule} - the observable module for the pop description
-   */
-  getPopDescModule() {
-    return this._popDesc;
-  }
-
-  /**
-   * Returns the pop description.
-   * @returns {PopDesc} - the pop description
-   */
-  getPopDesc() {
-    const popDescModule = this.getPopDescModule();
-
-    let id = undefined;
-    if (popDescModule.roster.id.length > 0) {
-      id = popDescModule.roster.id;
-    }
-
-    const list = [];
-    popDescModule.roster.list.forEach(server => {
-      list.push(server);
-    });
-
-    const roster = CothorityMessages.createRoster(id, list, Uint8Array.from(popDescModule.roster.aggregate));
-
-    return CothorityMessages.createPopDesc(popDescModule.name, popDescModule.dateTime, popDescModule.location, roster);
-  }
 
   /**
    * Returns wether the PopDesc is being set (partially or completely).
