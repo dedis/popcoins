@@ -29,9 +29,8 @@
                 </nsListView:RadListView.itemSwipeTemplate>
 
                 <nsListView:RadListView.itemTemplate>
-                    <GridLayout rows="*,*" columns="*, auto" backgroundColor="white" class="basic-list-decorated">
+                    <GridLayout rows="*" columns="*, auto" backgroundColor="white" class="basic-list-decorated">
                         <Label class="list-title" text="{{ certKey }}" row="0" col="0" textWrap="true"/>
-                        <Label text="foo" row="1" col="0" textWrap="true"/>
                         <Label class="status-text" horizontalAlignment="right" verticalAlignment="center" text="11-06-2018"
                                col="1" rowSpan="2" textWrap="true"/>
                     </GridLayout>

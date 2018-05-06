@@ -33,7 +33,6 @@ function onNavigatingTo(args) {
     }
 
     const page = args.object;
-
     page.bindingContext = viewModel;
     if (skipchainsArray.length == 0){
         createSkipchains();
@@ -51,6 +50,7 @@ function createSkipchains() {
 }
 
 function loadSkipchains() {
+    const bytesLimit = 32;
     viewModel.isLoading = true;
     let skipchain = undefined;
     viewModel.skipchainsList.splice(0);
@@ -58,7 +58,9 @@ function loadSkipchains() {
     for (var i = 0; i < skipchainsArray.length; i++) {
         viewModel.skipchainsList.push(ObservableModule.fromObject({
             skipchain: skipchainsArray[i],
-            identity: skipchainsArray[i].getIdentity()
+            identity: skipchainsArray[i].getIdentity(),
+            idSimple: (skipchainsArray[i].getIdentity().id).substring(0, bytesLimit-1),
+            skipchainName: "Skipchain " + (i+1)
         }));
     }    
     viewModel.isLoading = false;
@@ -188,7 +190,9 @@ function askForDevice(newSkipchain) {
                 skipchainsArray.push(newSkipchain);
                 viewModel.skipchainsList.push(ObservableModule.fromObject({
                     skipchain: newSkipchain,
-                    identity: newSkipchain.getIdentity()
+                    identity: newSkipchain.getIdentity(),
+                    idSimple: (newSkipchain.getIdentity().id).substring(0, 31),
+                    skipchainName: "Skipchain " + skipchainsArray.length
                 }));
 
             }
@@ -222,6 +226,7 @@ function disconnectSkipchain(args) {
     const delIndex = skipchainsArray.findIndex(sc => sc === delSkipchain);
     skipchainsArray.splice(delIndex, 1);
     viewModel.skipchainsList.splice(delIndex,1);
+    delSkipchain.setIsConnected(false);
     delSkipchain.remove()
     .then(() => {
         const listView = FrameModule.topmost().currentPage.getViewById("listView");

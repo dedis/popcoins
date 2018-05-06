@@ -12,7 +12,10 @@ const LabelModule = require("tns-core-modules/ui/label");
 const SkipPage = require("../skipchain-page");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const ObservableModule = require("data/observable");
-//const SSL = require('ssl-utils'); 
+//const SSL = require('ssl-utils/lib/verify'); 
+//const PKI = require('pkijs');
+//const x509 = require('x509');
+//const exCert = require('certpem');
 
 let Page;
 let page;
@@ -40,6 +43,14 @@ function onLoaded(args) {
     Page = page.page;
     viewModel.skipchainVMModule = skipchain.getVMModule();
     loadCert();
+    //const cc=viewModel.certList.getItem(0).cert;
+    //var getCertInfo = require('certpem').info;
+    //var certInfo = getCertInfo(results.cert);
+    /*SSL.checkCertificateExpiration(cc, function (expiry) {
+        //expiry is a Date instance
+        var remainingTime = expiry.getTime() - Date.now();
+    });
+    console.log('HERE IT IS '+ remainingTime);*/
     page.bindingContext = viewModel;
     viewmodel = page.bindingContext;
 
