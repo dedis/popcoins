@@ -39,16 +39,14 @@ function loadViews(page) {
  */
 function generateKeyPair() {
   function setNewKeyPair() {
-    const newKeyPair = Crypto.generateRandomKeyPair();
-
-    return User.setKeyPair(newKeyPair, true)
+    return User.randomizeKeyPair()
       .then(() => {
         return Dialog.alert({
           title: "New Key Pair",
           message: "The new key pair has been stored in your settings." +
-            "\n\nPublic:\n" + Convert.byteArrayToHex(newKeyPair.public) +
-            "\n\nPrivate:\n" + Convert.byteArrayToHex(newKeyPair.private) +
-            "\n\nPublic Complete:\n" + Convert.byteArrayToHex(newKeyPair.publicComplete),
+            "\n\nPublic:\n" + Convert.byteArrayToHex(User.getKeyPair().public) +
+            "\n\nPrivate:\n" + Convert.byteArrayToHex(User.getKeyPair().private) +
+            "\n\nPublic Complete:\n" + Convert.byteArrayToHex(User.getKeyPair().publicComplete),
           okButtonText: "Ok"
         });
       })

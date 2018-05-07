@@ -2,11 +2,13 @@
       navigatingTo="onNavigatingTo">
 
     <ActionBar class="action-bar">
+        <NavigationButton text="Go Back" android:icon="res://ic_arrow_back" tap="goBack"/>
         <Label class="action-bar-title" text="Conode Stats"/>
 
         <ActionItem tap="displayQrOfConode"
+                    android:icon="res://ic_share_white"
                     ios.systemIcon="9" ios.position="right"
-                    text="QR" android.position="popup"/>
+                    text="QR" android.position="actionBar"/>
     </ActionBar>
 
     <GridLayout rows="*,auto" columns="*">

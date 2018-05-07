@@ -1,5 +1,6 @@
 const Frame = require("ui/frame");
 const Dialog = require("ui/dialogs");
+const Timer = require("timer");
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const FileIO = require("../../../shared/lib/file-io/file-io");
@@ -13,10 +14,12 @@ const CANCELED_BY_USER = "CANCELED_BY_USER_STRING";
 
 const viewModel = ObservableModule.fromObject({
   partyListDescriptions: new ObservableArray(),
-  isLoading: false
+  isLoading: false,
+  isEmpty: true
 });
 
 let page = undefined;
+let timerId = undefined;
 
 function onLoaded(args) {
   page = args.object;
@@ -24,10 +27,27 @@ function onLoaded(args) {
   page.bindingContext = viewModel;
 
   loadParties();
+
+  // Poll the status every 3s
+  timerId = Timer.setInterval(() => {
+    reloadStatuses();
+  }, 5000)
+
+}
+
+function onUnloaded(args) {
+  // remove polling when page is leaved
+  Timer.clearInterval(timerId);
 }
 
 function loadParties() {
   viewModel.isLoading = true;
+
+  // Bind isEmpty to the length of the array
+  viewModel.partyListDescriptions.on(ObservableArray.changeEvent, () => {
+    viewModel.set('isEmpty', viewModel.partyListDescriptions.length === 0);
+  });
+
   let party = undefined;
   viewModel.partyListDescriptions.splice(0);
   FileIO.forEachFolderElement(FilePaths.POP_ORG_PATH, function (partyFolder) {
@@ -115,7 +135,7 @@ function partyTapped(args) {
         .action({
           message: "What do you want to do ?",
           cancelButtonText: "Cancel",
-          actions: ["Configure the party", "Publish the party"]
+          actions: ["Configure the party", "Publish the party", "Remove the party"]
         })
         .then(result => {
           if (result === "Configure the party") {
@@ -127,6 +147,12 @@ function partyTapped(args) {
             });
           } else if (result === "Publish the party") {
             hashAndSave(party);
+          } else if (result === "Remove the party") {
+            return party.remove()
+              .then(() => {
+                viewModel.partyListDescriptions.splice(index, 1);
+                return Promise.resolve();
+              });
           }
         })
         .catch((error) => {
@@ -240,6 +266,10 @@ function linkToConode(party) {
 
         return party.linkToConode(conodes[index], "")
           .then(result => {
+            if (result.alreadyLinked !== undefined && result.alreadyLinked) {
+              return Promise.resolve(conodes[index])
+            }
+
             return Dialog.prompt({
               title: "Requested PIN",
               message: result,
@@ -248,21 +278,21 @@ function linkToConode(party) {
               defaultText: "",
               inputType: Dialog.inputType.text
             })
+              .then(result => {
+                if (result.result) {
+                  if (result.text === "") {
+                    return Promise.reject("PIN should not be empty");
+                  }
+                  return party.linkToConode(conodes[index], result.text)
+                    .then(() => {
+                      return Promise.resolve(conodes[index]);
+                    });
+                } else {
+                  return Promise.reject(CANCELED_BY_USER);
+                }
+              });
+
           })
-          .then(result => {
-            if (result.result) {
-              console.log("SKDEBUG TEXT = " + result.result.text);
-              if (result.result.text === undefined) {
-                return Promise.reject("PIN should not be empty");
-              }
-              return party.linkToConode(conodes[index], result.text)
-                .then(() => {
-                  return Promise.resolve(conodes[index]);
-                });
-            } else {
-              return Promise.reject(CANCELED_BY_USER);
-            }
-          });
       } else {
         return Promise.reject(CANCELED_BY_USER);
       }
@@ -291,7 +321,7 @@ function addParty() {
     .then((result) => {
       conode = result;
       return Dialog.action({
-        message: "Successfully linked to your conode ! What do you want to do ?",
+        message: "You are linked to your conode ! What do you want to do ?",
         cancelButtonText: "Cancel",
         actions: ["Configure a new party", "List the proposals"]
       })
@@ -327,8 +357,15 @@ function addParty() {
 
 }
 
+function reloadStatuses() {
+  viewModel.partyListDescriptions.forEach(model => {
+    model.party.loadStatus();
+  })
+}
+
 module.exports.onLoaded = onLoaded;
 module.exports.partyTapped = partyTapped;
 module.exports.onSwipeCellStarted = onSwipeCellStarted;
 module.exports.deleteParty = deleteParty;
 module.exports.addParty = addParty;
+module.exports.onUnloaded = onUnloaded;

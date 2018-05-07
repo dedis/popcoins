@@ -2,17 +2,19 @@
         class="page"
         loaded="onLoaded"
         unloaded="onUnloaded"
+        navigatingTo="onNavigatingTo"
         xmlns:nsListView="nativescript-ui-listview"
         xmlns:nsFloatingButton="nativescript-floatingactionbutton"
         xmlns="http://www.nativescript.org/tns.xsd">
 
     <GridLayout class="page-content" rows="*" columns="*,*,auto">
-        <Label text="You don't have any party. Start by creating one !"
+        <Label text="You don't have any party. Find an organizer to join parties !"
                textWrap="true"
                class="empty-list-label"
                colSpan="3"
                visibility="{{ isEmpty ? 'visible' : 'collapsed' }}"
         />
+
 
         <nsListView:RadListView items="{{ partyListDescriptions }}" itemTap="partyTapped" row="0" colSpan="3"
                                 itemSwipeProgressStarted="onSwipeCellStarted"

@@ -9,13 +9,14 @@ const HashJs = require("hash.js");
 const Convert = require("../../../Convert");
 const Helper = require("../../../Helper");
 const ObjectType = require("../../../ObjectType");
-const NetDedis = require("@dedis/cothority").net;
+const Net = require("@dedis/cothority").net;
 const FilesPath = require("../../../../../res/files/files-path");
 const FileIO = require("../../../../../lib/file-io/file-io");
-const CothorityMessages = require("../../../protobuf/build/cothority-messages");
-const RequestPath = require("../../../RequestPath");
-const DecodeType = require("../../../DecodeType");
+const CothorityMessages = require("../../../network/cothority-messages");
+const RequestPath = require("../../../network/RequestPath");
+const DecodeType = require("../../../network/DecodeType");
 const uuidv4 = require("uuid/v4");
+const Party = require("../Party");
 
 const User = require("../../user/User").get;
 const PoP = require("../../pop/PoP").get;
@@ -23,16 +24,12 @@ const PoP = require("../../pop/PoP").get;
 /**
  * This class represents the organizer of a PoP party. It contains everything related to the organizer party.
  */
-
-/**
- * We define the Org class which is the object representing the organizer.
- */
-
 const EMPTY_SERVER_IDENTITY = CothorityMessages.createServerIdentity(new Uint8Array(), new Uint8Array(), "", "");
 const EMPTY_ROSTER = CothorityMessages.createRoster(new Uint8Array(), [], new Uint8Array());
 const EMPTY_POP_DESC = CothorityMessages.createPopDesc("", "", "", EMPTY_ROSTER);
 
-class OrgParty {
+class OrgParty extends Party {
+
 
   /**
    * Constructor for the Org class.
@@ -40,6 +37,7 @@ class OrgParty {
    *  If no directory is specified, a unique random directory name is generated
    */
   constructor(dirname) {
+    super();
     if (typeof dirname === "string") {
       this._dirname = dirname;
     } else if (dirname === undefined) {
@@ -53,16 +51,6 @@ class OrgParty {
       id: new Uint8Array(),
       address: "",
       description: ""
-    });
-    this._popDesc = ObservableModule.fromObjectRecursive({
-      name: "",
-      dateTime: "",
-      location: "",
-      roster: {
-        id: new Uint8Array(),
-        list: new ObservableArray(),
-        aggregate: new Uint8Array()
-      }
     });
     this._registeredAtts = ObservableModule.fromObject({
       array: new ObservableArray()
@@ -170,35 +158,6 @@ class OrgParty {
     }
   }
 
-  /**
-   * Returns the observable module for the pop description.
-   * @returns {ObservableModule} - the observable module for the pop description
-   */
-  getPopDescModule() {
-    return this._popDesc;
-  }
-
-  /**
-   * Returns the pop description.
-   * @returns {PopDesc} - the pop description
-   */
-  getPopDesc() {
-    const popDescModule = this.getPopDescModule();
-
-    let id = undefined;
-    if (popDescModule.roster.id.length > 0) {
-      id = popDescModule.roster.id;
-    }
-
-    const list = [];
-    popDescModule.roster.list.forEach(server => {
-      list.push(server);
-    });
-
-    const roster = CothorityMessages.createRoster(id, list, Uint8Array.from(popDescModule.roster.aggregate));
-
-    return CothorityMessages.createPopDesc(popDescModule.name, popDescModule.dateTime, popDescModule.location, roster);
-  }
 
   /**
    * Returns wether the PopDesc is being set (partially or completely).
@@ -609,11 +568,13 @@ class OrgParty {
   }
 
   /**
-   * Sends a link request to the conode given as parameter. If the pin is not empty and the link request succeeds, the conode will be
-   * stored as the linked conode.
+   * Sends a link request to the conode given as parameter. If the pin is not empty and the link request succeeds
+   * or if the public key of the user is already registered, the conode will be stored as the linked conode.
    * @param {ServerIdentity} conode - the conode to which send the link request
    * @param {string} pin - the pin received from the conode
    * @returns {Promise} - a promise that gets completed once the link request has been sent and a response received
+   * @property {boolean} alreadyLinked -  a property of the object returned by the promise that tells if
+   * the public key of the user were already registered (thus it won't need to ask PIN in the future)
    */
   linkToConode(conode, pin) {
     if (!Helper.isOfType(conode, ObjectType.SERVER_IDENTITY)) {
@@ -625,17 +586,28 @@ class OrgParty {
     if (!User.isKeyPairSet()) {
       throw new Error("user should generate a key pair before linking to a conode");
     }
-
-    const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(conode, ""), RequestPath.POP);
+    const ALREADY_LINKED = "ALREADY_LINKED_STRING";
+    const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(conode, ""), RequestPath.POP);
     const pinRequestMessage = CothorityMessages.createPinRequest(pin, User.getKeyPair().public);
+    const verifyLinkMessage = CothorityMessages.createVerifyLinkMessage(User.getKeyPair().public);
 
     // TODO change status request return type
-    return cothoritySocket.send(RequestPath.POP_PIN_REQUEST, RequestPath.STATUS_REQUEST, pinRequestMessage)
+
+    return cothoritySocket.send(RequestPath.POP_VERIFY_LINK, DecodeType.VERIFY_LINK_REPLY, verifyLinkMessage)
+      .then(alreadyLinked => {
+        return alreadyLinked.exists ?
+          Promise.resolve(ALREADY_LINKED) :
+          cothoritySocket.send(RequestPath.POP_PIN_REQUEST, RequestPath.STATUS_REQUEST, pinRequestMessage)
+      })
       .then(response => {
         return this.setLinkedConode(conode, true)
           .then(() => {
-            return Promise.resolve("PIN Accepted");
-          });
+            const fields = {
+              alreadyLinked: response === ALREADY_LINKED
+            };
+            return Promise.resolve(fields);
+          })
+
       })
       .catch(error => {
         if (error.message === CothorityMessages.READ_PIN_ERROR) {
@@ -687,7 +659,7 @@ class OrgParty {
     privateKey.unmarshalBinary(User.getKeyPair().private);
     const signature = Schnorr.sign(CURVE_ED25519_KYBER, privateKey, descHash);
 
-    const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(this.getLinkedConode(), ""), RequestPath.POP);
+    const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(this.getLinkedConode(), ""), RequestPath.POP);
     const storeConfigMessage = CothorityMessages.createStoreConfig(popDesc, signature);
 
     return cothoritySocket.send(RequestPath.POP_STORE_CONFIG, DecodeType.STORE_CONFIG_REPLY, storeConfigMessage)
@@ -745,7 +717,7 @@ class OrgParty {
     const signature = Schnorr.sign(CURVE_ED25519_KYBER, privateKey, hashToSign);
 
 
-    const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(this.getLinkedConode(), ""), RequestPath.POP);
+    const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(this.getLinkedConode(), ""), RequestPath.POP);
     const finalizeRequestMessage = CothorityMessages.createFinalizeRequest(descId, attendees, signature);
 
     return cothoritySocket.send(RequestPath.POP_FINALIZE_REQUEST, DecodeType.FINALIZE_RESPONSE, finalizeRequestMessage)
@@ -829,7 +801,7 @@ class OrgParty {
    * @returns {Promise} - a promise that gets resolved once the status is loaded
    */
   loadStatus() {
-    const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(this.getLinkedConode(), ""), RequestPath.POP);
+    const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(this.getLinkedConode(), ""), RequestPath.POP);
     const fetchRequest = CothorityMessages.createFetchRequest(this.getPopDescHash(), true);
 
     return cothoritySocket.send(RequestPath.POP_FETCH_REQUEST, DecodeType.FINALIZE_RESPONSE, fetchRequest)
