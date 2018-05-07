@@ -7,6 +7,7 @@ const ScanToReturn = require("../../../../shared/lib/scan-to-return/scan-to-retu
 const Observable = require("tns-core-modules/data/observable");
 const User = require("../../../../shared/lib/dedjs/object/user/User").get;
 const topmost = require("ui/frame").topmost;
+const PartyClass = require("../../../../shared/lib/dedjs/object/pop/Party");
 
 let Party = undefined;
 let newParty = undefined;
@@ -39,6 +40,10 @@ function onNavigatingTo(args) {
 
 
   Party = context.party;
+  if (!Party instanceof PartyClass) {
+    throw new Error("Party should be an instance of a Party");
+  }
+
   newParty = context.newParty;
 
   initDate();
