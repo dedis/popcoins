@@ -45,7 +45,11 @@ class Party {
 
     const list = [];
     popDescModule.roster.list.forEach(server => {
-      list.push(server);
+      list.push(CothorityMessages.createServerIdentity(
+        Uint8Array.from(server.public),
+        Uint8Array.from(server.id),
+        server.address,
+        server.description));
     });
 
     const roster = CothorityMessages.createRoster(id, list, Uint8Array.from(popDescModule.roster.aggregate));

@@ -8,7 +8,6 @@ const Observable = require("tns-core-modules/data/observable");
 const User = require("../../../../shared/lib/dedjs/object/user/User").get;
 const topmost = require("ui/frame").topmost;
 
-let viewModel = undefined;
 let Party = undefined;
 let newParty = undefined;
 
@@ -19,6 +18,11 @@ let dataForm = Observable.fromObject({
   date: "",
   time: "",
   location: ""
+});
+
+let viewModel = Observable.fromObject({
+  dataForm: dataForm,
+  readOnly: true
 });
 
 function onNavigatingTo(args) {
@@ -39,9 +43,9 @@ function onNavigatingTo(args) {
 
   initDate();
 
-  viewModel = {};
   viewModel.descModule = Party.getPopDescModule();
   viewModel.dataForm = dataForm;
+  viewModel.readOnly = context.readOnly === true;
   pageObject = page.page;
   page.bindingContext = viewModel;
 

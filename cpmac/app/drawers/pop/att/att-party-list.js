@@ -116,7 +116,13 @@ function partyTapped(args) {
             }, () => {
             }, true);
           } else if (result === "Display Party Info") {
-
+            Frame.topmost().navigate({
+              moduleName: "drawers/pop/org/config/config-page",
+              context: {
+                party: party,
+                readOnly: true
+              }
+            });
           }
         })
         .catch((error) => {
