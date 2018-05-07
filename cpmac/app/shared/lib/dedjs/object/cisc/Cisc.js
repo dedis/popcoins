@@ -49,7 +49,8 @@ class Cisc {
     this._identity = ObservableModule.fromObjectRecursive({
       "address": "",
       "id": "",
-      "label": ""
+      "label": "",
+      "name":""
     });
     this._viewModel = ObservableModule.fromObject({
       devices: new ObservableArray(),
@@ -316,7 +317,7 @@ class Cisc {
    * @param save - a boolean saying if you want the value saved permanently
    * @returns {Promise} - a promise that get resolved once the value is set
    */
-  setIdentity(identityId, identityAddress, identityLabel, save) {
+  setIdentity(identityId, identityAddress, identityLabel, identityName, save) {
     if (typeof save !== "boolean") {
       throw new Error("save must be of type boolean");
     }
@@ -329,12 +330,16 @@ class Cisc {
     if (typeof identityLabel !== "string") {
       throw new Error("identityLabel must be of type string");
     }
+    if (typeof identityName !== "string") {
+      throw new Error("identityName must be of type string");
+    }
 
     const oldIdentity = this.getIdentity();
     this._identity = new Object();
     this._identity.address = identityAddress;
     this._identity.id = identityId;
     this._identity.label = identityLabel;
+    this._identity.name = identityName;
     if (save) {
       let toWrite;
       toWrite = Convert.objectToJson(this._identity);
@@ -345,7 +350,7 @@ class Cisc {
           console.dir(error);
           console.trace();
 
-          return this.setIdentity(oldIdentity.id, oldIdentity.address, oldIdentity.label, false)
+          return this.setIdentity(oldIdentity.id, oldIdentity.address, oldIdentity.label, oldIdentity.name, false)
             .then(() => {
               return Promise.reject(error);
             });
@@ -753,7 +758,7 @@ class Cisc {
   }
 
   resetAddress() {
-    return this.setIdentity("", "", "", true);
+    return this.setIdentity("", "", "", "", true);
   }
 
     /**
@@ -798,7 +803,7 @@ class Cisc {
         const obj = JSON.parse(jsonAddress);
         console.log("SKDEBUG DIR JSON obj = ");
         console.dir(obj);
-        return this.setIdentity(obj.id, obj.address, obj.label, false)
+        return this.setIdentity(obj.id, obj.address, obj.label, obj.name, false)
       })
       .catch(error => {
         console.log(error);

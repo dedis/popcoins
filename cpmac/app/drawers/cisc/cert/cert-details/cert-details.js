@@ -1,4 +1,4 @@
-const Frame = require("ui/frame");
+const FrameModule = require("ui/frame");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const ObservableModule = require("data/observable");
 const merge = require("node.extend");
@@ -11,7 +11,8 @@ let conode = undefined;
 let conodeStatus = undefined;
 let pageObject = undefined;
 let viewModel = ObservableModule.fromObject({
-	cert: ""
+	certName: "",
+    certInfos: new ObservableArray()
 });
 
 function onNavigatingTo(args) {
@@ -23,14 +24,34 @@ function onNavigatingTo(args) {
 
     const context = page.navigationContext;
 
-    viewModel.cert = context.cert;
+    const result = getBasicInfo(context.cert);
 
     page.bindingContext = viewModel
 
-    const result = getBasicInfo(context.cert);
-    console.log("Cert Info");
-    console.dir(result);
+    viewModel.certName = result.subject;
+    if(viewModel.certInfos.length == 0){
+       loadCertInfos(result)
+    }
+}
 
+function loadCertInfos(certInfos){
+
+    viewModel.certInfos.push(ObservableModule.fromObject({
+        certInfoTitle: "Subject",
+        certInfo: certInfos.subject
+    }));
+    viewModel.certInfos.push(ObservableModule.fromObject({
+        certInfoTitle: "Altnames",
+        certInfo: certInfos.altnames.join(", ")
+    }));
+    viewModel.certInfos.push(ObservableModule.fromObject({
+        certInfoTitle: "Issued at",
+        certInfo: certInfos._issuedAt
+    }));
+    viewModel.certInfos.push(ObservableModule.fromObject({
+        certInfoTitle: "Expires at",
+        certInfo: certInfos._expiresAt
+    }));
 }
 
 function pemToBinAb(pem) {
@@ -64,23 +85,21 @@ function getBasicInfo(pem) {
 
     c.extensions.forEach(function (ext) {
     if (ext.parsedValue && ext.parsedValue.altNames) {
-      ext.parsedValue.altNames.forEach(function (alt) {
+        ext.parsedValue.altNames.forEach(function (alt) {
         domains.push(alt.Name);
-      });
+        });
     }
     });
 
     sub = c.subject.types_and_values[0].value.value_block.value || null;
 
     return {
-    subject: sub
-    , altnames: domains
-    // for debugging during console.log
-    // do not expect these values to be here
-    , _issuedAt: c.notBefore.value
-    , _expiresAt: c.notAfter.value
-    , issuedAt: new Date(c.notBefore.value).valueOf()
-    , expiresAt: new Date(c.notAfter.value).valueOf()
+        subject: sub
+        , altnames: domains
+        , _issuedAt: c.notBefore.value
+        , _expiresAt: c.notAfter.value
+        , issuedAt: new Date(c.notBefore.value).valueOf()
+        , expiresAt: new Date(c.notAfter.value).valueOf()
     };
 }
 

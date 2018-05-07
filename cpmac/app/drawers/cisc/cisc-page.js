@@ -16,8 +16,8 @@ const DecodeType = require("~/shared/lib/dedjs/DecodeType");
 
 const skipchainsArray = [];
 const viewModel = ObservableModule.fromObject({
-  skipchainsList: new ObservableArray(),
-  isLoading: false
+    skipchainsList: new ObservableArray(),
+    isLoading: false
 });
 /* ***********************************************************
  * Use the "onNavigatingTo" handler to initialize the page binding context.
@@ -60,7 +60,7 @@ function loadSkipchains() {
             skipchain: skipchainsArray[i],
             identity: skipchainsArray[i].getIdentity(),
             idSimple: (skipchainsArray[i].getIdentity().id).substring(0, bytesLimit-1),
-            skipchainName: "Skipchain " + (i+1)
+            skipchainName: skipchainsArray[i].getIdentity().name
         }));
     }    
     viewModel.isLoading = false;
@@ -93,7 +93,15 @@ function connectButtonTapped(args) {
     return barcodescanner.available()
         .then(function (available) {
             if (available) {
-                return availableFunction();
+                Dialog.prompt({
+                    title: "Give skipchain name",
+                    okButtonText: "Ok",
+                    cancelButtonText: "Cancel"
+                }).then(function (r) {
+                    console.log("Dialog result: " + r.result + ", text: " + r.text);
+                    return availableFunction(r.text);
+                });
+                
             } else {
                 return notAvailableFunction();
             }
@@ -107,7 +115,7 @@ function connectButtonTapped(args) {
             }), 100)
         });
 
-    function availableFunction() {
+    function availableFunction(identityName) {
         return barcodescanner.scan({
             formats: "QR_CODE", // Pass in of you want to restrict scanning to certain types
             cancelLabel: "EXIT. Also, try the volume buttons!", // iOS only, default 'Close'
@@ -136,10 +144,19 @@ function connectButtonTapped(args) {
                 let label = result.text;
                 let address = goodURL;
                 let id = `${splitSlash[1]}`;
+                setTimeout(() => {
+                    skipchainsArray.push(newSkipchain);
+                    viewModel.skipchainsList.push(ObservableModule.fromObject({
+                        skipchain: newSkipchain,
+                        identity: newSkipchain.getIdentity(),
+                        idSimple: (newSkipchain.getIdentity().id).substring(0, 31),
+                        skipchainName: identityName
+                    }));
+                },10);
 
                 newSkipchain.setName("Joker", true);
-                newSkipchain.setIdentity(id, address, label, true)
-                    .then(() => askForDevice(newSkipchain));
+                newSkipchain.setIdentity(id, address, label, identityName, true)
+                   .then(() => askForDevice(newSkipchain));
             })
             .catch(
                 (error) => setTimeout(() => Dialog.alert({
@@ -187,14 +204,6 @@ function askForDevice(newSkipchain) {
         .then((result) => {
             if (result) {
                 addDevice(newSkipchain);
-                skipchainsArray.push(newSkipchain);
-                viewModel.skipchainsList.push(ObservableModule.fromObject({
-                    skipchain: newSkipchain,
-                    identity: newSkipchain.getIdentity(),
-                    idSimple: (newSkipchain.getIdentity().id).substring(0, 31),
-                    skipchainName: "Skipchain " + skipchainsArray.length
-                }));
-
             }
         })
         .catch((error) => console.log(error));

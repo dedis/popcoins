@@ -4,8 +4,7 @@
         xmlns:nsDrawer="nativescript-ui-sidedrawer"
         xmlns:myDrawer="shared/my-drawer"
         xmlns="http://www.nativescript.org/tns.xsd"
-        xmlns:nsListView="nativescript-ui-listview"
-        xmlns:nsListView="nativescript-pro-ui/listview">
+        xmlns:nsListView="nativescript-ui-listview">
 
     <ActionBar class="action-bar">
 
@@ -16,11 +15,24 @@
                     tap="onDrawerButtonTap"
                     ios.position="left">
         </ActionItem>
-        <Label class="action-bar-title" text="Cisc"></Label>
+        <Label class="action-bar-title" text="{{ certName }}"></Label>
     </ActionBar>
 
     <StackLayout>
-        <Label id="storageLabel" class="label-title" text="Certificate Value"/>
-        <Label id="cert" text="{{ cert }}"/>
+        <Label class="label-title" text="Certificates infos" />
+        <GridLayout class="page-content" rows="*" columns="*,*,auto">
+            <nsListView:RadListView items="{{ certInfos }}" row="0" colSpan="3" itemTap="certTapped"
+                                            id="listView">
+                <nsListView:RadListView.itemTemplate>
+                    <GridLayout rows="auto,auto" columns="*" backgroundColor="white" class="basic-list-decorated">
+                        <Label class="list-title" text="{{ certInfoTitle }}" textAlignment="left" textWrap="true" row="0"/>
+                        <Label text="{{ certInfo }}" textAlignment="left" textWrap="true" row="1"/>
+                    </GridLayout>
+                </nsListView:RadListView.itemTemplate>
+            </nsListView:RadListView>
+        </GridLayout>
     </StackLayout>
+
+
+
 </Page>
