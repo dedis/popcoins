@@ -36,6 +36,13 @@ const CISC_NAME = "name.json";
  */
 const USER_PATH = "shared/res/files/user";
 
+/**
+ * BEERCOIN Files
+ */
+const BEERCOIN_PATH = "shared/res/files/beercoin";
+const BEERCOIN_BAR_CONFIG = "bar_config.json";
+const BEERCOIN_LINKED_FINALS = POP_ATT_FINAL;
+const BEERCOIN_CHECKED_CLIENTS = "checked_clients.json";
 
 module.exports.ROSTER = ROSTER;
 module.exports.KEY_PAIR = KEY_PAIR;
@@ -52,3 +59,7 @@ module.exports.USER_PATH = USER_PATH;
 module.exports.POP_ATT_PATH = POP_ATT_PATH;
 module.exports.POP_ATT_FINAL = POP_ATT_FINAL;
 module.exports.CISC_PATH = CISC_PATH;
+module.exports.BEERCOIN_PATH = BEERCOIN_PATH;
+module.exports.BEERCOIN_BAR_CONFIG = BEERCOIN_BAR_CONFIG;
+module.exports.BEERCOIN_LINKED_FINALS = BEERCOIN_LINKED_FINALS;
+module.exports.BEERCOIN_CHECKED_CLIENTS = BEERCOIN_CHECKED_CLIENTS;
