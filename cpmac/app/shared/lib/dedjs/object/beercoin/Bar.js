@@ -7,7 +7,6 @@ const Convert = require("../../Convert");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const Observable = require("data/observable");
 
-
 /**
  * @param {string} [dirname] - directory of the bar data (directory is created if non existent).
  *  If no directory is specified, a unique random directory name is generated
@@ -22,7 +21,7 @@ class Bar {
     this._config = Observable.fromObject({
       name: "",
       frequency: "",
-      date: ""
+      date: new Date(Date.now())
     });
     this._checkedClients = new ObservableArray();
     this._finalStatements = new ObservableArray();
@@ -55,14 +54,14 @@ class Bar {
    * @return {Promise<void>} - a promise that gets resolved once the configuration is loaded
    */
   loadConfig() {
-    return FileIO.getStringOf(FileIO.join(FilesPath.BEERCOIN_PATH, dirname, FilesPath.BEERCOIN_BAR_CONFIG))
+    return FileIO.getStringOf(FileIO.join(FilesPath.BEERCOIN_PATH, this._dirname, FilesPath.BEERCOIN_BAR_CONFIG))
       .then(configJson => {
         const config = Convert.jsonToObject(configJson);
         const configModule = this.getConfigModule();
 
         configModule.name = config.name;
         configModule.frequency = config.frequency;
-        configModule.date = config.date;
+        configModule.date = Date.parse(config.date);
 
         return Promise.resolve();
       })
@@ -73,7 +72,7 @@ class Bar {
    * @return {Promise<void>} - a promise that gets resolved once the clients are loaded
    */
   loadCheckedClients() {
-    return FileIO.getStringOf(FileIO.join(FilesPath.BEERCOIN_PATH, dirname, FilesPath.BEERCOIN_CHECKED_CLIENTS))
+    return FileIO.getStringOf(FileIO.join(FilesPath.BEERCOIN_PATH, this._dirname, FilesPath.BEERCOIN_CHECKED_CLIENTS))
       .then(checkedClientsJson => {
         const checkedClients = Convert.jsonToObject(checkedClientsJson);
         const checkedClientsModule = this.getCheckedClientsModule();
@@ -92,7 +91,7 @@ class Bar {
    * @return {Promise<void>} - a promise that gets resolved once the final statements are loaded
    */
   loadFinalStatements() {
-    return FileIO.getStringOf(FileIO.join(FilesPath.BEERCOIN_PATH, dirname, FilesPath.BEERCOIN_LINKED_FINALS))
+    return FileIO.getStringOf(FileIO.join(FilesPath.BEERCOIN_PATH, this._dirname, FilesPath.BEERCOIN_LINKED_FINALS))
       .then(finalStatemnetsJson => {
         const finalStatements = Convert.jsonToObject(finalStatemnetsJson);
         const finalStatementsModule = this.getFinalStatementsModule();
@@ -103,7 +102,77 @@ class Bar {
 
         return Promise.resolve();
       })
+  }
 
+  /**
+   * Save the list of checked client of this
+   * @return {Promise<T>} - a promise that gets sovled once the it is saved
+   */
+  saveCheckedClients() {
+    let clients = [];
+    this.getCheckedClientsModule().forEach(client => {
+      clients.push(client);
+    });
+    const objectString = Convert.objectToJson(clients);
+
+    return FileIO.writeStringTo(FileIO.join(FilesPath.BEERCOIN_PATH, this._dirname, FilesPath.BEERCOIN_LINKED_FINALS), objectString)
+      .catch(error => {
+        console.log(error);
+        console.dir(error);
+        console.trace();
+
+        return Promise.reject(error)
+      })
+  }
+
+  /**
+   * Check if a specific tag has already been registered to this bar
+   *
+   * @param tag - the tag to be checked
+   * @return {boolean} - true if this client already came here
+   */
+  isAlreadyChecked(tag) {
+    if (tag.constructor !== Uint8Array) {
+      throw "tag must be an Uint8Array";
+    }
+
+    const hexString = Convert.byteArrayToHex(tag);
+    return this.getCheckedClientsModule().indexOf(hexString) >= 0;
+  }
+
+  /**
+   * Register a new client and save it on the disk
+   *
+   * @param tag - the new client tag
+   * @return {Promise<T>} - a promise that gets solved once the save process is finished
+   */
+  registerClient(tag) {
+    if (tag.constructor !== Uint8Array) {
+      throw "tag must be an Uint8Array";
+    }
+
+    const hexString = Convert.byteArrayToHex(tag);
+    this.getCheckedClientsModule().push(hexString);
+
+    return this.saveCheckedClients();
+  }
+
+  /**
+   * Get the datas used that will be signed to identificate an user
+   *
+   * @return {{nonce: number, scope: Uint8Array}}
+   */
+  getSigningData() {
+    const configModule = this.getConfigModule();
+
+    const nonce = Math.random() % 100000;
+    const scopeString = configModule.name + configModule.frequency + configModule.date.toString();
+    const scope = new Uint8Array(Buffer.from(scopeString));
+
+    return {
+      nonce: nonce,
+      scope: scope
+    }
   }
 
   /**
@@ -140,16 +209,16 @@ class Bar {
       throw new Error("name must be of type string");
     }
 
-    if(!Object.values(Frequencies).includes(frequency)) {
+    if (!Object.values(Frequencies).includes(frequency)) {
       throw new Error("frequency must be part of the Frequencies enumeration");
     }
 
-    if(!(finalStatements) instanceof Array) {
+    if (!(finalStatements) instanceof Array) {
       throw new Error("name must be an instance of array");
     }
 
     finalStatements.forEach(finalStatement => {
-      if(!Helper.isOfType(finalStatement, ObjectType.FINAL_STATEMENT)) {
+      if (!Helper.isOfType(finalStatement, ObjectType.FINAL_STATEMENT)) {
         throw new Error("objects inside finalStatements must be of type FinalStatement");
       }
     });
