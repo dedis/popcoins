@@ -2,7 +2,6 @@ const Dialog = require("ui/dialogs");
 const Convert = require("../../lib/dedjs/Convert");
 const Helper = require("../../lib/dedjs/Helper");
 const CothorityMessages = require("../../lib/dedjs/protobuf/build/cothority-messages");
-//const dns = require("dns");
 
 let textFieldAddress = undefined;
 let textFieldPublicKey = undefined;
@@ -50,9 +49,7 @@ function addManual() {
   if (address.length > 0 && publicKey.length > 0 && description.length > 0) {
     try {
       publicKey = Convert.hexToByteArray(publicKey);
-     // dns.lookup('cothority.net', function(err, result) {
-     //   console.log(result)
-      //})
+
       const server = Convert.toServerIdentity(address, publicKey, description, undefined);
 
       closeCallBackFunction(server);

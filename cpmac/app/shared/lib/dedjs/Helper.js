@@ -92,7 +92,7 @@ function isValidAddress(address) {
       const port = parseInt(array[0]);
 
       // Port equal to PORT_MAX is not allowed since the port will be increased by one for the websocket url.
-      return IP_REGEX.test(ip) && PORT_MIN <= port && port < PORT_MAX;
+      return PORT_MIN <= port && port < PORT_MAX;
     }
   }
 
