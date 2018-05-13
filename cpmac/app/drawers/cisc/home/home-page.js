@@ -82,16 +82,30 @@ function voteForProposed() {
             viewmodel.isOnProposed = false;
         })
         .catch((error) => {
+                console.log(error);
+                console.dir(error);
+                console.trace();
+                
                 Dialog.alert({
-                    title: "Already signed",
-                    message: "You already signed this proposition",
+                    title: "Error",
+                    message: "Already signed or invalid signature",
                     okButtonText: "Ok"
                 });
-                throw new Error("You already signed this message")
+                throw new Error("Already signed or invalid signature")
             }
         );
 }
 
+function reloadData(args) {
+    skipchain.updateAll()
+        .catch((error) => {
+            console.log(error);
+            console.dir(error);
+            console.trace(); 
+        });
+}
+
+exports.reloadData = reloadData;
 exports.onLoaded = onLoaded;
 exports.toggleProposed = toggleProposed;
 exports.onDrawerButtonTap = onDrawerButtonTap;
