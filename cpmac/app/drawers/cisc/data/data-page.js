@@ -9,6 +9,8 @@ const Helper = require("~/shared/lib/dedjs/Helper");
 const Cisc = require("~/shared/lib/dedjs/object/cisc/Cisc").Skipchain;
 const NetDedis = require("@dedis/cothority").net;
 const SkipPage = require("../skipchain-page");
+const Kyber = require("@dedis/kyber-js");
+const User = require("../../../shared/lib/dedjs/object/user/User").get;
 
 let skipchain;
 let viewmodel;
@@ -68,16 +70,20 @@ function addKeyValue() {
                 }
                 edited.storage[key]=value;
                 edited.votes = null;
+
                 proposeSendMessage = CothorityMessages.createProposeSend(Convert.hexToByteArray(skipchain.getIdentity().id), edited);
-                let node = CothorityMessages.createServerIdentity(new Uint8Array({}), new Uint8Array({}), skipchain.getIdentity().address,"lelele");
-                const cothoritySocket = new NetDedis.Socket(node, RequestPath.IDENTITY);
+                const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(skipchain.getIdentity().address, ""), RequestPath.IDENTITY);
                 return cothoritySocket.send(RequestPath.IDENTITY_PROPOSE_SEND, DecodeType.DATA_UPDATE_REPLY, proposeSendMessage)
             }
         })
         .then(()=>{
-            skipchain.updateAll().then(()=>skipchain.voteForProposed());
+            return skipchain.updateAll().then(()=>skipchain.voteForProposed());
         })
-        .catch((error) => console.log(`There was an error: ${error}`));
+        .catch((error) => {
+            console.log(error);
+            console.dir(error);
+            console.trace();
+        });
 }
 
 /* ***********************************************************
