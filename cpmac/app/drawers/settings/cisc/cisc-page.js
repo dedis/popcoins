@@ -1,7 +1,7 @@
 const Dialog = require("ui/dialogs");
 
-const Cisc = require("~/shared/lib/dedjs/object/cisc/Cisc");
-const mockCisc = new Cisc("MOCK");
+const Cisc = require("~/shared/lib/dedjs/object/cisc/Cisc").Skipchain;
+const mockCisc = new Cisc("MOCK2");
 
 const viewModel = mockCisc.getVMModule();
 
