@@ -85,13 +85,13 @@ function voteForProposed() {
                 console.log(error);
                 console.dir(error);
                 console.trace();
-                
+
                 Dialog.alert({
                     title: "Error",
-                    message: "Already signed or invalid signature",
+                    message: "Already signed or invalid operation",
                     okButtonText: "Ok"
                 });
-                throw new Error("Already signed or invalid signature")
+                throw new Error("Already signed or invalid operation")
             }
         );
 }
