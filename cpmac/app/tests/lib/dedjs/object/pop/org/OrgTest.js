@@ -7,7 +7,7 @@ const FileIO = require("../../../../../../shared/lib/file-io/file-io");
 const Convert = require("../../../../../../shared/lib/dedjs/Convert");
 const Helper = require("../../../../../../shared/lib/dedjs/Helper");
 const ObjectType = require("../../../../../../shared/lib/dedjs/ObjectType");
-const CothorityMessages = require("../../../../../../shared/lib/dedjs/protobuf/build/cothority-messages");
+const CothorityMessages = require("../../../../../../shared/lib/dedjs/network/cothority-messages");
 const User = require("../../../../../../shared/lib/dedjs/object/user/User").get;
 const PoP = require("../../../../../../shared/lib/dedjs/object/pop/PoP").get;
 

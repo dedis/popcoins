@@ -3,8 +3,9 @@
         navigatingTo="onNavigatingTo"
         xmlns:nsDrawer="nativescript-ui-sidedrawer"
         xmlns:myDrawer="shared/my-drawer"
-        xmlns:pop="drawers/pop/pop"
+        xmlns:att="drawers/pop/att"
         xmlns:org="drawers/pop/org"
+        xmlns:pop="drawers/pop/pop"
         xmlns="http://www.nativescript.org/tns.xsd">
 
     <ActionBar class="action-bar">
@@ -65,13 +66,19 @@
 
                     <TabViewItem title="Attendee">
                         <TabViewItem.view>
-                            <pop:pop-page/>
+                            <att:att-party-list/>
                         </TabViewItem.view>
                     </TabViewItem>
 
                     <TabViewItem title="Organizer">
                         <TabViewItem.view>
                             <org:org-party-list/>
+                        </TabViewItem.view>
+                    </TabViewItem>
+
+                    <TabViewItem title="My Tokens">
+                        <TabViewItem.view>
+                            <pop:pop-page/>
                         </TabViewItem.view>
                     </TabViewItem>
 

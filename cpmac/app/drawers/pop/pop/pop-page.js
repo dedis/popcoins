@@ -1,4 +1,5 @@
 const ObservableModule = require("data/observable");
+const ObservableArray = require("data/observable-array").ObservableArray;
 const Dialog = require("ui/dialogs");
 const HashJs = require("hash.js");
 const Convert = require("../../../shared/lib/dedjs/Convert");
@@ -17,13 +18,21 @@ let pageObject = undefined;
 
 const viewModel = ObservableModule.fromObject({
   finalStatements: PoP.getFinalStatements(),
-  popToken: PoP.getPopToken()
+  popToken: PoP.getPopToken(),
+  isPopTokenEmpty: true,
 });
 
 function onLoaded(args) {
   const page = args.object;
   pageObject = page.parent.page;
   page.bindingContext = viewModel;
+
+  // Bind isPopTokenEmpty to PopToken array length
+  viewModel.isPopTokenEmpty = viewModel.popToken.length === 0;
+  viewModel.popToken.on(ObservableArray.changeEvent, () => {
+    viewModel.set('isPopTokenEmpty', viewModel.popToken.length === 0);
+  });
+
 }
 
 function finalStatementTapped(args) {

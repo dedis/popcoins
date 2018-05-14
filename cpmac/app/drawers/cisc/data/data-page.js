@@ -1,13 +1,13 @@
 const FrameModule = require("ui/frame");
 const Dialog = require("ui/dialogs");
 const RequestPath = require("~/shared/lib/dedjs/RequestPath");
-const CothorityMessages = require("~/shared/lib/dedjs/protobuf/build/cothority-messages");
+const CothorityMessages = require("~/shared/lib/dedjs/network/cothority-messages");
 const DecodeType = require("~/shared/lib/dedjs/DecodeType");
 const DedisJsNet = require("~/shared/lib/dedjs/Net");
 const Convert = require("~/shared/lib/dedjs/Convert");
 const Helper = require("~/shared/lib/dedjs/Helper");
 const Cisc = require("~/shared/lib/dedjs/object/cisc/Cisc").Skipchain;
-const NetDedis = require("@dedis/cothority").net;
+const Net = require("@dedis/cothority").net;
 const SkipPage = require("../skipchain-page");
 const Kyber = require("@dedis/kyber-js");
 const User = require("../../../shared/lib/dedjs/object/user/User").get;
@@ -72,7 +72,7 @@ function addKeyValue() {
                 edited.votes = null;
 
                 proposeSendMessage = CothorityMessages.createProposeSend(Convert.hexToByteArray(skipchain.getIdentity().id), edited);
-                const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(skipchain.getIdentity().address, ""), RequestPath.IDENTITY);
+                const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(skipchain.getIdentity().address, ""), RequestPath.IDENTITY);
                 return cothoritySocket.send(RequestPath.IDENTITY_PROPOSE_SEND, DecodeType.DATA_UPDATE_REPLY, proposeSendMessage)
             }
         })

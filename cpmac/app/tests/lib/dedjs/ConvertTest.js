@@ -6,7 +6,7 @@ const TomlParser = require("toml");
 const Tomlify = require("tomlify-j0.4");
 const Helper = require("../../../shared/lib/dedjs/Helper");
 const ObjectType = require("../../../shared/lib/dedjs/ObjectType");
-const CothorityMessages = require("../../../shared/lib/dedjs/protobuf/build/cothority-messages");
+const CothorityMessages = require("../../../shared/lib/dedjs/network/cothority-messages");
 
 const Convert = require("../../../shared/lib/dedjs/Convert");
 

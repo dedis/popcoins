@@ -17,7 +17,7 @@ const ARRAY_REGEX = /Array/;
 
 /**
  * Checks wether the object is of a specific type.
- * @param {any} object - the object we want to check the type of
+ * @param {*} object - the object we want to check the type of
  * @param {string} type - the type name
  * @returns {boolean} - true if and only if object has the type given as paramter
  */

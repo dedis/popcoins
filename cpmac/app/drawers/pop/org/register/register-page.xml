@@ -4,9 +4,12 @@
         xmlns:nsListView="nativescript-ui-listview">
 
     <ActionBar class="action-bar">
-        <!-- TODO change goBack() method to correct one -->
         <NavigationButton text="Go Back" android:icon="res://ic_arrow_back" tap="goBack"/>
         <Label class="action-bar-title" text="Public Keys"/>
+        <ActionItem tap="shareToAttendee"
+                    ios.systemIcon="9" ios.position="left"
+                    android.position="actionBar" android:icon="res://ic_share_white">
+        </ActionItem>
         <ActionItem tap="addNewKey"
                     ios.systemIcon="4" ios.position="left"
                     android.position="actionBar" android:icon="res://ic_add_white">

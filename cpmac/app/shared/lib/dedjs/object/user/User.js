@@ -10,11 +10,11 @@ const Package = require("../../Package");
 const Convert = require("../../Convert");
 const ObjectType = require("../../ObjectType");
 const Helper = require("../../Helper");
-const NetDedis = require("@dedis/cothority").net;
+const Net = require("@dedis/cothority").net;
 const Crypto = require("../../Crypto");
-const RequestPath = require("../../RequestPath");
-const DecodeType = require("../../DecodeType");
-const CothorityMessages = require("../../protobuf/build/cothority-messages");
+const RequestPath = require("../../network/RequestPath");
+const DecodeType = require("../../network/DecodeType");
+const CothorityMessages = require("../../network/cothority-messages");
 
 /**
  * This singleton is the user of the app. It contains everything needed that is general, app-wide or does not belong to any precise subpart.
@@ -24,7 +24,6 @@ const CothorityMessages = require("../../protobuf/build/cothority-messages");
  * We define the User class which is the object representing the user of the app.
  */
 
-const EMPTY_KEYPAIR = CothorityMessages.createKeyPair(new Uint8Array(), new Uint8Array(), new Uint8Array());
 const EMPTY_ROSTER = CothorityMessages.createRoster(new Uint8Array(), [], new Uint8Array());
 
 class User {
@@ -34,12 +33,7 @@ class User {
    */
   constructor() {
     this._isLoaded = false;
-    this._keyPair = ObservableModule.fromObject({
-      public: new Uint8Array(),
-      private: new Uint8Array(),
-      publicComplete: new Uint8Array(),
-      toHex: Convert.byteArrayToHex
-    });
+    this._keyPair = new Crypto.KeyPair(FilesPath.USER_PATH);
     this._roster = ObservableModule.fromObject({
       isLoading: false,
       id: new Uint8Array(),
@@ -66,7 +60,7 @@ class User {
    * @returns {ObservableModule} - the observable key pair module
    */
   getKeyPairModule() {
-    return this._keyPair;
+    return this._keyPair.getModule();
   }
 
   /**
@@ -74,10 +68,7 @@ class User {
    * @returns {boolean} - true if and only if the key pair of the user has been set
    */
   isKeyPairSet() {
-    const keyPairModule = this.getKeyPairModule();
-
-    return keyPairModule.public.length > 0 &&
-      keyPairModule.private.length > 0;
+    return this._keyPair.isSet();
   }
 
   /**
@@ -85,12 +76,7 @@ class User {
    * @returns {KeyPair} - a key pair object containg the keys of the user
    */
   getKeyPair() {
-    let publicComplete = undefined;
-    if (this.getKeyPairModule().publicComplete.length > 0) {
-      publicComplete = this.getKeyPairModule().publicComplete;
-    }
-
-    return CothorityMessages.createKeyPair(this.getKeyPairModule().public, this.getKeyPairModule().private, publicComplete);
+    return this._keyPair.getKeyPair();
   }
 
   /**
@@ -100,48 +86,15 @@ class User {
    * @returns {Promise} - a promise that gets resolved once the new key pair has been set and saved if the save parameter is set to true
    */
   setKeyPair(keyPair, save) {
-    if (!Helper.isOfType(keyPair, ObjectType.KEY_PAIR)) {
-      throw new Error("keyPair must be an instance of KeyPair");
-    }
-    if (typeof save !== "boolean") {
-      throw new Error("save must be of type boolean");
-    }
+    return this._keyPair.setKeyPair(keyPair, save);
+  }
 
-    const oldKeyPair = this.getKeyPair();
-
-    this.getKeyPairModule().public = keyPair.public;
-    this.getKeyPairModule().private = keyPair.private;
-
-    if (keyPair.publicComplete !== undefined) {
-      this.getKeyPairModule().publicComplete = keyPair.publicComplete;
-    } else {
-      this.getKeyPairModule().publicComplete = new Uint8Array();
-    }
-
-    const newKeyPair = this.getKeyPair();
-
-    if (save) {
-      let toWrite = "";
-      if (newKeyPair.public.length > 0 && newKeyPair.private.length > 0) {
-        toWrite = Convert.objectToJson(newKeyPair);
-      }
-
-      return FileIO.writeStringTo(FilesPath.KEY_PAIR, toWrite)
-        .catch((error) => {
-          console.log(error);
-          console.dir(error);
-          console.trace();
-
-          return this.setKeyPair(oldKeyPair, false)
-            .then(() => {
-              return Promise.reject(error);
-            });
-        });
-    } else {
-      return new Promise((resolve, reject) => {
-        resolve();
-      });
-    }
+  /**
+   * Randomize the key pair of the User
+   * @returns {Promise} - a prmise that gets resolved once the key pair has been randomized and saved
+   */
+  randomizeKeyPair() {
+    return this._keyPair.randomize();
   }
 
   /**
@@ -398,11 +351,10 @@ class User {
 
     conodes.map((server) => {
       const address = Convert.tlsToWebsocket(server, "");
-      // TODO Change to Net instead of NetDedis
-      const cothoritySocket = new NetDedis.Socket(address, RequestPath.STATUS);
+      // TODO Change to Net instead of Net
+      const cothoritySocket = new Net.Socket(address, RequestPath.STATUS);
       return cothoritySocket.send(RequestPath.STATUS_REQUEST, DecodeType.STATUS_RESPONSE, statusRequestMessage)
         .then(statusResponse => {
-          console.dir(statusResponse);
           this.getRosterModule().statusList.push({
             conode: server,
             conodeStatus: statusResponse
@@ -436,7 +388,7 @@ class User {
   reset() {
     this._isLoaded = false;
 
-    const promises = [this.setKeyPair(EMPTY_KEYPAIR, true), this.setRoster(EMPTY_ROSTER, true)];
+    const promises = [this._keyPair.reset(), this.setRoster(EMPTY_ROSTER, true)];
 
     return Promise.all(promises)
       .then(() => {
@@ -478,24 +430,7 @@ class User {
    * @returns {Promise} - a promise that gets resolved once the key pair is loaded into memory
    */
   loadKeyPair() {
-    return FileIO.getStringOf(FilesPath.KEY_PAIR)
-      .then(jsonKeyPair => {
-        if (jsonKeyPair.length > 0) {
-          return Convert.parseJsonKeyPair(jsonKeyPair);
-        } else {
-          return EMPTY_KEYPAIR;
-        }
-      })
-      .then(keyPair => {
-        return this.setKeyPair(keyPair, false);
-      })
-      .catch(error => {
-        console.log(error);
-        console.dir(error);
-        console.trace();
-
-        return Promise.reject(error);
-      });
+    return this._keyPair.load();
   }
 
   /**

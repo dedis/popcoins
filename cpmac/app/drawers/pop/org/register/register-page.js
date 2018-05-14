@@ -10,9 +10,11 @@ const User = require("../../../../shared/lib/dedjs/object/user/User").get;
 let viewModel = undefined;
 let Party = undefined;
 
+let pageObject = undefined;
 
 function onLoaded(args) {
   const page = args.object;
+  pageObject = page.page;
   const context = page.navigationContext;
 
   if(context.party === undefined) {
@@ -236,6 +238,18 @@ function addNewKey() {
   });
 }
 
+function shareToAttendee() {
+  let info = {
+    id:Convert.byteArrayToHex(Party.getPopDescHash()),
+    address:Party.getLinkedConode().address
+  };
+  pageObject.showModal("shared/pages/qr-code/qr-code-page", {
+    textToShow: Convert.objectToJson(info),
+    title: "Party informations"
+  }, () => { }, true);
+
+}
+
 function goBack() {
   topmost().goBack();
 }
@@ -248,3 +262,4 @@ module.exports.deleteAttendee = deleteAttendee;
 module.exports.onSwipeCellStarted = onSwipeCellStarted;
 module.exports.addNewKey = addNewKey;
 module.exports.goBack = goBack;
+module.exports.shareToAttendee = shareToAttendee;
