@@ -678,10 +678,11 @@ class Cisc {
       return Promise.reject("You already signed the message")
     }
     const privateKey = CURVE_ED25519.scalar();
-    privateKey.unmarshalBinary(User.getKeyPair().private);
+    privateKey.setBytes(User.getKeyPair().private);
+
     const signature = Schnorr.sign(CURVE_ED25519, privateKey, Convert.hexToByteArray(hashedData));
     let proposeVoteMessage = CothorityMessages.createProposeVote(Convert.hexToByteArray(this.getIdentity().id), this.getName(), signature);
-    return cothoritySocket.send(RequestPath.IDENTITY_PROPOSE_VOTE, DecodeType.PROPOSE_VOTE_REPLY, proposeVoteMessage)
+    return cothoritySocket.send(RequestPath.IDENTITY_PROPOSE_VOTE, DecodeType.PROPOSE_VOTE_REPLY, proposeVoteMessage);
   }
 
   hashData(data) {
@@ -715,6 +716,9 @@ class Cisc {
     for (let i in storageKeys) {
       dataHash.update(this.GetByteArrayFromString(data.storage[storageKeys[i]]));
     }
+
+    dataHash.update(data.roster.aggregate);
+
     return dataHash.digest("hex");
   }
 
