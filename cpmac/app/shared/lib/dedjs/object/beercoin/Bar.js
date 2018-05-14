@@ -103,7 +103,7 @@ class Bar {
 
         this._finalStatement.attendees.forEach(attendee => {
           let publicKey = Suite.point();
-          publicKey.unmarshalBinary(attendee);
+          publicKey.unmarshalBinary(Convert.base64ToByteArray(attendee));
           this._anonymitySet.add(publicKey)
         });
 
@@ -113,7 +113,7 @@ class Bar {
 
   /**
    * Save the list of checked client of this
-   * @return {Promise<T>} - a promise that gets sovled once the it is saved
+   * @return {Promise<T>} - a promise that gets solved once the it is saved
    */
   saveCheckedClients() {
     let clients = [];
@@ -149,8 +149,6 @@ class Bar {
     }
 
     const hexString = Convert.byteArrayToHex(tag);
-    console.log("SKDEBUG checking tag " + hexString + " in ");
-    console.dir(this.getCheckedClientsModule());
     return this.getCheckedClientsModule().indexOf(hexString) >= 0;
   }
 
@@ -167,22 +165,17 @@ class Bar {
       throw "signature must be an Uint8Array";
     }
 
-    console.log("SKDEBUG singingData = ");
-    console.dir(signingData);
 
     let nonce = Convert.hexToByteArray(signingData.nonce);
     let scope = Convert.hexToByteArray(signingData.scope);
 
 
     const verifInfo = RingSig.Verify(Suite, nonce, [...this._anonymitySet], scope, signature);
-    console.dir(verifInfo);
     if (!verifInfo.valid) {
-      return Promise.reject("Invalid signature")
+      return Promise.reject("You are not part of the right group !")
     } else if (this.isAlreadyChecked(verifInfo.tag)) {
       return Promise.reject("You already had a beer ! Please come back later")
     }
-
-    console.log("SKDEBUG ALMST AT END");
 
     const hexString = Convert.byteArrayToHex(verifInfo.tag);
     this.getCheckedClientsModule().push(hexString);
