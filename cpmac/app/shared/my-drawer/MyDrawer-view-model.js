@@ -25,6 +25,13 @@ function MyDrawerViewModel(selectedPage) {
                 isSelected: selectedPage === "PoP"
             },
             {
+                title: "Bar",
+                name: "bar",
+                route: "drawers/bar/bar-list",
+                icon: "\uf0fc",
+                isSelected: selectedPage === "Bar"
+            },
+            {
                 title: "CISC",
                 name: "cisc",
                 route: "drawers/cisc/cisc-page",

@@ -11,7 +11,7 @@ const Dialog = require("ui/dialogs");
 const Helper = require("~/shared/lib/dedjs/Helper");
 const Convert = require("~/shared/lib/dedjs/Convert");
 const Net = require("@dedis/cothority").net;
-const RequestPath = require("~/shared/lib/dedjs/RequestPath");
+const RequestPath = require("~/shared/lib/dedjs/network/RequestPath");
 const DecodeType = require("~/shared/lib/dedjs/DecodeType");
 
 const skipchainsArray = [];

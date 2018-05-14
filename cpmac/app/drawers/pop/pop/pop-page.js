@@ -13,6 +13,7 @@ const FINAL_STATEMENT_OPTION_QR = "QR";
 const FINAL_STATEMENT_OPTION_POP_TOKENIFY = "PoP-Tokenify";
 
 const POP_TOKEN_OPTION_REVOKE = "Revoke";
+const POP_TOKEN_OPTION_SIGN = "Sign";
 
 let pageObject = undefined;
 
@@ -75,7 +76,8 @@ function finalStatementTapped(args) {
           pageObject.showModal("shared/pages/qr-code/qr-code-page", {
             textToShow: Convert.objectToJson(object),
             title: "Final Statement"
-          }, () => { }, true);
+          }, () => {
+          }, true);
 
           return Promise.resolve();
         } else {
@@ -105,15 +107,47 @@ function finalStatementTapped(args) {
 }
 
 function popTokenTapped(args) {
+  let index = args.index;
   return Dialog.action({
     message: "Choose an Action",
     cancelButtonText: "Cancel",
-    actions: [POP_TOKEN_OPTION_REVOKE]
+    actions: [POP_TOKEN_OPTION_REVOKE, POP_TOKEN_OPTION_SIGN]
   })
     .then(result => {
       if (result === POP_TOKEN_OPTION_REVOKE) {
         // Revoke Token
         return PoP.revokePopTokenByIndex(args.index);
+      } else if (result === POP_TOKEN_OPTION_SIGN) {
+        return ScanToReturn.scan()
+          .then(signDataJson => {
+            console.dir(signDataJson);
+            const sigData = Convert.jsonToObject(signDataJson);
+            const sig = PoP.signWithPopTokenIndex(index, Convert.hexToByteArray(sigData.nonce), Convert.hexToByteArray(sigData.scope));
+
+            const fields = {
+              signature: Convert.byteArrayToHex(sig)
+            };
+
+
+            pageObject.showModal("shared/pages/qr-code/qr-code-page", {
+              textToShow: Convert.objectToJson(fields),
+              title: "Signed informations"
+            }, () => {
+            }, true);
+
+            return Promise.resolve()
+          })
+          .catch(error => {
+            console.log(error);
+            console.dir(error);
+            console.trace();
+
+            Dialog.alert({
+              title: "Error",
+              message: "An error occured, please retry. - " + error,
+              okButtonText: "Ok"
+            });
+          })
       }
 
       return Promise.resolve();

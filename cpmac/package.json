@@ -26,6 +26,7 @@
     "bn.js": "^4.11.8",
     "buffer": "^5.0.8",
     "chai-as-promised": "^7.1.1",
+    "crypto-browserify": "^3.12.0",
     "elliptic": "^6.4.0",
     "file": "^0.2.2",
     "get-random-values": "^1.2.0",

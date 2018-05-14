@@ -6,6 +6,10 @@ const FilesPath = require("../../../../res/files/files-path");
 const Convert = require("../../Convert");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const Observable = require("data/observable");
+const RingSig = require("../../RingSig");
+const Kyber = require("@dedis/kyber-js");
+const Suite = new Kyber.curve.edwards25519.Curve;
+const Crypto = require("crypto-browserify");
 
 /**
  * @param {string} [dirname] - directory of the bar data (directory is created if non existent).
@@ -23,10 +27,11 @@ class Bar {
       frequency: "",
       date: new Date(Date.now())
     });
-    this._checkedClients = new ObservableArray();
-    this._finalStatements = new ObservableArray();
+    this._checkedClients = [];
+    this._finalStatement = undefined;
+    this._anonymitySet = new Set();
 
-    load()
+    this.load()
   }
 
   /**
@@ -61,7 +66,7 @@ class Bar {
 
         configModule.name = config.name;
         configModule.frequency = config.frequency;
-        configModule.date = Date.parse(config.date);
+        configModule.date = new Date(config.date);
 
         return Promise.resolve();
       })
@@ -77,7 +82,7 @@ class Bar {
         const checkedClients = Convert.jsonToObject(checkedClientsJson);
         const checkedClientsModule = this.getCheckedClientsModule();
 
-        checkedClients.forEach(client => {
+        checkedClients.clients.forEach(client => {
           checkedClientsModule.push(client)
         });
 
@@ -92,12 +97,14 @@ class Bar {
    */
   loadFinalStatements() {
     return FileIO.getStringOf(FileIO.join(FilesPath.BEERCOIN_PATH, this._dirname, FilesPath.BEERCOIN_LINKED_FINALS))
-      .then(finalStatemnetsJson => {
-        const finalStatements = Convert.jsonToObject(finalStatemnetsJson);
-        const finalStatementsModule = this.getFinalStatementsModule();
+      .then(finalStatementJson => {
 
-        finalStatements.forEach(finalStatement => {
-          finalStatementsModule.push(finalStatement)
+        this._finalStatement = Convert.jsonToObject(finalStatementJson);
+
+        this._finalStatement.attendees.forEach(attendee => {
+          let publicKey = Suite.point();
+          publicKey.unmarshalBinary(attendee);
+          this._anonymitySet.add(publicKey)
         });
 
         return Promise.resolve();
@@ -113,9 +120,14 @@ class Bar {
     this.getCheckedClientsModule().forEach(client => {
       clients.push(client);
     });
-    const objectString = Convert.objectToJson(clients);
 
-    return FileIO.writeStringTo(FileIO.join(FilesPath.BEERCOIN_PATH, this._dirname, FilesPath.BEERCOIN_LINKED_FINALS), objectString)
+    const fields = {
+      clients: clients
+    };
+
+    const objectString = Convert.objectToJson(fields);
+
+    return FileIO.writeStringTo(FileIO.join(FilesPath.BEERCOIN_PATH, this._dirname, FilesPath.BEERCOIN_CHECKED_CLIENTS), objectString)
       .catch(error => {
         console.log(error);
         console.dir(error);
@@ -137,41 +149,68 @@ class Bar {
     }
 
     const hexString = Convert.byteArrayToHex(tag);
+    console.log("SKDEBUG checking tag " + hexString + " in ");
+    console.dir(this.getCheckedClientsModule());
     return this.getCheckedClientsModule().indexOf(hexString) >= 0;
   }
 
   /**
    * Register a new client and save it on the disk
    *
-   * @param tag - the new client tag
-   * @return {Promise<T>} - a promise that gets solved once the save process is finished
+   * @param signature - the new client signature
+   * @param signingData - the signing info used to register a client. Shoul be an object oh hex string
+   * @return {Promise} - a promise that gets solved once the save process is finished if the client is not already
+   * registered
    */
-  registerClient(tag) {
-    if (tag.constructor !== Uint8Array) {
-      throw "tag must be an Uint8Array";
+  registerClient(signature, signingData) {
+    if (signature.constructor !== Uint8Array) {
+      throw "signature must be an Uint8Array";
     }
 
-    const hexString = Convert.byteArrayToHex(tag);
+    console.log("SKDEBUG singingData = ");
+    console.dir(signingData);
+
+    let nonce = Convert.hexToByteArray(signingData.nonce);
+    let scope = Convert.hexToByteArray(signingData.scope);
+
+
+    const verifInfo = RingSig.Verify(Suite, nonce, [...this._anonymitySet], scope, signature);
+    console.dir(verifInfo);
+    if (!verifInfo.valid) {
+      return Promise.reject("Invalid signature")
+    } else if (this.isAlreadyChecked(verifInfo.tag)) {
+      return Promise.reject("You already had a beer ! Please come back later")
+    }
+
+    console.log("SKDEBUG ALMST AT END");
+
+    const hexString = Convert.byteArrayToHex(verifInfo.tag);
     this.getCheckedClientsModule().push(hexString);
 
     return this.saveCheckedClients();
   }
 
+
   /**
    * Get the datas used that will be signed to identificate an user
    *
-   * @return {{nonce: number, scope: Uint8Array}}
+   * @return {{nonce: Uint8Array, scope: Uint8Array}}
    */
   getSigningData() {
     const configModule = this.getConfigModule();
 
-    const nonce = Math.random() % 100000;
-    const scopeString = configModule.name + configModule.frequency + configModule.date.toString();
+    const nonce = Crypto.randomBytes(16);
+    const scopeString =
+      configModule.name +
+      configModule.frequency +
+      configModule.date.getFullYear() + "-" +
+      configModule.date.getMonth() + "-" +
+      configModule.date.getDay();
     const scope = new Uint8Array(Buffer.from(scopeString));
 
     return {
-      nonce: nonce,
-      scope: scope
+      nonce: Convert.byteArrayToHex(nonce),
+      scope: Convert.byteArrayToHex(scope)
     }
   }
 
@@ -192,8 +231,8 @@ class Bar {
   /**
    * @return {ObservableArray} - the observable array of the final statements
    */
-  getFinalStatementsModule() {
-    return this._finalStatements;
+  getFinalStatement() {
+    return this._finalStatement;
   }
 
   /**
@@ -201,10 +240,10 @@ class Bar {
    *
    * @param {String} name - the name of the bar
    * @param {String} frequency - the frequency at which clients can have a beer. Should be a member of Frequencies enum
-   * @param {Array<FinalStatement>} finalStatements - the linked final statements to get the allowed clients
+   * @param {FinalStatement} finalStatement - the linked final statement to get the allowed clients
    * @return {Promise<Bar>} - a promise that gets solved when the bar is correctly saved on the disk
    */
-  static createWithConfig(name, frequency, finalStatements) {
+  static createWithConfig(name, frequency, finalStatement) {
     if (typeof name !== "string") {
       throw new Error("name must be of type string");
     }
@@ -213,15 +252,9 @@ class Bar {
       throw new Error("frequency must be part of the Frequencies enumeration");
     }
 
-    if (!(finalStatements) instanceof Array) {
-      throw new Error("name must be an instance of array");
+    if (!Helper.isOfType(finalStatement, ObjectType.FINAL_STATEMENT)) {
+      throw new Error("finalStatement must be of type FinalStatement");
     }
-
-    finalStatements.forEach(finalStatement => {
-      if (!Helper.isOfType(finalStatement, ObjectType.FINAL_STATEMENT)) {
-        throw new Error("objects inside finalStatements must be of type FinalStatement");
-      }
-    });
 
     const config = {
       name: name,
@@ -230,15 +263,15 @@ class Bar {
     };
 
     const configString = Convert.objectToJson(config);
-    const finalStatementsString = Convert.objectToJson(finalStatements);
+    const finalStatementString = Convert.objectToJson(finalStatement);
     const dirname = uuidv4();
 
-    return FileIO.writeStringTo(FileIO.join(FilesPath.BEERCOIN_PATH, dirname, FilesPath.BEERCOIN_LINKED_FINALS), finalStatementsString)
+    return FileIO.writeStringTo(FileIO.join(FilesPath.BEERCOIN_PATH, dirname, FilesPath.BEERCOIN_LINKED_FINALS), finalStatementString)
       .then(() => {
         return FileIO.writeStringTo(FileIO.join(FilesPath.BEERCOIN_PATH, dirname, FilesPath.BEERCOIN_BAR_CONFIG), configString)
       })
       .then(() => {
-        return new Bar(dirname);
+        return Promise.resolve(new Bar(dirname));
       })
       .catch(error => {
         console.log(error);
@@ -273,3 +306,6 @@ const Frequencies = Object.freeze({
 
   MONTHLY: "monthly",
 });
+
+module.exports.Bar = Bar;
+module.exports.Frequencies = Frequencies;
