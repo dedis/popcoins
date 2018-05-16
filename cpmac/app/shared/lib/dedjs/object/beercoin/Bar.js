@@ -79,6 +79,9 @@ class Bar {
   loadCheckedClients() {
     return FileIO.getStringOf(FileIO.join(FilesPath.BEERCOIN_PATH, this._dirname, FilesPath.BEERCOIN_CHECKED_CLIENTS))
       .then(checkedClientsJson => {
+        if (checkedClientsJson.length === 0) {
+          return Promise.resolve();
+        }
         const checkedClients = Convert.jsonToObject(checkedClientsJson);
         const checkedClientsModule = this.getCheckedClientsModule();
 
@@ -144,7 +147,7 @@ class Bar {
    * @return {boolean} - true if this client already came here
    */
   isAlreadyChecked(tag) {
-    if (tag.constructor !== Uint8Array) {
+    if (!(tag instanceof Uint8Array)) {
       throw "tag must be an Uint8Array";
     }
 
@@ -161,7 +164,7 @@ class Bar {
    * registered
    */
   registerClient(signature, signingData) {
-    if (signature.constructor !== Uint8Array) {
+    if (!(signature instanceof Uint8Array)) {
       throw "signature must be an Uint8Array";
     }
 
@@ -171,6 +174,8 @@ class Bar {
 
 
     const verifInfo = RingSig.Verify(Suite, nonce, [...this._anonymitySet], scope, signature);
+    console.log("SKDEBUG verfiInfo");
+    console.dir(verifInfo);
     if (!verifInfo.valid) {
       return Promise.reject("You are not part of the right group !")
     } else if (this.isAlreadyChecked(verifInfo.tag)) {

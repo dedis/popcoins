@@ -79,11 +79,14 @@ function barTapped(args) {
       console.dir(sig);
       return bar.registerClient(sig, signData)
     }).then(() => {
-      setTimeout(() => {Dialog.alert({
-        title: "Success !",
-        message: "The beer is paid !",
-        okButtonText: "Great"
-      })}, 1500); // TODO Not good
+      // Alert is shown in the modal page if not enclosed in setTimeout
+      setTimeout(() => {
+        Dialog.alert({
+          title: "Success !",
+          message: "The beer is paid !",
+          okButtonText: "Great"
+        })
+      });
     }).catch(error => {
       if (error === USER_CANCELED) {
         return Promise.resolve();
@@ -92,11 +95,14 @@ function barTapped(args) {
       console.dir(error);
       console.trace();
 
-      setTimeout(() => {Dialog.alert({
-        title: "Error",
-        message: error,
-        okButtonText: "Ok"
-      });}, 1500); //TODO not good either
+      // Alert is shown in the modal page if not enclosed in setTimeout
+      setTimeout(() => {
+        Dialog.alert({
+          title: "Error",
+          message: error,
+          okButtonText: "Ok"
+        });
+      });
 
       return Promise.reject(error);
     });

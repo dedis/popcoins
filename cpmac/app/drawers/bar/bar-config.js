@@ -16,7 +16,7 @@ let pageObject = undefined;
 
 let dataForm = Observable.fromObject({
   name: "",
-  frequency: "",
+  frequency: BarFrequencies.DAILY,
   final_statement: {}
 });
 
