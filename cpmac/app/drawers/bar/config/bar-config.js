@@ -1,14 +1,14 @@
 const Dialog = require("ui/dialogs");
 const Frame = require("ui/frame");
-const Helper = require("../../shared/lib/dedjs/Helper");
-const Convert = require("../../shared/lib/dedjs/Convert");
-const ObjectType = require("../../shared/lib/dedjs/ObjectType");
-const ScanToReturn = require("../../shared/lib/scan-to-return/scan-to-return");
+const Helper = require("../../../shared/lib/dedjs/Helper");
+const Convert = require("../../../shared/lib/dedjs/Convert");
+const ObjectType = require("../../../shared/lib/dedjs/ObjectType");
+const ScanToReturn = require("../../../shared/lib/scan-to-return/scan-to-return");
 const Observable = require("tns-core-modules/data/observable");
-const User = require("../../shared/lib/dedjs/object/user/User").get;
-const PoP = require("../../shared/lib/dedjs/object/pop/PoP").get;
-const Bar = require("../../shared/lib/dedjs/object/beercoin/Bar").Bar;
-const BarFrequencies = require("../../shared/lib/dedjs/object/beercoin/Bar").Frequencies;
+const User = require("../../../shared/lib/dedjs/object/user/User").get;
+const PoP = require("../../../shared/lib/dedjs/object/pop/PoP").get;
+const Bar = require("../../../shared/lib/dedjs/object/beercoin/Bar").Bar;
+const BarFrequencies = require("../../../shared/lib/dedjs/object/beercoin/Bar").Frequencies;
 const topmost = require("ui/frame").topmost;
 
 

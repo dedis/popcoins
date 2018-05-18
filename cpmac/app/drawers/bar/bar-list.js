@@ -59,55 +59,76 @@ function barTapped(args) {
   const bar = viewModel.barListDescriptions.getItem(index).bar;
   const signData = bar.getSigningData();
   const USER_CANCELED = "USER_CANCELED_STRING";
-  pageObject.showModal("shared/pages/qr-code/qr-code-page", {
-    textToShow: Convert.objectToJson(signData),
-    title: "Bar informations"
-  }, () => {
-    Dialog.confirm({
-      title: "Client confirmation",
-      message: "Do you want to also scan the client confirmation ?",
-      okButtonText: "Yes",
-      cancelButtonText: "No"
-    }).then(function (result) {
-      if (!result) {
-        return Promise.reject(USER_CANCELED);
-      }
-      return ScanToReturn.scan();
-    }).then(signatureJson => {
-      console.log(signatureJson);
-      const sig = Convert.hexToByteArray(Convert.jsonToObject(signatureJson).signature);
-      console.dir(sig);
-      return bar.registerClient(sig, signData)
-    }).then(() => {
-      // Alert is shown in the modal page if not enclosed in setTimeout
-      setTimeout(() => {
-        Dialog.alert({
-          title: "Success !",
-          message: "The beer is paid !",
-          okButtonText: "Great"
-        })
-      });
-    }).catch(error => {
-      if (error === USER_CANCELED) {
-        return Promise.resolve();
-      }
-      console.log(error);
-      console.dir(error);
-      console.trace();
+  Dialog
+    .action({
+      message: "What do you want to do ?",
+      cancelButtonText: "Cancel",
+      actions: ["Show bar info to user", "Show orders history"]
+    })
+    .then(result => {
+      if (result === "Show bar info to user") {
+        pageObject.showModal("shared/pages/qr-code/qr-code-page", {
+          textToShow: Convert.objectToJson(signData),
+          title: "Bar informations"
+        }, () => {
+          Dialog.confirm({
+            title: "Client confirmation",
+            message: "Do you want to also scan the client confirmation ?",
+            okButtonText: "Yes",
+            cancelButtonText: "No"
+          }).then(function (result) {
+            if (!result) {
+              return Promise.reject(USER_CANCELED);
+            }
+            return ScanToReturn.scan();
+          }).then(signatureJson => {
+            console.log(signatureJson);
+            const sig = Convert.hexToByteArray(Convert.jsonToObject(signatureJson).signature);
+            console.dir(sig);
+            return bar.registerClient(sig, signData)
+          }).then(() => {
+            return bar.addOrderToHistory(new Date(Date.now()));
+          })
+            .then(() => {
+              // Alert is shown in the modal page if not enclosed in setTimeout
+              setTimeout(() => {
+                Dialog.alert({
+                  title: "Success !",
+                  message: "The beer is paid !",
+                  okButtonText: "Great"
+                })
+              });
+            }).catch(error => {
+            if (error === USER_CANCELED) {
+              return Promise.resolve();
+            }
+            console.log(error);
+            console.dir(error);
+            console.trace();
 
-      // Alert is shown in the modal page if not enclosed in setTimeout
-      setTimeout(() => {
-        Dialog.alert({
-          title: "Error",
-          message: error,
-          okButtonText: "Ok"
+            // Alert is shown in the modal page if not enclosed in setTimeout
+            setTimeout(() => {
+              Dialog.alert({
+                title: "Error",
+                message: error,
+                okButtonText: "Ok"
+              });
+            });
+
+            return Promise.reject(error);
+          });
+
+        }, true);
+      } else if (result === "Show orders history") {
+        Frame.topmost().navigate({
+          moduleName: "drawers/bar/order-history/bar-history-list",
+          context: {
+            bar: bar,
+          }
         });
-      });
 
-      return Promise.reject(error);
-    });
-
-  }, true);
+      }
+    })
 
 }
 
@@ -151,7 +172,7 @@ function onSwipeCellStarted(args) {
 
 function addBar() {
   Frame.topmost().navigate({
-    moduleName: "drawers/bar/bar-config",
+    moduleName: "drawers/bar/config/bar-config",
   });
 }
 

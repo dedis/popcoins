@@ -30,8 +30,26 @@ class Bar {
     this._checkedClients = [];
     this._finalStatement = undefined;
     this._anonymitySet = new Set();
+    this._orderHistory = new ObservableArray();
 
     this.load()
+  }
+
+  /**
+   * Add a new date to the order history
+   *
+   * @param date - the date that will be added
+   * @return {Promise} - a promise that gets resolved once the new history is saved on the disk
+   */
+  addOrderToHistory(date) {
+    if(!(date instanceof Date)) {
+      throw "date must be an instance of Date"
+    }
+
+    const history = this.getOrderHistoryModule();
+    history.push(date.toString());
+
+    return this.saveHistory()
   }
 
   /**
@@ -42,9 +60,13 @@ class Bar {
    * @return {Promise<[any]>}
    */
   load() {
-    const promises = [this.loadConfig(), this.loadCheckedClients(), this.loadFinalStatements()];
+    const promises = [this.loadConfig(), this.loadFinalStatements(), this.loadOrderHistory()];
 
     return Promise.all(promises)
+      .then(() => {
+        // needs to be done after, as the period may need to be reset (thus we check the config before)
+        return this.loadCheckedClients();
+      })
       .catch(error => {
         console.log(error);
         console.dir(error);
@@ -63,10 +85,33 @@ class Bar {
       .then(configJson => {
         const config = Convert.jsonToObject(configJson);
         const configModule = this.getConfigModule();
+        const ONE_DAY = 24 * 60 * 60 * 1000;
 
         configModule.name = config.name;
         configModule.frequency = config.frequency;
         configModule.date = new Date(config.date);
+
+        let numberOfDay = Math.floor((configModule.date.getTime() - configModule.date) / ONE_DAY);
+        let maxDays;
+
+        switch (configModule.frequency) {
+          case Frequencies.DAILY:
+            maxDays = 1;
+            break;
+          case Frequencies.WEEKLY:
+            maxDays = 7;
+            break;
+          case Frequencies.MONTHLY:
+            maxDays = 30;
+            break;
+          default:
+            throw "Date is not valid"
+        }
+
+        if (numberOfDay > maxDays) {
+          return this.resetPeriod()
+        }
+
 
         return Promise.resolve();
       })
@@ -115,8 +160,27 @@ class Bar {
   }
 
   /**
+   * Load the order history in memory
+   * @return {Promise} - a promise that gets resolved once the history is loaded
+   */
+  loadOrderHistory() {
+    return FileIO.getStringOf(FileIO.join(FilesPath.BEERCOIN_PATH, this._dirname, FilesPath.BEERCOIN_ORDER_HISTORY))
+      .then(orderHistoryJson => {
+        if (orderHistoryJson.length === 0) {
+          return Promise.resolve()
+        }
+
+        const orderHistory = Convert.jsonToObject(orderHistoryJson);
+        const orderHistoryModule = this.getOrderHistoryModule();
+        orderHistory.dates.forEach(date => {
+          orderHistoryModule.push(new Date(date))
+        })
+      })
+  }
+
+  /**
    * Save the list of checked client of this
-   * @return {Promise<T>} - a promise that gets solved once the it is saved
+   * @return {Promise} - a promise that gets solved once the it is saved
    */
   saveCheckedClients() {
     let clients = [];
@@ -141,6 +205,47 @@ class Bar {
   }
 
   /**
+   * Save the current bar configuration on the disk
+   *
+   * @return {Promise} - a promise that gets solved once the config is saved on the disk
+   */
+  saveConfig() {
+    let currentConfig = this.getConfigModule();
+
+    const config = {
+      name: currentConfig.name,
+      frequency: currentConfig.frequency,
+      lastPeriodStartDate: currentConfig.date.toString(),
+    };
+
+    const configString = Convert.objectToJson(config);
+
+    return FileIO.writeStringTo(FileIO.join(FilesPath.BEERCOIN_PATH, this._dirname, FilesPath.BEERCOIN_BAR_CONFIG), configString)
+  }
+
+  /**
+   * Save the current history on the disk
+   * @return {Promise} - a promise that gets solved once the datas are on the disk
+   */
+  saveHistory() {
+    let dates = [];
+    let history = this.getOrderHistoryModule();
+
+    history.forEach(date => {
+      dates.push(date.toString())
+    });
+
+    const fields = {
+      dates: dates
+    };
+
+    let historyString = Convert.objectToJson(fields);
+
+    return FileIO.writeStringTo(FileIO.join(FilesPath.BEERCOIN_PATH, this._dirname, FilesPath.BEERCOIN_ORDER_HISTORY), historyString)
+
+  }
+
+  /**
    * Check if a specific tag has already been registered to this bar
    *
    * @param tag - the tag to be checked
@@ -153,6 +258,41 @@ class Bar {
 
     const hexString = Convert.byteArrayToHex(tag);
     return this.getCheckedClientsModule().indexOf(hexString) >= 0;
+  }
+
+  /**
+   * Reste the current period (set to date to now and clear the list of checked clients)
+   *
+   * @return {Promise} - a promise that gets solved when everything (config + check clients) is saved to disk
+   */
+  resetPeriod() {
+    const configModule = this.getConfigModule();
+    configModule.date = new Date(Date.now());
+
+    const checkedClients = this.getCheckedClientsModule();
+    checkedClients.splice(0);
+
+    const promises = [this.saveCheckedClients(), this.saveConfig()];
+
+    return Promise.all(promises)
+      .catch(error => {
+        console.log(error);
+        console.dir(error);
+        console.trace();
+
+        return Promise.reject()
+      })
+  }
+
+  /**
+   * Empty the history and save it on the disk
+   * @return {Promise} - a promise that gets solved once the history is cleared in memory and on the disk
+   */
+  resetOrderHistory() {
+    const history = this.getOrderHistoryModule();
+    history.splice(0);
+
+    return this.saveHistory();
   }
 
   /**
@@ -174,8 +314,6 @@ class Bar {
 
 
     const verifInfo = RingSig.Verify(Suite, nonce, [...this._anonymitySet], scope, signature);
-    console.log("SKDEBUG verfiInfo");
-    console.dir(verifInfo);
     if (!verifInfo.valid) {
       return Promise.reject("You are not part of the right group !")
     } else if (this.isAlreadyChecked(verifInfo.tag)) {
@@ -210,6 +348,15 @@ class Bar {
       nonce: Convert.byteArrayToHex(nonce),
       scope: Convert.byteArrayToHex(scope)
     }
+  }
+
+  /**
+   * Return the history of the ordered beer since the last reset
+   *
+   * @return {ObservableArray}
+   */
+  getOrderHistoryModule() {
+    return this._orderHistory;
   }
 
   /**
