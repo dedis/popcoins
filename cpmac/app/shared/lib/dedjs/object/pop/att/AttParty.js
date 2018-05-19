@@ -1,24 +1,21 @@
 const Helper = require("../../../Helper");
 const ObservableModule = require("data/observable");
-const ObservableArray = require("data/observable-array").ObservableArray;
 const KeyPair = require("../../../Crypto").KeyPair;
 const FileIO = require("../../../../file-io/file-io");
 const FilePath = require("../../../../../res/files/files-path");
 const Convert = require("../../../Convert");
-const NetDedis = require("@dedis/cothority").net;
-const CothorityMessages = require("../../../protobuf/build/cothority-messages");
-const RequestPath = require("../../../RequestPath");
-const DecodeType = require("../../../DecodeType");
+const Net = require("@dedis/cothority").net;
+const CothorityMessages = require("../../../network/cothority-messages");
+const RequestPath = require("../../../network/RequestPath");
+const DecodeType = require("../../../network/DecodeType");
+const Party = require("../Party");
 
-/**
- * This singleton represents the attendee of a PoP party. It contains everything related to the attendee.
- */
 
 /**
  * We define the AttParty class which is the object representing the attendee.
  */
 
-class AttParty {
+class AttParty extends Party {
 
   /**
    * Constructor for the AttParty class.
@@ -29,6 +26,7 @@ class AttParty {
    *
    */
   constructor(id, loadLocally, address) {
+    super();
     if (typeof id !== "string" || id === "") {
       throw new Error("id must be of type string and shouldn't be empty");
     }
@@ -45,16 +43,6 @@ class AttParty {
     this._isLoaded = false;
     this._finalStatement = undefined;
     this._keyPair = new KeyPair(FileIO.join(FilePath.POP_ATT_PATH, this._folderName));
-    this._popDesc = ObservableModule.fromObjectRecursive({
-      name: "",
-      dateTime: "",
-      location: "",
-      roster: {
-        id: new Uint8Array(),
-        list: new ObservableArray(),
-        aggregate: new Uint8Array()
-      }
-    });
     this._status = ObservableModule.fromObject({
       status: States.UNDEFINED
     });
@@ -69,7 +57,7 @@ class AttParty {
    * @returns {Promise} - a promise that gets solved once the final statement is retrieved and the status updated
    */
   retrieveFinalStatementAndStatus() {
-    const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(this._address, ""), RequestPath.POP);
+    const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(this._address, ""), RequestPath.POP);
     const fetchRequest = CothorityMessages.createFetchRequest(this._id, true);
 
     return cothoritySocket.send(RequestPath.POP_FETCH_REQUEST, DecodeType.FINALIZE_RESPONSE, fetchRequest)
@@ -205,6 +193,12 @@ class AttParty {
     }
   }
 
+  /**
+   * Check if a specific public key is part of the party
+   *
+   * @param publicKey - the public that has to be checked
+   * @return {boolean} - returns true if the publix key is in the party
+   */
   isAttendee(publicKey) {
     let attendees = this._finalStatement.attendees;
     let publicKeyHexString = Convert.byteArrayToHex(publicKey);
@@ -215,14 +209,6 @@ class AttParty {
     }
 
     return false;
-  }
-
-  /**
-   * Returns the observable module for the description of the party
-   * @returns {ObservableModule}
-   */
-  getPopDescModule() {
-    return this._popDesc;
   }
 
   /**

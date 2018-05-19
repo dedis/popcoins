@@ -5,13 +5,13 @@ const FileIO = require("../../shared/lib/file-io/file-io");
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const BarcodeScanner = require("nativescript-barcodescanner").BarcodeScanner;
-const CothorityMessages = require("~/shared/lib/dedjs/protobuf/build/cothority-messages");
+const CothorityMessages = require("~/shared/lib/dedjs/network/cothority-messages");
 const User = require("~/shared/lib/dedjs/object/user/User").get;
 const Dialog = require("ui/dialogs");
 const Helper = require("~/shared/lib/dedjs/Helper");
 const Convert = require("~/shared/lib/dedjs/Convert");
-const NetDedis = require("@dedis/cothority").net;
-const RequestPath = require("~/shared/lib/dedjs/RequestPath");
+const Net = require("@dedis/cothority").net;
+const RequestPath = require("~/shared/lib/dedjs/network/RequestPath");
 const DecodeType = require("~/shared/lib/dedjs/DecodeType");
 
 const skipchainsArray = [];
@@ -204,7 +204,7 @@ function addDevice(newSkipchain) {
 
     let proposeSendMessage = CothorityMessages.createProposeSend(Convert.hexToByteArray(newSkipchain.getIdentity().id), data);
     console.log(newSkipchain.getIdentity().id);
-    const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(newSkipchain.getIdentity().address, ""), RequestPath.IDENTITY);
+    const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(newSkipchain.getIdentity().address, ""), RequestPath.IDENTITY);
     cothoritySocket.send(RequestPath.IDENTITY_PROPOSE_SEND, DecodeType.DATA_UPDATE_REPLY, proposeSendMessage)
         .then((response) => {
             console.log(response);

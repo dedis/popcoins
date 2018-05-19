@@ -5,7 +5,7 @@ chai.should();
 const FilesPath = require("../../../../../shared/res/files/files-path");
 const FileIO = require("../../../../../shared/lib/file-io/file-io");
 const Convert = require("../../../../../shared/lib/dedjs/Convert");
-const CothorityMessages = require("../../../../../shared/lib/dedjs/protobuf/build/cothority-messages");
+const CothorityMessages = require("../../../../../shared/lib/dedjs/network/cothority-messages");
 const User = require("../../../../../shared/lib/dedjs/object/user/User").get;
 
 const PoP = require("../../../../../shared/lib/dedjs/object/pop/PoP").get;
@@ -176,7 +176,7 @@ describe("PoP", function () {
       })
       .then(() => {
         for (let i = 0; i < 100; ++i) {
-          PoP._finalStatements.array.push(i);
+          PoP._finalStatement.array.push(i);
           PoP._popToken.array.push(i);
         }
 
@@ -195,7 +195,7 @@ describe("PoP", function () {
           });
       })
       .then(() => {
-        PoP._finalStatements.array.length.should.equal(0);
+        PoP._finalStatement.array.length.should.equal(0);
         PoP._popToken.array.length.should.equal(0);
       });
   });
@@ -208,13 +208,13 @@ describe("PoP", function () {
 
   describe("#getFinalStatements", function () {
     it("should return the reference to the final statements observable array", function () {
-      (PoP.getFinalStatements() === PoP._finalStatements.array).should.be.true;
+      (PoP.getFinalStatements() === PoP._finalStatement.array).should.be.true;
     });
   });
 
   describe("#getFinalStatementsModule", function () {
     it("should return the reference to the final statements observable module", function () {
-      (PoP.getFinalStatementsModule() === PoP._finalStatements).should.be.true;
+      (PoP.getFinalStatementsModule() === PoP._finalStatement).should.be.true;
     });
   });
 
@@ -233,12 +233,12 @@ describe("PoP", function () {
   describe("#emptyFinalStatementArray", function () {
     it("should completely empty the final statement array", function () {
       for (let i = 0; i < 100; ++i) {
-        PoP._finalStatements.array.push(i);
+        PoP._finalStatement.array.push(i);
       }
 
       PoP.emptyFinalStatementArray();
 
-      PoP._finalStatements.array.length.should.equal(0);
+      PoP._finalStatement.array.length.should.equal(0);
     });
   });
 
@@ -343,7 +343,7 @@ describe("PoP", function () {
 
     it("should completely replace the current final statements", function () {
       for (let i = 0; i < 10; ++i) {
-        PoP._finalStatements.array.push(i);
+        PoP._finalStatement.array.push(i);
       }
 
       return PoP.setFinalStatementsArray([FINAL_STATEMENT, FINAL_STATEMENT], false)

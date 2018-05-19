@@ -2,10 +2,10 @@ const Dialog = require("ui/dialogs");
 const Convert = require("../../lib/dedjs/Convert");
 const Helper = require("../../lib/dedjs/Helper");
 const NetDedis = require("@dedis/cothority").net;
-const RequestPath = require("../../lib/dedjs/RequestPath");
-const DecodeType = require("../../lib/dedjs/DecodeType");
-const CothorityMessages = require("../../lib/dedjs/protobuf/build/cothority-messages");
+const RequestPath = require("../../lib/dedjs/network/RequestPath");
+const DecodeType = require("../../lib/dedjs/network/DecodeType");
 const StatusExtractor = require("../../lib/dedjs/extractor/StatusExtractor");
+const CothorityMessages = require("../../lib/dedjs/network/cothority-messages");
 
 let textFieldAddress = undefined;
 let textFieldPublicKey = undefined;

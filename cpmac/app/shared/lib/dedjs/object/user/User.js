@@ -10,11 +10,11 @@ const Package = require("../../Package");
 const Convert = require("../../Convert");
 const ObjectType = require("../../ObjectType");
 const Helper = require("../../Helper");
-const NetDedis = require("@dedis/cothority").net;
+const Net = require("@dedis/cothority").net;
 const Crypto = require("../../Crypto");
-const RequestPath = require("../../RequestPath");
-const DecodeType = require("../../DecodeType");
-const CothorityMessages = require("../../protobuf/build/cothority-messages");
+const RequestPath = require("../../network/RequestPath");
+const DecodeType = require("../../network/DecodeType");
+const CothorityMessages = require("../../network/cothority-messages");
 
 /**
  * This singleton is the user of the app. It contains everything needed that is general, app-wide or does not belong to any precise subpart.
@@ -351,8 +351,8 @@ class User {
 
     conodes.map((server) => {
       const address = Convert.tlsToWebsocket(server, "");
-      // TODO Change to Net instead of NetDedis
-      const cothoritySocket = new NetDedis.Socket(address, RequestPath.STATUS);
+      // TODO Change to Net instead of Net
+      const cothoritySocket = new Net.Socket(address, RequestPath.STATUS);
       return cothoritySocket.send(RequestPath.STATUS_REQUEST, DecodeType.STATUS_RESPONSE, statusRequestMessage)
         .then(statusResponse => {
           this.getRosterModule().statusList.push({

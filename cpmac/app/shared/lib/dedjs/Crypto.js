@@ -1,7 +1,7 @@
 require("nativescript-nodeify");
 
 const Convert = require("./Convert");
-const CothorityMessages = require("./protobuf/build/cothority-messages");
+const CothorityMessages = require("./network/cothority-messages");
 const Kyber = require("@dedis/kyber-js");
 const ObservableModule = require("data/observable");
 const Helper = require("./Helper");

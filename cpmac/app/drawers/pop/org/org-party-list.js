@@ -267,7 +267,7 @@ function linkToConode(party) {
         return party.linkToConode(conodes[index], "")
           .then(result => {
             if (result.alreadyLinked !== undefined && result.alreadyLinked) {
-              return Promise.resolve()
+              return Promise.resolve(conodes[index])
             }
 
             return Dialog.prompt({
@@ -280,10 +280,9 @@ function linkToConode(party) {
             })
               .then(result => {
                 if (result.result) {
-                  /*console.log("SKDEBUG TEXT = " + result.result.text);
-                  if (result.result.text === undefined) {
+                  if (result.text === "") {
                     return Promise.reject("PIN should not be empty");
-                  }*/
+                  }
                   return party.linkToConode(conodes[index], result.text)
                     .then(() => {
                       return Promise.resolve(conodes[index]);

@@ -116,7 +116,13 @@ function partyTapped(args) {
             }, () => {
             }, true);
           } else if (result === "Display Party Info") {
-
+            Frame.topmost().navigate({
+              moduleName: "drawers/pop/org/config/config-page",
+              context: {
+                party: party,
+                readOnly: true
+              }
+            });
           }
         })
         .catch((error) => {
@@ -144,11 +150,10 @@ function partyTapped(args) {
             }
             return PoP.addPopTokenFromFinalStatement(party.getFinalStatement(), party.getKeyPair(), true)
               .then(() => {
-                // return party.remove(); TODO remove
-                return Promise.resolve();
+                return party.remove();
               })
               .then(() => {
-                viewModel.partyListDescriptions.splice(index, 1); // TODO and this
+                viewModel.partyListDescriptions.splice(index, 1);
                 return Dialog.alert({
                   title: "Success !",
                   message: "Your Token is now accessible under \"My Tokens\".",

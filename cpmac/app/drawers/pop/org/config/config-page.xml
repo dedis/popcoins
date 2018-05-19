@@ -1,6 +1,6 @@
 <Page
         class="page"
-        loaded="onLoaded"
+        navigatingTo="onNavigatingTo"
         xmlns:nsListView="nativescript-ui-listview"
         xmlns:nsDataForm="nativescript-ui-dataform">
 
@@ -9,7 +9,8 @@
         <Label class="action-bar-title" text="Configuration"/>
         <ActionItem tap="save"
                     ios.systemIcon="0" ios.position="right"
-                    android:icon="res://ic_done" android.position="actionBar"/>
+                    android:icon="res://ic_done" android.position="actionBar"
+                    visibility="{{ readOnly ? 'collapsed' : 'visible' }}"/>
     </ActionBar>
 
     <GridLayout class="page-content" rows="auto, auto, auto,*"
@@ -17,7 +18,11 @@
         <Label class="label-title" text="Description" row="0" col="0" colSpan="3"/>
 
 
-        <nsDataForm:RadDataForm id="data-form" source="{{ dataForm }}" row="1" colSpan="3">
+        <nsDataForm:RadDataForm
+                id="data-form"
+                source="{{ dataForm }}"
+                row="1" colSpan="3"
+                isReadOnly="{{ readOnly }}">
             <nsDataForm:RadaForm.properties>
                 <nsDataForm:EntityProperty name="name" index="0"/>
                 <nsDataForm:EntityProperty name="date" index="1">
@@ -37,11 +42,15 @@
         </nsDataForm:RadDataForm>
         <GridLayout id="org-list-header" rows="auto" columns="auto, *" row="2" colSpan="3">
             <Label class="label-title" text="Organizers" row="0" col="0" colSpan="2"/>
-            <Label class="label-title" id="addOrg" text="+" tap="addOrganizer" row="0" col="1"/>
+            <Label class="label-title" id="addOrg"
+                   text="+"
+                   tap="addOrganizer"
+                   row="0" col="1"
+                   visibility="{{ readOnly ? 'collapse' : 'visible' }}"/>
         </GridLayout>
 
         <nsListView:RadListView items="{{ descModule.roster.list }}" id="list-view-conodes"
-                                itemTap="conodeTapped"
+                                itemTap="{{ readOnly ? '' : 'conodeTapped' }}"
                                 itemSwipeProgressStarted="onSwipeCellStarted"
                                 swipeActions="true"
                                 row="3"

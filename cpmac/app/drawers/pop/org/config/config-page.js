@@ -2,14 +2,13 @@ const Dialog = require("ui/dialogs");
 const Frame = require("ui/frame");
 const Helper = require("../../../../shared/lib/dedjs/Helper");
 const Convert = require("../../../../shared/lib/dedjs/Convert");
-const Net = require("../../../../shared/lib/dedjs/Net");
 const ObjectType = require("../../../../shared/lib/dedjs/ObjectType");
 const ScanToReturn = require("../../../../shared/lib/scan-to-return/scan-to-return");
 const Observable = require("tns-core-modules/data/observable");
 const User = require("../../../../shared/lib/dedjs/object/user/User").get;
 const topmost = require("ui/frame").topmost;
+const PartyClass = require("../../../../shared/lib/dedjs/object/pop/Party");
 
-let viewModel = undefined;
 let Party = undefined;
 let newParty = undefined;
 
@@ -22,7 +21,16 @@ let dataForm = Observable.fromObject({
   location: ""
 });
 
-function onLoaded(args) {
+let viewModel = Observable.fromObject({
+  dataForm: dataForm,
+  readOnly: true
+});
+
+function onNavigatingTo(args) {
+  if (args.isBackNavigation) {
+    return;
+  }
+
   const page = args.object;
   const context = page.navigationContext;
 
@@ -32,13 +40,17 @@ function onLoaded(args) {
 
 
   Party = context.party;
+  if (!Party instanceof PartyClass) {
+    throw new Error("Party should be an instance of a Party");
+  }
+
   newParty = context.newParty;
 
   initDate();
 
-  viewModel = {};
   viewModel.descModule = Party.getPopDescModule();
   viewModel.dataForm = dataForm;
+  viewModel.readOnly = context.readOnly === true;
   pageObject = page.page;
   page.bindingContext = viewModel;
 
@@ -68,9 +80,11 @@ function initDate() {
   dataForm.set("name", Party.getPopDesc().name);
   dataForm.set("location", Party.getPopDesc().location);
 
-  let date = new Date(desc.dateTime === "" ? Date.now() : Date.parse(desc.dateTime));
+  let todayDate = desc.dateTime === "";
 
-  dataForm.set("date", date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + (date.getDay() + 1));
+  let date = new Date(todayDate ? Date.now() : Date.parse(desc.dateTime));
+
+  dataForm.set("date", date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate());
   dataForm.set("time", date.getHours() + ":" + date.getMinutes());
 }
 
@@ -251,7 +265,7 @@ function setDate() {
   date.map(parseInt);
   time.map(parseInt);
 
-  let dateString = new Date(date[0], date[1] - 1, date[2] - 1, time[0], time[1], 0, 0).toString();
+  let dateString = new Date(date[0], date[1], date[2], time[0], time[1], 0, 0).toString();
 
   return Party.setPopDescDateTime(dateString);
 }
@@ -349,79 +363,6 @@ function hashAndSave() {
   return registerPopDesc();
 }
 
-function manageDesc() {
-  return Dialog.confirm({
-    title: "PoP-Description",
-    message: "Do you want to share your description or import a new one?",
-    okButtonText: "Import",
-    cancelButtonText: "Cancel",
-    neutralButtonText: "Share"
-  })
-    .then(result => {
-      if (result) {
-        // Import
-        return ScanToReturn.scan()
-          .then(pasteBinIdJson => {
-            const id = Convert.jsonToObject(pasteBinIdJson).id;
-            const PasteBin = new Net.PasteBin();
-
-            return PasteBin.get(id);
-          })
-          .then(popDescJson => {
-            const popDesc = Convert.parseJsonPopDesc(popDescJson);
-
-            return Party.setPopDesc(popDesc, true)
-              .then(() => {
-                return setUpDate();
-              });
-          })
-      } else if (result === undefined) {
-        // Share
-        if (!Party.isPopDescComplete()) {
-          return Dialog.alert({
-            title: "Missing Information",
-            message: "Please provide a name, date, time, location and the list (min 3) of conodes" +
-            " of the organizers of your PoP Party.",
-            okButtonText: "Ok"
-          });
-        }
-
-        const PasteBin = new Net.PasteBin();
-        const popDescJson = JSON.stringify(Party.getPopDesc());
-
-        return PasteBin.paste(popDescJson)
-          .then(id => {
-            const object = {};
-            object.id = id;
-
-            pageObject.showModal("shared/pages/qr-code/qr-code-page", {
-              textToShow: Convert.objectToJson(object),
-              title: "Party informations"
-            }, () => {
-            }, true);
-
-            return Promise.resolve();
-          });
-      } else {
-        // Cancel
-        return Promise.resolve();
-      }
-    })
-    .catch(error => {
-      console.log(error);
-      console.dir(error);
-      console.trace();
-
-      Dialog.alert({
-        title: "Error",
-        message: "An error occured, please try again. - " + error,
-        okButtonText: "Ok"
-      });
-
-      return Promise.reject(error);
-    });
-}
-
 function goBack() {
   topmost().goBack();
 }
@@ -489,13 +430,12 @@ function conodeTapped(args) {
 
 }
 
-module.exports.onLoaded = onLoaded;
+module.exports.onNavigatingTo = onNavigatingTo;
 module.exports.hashAndSave = hashAndSave;
 module.exports.addManual = addManual;
 module.exports.addScan = addScan;
 module.exports.deleteConode = deleteConode;
 module.exports.onSwipeCellStarted = onSwipeCellStarted;
-module.exports.manageDesc = manageDesc;
 module.exports.goBack = goBack;
 module.exports.finish = finish;
 module.exports.addOrganizer = addOrganizer;
