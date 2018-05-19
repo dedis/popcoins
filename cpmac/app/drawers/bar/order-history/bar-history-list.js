@@ -46,8 +46,6 @@ function goBack() {
 }
 
 function clear() {
-  viewModel.dates.splice(0);
-
   Dialog.confirm({
     title: "Be careful !",
     message: "Every orders in this history will be deleted ! Are you sure you want to continue ?",
@@ -55,6 +53,7 @@ function clear() {
     cancelButtonText: "No"
   }).then(result => {
     if (result) {
+      viewModel.dates.splice(0);
       return bar.resetOrderHistory();
     } else {
       return Promise.resolve()
