@@ -19,10 +19,9 @@
   },
   "scripts": {},
   "dependencies": {
-    "@dedis/cothority": "1.1.10",
-    "@dedis/kyber-js": "0.0.7",
+    "@dedis/cothority": "^1.1.10",
+    "@dedis/kyber-js": "^0.0.9",
     "@stablelib/blake2xs": "^0.10.4",
-    "blakejs": "^1.1.0",
     "bn.js": "^4.11.8",
     "buffer": "^5.0.8",
     "chai-as-promised": "^7.1.1",

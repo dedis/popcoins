@@ -186,8 +186,17 @@ class PoP {
     if (typeof save !== "boolean") {
       throw new Error("save must be of type boolean");
     }
-
+    let alreadyExists = false;
     const oldFinalStatements = this.getFinalStatements().slice();
+    oldFinalStatements.forEach(statement => {
+      if (Convert.byteArrayToHex(statement.signature) === Convert.byteArrayToHex(finalStatement.signature)) {
+        alreadyExists = true;
+      }
+    });
+
+    if (alreadyExists) {
+      return Promise.resolve();
+    }
 
     this.getFinalStatements().push(finalStatement);
 
@@ -275,7 +284,7 @@ class PoP {
     if (typeof save !== "boolean") {
       throw new Error("save must be of type boolean");
     }
-    if(!Helper.isOfType(keyPair, ObjectType.KEY_PAIR)){
+    if (!Helper.isOfType(keyPair, ObjectType.KEY_PAIR)) {
       throw new Error("keyPair must be an instance of KeyPair");
     }
 
@@ -418,13 +427,13 @@ class PoP {
    * @return {Uint8Array} - the signature
    */
   signWithPopTokenIndex(index, message, scope) {
-    if(!Number.isInteger(index) || index < 0 || index >= this.getPopToken().length) {
+    if (!Number.isInteger(index) || index < 0 || index >= this.getPopToken().length) {
       throw "index is not valid"
     }
-    if(!message instanceof  Uint8Array) {
+    if (!message instanceof Uint8Array) {
       throw "message should be an Uint8Array"
     }
-    if(!scope instanceof Uint8Array) {
+    if (!scope instanceof Uint8Array) {
       throw "scope should be an Uint8Array"
     }
     let popToken = this.getPopToken().getItem(index);
@@ -446,7 +455,7 @@ class PoP {
       }
     }
 
-    if(mine < 0) {
+    if (mine < 0) {
       throw "Pop Token is invalid"
     }
 
