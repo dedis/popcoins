@@ -28,13 +28,13 @@ function Sign(suite, message, anonymitySet, linkScope, mine, privateKey) {
   if (!(suite instanceof Kyber.Group)) {
     throw "suite must be an instance of a Group";
   }
-  if (message.constructor !== Uint8Array) {
+  if (!(message instanceof Uint8Array)) {
     throw "message must be Uint8Array";
   }
   if (!(anonymitySet instanceof Array)) {
     throw "anonymitySet must be an Array of Point";
   }
-  if (linkScope !== undefined && linkScope.constructor !== Uint8Array) {
+  if (linkScope !== undefined && !(linkScope instanceof Uint8Array)) {
     throw "linkScope must be Uint8Array";
   }
   if (!Number.isInteger(mine)) {
@@ -108,16 +108,16 @@ function Verify(suite, message, anonymitySet, linkScope, signatureBuffer) {
   if (!(suite instanceof Kyber.Group)) {
     throw "suite must be an instance of a Group";
   }
-  if (message.constructor !== Uint8Array) {
+  if (!(message instanceof Uint8Array)) {
     throw "message must be Uint8Array";
   }
   if (!(anonymitySet instanceof Array)) {
     throw "anonymitySet must be an Array of Point";
   }
-  if (linkScope !== undefined && linkScope.constructor !== Uint8Array) {
+  if (linkScope !== undefined && !(linkScope instanceof Uint8Array)) {
     throw "linkScope must be Uint8Array";
   }
-  if (signatureBuffer.constructor !== Uint8Array) {
+  if (!(signatureBuffer instanceof Uint8Array)) {
     throw "signatureBuffer must be Uint8Array";
   }
 
@@ -189,7 +189,7 @@ function concatArrays(constructor, arrays) {
 }
 
 function createStreamFromBlake(blakeInstance) {
-  if (blakeInstance.constructor !== Blake) {
+  if (!(blakeInstance instanceof Blake)) {
     throw "blakeInstance must be of type Blake2xs";
   }
 
@@ -209,13 +209,13 @@ function signH1pre(suite, linkScope, linkTag, message) {
   if (!(suite instanceof Kyber.Group)) {
     throw "suite must be an instance of a Group";
   }
-  if (linkScope !== undefined && linkScope.constructor !== Uint8Array) {
+  if (linkScope !== undefined && !(linkScope instanceof Uint8Array)) {
     throw "linkScope must be Uint8Array";
   }
   if (linkTag !== undefined && !(linkTag instanceof Kyber.Point)) {
     throw "linkTag must be an instance of a Point";
   }
-  if (message.constructor !== Uint8Array) {
+  if (!(message instanceof Uint8Array)) {
     throw "message must be Uint8Array";
   }
 
@@ -284,7 +284,7 @@ function decodeSignature(suite, signatureBuffer, isLinkableSig) {
   if (!(suite instanceof Kyber.Group)) {
     throw "suite must be an instance of a Group";
   }
-  if (signatureBuffer.constructor !== Uint8Array) {
+  if (!(signatureBuffer instanceof Uint8Array)) {
     throw "message must be Uint8Array";
   }
   if (typeof isLinkableSig !== "boolean") {
