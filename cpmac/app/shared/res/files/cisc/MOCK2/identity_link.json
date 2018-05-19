@@ -1,5 +1,6 @@
 {
   "address": "tls://192.33.210.38:2004",
   "id": "bf9feadff49387dbe6ee6963c528683657ad97b6090a6335405a47a14dc8eb34",
-  "label": "cisc://192.33.210.38:2004/bf9feadff49387dbe6ee6963c528683657ad97b6090a6335405a47a14dc8eb34"
+  "label": "cisc://192.33.210.38:2004/bf9feadff49387dbe6ee6963c528683657ad97b6090a6335405a47a14dc8eb34",
+  "name": "IcsilServer Skipchain"
 }

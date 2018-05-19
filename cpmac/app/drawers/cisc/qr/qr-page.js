@@ -7,7 +7,6 @@ const QRGenerator = new ZXing();
 
 const Cisc = require("../../../shared/lib/dedjs/object/cisc/Cisc").Skipchain;
 const SkipPage = require("../skipchain-page");
-//const skipchain = new Cisc("MOCK");
 
 let skipchain;
 let viewModel;

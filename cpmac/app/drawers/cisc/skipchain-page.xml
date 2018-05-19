@@ -5,6 +5,7 @@
         xmlns:qr="drawers/cisc/qr"
         xmlns:home="drawers/cisc/home"
         xmlns:data="drawers/cisc/data"
+        xmlns:cert="drawers/cisc/cert"
         xmlns="http://www.nativescript.org/tns.xsd">
 
     <ActionBar class="action-bar">
@@ -77,6 +78,12 @@
                     <TabViewItem title="Data">
                         <TabViewItem.view>
                             <data:data-page/>
+                        </TabViewItem.view>
+                    </TabViewItem>
+
+                    <TabViewItem title="Cert">
+                        <TabViewItem.view>
+                            <cert:cert-page/>
                         </TabViewItem.view>
                     </TabViewItem>
 

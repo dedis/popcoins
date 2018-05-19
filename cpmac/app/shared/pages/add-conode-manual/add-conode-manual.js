@@ -49,6 +49,7 @@ function addManual() {
   if (address.length > 0 && publicKey.length > 0 && description.length > 0) {
     try {
       publicKey = Convert.hexToByteArray(publicKey);
+
       const server = Convert.toServerIdentity(address, publicKey, description, undefined);
 
       closeCallBackFunction(server);

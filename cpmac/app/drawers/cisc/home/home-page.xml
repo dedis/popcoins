@@ -51,6 +51,7 @@
                 <Button text="Toggle proposed/actual data" tap="toggleProposed" row="0" col="0"/>
                 <Button text="Vote for proposed data" tap="voteForProposed" row="0" col="1" isEnabled="{{ isOnProposed }}"/>
             </GridLayout>
+            <Button text="Reload" tap="reloadData"/>
         </StackLayout>
     </StackLayout>
 </Page>
