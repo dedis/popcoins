@@ -10,7 +10,7 @@
         <ActionItem tap="save"
                     ios.systemIcon="0" ios.position="right"
                     android:icon="res://ic_done" android.position="actionBar"
-                    visibility="{{ readOnly ? 'collapsed' : 'normal' }}"/>
+                    visibility="{{ readOnly ? 'collapsed' : 'visible' }}"/>
     </ActionBar>
 
     <GridLayout class="page-content" rows="auto, auto, auto,*"

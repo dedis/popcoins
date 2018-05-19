@@ -10,6 +10,9 @@ const Net = require("@dedis/cothority").net;
 const FilesPath = require("../../../../res/files/files-path");
 const FileIO = require("../../../../lib/file-io/file-io");
 const CothorityMessages = require("../../network/cothority-messages");
+const RingSig = require("../../RingSig");
+const Kyber = require("@dedis/kyber-js");
+const Suite = new Kyber.curve.edwards25519.Curve;
 
 const User = require("../user/User").get;
 
@@ -183,8 +186,17 @@ class PoP {
     if (typeof save !== "boolean") {
       throw new Error("save must be of type boolean");
     }
-
+    let alreadyExists = false;
     const oldFinalStatements = this.getFinalStatements().slice();
+    oldFinalStatements.forEach(statement => {
+      if (Convert.byteArrayToHex(statement.signature) === Convert.byteArrayToHex(finalStatement.signature)) {
+        alreadyExists = true;
+      }
+    });
+
+    if (alreadyExists) {
+      return Promise.resolve();
+    }
 
     this.getFinalStatements().push(finalStatement);
 
@@ -272,7 +284,7 @@ class PoP {
     if (typeof save !== "boolean") {
       throw new Error("save must be of type boolean");
     }
-    if(!Helper.isOfType(keyPair, ObjectType.KEY_PAIR)){
+    if (!Helper.isOfType(keyPair, ObjectType.KEY_PAIR)) {
       throw new Error("keyPair must be an instance of KeyPair");
     }
 
@@ -404,6 +416,50 @@ class PoP {
 
         return Promise.reject(error);
       });
+  }
+
+  /**
+   * Sign a message using (un)linkable ring signature
+   *
+   * @param {Integer} index - the index of the pop token used to sign the message
+   * @param {Uint8Array} message -  the message to be signed
+   * @param {Uint8Array} [scope] - has to be given if linkable ring signature is used
+   * @return {Uint8Array} - the signature
+   */
+  signWithPopTokenIndex(index, message, scope) {
+    if (!Number.isInteger(index) || index < 0 || index >= this.getPopToken().length) {
+      throw "index is not valid"
+    }
+    if (!message instanceof Uint8Array) {
+      throw "message should be an Uint8Array"
+    }
+    if (!scope instanceof Uint8Array) {
+      throw "scope should be an Uint8Array"
+    }
+    let popToken = this.getPopToken().getItem(index);
+    let attendees = popToken.final.attendees;
+    let anonimitySet = new Set();
+    let minePublic = Suite.point();
+    minePublic.unmarshalBinary(popToken.public);
+    let minePrivate = Suite.scalar();
+    minePrivate.unmarshalBinary(popToken.private);
+    let mine = -1;
+    for (let i = 0; i < attendees.length; i++) {
+      let attendee = attendees[i];
+
+      let point = Suite.point();
+      point.unmarshalBinary(attendee);
+      anonimitySet.add(point);
+      if (point.equal(minePublic)) {
+        mine = i;
+      }
+    }
+
+    if (mine < 0) {
+      throw "Pop Token is invalid"
+    }
+
+    return RingSig.Sign(Suite, message, [...anonimitySet], scope, mine, minePrivate)
   }
 
   /**

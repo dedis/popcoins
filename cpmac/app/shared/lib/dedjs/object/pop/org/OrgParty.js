@@ -681,7 +681,8 @@ class OrgParty extends Party {
 
   /**
    * Registers the attendees to the PoP-Party stored on the linked conode, this finalizes the party.
-   * @returns {Promise} - a promise that gets completed once the attendees have been registered and the party finalized
+   * @returns {Promise<string>} - a promise that gets completed once the attendees have been registered
+   * and the party finalized. The Promise conatins the updated state of the party (from OrgParty.States)
    */
   registerAttsAndFinalizeParty() {
     if (!User.isKeyPairSet()) {
@@ -721,8 +722,9 @@ class OrgParty extends Party {
     const finalizeRequestMessage = CothorityMessages.createFinalizeRequest(descId, attendees, signature);
 
     return cothoritySocket.send(RequestPath.POP_FINALIZE_REQUEST, DecodeType.FINALIZE_RESPONSE, finalizeRequestMessage)
-      .then(response => {
-        return PoP.addFinalStatement(response.final, true);
+      .then(() => {
+        this.setPopStatus(States.FINALIZED);
+        return Promise.resolve(States.FINALIZED)
       })
       .catch(error => {
         if (error.message !== undefined && error.message.includes("Not all other conodes finalized yet")) {
@@ -812,6 +814,9 @@ class OrgParty extends Party {
           this.setPopStatus(States.FINALIZING);
         } else {
           this.setPopStatus(States.FINALIZED);
+          // We can add it to the user's final statements
+          CothorityMessages.createFinalStatement(response.final.desc, response.final.attendees, response.final.signature, response.final.merged);
+          return PoP.addFinalStatement(response.final, true)
         }
 
         return Promise.resolve();

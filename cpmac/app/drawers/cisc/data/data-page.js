@@ -1,6 +1,6 @@
 const FrameModule = require("ui/frame");
 const Dialog = require("ui/dialogs");
-const RequestPath = require("~/shared/lib/dedjs/RequestPath");
+const RequestPath = require("~/shared/lib/dedjs/network/RequestPath");
 const CothorityMessages = require("~/shared/lib/dedjs/network/cothority-messages");
 const DecodeType = require("~/shared/lib/dedjs/DecodeType");
 const DedisJsNet = require("~/shared/lib/dedjs/Net");
