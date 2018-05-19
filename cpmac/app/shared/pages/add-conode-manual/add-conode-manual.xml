@@ -27,12 +27,13 @@
                    visibility="collapsed"
                    id="text-view-conode-public-key"/>
 
-        <Label class="label-title" text="Conode Description" row="5" colSpan="2"/>
+        <Label class="label-title" text="Conode Description" row="5" colSpan="2" visibility="collapsed"/>
         <TextField class="text-field" hint="description" autocorrect="false"
                    autocapitalizationType="none"
                    returnKeyType="done"
                    row="6"
                    colSpan="2"
+                   visibility="collapsed"
                    id="text-view-conode-description"/>
 
         <Label row="7" colSpan="2"/>

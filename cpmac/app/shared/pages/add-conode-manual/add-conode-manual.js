@@ -48,13 +48,10 @@ function loadViews(page) {
 function addManual() {
   const address = textFieldAddress.text;
   let publicKey = textFieldPublicKey.text;
-  const description = textFieldDescription.text;
 
-  if (address.length > 0 && description.length > 0) {
+  if (address.length > 0) {
     try {
-      console.log("SKDEBUG HEREEEE 1 " + publicKey);
       if (publicKey.length === 0) {
-        console.log("SKDEBUG HEREEEE 2 " + publicKey);
         if(!Helper.isValidAddress(address)) {
           return Dialog.alert({
             title: "Address or server incorrect",
@@ -67,7 +64,9 @@ function addManual() {
         return cothoritySocket.send(RequestPath.STATUS_REQUEST, DecodeType.STATUS_RESPONSE, statusRequestMessage)
           .then(statusResponse => {
             const hexKey = StatusExtractor.getPublicKey(statusResponse);
-            const server = Convert.toServerIdentity(address, Convert.hexToByteArray(hexKey), description, undefined);
+            const description = StatusExtractor.getDescription(statusResponse);
+            const id = StatusExtractor.getID(statusResponse);
+            const server = Convert.toServerIdentity(address, Convert.hexToByteArray(hexKey), description, Convert.hexToByteArray(id));
 
             closeCallBackFunction(server);
           })
