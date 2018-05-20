@@ -235,12 +235,15 @@ function addParty() {
       console.log(error);
       console.dir(error);
       console.trace();
-
-      Dialog.alert({
-        title: "Error",
-        message: "An error occured, please try again. - " + error,
-        okButtonText: "Ok"
-      });
+      if (error !== ScanToReturn.SCAN_ABORTED) {
+        setTimeout(() => {
+          Dialog.alert({
+            title: "Error",
+            message: "An error occured, please try again. - " + error,
+            okButtonText: "Ok"
+          });
+        });
+      }
 
       return Promise.reject(error);
     });

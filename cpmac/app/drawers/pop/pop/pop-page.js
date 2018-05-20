@@ -142,11 +142,16 @@ function popTokenTapped(args) {
             console.dir(error);
             console.trace();
 
-            Dialog.alert({
-              title: "Error",
-              message: "An error occured, please retry. - " + error,
-              okButtonText: "Ok"
-            });
+            if (error !== ScanToReturn.SCAN_ABORTED) {
+              setTimeout(() => {
+                Dialog.alert({
+                  title: "Error",
+                  message: "An error occured, please retry. - " + error,
+                  okButtonText: "Ok"
+                });
+              });
+            }
+
           })
       }
 
@@ -181,11 +186,15 @@ function scanFinalStatement() {
       console.dir(error);
       console.trace();
 
-      Dialog.alert({
-        title: "Error",
-        message: "An error occured, please retry. - " + error,
-        okButtonText: "Ok"
-      });
+      if (error !== ScanToReturn.SCAN_ABORTED) {
+        setTimeout(() => {
+          Dialog.alert({
+            title: "Error",
+            message: "An error occured, please retry. - " + error,
+            okButtonText: "Ok"
+          });
+        });
+      }
 
       return Promise.reject(error);
     });

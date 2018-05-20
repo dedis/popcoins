@@ -130,7 +130,6 @@ function addConode() {
             return User.addServer(conode);
           });
       } else if (result === undefined) {
-        // Manual
         pageObject.showModal("shared/pages/add-conode-manual/add-conode-manual", undefined, addManualCallBack, true);
         return Promise.resolve();
       } else {
@@ -143,11 +142,15 @@ function addConode() {
       console.dir(error);
       console.trace();
 
-      Dialog.alert({
-        title: "Error",
-        message: "An error occured, please check the code you scanned. - " + error,
-        okButtonText: "Ok"
-      });
+      if (error !== ScanToReturn.SCAN_ABORTED) {
+        setTimeout(() => {
+          Dialog.alert({
+            title: "Error",
+            message: "An error occured, please check the code you scanned. - " + error,
+            okButtonText: "Ok"
+          });
+        });
+      }
 
       return Promise.reject(error);
     });
