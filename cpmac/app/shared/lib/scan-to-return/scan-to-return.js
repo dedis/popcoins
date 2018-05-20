@@ -5,6 +5,7 @@
 const BCScanner = require("nativescript-barcodescanner").BarcodeScanner;
 
 const BarCodeScanner = new BCScanner();
+const SCAN_ABORTED = "Scan aborted";
 
 // Functions ------------------------------------------------------------------
 
@@ -44,3 +45,4 @@ function scan() {
 
 // Exports --------------------------------------------------------------------
 module.exports.scan = scan;
+module.exports.SCAN_ABORTED = SCAN_ABORTED;

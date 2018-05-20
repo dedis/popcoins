@@ -142,11 +142,15 @@ function addConode() {
       console.dir(error);
       console.trace();
 
-      Dialog.alert({
-        title: "Error",
-        message: "An error occured, please check the code you scanned. - " + error,
-        okButtonText: "Ok"
-      });
+      if (error !== ScanToReturn.SCAN_ABORTED) {
+        setTimeout(() => {
+          Dialog.alert({
+            title: "Error",
+            message: "An error occured, please check the code you scanned. - " + error,
+            okButtonText: "Ok"
+          });
+        });
+      }
 
       return Promise.reject(error);
     });
