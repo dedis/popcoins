@@ -117,3 +117,4 @@ module.exports.isArray = isArray;
 module.exports.isValidPublicKey = isValidPublicKey;
 module.exports.isValidAddress = isValidAddress;
 module.exports.deepCopy = deepCopy;
+module.exports.BASE_URL_TLS = BASE_URL_TLS;

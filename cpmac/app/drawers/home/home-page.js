@@ -130,7 +130,6 @@ function addConode() {
             return User.addServer(conode);
           });
       } else if (result === undefined) {
-        // Manual
         pageObject.showModal("shared/pages/add-conode-manual/add-conode-manual", undefined, addManualCallBack, true);
         return Promise.resolve();
       } else {

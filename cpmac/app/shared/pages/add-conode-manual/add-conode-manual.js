@@ -1,17 +1,15 @@
 const Dialog = require("ui/dialogs");
-const Convert = require("../../lib/dedjs/Convert");
 const Helper = require("../../lib/dedjs/Helper");
-const NetDedis = require("@dedis/cothority").net;
-const RequestPath = require("../../lib/dedjs/network/RequestPath");
-const DecodeType = require("../../lib/dedjs/network/DecodeType");
-const StatusExtractor = require("../../lib/dedjs/extractor/StatusExtractor");
-const CothorityMessages = require("../../lib/dedjs/network/cothority-messages");
+const NetUtils = require("../../lib/dedjs/network/NetUtils");
+const ObservableModule = require("data/observable");
 
 let textFieldAddress = undefined;
-let textFieldPublicKey = undefined;
-let textFieldDescription = undefined;
 
 let closeCallBackFunction = undefined;
+
+let viewModel = ObservableModule.fromObject({
+  isLoading: false
+});
 
 function onShownModally(args) {
   closeCallBackFunction = args.closeCallback;
@@ -21,14 +19,10 @@ function onLoaded(args) {
   const page = args.object;
 
   loadViews(page);
-  if (textFieldAddress === undefined || textFieldPublicKey === undefined || textFieldDescription === undefined) {
+  if (textFieldAddress === undefined) {
     throw new Error("a field is undefined, but it shouldn't");
   }
-
-  // Can be removed. Only used for testing purposes.
-  //textFieldAddress.text = "tls://10.0.2.2:7002";
-  //textFieldPublicKey.text = "HkDzpR5Imd7WNx8kl2lJcIVRVn8gfDByJnmlfrYh/zU=";
-  //textFieldDescription.text = "Conode_1";
+  page.bindingContext = viewModel
 }
 
 /**
@@ -37,8 +31,6 @@ function onLoaded(args) {
  */
 function loadViews(page) {
   textFieldAddress = page.getViewById("text-view-conode-address");
-  textFieldPublicKey = page.getViewById("text-view-conode-public-key");
-  textFieldDescription = page.getViewById("text-view-conode-description");
 }
 
 /**
@@ -46,61 +38,56 @@ function loadViews(page) {
  * and sends it back to the description page.
  */
 function addManual() {
+  textFieldAddress.dismissSoftInput();
+
   const address = textFieldAddress.text;
-  let publicKey = textFieldPublicKey.text;
 
   if (address.length > 0) {
+    const finalAddress = Helper.BASE_URL_TLS + address;
     try {
-      if (publicKey.length === 0) {
-        if(!Helper.isValidAddress(address)) {
+      if (!Helper.isValidAddress(finalAddress)) {
+        return Dialog.alert({
+          title: "Address of conode incorrect",
+          message: "Please double check your address.",
+          okButtonText: "Ok"
+        });
+      }
+
+      viewModel.isLoading = true;
+
+      return NetUtils.getServerIdentiyFromAddress(finalAddress)
+        .then(server => {
+          viewModel.isLoading = false;
+          closeCallBackFunction(server);
+        })
+        .catch(error => {
+          console.log(error);
+          console.dir(error);
+          viewModel.isLoading = false;
           return Dialog.alert({
             title: "Address or server incorrect",
             message: "Please double check your address.",
             okButtonText: "Ok"
           });
-        }
-        const statusRequestMessage = CothorityMessages.createStatusRequest();
-        const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(address, ""), RequestPath.STATUS);
-        return cothoritySocket.send(RequestPath.STATUS_REQUEST, DecodeType.STATUS_RESPONSE, statusRequestMessage)
-          .then(statusResponse => {
-            const hexKey = StatusExtractor.getPublicKey(statusResponse);
-            const description = StatusExtractor.getDescription(statusResponse);
-            const id = StatusExtractor.getID(statusResponse);
-            const server = Convert.toServerIdentity(address, Convert.hexToByteArray(hexKey), description, Convert.hexToByteArray(id));
 
-            closeCallBackFunction(server);
-          })
-          .catch(error =>  {
-            console.log(error);
-            console.dir(error);
-
-            return Dialog.alert({
-              title: "Address or server incorrect",
-              message: "Please double check your address.",
-              okButtonText: "Ok"
-            });
-
-          })
-      }
-      publicKey = Convert.hexToByteArray(publicKey);
-      const server = Convert.toServerIdentity(address, publicKey, description, undefined);
-
-      closeCallBackFunction(server);
+        })
     } catch (error) {
       console.log(error);
       console.dir(error);
       console.trace();
+      viewModel.isLoading = false;
 
       return Dialog.alert({
         title: "Incorrect Input",
-        message: "Please double check your address and public key.",
+        message: "Please double check your address.",
         okButtonText: "Ok"
       });
     }
   } else {
+    viewModel.isLoading = false;
     return Dialog.alert({
-      title: "Provide More Information",
-      message: "Please provide the address, the public key and the description of the conode.",
+      title: "Provide the address",
+      message: "Please provide the address of the conode.",
       okButtonText: "Ok"
     });
   }

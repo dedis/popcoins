@@ -7,39 +7,31 @@
         <Label class="action-bar-title" text="Add Conode Manually"/>
     </ActionBar>
 
-    <GridLayout class="page-content" rows="*,auto,auto,auto,auto,auto,auto,*,auto" columns="*,*">
-        <Label row="0" colSpan="2"/>
+    <GridLayout class="page-content" rows="*" columns="*"
+                backgroundColor="{{ isLoading ?  'black' : ''}}"
+                opacity="{{ isLoading ? '0.5' : '1' }}">
+        <GridLayout rows="*, auto,auto,*,auto" columns="*,*" visibility="{{ isLoading ? 'hidden' : 'visible' }}">
 
-        <Label class="label-title" text="Conode Address" row="1" colSpan="2"/>
-        <TextField class="text-field" hint="tls://127.0.0.1:7002" autocorrect="false"
-                   autocapitalizationType="none"
-                   returnKeyType="next"
-                   row="2"
-                   colSpan="2"
-                   id="text-view-conode-address"/>
+            <Label row="0" colSpan="2"/>
 
-        <Label class="label-title" text="Conode Public Key" row="3" colSpan="2" visibility="collapsed"/>
-        <TextField class="text-field" hint="hex" autocorrect="false"
-                   autocapitalizationType="none"
-                   returnKeyType="next"
-                   row="4"
-                   colSpan="2"
-                   visibility="collapsed"
-                   id="text-view-conode-public-key"/>
+            <Label class="label-title" text="Conode Address" row="1" colSpan="2"/>
+            <TextField class="text-field" hint="127.0.0.1:7002" autocorrect="false"
+                       autocapitalizationType="none"
+                       returnKeyType="next"
+                       row="2"
+                       colSpan="2"
+                       id="text-view-conode-address"/>
 
-        <Label class="label-title" text="Conode Description" row="5" colSpan="2" visibility="collapsed"/>
-        <TextField class="text-field" hint="description" autocorrect="false"
-                   autocapitalizationType="none"
-                   returnKeyType="done"
-                   row="6"
-                   colSpan="2"
-                   visibility="collapsed"
-                   id="text-view-conode-description"/>
+            <Label row="3" colSpan="2"/>
 
-        <Label row="7" colSpan="2"/>
+            <Button text="Add" tap="addManual" row="4" col="0"/>
+            <Button text="Cancel" tap="onCancel" row="4" col="1"/>
+        </GridLayout>
 
-        <Button text="Add" tap="addManual" row="8" col="0"/>
-        <Button text="Cancel" tap="onCancel" row="8" col="1"/>
+        <StackLayout width="50" height="50">
+            <ActivityIndicator busy="{{ isLoading }}" verticalAlignment="center" width="50" height="50"/>
+        </StackLayout>
+
     </GridLayout>
 
 </Page>
