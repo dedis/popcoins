@@ -1,0 +1,23 @@
+{
+  "list": [
+    {
+      "public": "TiQ6VSm5I1IbxDaQcZQVaC5tiQbSG7jMyLd0cE/5BUU=",
+      "id": "RzDLhPqmXu66BkZr5YdXzA==",
+      "address": "tls://10.211.55.23:7002",
+      "description": "Conode_1"
+    },
+    {
+      "public": "Jed1mbNmOIlgTWReyp5sYwjRDwNcTqsCf6HWavVC718=",
+      "id": "9Mz/ot75UDepGyH4+gdPVw==",
+      "address": "tls://10.211.55.23:7004",
+      "description": "Conode_2"
+    },
+    {
+      "public": "m32+s+NkYhwVjMBpKuxJdIitDhQ0GEmSUkRQE7WoZ4Q=",
+      "id": "JkuEHQP1X6qpzZfyOFrvpA==",
+      "address": "tls://10.211.55.23:7006",
+      "description": "Conode_3"
+    }
+  ],
+  "aggregate": "q+G+7n6FXsY7hpxK3m119GuDHnchS6wqTE0sZE/fOKg="
+}
