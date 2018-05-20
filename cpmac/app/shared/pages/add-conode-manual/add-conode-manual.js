@@ -38,8 +38,6 @@ function loadViews(page) {
  * and sends it back to the description page.
  */
 function addManual() {
-  textFieldAddress.dismissSoftInput();
-
   const address = textFieldAddress.text;
 
   if (address.length > 0) {
