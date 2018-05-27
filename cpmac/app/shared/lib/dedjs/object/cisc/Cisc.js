@@ -678,7 +678,7 @@ class Cisc {
       return Promise.reject("You already signed the message")
     }
     const privateKey = CURVE_ED25519.scalar();
-    privateKey.setBytes(User.getKeyPair().private);
+    privateKey.unmarshalBinary(User.getKeyPair().private);
 
     const signature = Schnorr.sign(CURVE_ED25519, privateKey, Convert.hexToByteArray(hashedData));
     let proposeVoteMessage = CothorityMessages.createProposeVote(Convert.hexToByteArray(this.getIdentity().id), this.getName(), signature);
