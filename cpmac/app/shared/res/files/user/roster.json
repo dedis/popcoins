@@ -1,22 +1,16 @@
 {
   "list": [
     {
-      "public": "TiQ6VSm5I1IbxDaQcZQVaC5tiQbSG7jMyLd0cE/5BUU=",
-      "id": "RzDLhPqmXu66BkZr5YdXzA==",
-      "address": "tls://10.211.55.23:7002",
+      "public": "yUZ3HWYGTCHjAayEloE8hH6OA70WvAv8otmqbqq4Np0=",
+      "id": "n9PVfg7aVduq4bGckJPBFQ==",
+      "address": "tls://cothority.net:7002",
       "description": "Conode_1"
     },
     {
-      "public": "Jed1mbNmOIlgTWReyp5sYwjRDwNcTqsCf6HWavVC718=",
-      "id": "9Mz/ot75UDepGyH4+gdPVw==",
-      "address": "tls://10.211.55.23:7004",
+      "public": "hwXtb0R2U5saFEIYD59A1iSPKflpLQuMHiBgp8snL6Q=",
+      "id": "Xwg8BRsHWjmW7xk8KXr1mQ==",
+      "address": "tls://cothority.net:7004",
       "description": "Conode_2"
-    },
-    {
-      "public": "m32+s+NkYhwVjMBpKuxJdIitDhQ0GEmSUkRQE7WoZ4Q=",
-      "id": "JkuEHQP1X6qpzZfyOFrvpA==",
-      "address": "tls://10.211.55.23:7006",
-      "description": "Conode_3"
     }
   ],
   "aggregate": "q+G+7n6FXsY7hpxK3m119GuDHnchS6wqTE0sZE/fOKg="
