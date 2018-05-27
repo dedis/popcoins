@@ -6,6 +6,7 @@
  * General settings files.
  */
 const ROSTER = "shared/res/files/user/roster.json";
+const USER_NAME = "shared/res/files/user/name.json";
 const KEY_PAIR = "keypair.json";
 
 
@@ -46,6 +47,7 @@ const BEERCOIN_CHECKED_CLIENTS = "checked_clients.json";
 const BEERCOIN_ORDER_HISTORY = "order_history.json";
 
 module.exports.ROSTER = ROSTER;
+module.exports.USER_NAME = USER_NAME;
 module.exports.KEY_PAIR = KEY_PAIR;
 module.exports.POP_FINAL_STATEMENTS = POP_FINAL_STATEMENTS;
 module.exports.POP_TOKEN = POP_TOKEN;

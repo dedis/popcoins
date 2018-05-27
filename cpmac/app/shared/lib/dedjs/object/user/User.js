@@ -33,6 +33,7 @@ class User {
    */
   constructor() {
     this._isLoaded = false;
+    this._name = ""
     this._keyPair = new Crypto.KeyPair(FilesPath.USER_PATH);
     this._roster = ObservableModule.fromObject({
       isLoading: false,
@@ -54,6 +55,15 @@ class User {
   isLoaded() {
     return this._isLoaded;
   }
+
+  /**
+   * Returns the user name.
+   * @returns {String} - the string of the name
+   */
+  getName() {
+    return this._name;
+  }
+
 
   /**
    * Returns the observable key pair module.
@@ -123,6 +133,43 @@ class User {
     });
 
     return CothorityMessages.createRoster(id, list, rosterModule.aggregate);
+  }
+
+  /**
+   * Sets the the name of the user given in parameters
+   * @param {String} name - The new user name
+   * @param {boolean} save - if the new name should be saved permanently
+   * @returns {Promise} - a promise that gets resolved once the new name has been set and saved if the save parameter is set to true
+   */
+  setName(name, save) {
+    if (typeof save !== "boolean") {
+      throw new Error("save must be of type boolean");
+    }
+    if (typeof name !== "string") {
+      throw new Error("name must be of type string");
+    }
+
+    const oldName = this.getName();
+    this._name = name;
+    let nameObject = {"name": this._name};
+    if (save) {
+      let toWrite;
+      toWrite = Convert.objectToJson(nameObject);
+
+      return FileIO.writeStringTo(FilesPath.USER_NAME, toWrite)
+        .catch((error) => {
+          console.log(error);
+          console.dir(error);
+          console.trace();
+
+          return this.setName(oldName, false)
+            .then(() => {
+              return Promise.reject(error);
+            });
+        });
+    }
+
+    return Promise.resolve();
   }
 
   /**
@@ -410,7 +457,7 @@ class User {
   load() {
     this._isLoaded = false;
 
-    const promises = [this.loadKeyPair(), this.loadRoster()];
+    const promises = [this.loadKeyPair(), this.loadRoster(), this.loadName()];
 
     return Promise.all(promises)
       .then(() => {
@@ -431,6 +478,31 @@ class User {
    */
   loadKeyPair() {
     return this._keyPair.load();
+  }
+
+  /**
+   * Loads the user name into memory.
+   * @returns {Promise} - a promise that gets resolved once the name is loaded into memory
+   */
+  loadName() {
+    return FileIO.getStringOf(FilesPath.USER_NAME)
+      .then(jsonName => {
+        let name;
+        if (jsonName.length > 0) {
+          name = Convert.parseJsonUserName(jsonName);
+        }
+        else {
+          name = "Undefined";
+        }
+        return this.setName(name, false);
+      })
+      .catch(error => {
+        console.log(error);
+        console.dir(error);
+        console.trace();
+
+        return Promise.reject(error);
+      });
   }
 
   /**

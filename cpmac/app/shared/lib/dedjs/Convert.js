@@ -328,6 +328,17 @@ function parseJsonPopDescHash(jsonString) {
   return base64ToByteArray(hash);
 }
 
+// TODO
+function parseJsonUserName(jsonString) {
+  if (typeof jsonString !== "string") {
+    throw new Error("jsonString must be of type string");
+  }
+
+  const name = jsonToObject(jsonString);
+
+  return name.name;
+}
+
 /**
  * Parses a JSON string into a Roster object, if the ServerIdentities does not have an ID yet it will be computed.
  * @param {string} jsonString - the JSON string to parse into a Roster object
@@ -550,6 +561,7 @@ module.exports.parseJsonFinalStatementsArray = parseJsonFinalStatementsArray;
 module.exports.parseJsonFinalStatement = parseJsonFinalStatement;
 module.exports.parseJsonPopDesc = parseJsonPopDesc;
 module.exports.parseJsonPopDescHash = parseJsonPopDescHash;
+module.exports.parseJsonUserName = parseJsonUserName;
 module.exports.parseJsonRoster = parseJsonRoster;
 module.exports.parseTomlRoster = parseTomlRoster;
 module.exports.parseJsonKeyPair = parseJsonKeyPair;
