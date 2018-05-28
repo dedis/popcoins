@@ -328,7 +328,11 @@ function parseJsonPopDescHash(jsonString) {
   return base64ToByteArray(hash);
 }
 
-// TODO
+/**
+ * Parses a JSON string into a Cisc username
+ * @param {string} jsonString - the JSON string to parse into the Cisc username
+ * @returns {String} - the parsed string for the username
+ */ 
 function parseJsonUserName(jsonString) {
   if (typeof jsonString !== "string") {
     throw new Error("jsonString must be of type string");
