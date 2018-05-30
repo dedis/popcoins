@@ -66,6 +66,7 @@ function voteForProposed() {
     skipchain.voteForProposed()
         .then(() => {
             viewmodel.isOnProposed = false;
+            skipchain.updateAll();
         })
         .catch((error) => {
                 console.log(error);
