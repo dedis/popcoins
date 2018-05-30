@@ -24,11 +24,7 @@ const uuidv4 = require("uuid/v4");
 
 
 /**
- * This singleton is the Cisc component of the app. It contains everything needed to interact with the identity skipchain.
- */
-
-/**
- * We define the Cisc class which is the object representing the Cisc component of the app.
+ * We define the Cisc class which is the object representing as skipchain component in the app.
  */
 
 class Cisc {
