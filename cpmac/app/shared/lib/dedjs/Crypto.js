@@ -178,7 +178,8 @@ class KeyPair {
   load() {
     return FileIO.getStringOf(FileIO.join(this._dirname, FilesPath.KEY_PAIR))
       .then(jsonKeyPair => {
-        if (jsonKeyPair.length > 0) {
+        if (jsonKeyPair.length > 0 && Convert.jsonToObject(jsonKeyPair).public !== "" 
+            &&  Convert.jsonToObject(jsonKeyPair).private !== "" && Convert.jsonToObject(jsonKeyPair).private !== "" ) {
           return this.setKeyPair(Convert.parseJsonKeyPair(jsonKeyPair), false);
         } else {
           return this.randomize();

@@ -2,12 +2,21 @@ const Dialog = require("ui/dialogs");
 const Crypto = require("../../../shared/lib/dedjs/Crypto");
 const Convert = require("../../../shared/lib/dedjs/Convert");
 const User = require("../../../shared/lib/dedjs/object/user/User").get;
+const ObservableModule = require("data/observable");
 
-const viewModel = User.getKeyPairModule();
+//const viewModel = User.getKeyPairModule();
+
+const viewModel = ObservableModule.fromObject({
+  privateKey: Convert.byteArrayToHex(User.getKeyPairModule().private),
+  publicKey: Convert.byteArrayToHex(User.getKeyPairModule().public),
+  publicCompleteKey: Convert.byteArrayToHex(User.getKeyPairModule().publicComplete),
+  nameModule: User.getName()
+});
 
 let textFieldPublic = undefined;
 let textFieldPrivate = undefined;
 let textFieldPublicComplete = undefined;
+let textFieldUserName = undefined;
 
 let pageObject = undefined;
 
@@ -31,6 +40,7 @@ function loadViews(page) {
   textFieldPublic = page.getViewById("text-field-public");
   textFieldPrivate = page.getViewById("text-field-private");
   textFieldPublicComplete = page.getViewById("text-field-public-complete");
+  textFieldUserName = page.getViewById("text-field-username");
 }
 
 /**
@@ -70,7 +80,7 @@ function generateKeyPair() {
   } else {
     return Dialog.confirm({
       title: "Old Key Pair Overwriting",
-      message: "There is already a key pair stored in you settings. Do you" +
+      message: "There is already a key pair stored in your settings. Do you" +
         " want to overwrite it and generate a new key pair?",
       okButtonText: "Yes",
       cancelButtonText: "Cancel"
@@ -104,6 +114,48 @@ function displayQrOfPublicKey() {
       message: "You have to generate a key pair first.",
       okButtonText: "Ok"
     });
+  }
+}
+
+function changeUserName() {
+  const oldUsername = User.getName();
+  const username = textFieldUserName.text;
+  console.log(oldUsername);
+  console.log(username);
+  if((oldUsername !== username)) {
+    return Dialog.confirm({
+      title: "Alert",
+      message: "You are about to change your username from " + oldUsername + " to " + username + " please confirm",
+      okButtonText: "Change name",
+      cancelButtonText: "Cancel"
+    })
+    .then(result => {
+      if (result) {
+        return User.setName(username, true)
+        .then(() => {
+          return Dialog.alert({
+                title: "Information",
+                message: "Name has been changed to " + User.getName(),
+                okButtonText: "Ok"
+              });
+        });
+      }
+      
+      return Promise.resolve();
+    })
+    .catch(error => {
+      console.log(error);
+        console.dir(error);
+        console.trace();
+
+        return Dialog.alert({
+          title: "Error",
+          message: "An unexpected error occurred. Please try again. - " + error,
+          okButtonText: "Ok"
+        });
+
+        return Promise.reject(error);
+    })
   }
 }
 
@@ -146,4 +198,5 @@ function resetUser() {
 module.exports.onLoaded = onLoaded;
 module.exports.generateKeyPair = generateKeyPair;
 module.exports.displayQrOfPublicKey = displayQrOfPublicKey;
+module.exports.changeUserName = changeUserName;
 module.exports.resetUser = resetUser;

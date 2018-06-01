@@ -329,6 +329,21 @@ function parseJsonPopDescHash(jsonString) {
 }
 
 /**
+ * Parses a JSON string into a Cisc username
+ * @param {string} jsonString - the JSON string to parse into the Cisc username
+ * @returns {String} - the parsed string for the username
+ */ 
+function parseJsonUserName(jsonString) {
+  if (typeof jsonString !== "string") {
+    throw new Error("jsonString must be of type string");
+  }
+
+  const name = jsonToObject(jsonString);
+
+  return name.name;
+}
+
+/**
  * Parses a JSON string into a Roster object, if the ServerIdentities does not have an ID yet it will be computed.
  * @param {string} jsonString - the JSON string to parse into a Roster object
  * @returns {Roster} - the parsed Roster object
@@ -550,6 +565,7 @@ module.exports.parseJsonFinalStatementsArray = parseJsonFinalStatementsArray;
 module.exports.parseJsonFinalStatement = parseJsonFinalStatement;
 module.exports.parseJsonPopDesc = parseJsonPopDesc;
 module.exports.parseJsonPopDescHash = parseJsonPopDescHash;
+module.exports.parseJsonUserName = parseJsonUserName;
 module.exports.parseJsonRoster = parseJsonRoster;
 module.exports.parseTomlRoster = parseTomlRoster;
 module.exports.parseJsonKeyPair = parseJsonKeyPair;

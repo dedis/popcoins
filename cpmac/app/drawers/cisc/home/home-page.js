@@ -66,6 +66,7 @@ function voteForProposed() {
     skipchain.voteForProposed()
         .then(() => {
             viewmodel.isOnProposed = false;
+            skipchain.updateAll();
         })
         .catch((error) => {
                 console.log(error);
@@ -83,12 +84,14 @@ function voteForProposed() {
 }
 
 function reloadData(args) {
-    skipchain.updateAll()
-        .catch((error) => {
-            console.log(error);
-            console.dir(error);
-            console.trace(); 
-        });
+    if(!viewmodel.isOnProposed){
+        skipchain.updateAll()
+            .catch((error) => {
+                console.log(error);
+                console.dir(error);
+                console.trace(); 
+            });
+    }
 }
 
 exports.reloadData = reloadData;

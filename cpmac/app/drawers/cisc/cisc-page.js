@@ -80,9 +80,7 @@ function skipchainTapped(args) {
 }
 
 function connectButtonTapped(args) {
-    // For the moment use a predefined name
-    // TODO : create a field for name in the User class
-    const scName = "Joker";
+    const scName = User.getName();
     const barcodescanner = new BarcodeScanner();
     if (scName === null || scName === undefined || scName === "") {
         throw new Error("Go to the settings to set your name")
@@ -94,12 +92,14 @@ function connectButtonTapped(args) {
         .then(function (available) {
             if (available) {
                 Dialog.prompt({
-                    title: "Give skipchain name",
+                    title: "Information",
+                    message: "Give your skipchain a name",
                     okButtonText: "Ok",
                     cancelButtonText: "Cancel"
                 }).then(function (r) {
-                    console.log("Dialog result: " + r.result + ", text: " + r.text);
-                    return availableFunction(r.text);
+                    if(r.result){
+                        return availableFunction(r.text);
+                    }
                 });
                 
             } else {
@@ -154,7 +154,7 @@ function connectButtonTapped(args) {
                     }));
                 },10);
 
-                newSkipchain.setName("Joker", true);
+                newSkipchain.setName(User.getName(), true);
                 newSkipchain.setIdentity(id, address, label, identityName, true)
                    .then(() => askForDevice(newSkipchain));
             })
