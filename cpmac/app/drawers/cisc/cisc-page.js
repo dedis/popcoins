@@ -69,7 +69,7 @@ function loadSkipchains() {
 
 function skipchainTapped(args) {
     const index = args.index;
-    const skipchain = viewModel.skipchainsList.getItem(index).skipchain;
+    const skipchain = viewModel.skipchainsList.getItem(index);
 
     FrameModule.topmost().navigate({
         moduleName: "drawers/cisc/skipchain-page",
