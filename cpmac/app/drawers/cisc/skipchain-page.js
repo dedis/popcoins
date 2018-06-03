@@ -7,7 +7,6 @@ const FileIO = require("../../shared/lib/file-io/file-io");
  * Use the "onNavigatingTo" handler to initialize the page binding context.
  *************************************************************/
 const skipchain = {}
-let viewmodel;
 
 function onNavigatingTo(args) {
 
@@ -20,8 +19,8 @@ function onNavigatingTo(args) {
 
     skipchain.elem = context.skipchain.skipchain;
 
-    viewmodel = context.skipchain;
-    page.bindingContext = context.skipchain;
+    const viewmodel = context.skipchain;
+    page.bindingContext = viewmodel;
 }
 
 /* ***********************************************************
