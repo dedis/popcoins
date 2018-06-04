@@ -12,28 +12,23 @@
 
     <StackLayout>
         <Label class="label-title" text="Certificates stored" />
-        <GridLayout class="page-content" rows="*" columns="*,*,auto">
+        <GridLayout class="page-content" rows="*,auto" columns="*,*,auto">
+
             <nsListView:RadListView items="{{ certList }}" row="0" colSpan="3" itemTap="certTapped"
                                     itemSwipeProgressStarted="onSwipeCellStarted"
                                     swipeActions="true"
                                     id="listView">
-
-                <nsListView:RadListView.itemSwipeTemplate>
-                    <GridLayout class="basic-list-decorated" rows="*" columns="*,auto">
-                        <StackLayout orientation="horizontal" col="0">
-                        </StackLayout>
-                        <StackLayout orientation="horizontal" col="1">
-                            <Button id="button-delete" text="Delete" tap="disconnectSkipchain" backgroundColor="red"/>
-                        </StackLayout>
-                    </GridLayout>
-                </nsListView:RadListView.itemSwipeTemplate>
-
                 <nsListView:RadListView.itemTemplate>
                     <GridLayout rows="*" columns="*, auto" backgroundColor="white" class="basic-list-decorated">
                         <Label class="list-title" text="{{ certKey }}" row="0" col="0" textWrap="true"/>
                     </GridLayout>
                 </nsListView:RadListView.itemTemplate>
             </nsListView:RadListView>
+
+            <StackLayout row="1" colSpan="3">
+                <Button text="Reload" tap="loadCert"/>
+            </StackLayout>
+
         </GridLayout>
     </StackLayout>
 </Page>

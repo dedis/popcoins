@@ -75,7 +75,6 @@ function certTapped(args){
             cert: cert
         }
     });
-   
 }
 
 
@@ -89,6 +88,7 @@ function onDrawerButtonTap(args) {
     sideDrawer.showDrawer();
 }
 
+exports.loadCert = loadCert;
 exports.certTapped = certTapped;
 exports.onLoaded = onLoaded;
 exports.onDrawerButtonTap = onDrawerButtonTap;

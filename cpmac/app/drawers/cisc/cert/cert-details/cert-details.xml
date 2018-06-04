@@ -8,11 +8,11 @@
 
     <ActionBar class="action-bar">
 
-        <NavigationButton ios:visibility="collapsed" icon="res://menu" tap="onDrawerButtonTap"></NavigationButton>
+        <NavigationButton text="Go Back" android:icon="res://ic_arrow_back" tap="goBack"/>
 
-        <ActionItem icon="res://navigation/menu"
+        <ActionItem icon="res://ic_arrow_back"
                     android:visibility="collapsed"
-                    tap="onDrawerButtonTap"
+                    tap="goBack"
                     ios.position="left">
         </ActionItem>
         <Label class="action-bar-title" text="{{ certName }}"></Label>
@@ -20,9 +20,10 @@
 
     <StackLayout>
         <Label class="label-title" text="Certificates infos" />
-        <GridLayout class="page-content" rows="*" columns="*,*,auto">
+        <GridLayout class="page-content" rows="*,auto" columns="*,*,auto">
             <nsListView:RadListView items="{{ certInfos }}" row="0" colSpan="3" itemTap="certTapped"
                                             id="listView">
+
                 <nsListView:RadListView.itemTemplate>
                     <GridLayout rows="auto,auto" columns="*" backgroundColor="white" class="basic-list-decorated">
                         <Label class="list-title" text="{{ certInfoTitle }}" textAlignment="left" textWrap="true" row="0"/>
@@ -30,9 +31,11 @@
                     </GridLayout>
                 </nsListView:RadListView.itemTemplate>
             </nsListView:RadListView>
+
+            <StackLayout row="1" colSpan="2">
+                <Button text="Verify" tap="verifyCert"/>
+            </StackLayout>
+
         </GridLayout>
     </StackLayout>
-
-
-
 </Page>
