@@ -1,3 +1,11 @@
+UNAME_S := $(shell uname -s)
+install_dep_command :=
+ifeq ($(UNAME_S),Darwin)
+	install_dep_command += CXX=clang++
+endif
+install_dep_command += npm install --no-package-lock
+
+
 ### Clean
 clean:
 	-sudo rm -R node_modules/
@@ -7,7 +15,7 @@ clean:
 
 ### Install local and global dependencies
 install-dependencies:
-	npm install --no-package-lock
+	$(install_dep_command)
 
 ### Clean Install for EcmaScript6
 clean-install:
