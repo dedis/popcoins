@@ -339,8 +339,8 @@ class Bar {
     const scopeString =
       configModule.name +
       configModule.frequency +
-      configModule.date.getFullYear() + "-" +
-      configModule.date.getMonth() + "-" +
+      configModule.date.getFullYear() +
+      configModule.date.getMonth() +
       configModule.date.getDay();
     const scope = new Uint8Array(Buffer.from(scopeString));
 
