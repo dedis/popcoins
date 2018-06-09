@@ -171,6 +171,14 @@ function onSwipeCellStarted(args) {
 }
 
 function addBar() {
+  if (PoP.getFinalStatements().length === 0) {
+    return Dialog.alert({
+      title: "No group available",
+      message: "You didn't participate to any party. Please do so to have a group to which you can pay beers !",
+      okButtonText: "Ok"
+    });
+
+  }
   Frame.topmost().navigate({
     moduleName: "drawers/bar/config/bar-config",
   });
