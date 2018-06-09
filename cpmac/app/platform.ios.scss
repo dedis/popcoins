@@ -10,6 +10,6 @@
 
 // Place any CSS rules you want to apply only on iOS here
 //Action bar
-ActionBar .fa {
+ActionBar [class^='fa'] {
     padding: 40px 40px 40px 0;
 }

@@ -19,14 +19,18 @@ $sidedrawer-list-icon-size: 20;
     .sidedrawer-header {
         background-color: $ab-background;
 
+        Label {
+            horizontal-align: center;
+            font-size: 10;
+        }
+
         .sidedrawer-header-brand {
             color: $ab-color;
         }
 
         #app-name {
             color: white;
-            font-size: 24;
-            horizontal-align: center;
+            font-size: 22;
         }
     }
 
@@ -47,7 +51,7 @@ $sidedrawer-list-icon-size: 20;
             color: $blue-dark;
         }
 
-        .fa {
+        .fas {
             width: $sidedrawer-list-icon-size;
             margin-right: $sidedrawer-list-icon-offset;
         }
