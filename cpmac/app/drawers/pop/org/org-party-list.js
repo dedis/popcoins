@@ -250,7 +250,7 @@ function linkToConode(party) {
 
   const conodes = User.getRoster().list;
   const conodesNames = conodes.map(serverIdentity => {
-    return serverIdentity.description + " - " + Convert.byteArrayToHex(serverIdentity.id);
+    return serverIdentity.description;
   });
 
   let index = undefined;
