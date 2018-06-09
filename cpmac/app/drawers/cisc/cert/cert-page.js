@@ -45,7 +45,8 @@ function onLoaded(args) {
 }
 
 function isCert(cert) {
-    return cert.startsWith("-----BEGIN CERTIFICATE-----");
+    return cert.startsWith("-----BEGIN CERTIFICATE-----") && 
+            cert.includes("-----END CERTIFICATE-----");
 }
 
 function loadCert() {
