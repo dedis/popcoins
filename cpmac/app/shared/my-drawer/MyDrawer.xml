@@ -4,6 +4,7 @@ Feel free to customize layouts and components to change how your app drawer look
 -->
 <StackLayout class="sidedrawer sidedrawer-left" loaded="onLoaded">
     <StackLayout class="sidedrawer-header">
+        <Label text="CPMAC" id="app-name"/>
     </StackLayout>
 
     <StackLayout class="sidedrawer-content">

@@ -16,7 +16,7 @@
 // This is where the vast majority of your CSS code goes.
 // Font icon class
 .fa {
-  font-family: "FontAwesome";
+  font-family: "FontAwesome", fontawesome-webfont;
 }
 
 // Common page class
@@ -110,12 +110,6 @@ TabView {
   vertical-align: center;
   horizontal-align: center;
   text-align: center;
-}
-
-// Font Awesome
-.fa {
-  font-family: 'FontAwesome', fontawesome-webfont;
-  font-size: 29;
 }
 
 //Floating Button
