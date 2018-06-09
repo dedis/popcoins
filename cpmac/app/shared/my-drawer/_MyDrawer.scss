@@ -22,6 +22,12 @@ $sidedrawer-list-icon-size: 20;
         .sidedrawer-header-brand {
             color: $ab-color;
         }
+
+        #app-name {
+            color: white;
+            font-size: 24;
+            horizontal-align: center;
+        }
     }
 
     .sidedrawer-content {
