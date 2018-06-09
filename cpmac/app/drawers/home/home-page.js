@@ -8,6 +8,7 @@ const ScanToReturn = require("../../shared/lib/scan-to-return/scan-to-return");
 const User = require("../../shared/lib/dedjs/object/user/User").get;
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
+const Timer = require("timer");
 
 const viewModel = ObservableModule.fromObject({
   rosterModule: User.getRosterModule(),
@@ -15,6 +16,20 @@ const viewModel = ObservableModule.fromObject({
 });
 
 let pageObject = undefined;
+let timerId = undefined;
+
+function onLoaded() {
+  // Poll the statuses every 2s
+  timerId = Timer.setInterval(() => {
+    loadConodeList();
+  }, 2000)
+
+}
+
+function onUnloaded() {
+  // remove polling when page is leaved
+  Timer.clearInterval(timerId);
+}
 
 function onNavigatingTo(args) {
   const page = args.object;
@@ -24,7 +39,6 @@ function onNavigatingTo(args) {
   // Bind isEmpty to the length of the array
   viewModel.isRosterEmpty = viewModel.rosterModule.list.length === 0;
   viewModel.rosterModule.list.on(ObservableArray.changeEvent, () => {
-    console.log("SKDEBUG TRIGGERED");
     viewModel.set('isRosterEmpty', viewModel.rosterModule.list.length === 0);
   });
 
@@ -34,6 +48,9 @@ function onNavigatingTo(args) {
 }
 
 function loadConodeList() {
+  if (viewModel.rosterModule.isLoading) {
+    return Promise.resolve();
+  }
   return User.getRosterStatus();
 }
 
@@ -207,3 +224,5 @@ module.exports.deblockConodeList = deblockConodeList;
 module.exports.conodeTapped = conodeTapped;
 module.exports.addConode = addConode;
 module.exports.deleteConode = deleteConode;
+module.exports.onLoaded = onLoaded;
+module.exports.onUnloaded = onUnloaded;

@@ -31,7 +31,7 @@
                 </nsDataForm:EntityProperty>
                 <nsDataForm:EntityProperty name="final_statement" displayName="Final Statement" index="2" valuesProvider="{{ finalStatements }}">
                     <nsDataForm:PropertyEditor.editor>
-                        <nsDataForm:PropertyEditor type="List"/>
+                        <nsDataForm:PropertyEditor type="Picker"/>
                     </nsDataForm:PropertyEditor.editor>
                 </nsDataForm:EntityProperty>
                 <nsDataForm:EntityProperty name="_observers" hidden="true"/>

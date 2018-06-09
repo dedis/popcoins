@@ -89,9 +89,16 @@ class Bar {
 
         configModule.name = config.name;
         configModule.frequency = config.frequency;
-        configModule.date = new Date(config.date);
+        configModule.date = new Date(+config.date); // + permforms the conversion to Int
 
-        let numberOfDay = Math.floor((configModule.date.getTime() - configModule.date) / ONE_DAY);
+
+        console.log("SKDEBUG");
+        console.log("val 1 = " + Date.now());
+        console.log("valval 2 = " + configModule.date);
+        console.log("json = " + configJson);
+        console.dir(config);
+
+        let numberOfDay = Math.floor((Date.now() - configModule.date.getTime()) / ONE_DAY);
         let maxDays;
 
         switch (configModule.frequency) {
@@ -108,7 +115,11 @@ class Bar {
             throw "Date is not valid"
         }
 
-        if (numberOfDay > maxDays) {
+
+        console.log("nb of day =" + numberOfDay);
+        console.log("max days ="  + maxDays);
+
+        if (numberOfDay >= maxDays) {
           return this.resetPeriod()
         }
 
@@ -215,7 +226,7 @@ class Bar {
     const config = {
       name: currentConfig.name,
       frequency: currentConfig.frequency,
-      lastPeriodStartDate: currentConfig.date.toString(),
+      date: currentConfig.date.toString(),
     };
 
     const configString = Convert.objectToJson(config);
@@ -261,7 +272,7 @@ class Bar {
   }
 
   /**
-   * Reste the current period (set to date to now and clear the list of checked clients)
+   * Reset the current period (set to date to now and clear the list of checked clients)
    *
    * @return {Promise} - a promise that gets solved when everything (config + check clients) is saved to disk
    */
@@ -404,7 +415,7 @@ class Bar {
     const config = {
       name: name,
       frequency: frequency,
-      lastPeriodStartDate: Date.now().toString(),
+      date: Date.now().toString(),
     };
 
     const configString = Convert.objectToJson(config);

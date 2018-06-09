@@ -14,17 +14,19 @@ const topmost = require("ui/frame").topmost;
 
 let pageObject = undefined;
 
+let finalStatementsMap = PoP.getFinalStatements().map((statement, index) => {
+  return {key: index, label: statement.desc.name};
+});
+
 let dataForm = Observable.fromObject({
   name: "",
   frequency: BarFrequencies.DAILY,
-  final_statement: {}
+  final_statement: 0
 });
 
 let viewModel = Observable.fromObject({
   dataForm: dataForm,
-  finalStatements: PoP.getFinalStatements().map((statement, index) => {
-    return {key: index, label: statement.desc.name};
-  }),
+  finalStatements: finalStatementsMap,
   frequencies: [
     {key: BarFrequencies.DAILY, label: "Daily"},
     {key: BarFrequencies.WEEKLY, label: "Weekly"},

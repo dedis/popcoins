@@ -37,8 +37,7 @@
                     <Label class="list-title" text="{{ desc.name }}" row="0" col="0"
                            textWrap="true"/>
                     <Label text="{{ desc.location }}" row="1" col="0" textWrap="true"/>
-                    <Label class="status-text" horizontalAlignment="right" verticalAlignment="center" text="{{ status.status }}"
-                           col="1" rowSpan="2" textWrap="true"/>
+                    <Label class="status-text" text="{{ status.status }}" col="1" rowSpan="2" textWrap="true"/>
                 </GridLayout>
             </nsListView:RadListView.itemTemplate>
         </nsListView:RadListView>

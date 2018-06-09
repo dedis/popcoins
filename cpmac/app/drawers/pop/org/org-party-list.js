@@ -28,14 +28,14 @@ function onLoaded(args) {
 
   loadParties();
 
-  // Poll the status every 3s
+  // Poll the status every 5s
   timerId = Timer.setInterval(() => {
     reloadStatuses();
   }, 5000)
 
 }
 
-function onUnloaded(args) {
+function onUnloaded() {
   // remove polling when page is leaved
   Timer.clearInterval(timerId);
 }
@@ -250,7 +250,7 @@ function linkToConode(party) {
 
   const conodes = User.getRoster().list;
   const conodesNames = conodes.map(serverIdentity => {
-    return serverIdentity.description + " - " + Convert.byteArrayToHex(serverIdentity.id);
+    return serverIdentity.description;
   });
 
   let index = undefined;
