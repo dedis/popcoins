@@ -1,9 +1,16 @@
 @import '../../../app-variables';
+@import '../../../app.scss';
 
 $box-height : 65%;
 $box-width : 85%;
 $box-border-radius : 40;
 $text-box-height : 10%;
+
+.nav-buttons {
+    @extend .fas;
+    font-size: 25;
+    font-weight: light;
+}
 
 .page-content {
     background-color: $accent-light;
