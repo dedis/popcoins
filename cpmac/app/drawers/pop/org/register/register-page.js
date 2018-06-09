@@ -201,7 +201,7 @@ function registerKeys() {
       }
       return Dialog.alert({
         title: "Success",
-        message: "The final statement of you PoP-Party is accessible in the PoP tab.",
+        message: "The final statement of your PoP-Party is now accessible to the attendees.",
         okButtonText: "Ok"
       });
     })
