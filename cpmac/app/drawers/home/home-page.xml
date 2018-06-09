@@ -1,6 +1,8 @@
 <Page
         class="page"
         navigatingTo="onNavigatingTo"
+        loaded="onLoaded"
+        unloaded="onUnloaded"
         xmlns:nsDrawer="nativescript-ui-sidedrawer"
         xmlns:nsListView="nativescript-ui-listview"
         xmlns:myDrawer="shared/my-drawer"
@@ -61,16 +63,14 @@
         Always wrap content in a layout component.
         -->
         <nsDrawer:RadSideDrawer.mainContent>
-            <GridLayout class="page-content" rows="*,auto" columns="*,*">
+            <GridLayout class="page-content" rows="*" columns="*">
                 <Label text="You don't have any conode. Feel free to add one !"
                        textWrap="true"
                        class="empty-list-label"
-                       row="0"
-                       colSpan="2"
                        visibility="{{ isRosterEmpty ? 'visible' : 'collapsed' }}"
                 />
 
-                <nsListView:RadListView items="{{ rosterModule.list }}" itemTap="conodeTapped" row="0" colSpan="2"
+                <nsListView:RadListView items="{{ rosterModule.list }}" itemTap="conodeTapped"
                           itemSwipeProgressStarted="onSwipeCellStarted"
                           swipeActions="true"
                           id="listView">
@@ -93,11 +93,7 @@
                     </nsListView:RadListView.itemTemplate>
                 </nsListView:RadListView>
 
-                <Button text="Reload" tap="loadConodeList" row="1" col="0" isEnabled="{{ !isLoading}}"/>
-
-                <Button text="Deblock" tap="deblockConodeList" row="1" col="1" isEnabled="{{ isLoading }}"/>
-
-                <ActivityIndicator busy="{{ rosterModule.isLoading }}" rowSpan="1" colSpan="2"/>
+                <ActivityIndicator busy="{{ rosterModule.isLoading }}"/>
             </GridLayout>
         </nsDrawer:RadSideDrawer.mainContent>
     </nsDrawer:RadSideDrawer>

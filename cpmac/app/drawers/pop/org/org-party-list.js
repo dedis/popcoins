@@ -28,14 +28,14 @@ function onLoaded(args) {
 
   loadParties();
 
-  // Poll the status every 3s
+  // Poll the status every 5s
   timerId = Timer.setInterval(() => {
     reloadStatuses();
   }, 5000)
 
 }
 
-function onUnloaded(args) {
+function onUnloaded() {
   // remove polling when page is leaved
   Timer.clearInterval(timerId);
 }
