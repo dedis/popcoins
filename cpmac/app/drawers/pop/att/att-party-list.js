@@ -88,7 +88,7 @@ function partyTapped(args) {
         .action({
           message: "What do you want to do ?",
           cancelButtonText: "Cancel",
-          actions: ["Generate a new key pair", "Show the QR Code of my key pair", "Display Party Info"]
+          actions: ["Generate a new key pair", "Show the QR Code of my public key", "Display Party Info"]
         })
         .then(result => {
           if (result === "Generate a new key pair") {
@@ -109,7 +109,7 @@ function partyTapped(args) {
                     })
                   })
               })
-          } else if (result === "Show the QR Code of my key pair") {
+          } else if (result === "Show the QR Code of my public key") {
             Frame.topmost().currentPage.showModal("shared/pages/qr-code/qr-code-page", {
               textToShow: Convert.objectToJson(party.getKeyPair()),
               title: "Key Pair"
