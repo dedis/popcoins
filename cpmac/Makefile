@@ -8,10 +8,10 @@ install_dep_command += npm install --no-package-lock
 
 ### Clean
 clean:
-	-sudo rm -R node_modules/
-	-sudo rm -R platforms/
-	-sudo rm -R hooks/
-	-sudo rm -f package-lock.json
+	-rm -rf node_modules/
+	-rm -rf platforms/
+	-rm -rf hooks/
+	-rm -f package-lock.json
 
 ### Install local and global dependencies
 install-dependencies:
