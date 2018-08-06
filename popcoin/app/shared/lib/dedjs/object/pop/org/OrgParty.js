@@ -609,8 +609,28 @@ class OrgParty extends Party {
       throw new Error("publicKey must be an instance of Uint8Array and have the right format");
     }
 
-    const newAttendees = this.getRegisteredAtts().slice();
+    var newAttendees = this.getRegisteredAtts().slice();
     newAttendees.push(publicKey);
+
+          for (var i = 0; i < newAttendees.length; i++) {
+              let value = newAttendees[i]
+              // store the current item value so it can be placed right
+              for (var j = i - 1; j > -1 && Convert.byteArrayToHex(newAttendees[j]) > Convert.byteArrayToHex(value); j--) {
+                  // loop through the items in the sorted array (the items from the current to the beginning)
+                  // copy each item to the next one
+                  newAttendees[j + 1] = newAttendees[j]
+              }
+              // the last item we've reached should now hold the value of the currently sorted item
+              newAttendees[j + 1] = value
+
+          }
+
+      for (var i = 0; i < newAttendees.length; i++) {
+            console.log(newAttendees[i])
+      }
+
+
+
 
     return this.setRegisteredAtts(newAttendees, true);
   }
@@ -1094,6 +1114,8 @@ class OrgParty extends Party {
    }
   }
 }
+
+
 
 /**
  * Enumerate the different possible state for a party
