@@ -59,7 +59,7 @@ function loadParties() {
   if (platform.isAndroid) {
 
     FileIO.forEachFolderElement(FilePaths.POP_ATT_PATH, function (partyFolder) {
-      party = new AttParty(partyFolder.name, true);
+      party = new AttParty(partyFolder.name);
       party.load();
       // Observables have to be nested to reflect changes
 
@@ -75,7 +75,7 @@ function loadParties() {
     var array = Directory.getFolders(FilePaths.POP_ATT_PATH, FilePaths.POP_ATT_FINAL);
     array.forEach(function (partyFolder) {
       console.log(partyFolder);
-      party = new AttParty(partyFolder, true);
+      party = new AttParty(partyFolder);
       party.load();
 
       // Observables have to be nested to reflect changes
@@ -244,7 +244,7 @@ function addParty() {
   return ScanToReturn.scan()
     .then(string => {
       const infos = Convert.jsonToObject(string);
-      const newParty = new AttParty(infos.id, false, infos.address);
+      const newParty = new AttParty(infos.id, infos.address);
       viewModel.partyListDescriptions.push(ObservableModule.fromObject({
         party: newParty,
         desc: newParty.getPopDescModule(),

@@ -70,7 +70,7 @@ function addManual() {
           address: Party.getLinkedConode().address
         };
 
-        var newParty = new AttParty(info.id, false, info.address);
+        var newParty = new AttParty(info.id, info.address);
 
 
         return newParty.load().then(party => {

@@ -21,12 +21,11 @@ class AttParty extends Party {
     /**
      * Constructor for the AttParty class.
      * @param {string} id - the hash of the party
-     * @param {boolean} loadLocally - precise if the party has to be loaded from the local storage
      * @param {string} [address] - address of the conode in the format tls://XXX.XXX.XXX.XXX:XXX. It is required
      * if the party needs to be retrieved from the conode. If the address is not specified, the leader conode is used.
      *
      */
-    constructor(id, loadLocally, address) {
+    constructor(id, address) {
         super();
         if (typeof id !== "string" || id === "") {
             throw new Error("id must be of type string and shouldn't be empty");
