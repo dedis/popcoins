@@ -625,10 +625,6 @@ class OrgParty extends Party {
 
           }
 
-      for (var i = 0; i < newAttendees.length; i++) {
-            console.log(newAttendees[i])
-      }
-
 
 
 
