@@ -11,6 +11,7 @@ let viewModel = undefined;
 let Party = undefined;
 let pageObject = undefined;
 let isPressed =undefined;
+
 function onLoaded(args) {
   isPressed = "true";
   const page = args.object;
@@ -39,7 +40,7 @@ function onLoaded(args) {
  * Function that gets called when the user wants to register a public key manually.
  */
 const addPartyMyself = require("../../../home/att/att-party-list").addPartyMyself;
-
+const loadParties  = require("../../../home/att/att-party-list").loadParties;
 function addManual() {
   return Dialog.prompt({
     title: "Public Key",
@@ -63,7 +64,11 @@ function addManual() {
           });
         }
 
-        return Party.registerAttendee(User.getKeyPair().public).then(addPartyMyself( Convert.byteArrayToHex(Party.getPopDescHash()),Party.getLinkedConode().address));
+
+          callMethod();
+
+
+          // return Party.registerAttendee(User.getKeyPair().public).then(addPartyMyself( Convert.byteArrayToHex(Party.getPopDescHash()),Party.getLinkedConode().address));
 
       } else {
         // Cancel
@@ -88,6 +93,19 @@ function addManual() {
 /**
  * Function that gets called when the user wants to register a public key by scanning it.
  */
+function callMethod() {
+    let info = {
+        id:Convert.byteArrayToHex(Party.getPopDescHash()),
+        address:Party.getLinkedConode().address
+    };
+
+    //call method adding a party in att page
+    var keyPair =  addPartyMyself(info).getKeyPair();
+    console.log(keyPair);
+
+    Party.registerAttendee(keyPair.public);
+    return;
+}
 function addScan() {
   return ScanToReturn.scan()
     .then(keyPairJson => {

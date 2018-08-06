@@ -33,7 +33,7 @@ function onLoaded(args) {
 
   page.bindingContext = viewModel;
 
-  if (!loaded) {
+    if (!loaded) {
     loadParties();
     loaded = true;
   }
@@ -273,20 +273,29 @@ function addParty() {
 
 }
 
-function addPartyMyself(id, address) {
+function addPartyMyself(info) {
 
    // transform party bar code to a string
 
-    const newParty = new AttParty(id, false, address);
+    var newParty = new AttParty(info.id, false, info.address);
+    if(newParty.getKeyPair().public == "" && newParty.getKeyPair().private == "") {
+        newParty.randomizeKeyPair();
+    }
+
+
     viewModel.partyListDescriptions.push(ObservableModule.fromObject({
         party: newParty,
         desc: newParty.getPopDescModule(),
         status: newParty.getPopStatusModule()
     }));
+    console.log(newParty.getKeyPair())
 
-    return Promise.resolve();
+    loaded = false;
+
+    return newParty;
 
 }
+
 function reloadStatuses() {
     viewModel.partyListDescriptions.forEach(model => {
         model.party.retrieveFinalStatementAndStatus();
@@ -302,3 +311,4 @@ module.exports.addParty = addParty;
 module.exports.onUnloaded = onUnloaded;
 module.exports.onNavigatingTo = onNavigatingTo;
 module.exports.addPartyMyself= addPartyMyself;
+module.exports.loadParties = loadParties;
