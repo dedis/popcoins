@@ -276,11 +276,10 @@ function addParty() {
 function addPartyMyself(info) {
 
    // transform party bar code to a string
-
     var newParty = new AttParty(info.id, false, info.address);
-    if(newParty.getKeyPair().public == "" && newParty.getKeyPair().private == "") {
-        newParty.randomizeKeyPair();
-    }
+
+    console.log("PARTY IS : ");
+    console.dir(newParty);
 
 
     viewModel.partyListDescriptions.push(ObservableModule.fromObject({

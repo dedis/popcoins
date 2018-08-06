@@ -139,6 +139,11 @@ class Directory {
         }
     return temp.children;
     }
+    doesExist(){
+
+
+    }
+
 
 
 
