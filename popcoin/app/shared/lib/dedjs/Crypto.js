@@ -143,7 +143,7 @@ class KeyPair {
       }
         console.log("This is toWrite :****"+toWrite+"*****");
 
-        if(platform.isAndroid){
+
          return FileIO.writeStringTo(FileIO.join(this._dirname, FilesPath.KEY_PAIR), toWrite)
              .catch((error) => {
              console.log(error);
@@ -155,20 +155,7 @@ class KeyPair {
              return Promise.reject(error);
      });
      });
-     }
-     if(platform.isIOS){
-         return Directory.add(FileIO.join(this._dirname, FilesPath.KEY_PAIR), toWrite)
-             .catch((error) => {
-             console.log(error);
-         console.dir(error);
-         console.trace();
 
-         return this.setKeyPair(oldKeyPair, false)
-             .then(() => {
-             return Promise.reject(error);
-     });
-     });
-     }
     } else {
       return new Promise((resolve, reject) => {
         resolve();
@@ -194,7 +181,7 @@ class KeyPair {
    * @returns {Promise} - a promise that gets resolved once the key pair is loaded into memory
    */
   load() {
-    if(platform.isAndroid){
+
         return FileIO.getStringOf(FileIO.join(this._dirname, FilesPath.KEY_PAIR))
                 .then(jsonKeyPair => {
                 if (jsonKeyPair.length > 0 && Convert.jsonToObject(jsonKeyPair).public !== ""
@@ -212,26 +199,8 @@ class KeyPair {
 
         return Promise.reject(error);
     });
-    }
-    if(platform.isIOS){
-        return Directory.read(FileIO.join(this._dirname, FilesPath.KEY_PAIR))
-                .then(jsonKeyPair => {
-                if (jsonKeyPair.length > 0 && Convert.jsonToObject(jsonKeyPair).public !== ""
-            &&  Convert.jsonToObject(jsonKeyPair).private !== "" && Convert.jsonToObject(jsonKeyPair).private !== "" ) {
-            return this.setKeyPair(Convert.parseJsonKeyPair(jsonKeyPair), false);
-        } else {
-            return this.randomize();
-        }
-    })
 
-    .catch(error => {
-            console.log(error);
-        console.dir(error);
-        console.trace();
 
-        return Promise.reject(error);
-    });
-    }
   }
 
 

@@ -159,7 +159,7 @@ class User {
       let toWrite;
       toWrite = Convert.objectToJson(nameObject);
 
-      if(platform.isAndroid){
+
           return FileIO.writeStringTo(FilesPath.USER_NAME, toWrite)
               .catch((error) => {
               console.log(error);
@@ -171,21 +171,6 @@ class User {
               return Promise.reject(error);
       });
       });
-      }
-      if(platform.isIOS){
-          return Directory.add(FilesPath.USER_NAME, toWrite)
-              .catch((error) => {
-              console.log(error);
-          console.dir(error);
-          console.trace();
-          console.trace();
-
-          return this.setName(oldName, false)
-              .then(() => {
-              return Promise.reject(error);
-      });
-      });
-      }
     }
 
     return Promise.resolve();
@@ -226,7 +211,6 @@ class User {
         toWrite = Convert.objectToJson(newRoster);
       }
 
-      if(platform.isAndroid){
           return FileIO.writeStringTo(FilesPath.ROSTER, toWrite)
               .catch((error) => {
               console.log(error);
@@ -238,20 +222,7 @@ class User {
               return Promise.reject(error);
       });
       });
-      }
-      if(platform.isIOS){
-          return Directory.add(FilesPath.ROSTER, toWrite)
-              .catch((error) => {
-              console.log(error);
-          console.dir(error);
-          console.trace();
 
-          return this.setRoster(oldRoster, false)
-              .then(() => {
-              return Promise.reject(error);
-      });
-      });
-      }
     } else {
       return new Promise((resolve, reject) => {
         resolve();
@@ -519,7 +490,7 @@ class User {
    * @returns {Promise} - a promise that gets resolved once the name is loaded into memory
    */
   loadName() {
-    if(platform.isAndroid){
+
 
         return FileIO.getStringOf(FilesPath.USER_NAME)
             .then(jsonName => {
@@ -539,28 +510,7 @@ class User {
 
         return Promise.reject(error);
     });
-    }
-    if(platform.isIOS){
 
-        return Directory.read(FilesPath.USER_NAME)
-            .then(jsonName => {
-            let name;
-        if (jsonName.length > 0) {
-            name = Convert.parseJsonUserName(jsonName);
-        }
-        else {
-            name = "Undefined";
-        }
-        return this.setName(name, false);
-    })
-    .catch(error => {
-            console.log(error);
-        console.dir(error);
-        console.trace();
-
-        return Promise.reject(error);
-    });
-    }
   }
 
   /**
@@ -568,7 +518,7 @@ class User {
    * @returns {Promise} - a promise that gets resolved once the complete roster is loaded into memory
    */
   loadRoster() {
-   if(platform.isAndroid){
+
        return FileIO.getStringOf(FilesPath.ROSTER)
            .then(jsonRoster => {
            if (jsonRoster.length > 0) {
@@ -588,27 +538,7 @@ class User {
        return Promise.reject(error);
    });
 
-   }
-   if(platform.isIOS){
-       return Directory.read(FilesPath.ROSTER)
-           .then(jsonRoster => {
-           if (jsonRoster.length > 0) {
-           return Convert.parseJsonRoster(jsonRoster);
-       } else {
-           return EMPTY_ROSTER;
-       }
-   })
-   .then(roster => {
-           return this.setRoster(roster, false);
-   })
-   .catch(error => {
-           console.log(error);
-       console.dir(error);
-       console.trace();
 
-       return Promise.reject(error);
-   });
-   }
   }
 }
 
