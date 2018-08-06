@@ -13,7 +13,6 @@ const PoP = require("../../../shared/lib/dedjs/object/pop/PoP").get;
 var platform = require("tns-core-modules/platform");
 var Directory = require("../../../shared/lib/Directory/Directory");
 
-let loaded = false;
 const viewModel = ObservableModule.fromObject({
   partyListDescriptions: new ObservableArray(),
   isLoading: false,
@@ -33,10 +32,7 @@ function onLoaded(args) {
 
   page.bindingContext = viewModel;
 
-    if (!loaded) {
-    loadParties();
-    loaded = true;
-  }
+  loadParties();
 
 
   // Poll the status every 3s
@@ -60,32 +56,35 @@ function loadParties() {
 
   let party = undefined;
   viewModel.partyListDescriptions.splice(0);
-  if(platform.isAndroid){
+  if (platform.isAndroid) {
 
-      FileIO.forEachFolderElement(FilePaths.POP_ATT_PATH, function (partyFolder) {
-          party = new AttParty(partyFolder.name, true);
-          // Observables have to be nested to reflect changes
+    FileIO.forEachFolderElement(FilePaths.POP_ATT_PATH, function (partyFolder) {
+      party = new AttParty(partyFolder.name, true);
+      party.load();
+      // Observables have to be nested to reflect changes
 
-          viewModel.partyListDescriptions.push(ObservableModule.fromObject({
-              party: party,
-              desc: party.getPopDescModule(),
-              status: party.getPopStatusModule()
-          }));
-      });
+      viewModel.partyListDescriptions.push(ObservableModule.fromObject({
+        party: party,
+        desc: party.getPopDescModule(),
+        status: party.getPopStatusModule()
+      }));
+    });
   }
-  if(platform.isIOS ){
+  if (platform.isIOS) {
 
     var array = Directory.getFolders(FilePaths.POP_ATT_PATH, FilePaths.POP_ATT_FINAL);
-      array.forEach( function (partyFolder) {
-          console.log(partyFolder);
-          party = new AttParty(partyFolder, true);
-          // Observables have to be nested to reflect changes
-          viewModel.partyListDescriptions.push(ObservableModule.fromObject({
-              party: party,
-              desc: party.getPopDescModule(),
-              status: party.getPopStatusModule()
-          }));
-      });
+    array.forEach(function (partyFolder) {
+      console.log(partyFolder);
+      party = new AttParty(partyFolder, true);
+      party.load();
+
+      // Observables have to be nested to reflect changes
+      viewModel.partyListDescriptions.push(ObservableModule.fromObject({
+        party: party,
+        desc: party.getPopDescModule(),
+        status: party.getPopStatusModule()
+      }));
+    });
   }
 
   viewModel.isLoading = false;
@@ -117,7 +116,7 @@ function partyTapped(args) {
             return Dialog.confirm({
               title: "Warning !",
               message: "The current key pair will by overwritten, so will need to get the new one " +
-              "registered by the organizers. Are you sure you want to continue ?",
+                "registered by the organizers. Are you sure you want to continue ?",
               okButtonText: "Yes",
               cancelButtonText: "No",
             })
@@ -252,7 +251,7 @@ function addParty() {
         status: newParty.getPopStatusModule()
       }));
 
-      return Promise.resolve();
+      return newParty.load();
     })
     .catch(error => {
       console.log(error);
@@ -273,32 +272,10 @@ function addParty() {
 
 }
 
-function addPartyMyself(info) {
-
-   // transform party bar code to a string
-    var newParty = new AttParty(info.id, false, info.address);
-
-    console.log("PARTY IS : ");
-    console.dir(newParty);
-
-
-    viewModel.partyListDescriptions.push(ObservableModule.fromObject({
-        party: newParty,
-        desc: newParty.getPopDescModule(),
-        status: newParty.getPopStatusModule()
-    }));
-    console.log(newParty.getKeyPair())
-
-    loaded = false;
-
-    return newParty;
-
-}
-
 function reloadStatuses() {
-    viewModel.partyListDescriptions.forEach(model => {
-        model.party.retrieveFinalStatementAndStatus();
-})
+  viewModel.partyListDescriptions.forEach(model => {
+    model.party.retrieveFinalStatementAndStatus();
+  })
 }
 
 
@@ -309,5 +286,4 @@ module.exports.deleteParty = deleteParty;
 module.exports.addParty = addParty;
 module.exports.onUnloaded = onUnloaded;
 module.exports.onNavigatingTo = onNavigatingTo;
-module.exports.addPartyMyself= addPartyMyself;
 module.exports.loadParties = loadParties;

@@ -49,10 +49,6 @@ class AttParty extends Party {
             status: States.UNDEFINED
         });
 
-        new KeyPair(FileIO.join(FilePath.POP_ATT_PATH, this._folderName)).then((key) => {
-            this._keyPair = key;
-        }).then(this.load());
-
     }
 
     /**
@@ -194,34 +190,44 @@ class AttParty extends Party {
      * @returns {Promise}- a promise that gets resolved once the loading is finished
      */
     load() {
+      return new KeyPair(FileIO.join(FilePath.POP_ATT_PATH, this._folderName)).then((key) => {
+        this._keyPair = key;
         if (this._partyExistLocally) {
-            return this.loadFinalStatement()
-                .then(() => {
-                    return this.loadPopDesc();
-                })
-                .then(() => {
-                    return this.retrieveFinalStatementAndStatus();
-                })
-                .catch(error => {
-                    console.log(error);
-                    console.dir(error);
-                    console.trace();
+          return this.loadFinalStatement()
+            .then(() => {
+              return this.loadPopDesc();
+            })
+            .then(() => {
+              return this.retrieveFinalStatementAndStatus();
+            })
+            .then(() => {
+              return Promise.resolve(this);
+            })
+            .catch(error => {
+              console.log(error);
+              console.dir(error);
+              console.trace();
 
-                    return Promise.reject(error);
-                });
+              return Promise.reject(error);
+            });
         } else {
-            return this.retrieveFinalStatementAndStatus()
-                .then(() => {
-                    return Promise.all([this.cacheFinalStatement(), this.loadPopDesc()]);
-                })
-                .catch(error => {
-                    console.log(error);
-                    console.dir(error);
-                    console.trace();
+          return this.retrieveFinalStatementAndStatus()
+            .then(() => {
+              return Promise.all([this.cacheFinalStatement(), this.loadPopDesc()]);
+            })
+            .then(() => {
+              return Promise.resolve(this);
+            })
+            .catch(error => {
+              console.log(error);
+              console.dir(error);
+              console.trace();
 
-                    return Promise.reject(error);
-                })
+              return Promise.reject(error);
+            })
         }
+      });
+
     }
 
     /**
