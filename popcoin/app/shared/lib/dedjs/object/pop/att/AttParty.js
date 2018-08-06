@@ -9,84 +9,12 @@ const CothorityMessages = require("../../../network/cothority-messages");
 const RequestPath = require("../../../network/RequestPath");
 const DecodeType = require("../../../network/DecodeType");
 const Party = require("../Party");
-
-const couchbaseModule = require("nativescript-couchbase");
-const observableArrayModule = require("data/observable-array");
-
-const personList = new observableArrayModule.ObservableArray([]);
-const database = new couchbaseModule.Couchbase("database1");
-
-
-database.createView("view1", "1", function(document, emitter) {
-    emitter.emit(document._id, document);
-});
+var platform = require("tns-core-modules/platform");
+var Directory = require("../../../../Directory/Directory");
 
 /**
  * We define the AttParty class which is the object representing the attendee.
  */
-function add(id, text){
-    personList.splice(0);
-
-    var rows = database.executeQuery("view1");
-
-    for(var i in rows) {
-        if(rows.hasOwnProperty(i)) {
-            personList.push(rows[i]);
-            console.log(rows[i])
-        }
-    }
-    for ( s =0; s< personList.length; s++){
-
-        if (personList.getItem(s).id === id){
-          database.deleteDocument(personList.getItem(s));
-          personList.remove(s);
-        }
-
-    }
-  database.createDocument({"id": id, "text":text});
-}
-function remove(id){
-    personList.splice(0);
-
-    var rows = database.executeQuery("view1");
-
-    for(var i in rows) {
-        if(rows.hasOwnProperty(i)) {
-            personList.push(rows[i]);
-            console.log(rows[i])
-        }
-    }
-    for ( s =0; s< personList.length; s++){
-
-        if (personList.getItem(s).id === id){
-            database.deleteDocument(personList.getItem(s));
-            personList.remove(s);
-        }
-
-    }
-
-}
-function get(id){
-    personList.splice(0);
-
-    var rows = database.executeQuery("view1");
-
-    for(var i in rows) {
-        if(rows.hasOwnProperty(i)) {
-            personList.push(rows[i]);
-            console.log(rows[i])
-        }
-    }
-    for ( s =0; s< personList.length; s++){
-
-        if (personList.getItem(s).id === id){
-            return personList.getItems(s);
-        }
-
-    }
-    return "null";
-
-}
 
 class AttParty extends Party {
 
@@ -104,6 +32,9 @@ class AttParty extends Party {
       throw new Error("id must be of type string and shouldn't be empty");
     }
     this._folderName = id;
+    if(platform.isAndroid) {
+        this._partyExistLocally = FileIO.folderExists(FileIO.join(FilePath.POP_ATT_PATH, this._folderName));
+    }
     this._partyExistLocally = loadLocally;
     if (!this._partyExistLocally && address === undefined) {
       throw new Error("address should not be undefined as the party isn't stored locally");
@@ -114,7 +45,7 @@ class AttParty extends Party {
     this._id = Convert.hexToByteArray(id);
     this._isLoaded = false;
     this._finalStatement = undefined;
-    this._keyPair = new KeyPair(this._folderName);
+    this._keyPair = new KeyPair(FileIO.join(FilePath.POP_ATT_PATH, this._folderName));
     this._status = ObservableModule.fromObject({
       status: States.UNDEFINED
     });
@@ -160,15 +91,33 @@ class AttParty extends Party {
    * @returns {Promise} - a promise that gets resolved once the final statement is load in memory
    */
   loadFinalStatement() {
-    var str = get(this._folderName);
-    if (str !== "null"){
-        this._finalStatement =str;
+    if(platform.isIOS){
+        return Directory.read(FileIO.join(FilePath.POP_ATT_PATH, this._folderName, FilePath.POP_ATT_FINAL))
+            .then(string => {
+            this._finalStatement = Convert.jsonToObject(string);
         return Promise.resolve();
+    })
+    .catch(error => {
+            console.log(error);
+        console.dir(error);
+        console.trace();
 
-    }else {
-        return Promise.reject();
+        return Promise.reject(error);
+    })
     }
+    if (platform.isAndroid){
+    return FileIO.getStringOf(FileIO.join(FilePath.POP_ATT_PATH, this._folderName, FilePath.POP_ATT_FINAL))
+      .then(string => {
+        this._finalStatement = Convert.jsonToObject(string);
+        return Promise.resolve();
+      })
+      .catch(error => {
+        console.log(error);
+        console.dir(error);
+        console.trace();
 
+        return Promise.reject(error);
+      })}
   }
 
   /**
@@ -204,17 +153,25 @@ class AttParty extends Party {
    */
   cacheFinalStatement() {
     const toWrite = Convert.objectToJson(this._finalStatement);
-
-  //
-      return add( this._folderName, toWrite)
-
+  if(platform.isAndroid){
+    return FileIO.writeStringTo(FileIO.join(FilePath.POP_ATT_PATH, this._folderName, FilePath.POP_ATT_FINAL), toWrite)
       .catch(error => {
         console.log(error);
         console.dir(error);
         console.trace();
 
         return Promise.reject(error);
+      })}
+      if(platform.isIOS){
+          return Directory.add(FileIO.join(FilePath.POP_ATT_PATH, this._folderName, FilePath.POP_ATT_FINAL), toWrite)
+              .catch(error => {
+              console.log(error);
+          console.dir(error);
+          console.trace();
+
+          return Promise.reject(error);
       })
+      }
   }
 
   /**
@@ -318,7 +275,13 @@ class AttParty extends Party {
    * @returns {Promise} a promise that gets resolved once the party is deleted
    */
   remove() {
-    return remove(this._folderName) ;
+    if(platform.isAndroid) {
+        return FileIO.removeFolder(FileIO.join(FilePath.POP_ATT_PATH, this._folderName));
+    }
+    if(platform.isIOS){
+      Directory.deleteFile(FileIO.join(FilePath.POP_ATT_PATH, this._folderName));
+      return;
+    }
   }
 }
 

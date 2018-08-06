@@ -21,6 +21,9 @@ const Party = require("../Party");
 const User = require("../../user/User").get;
 const PoP = require("../../pop/PoP").get;
 
+var platform = require ("tns-core-modules/platform");
+var Directory = require("../../../../Directory/Directory");
+
 /**
  * This class represents the organizer of a PoP party. It contains everything related to the organizer party.
  */
@@ -115,7 +118,6 @@ class OrgParty extends Party {
    * @returns {Promise} - a promise that gets resolved once the new conode has been set and saved if the save parameter is set to true
    */
   setLinkedConode(conode, save) {
-
     if (!Helper.isOfType(conode, ObjectType.SERVER_IDENTITY)) {
       throw new Error("conode must be an instance of ServerIdentity");
     }
@@ -139,19 +141,36 @@ class OrgParty extends Party {
         toWrite = Convert.objectToJson(newLinkedConode);
       }
 
-      return FileIO.writeStringTo(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_CONODE), toWrite)
-        .catch((error) => {
-          console.log(error);
+      if(platform.isAndroid){
+          return FileIO.writeStringTo(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_CONODE), toWrite)
+              .catch((error) => {
+              console.log(error);
           console.dir(error);
           console.trace();
 
           return this.setLinkedConode(oldLinkedConode, false)
-            .then(() => {
+              .then(() => {
               return Promise.reject(error);
-            });
-        }).then(() => {
-          return this.loadStatus();
-        });
+      });
+      }).then(() => {
+              return this.loadStatus();
+      });
+      }
+      if(platform.isIOS){
+          return Directory.add(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_CONODE), toWrite)
+              .catch((error) => {
+              console.log(error);
+          console.dir(error);
+          console.trace();
+
+          return this.setLinkedConode(oldLinkedConode, false)
+              .then(() => {
+              return Promise.reject(error);
+      });
+      }).then(() => {
+              return this.loadStatus();
+      });
+      }
     } else {
       return new Promise((resolve, reject) => {
         resolve();
@@ -225,20 +244,38 @@ class OrgParty extends Party {
         toWrite = Convert.objectToJson(newPopDesc);
       }
 
-      return FileIO.writeStringTo(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_DESC), toWrite)
-        .catch((error) => {
-          console.log(error);
+      if(platform.isAndroid){
+          return FileIO.writeStringTo(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_DESC), toWrite)
+              .catch((error) => {
+              console.log(error);
           console.dir(error);
           console.trace();
 
           return this.setPopDesc(oldPopDesc, false)
-            .then(() => {
+              .then(() => {
               return Promise.reject(error);
-            });
-        })
-        .then(() => {
-          return this.updatePopHash();
-        });
+      });
+      })
+      .then(() => {
+              return this.updatePopHash();
+      });
+      }
+      if(platform.isIOS){
+          return Directory.add(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_DESC), toWrite)
+              .catch((error) => {
+              console.log(error);
+          console.dir(error);
+          console.trace();
+
+          return this.setPopDesc(oldPopDesc, false)
+              .then(() => {
+              return Promise.reject(error);
+      });
+      })
+      .then(() => {
+              return this.updatePopHash();
+      });
+      }
     } else {
       return new Promise((resolve, reject) => {
         resolve();
@@ -300,17 +337,32 @@ class OrgParty extends Party {
         toWrite = Convert.objectToJson(object);
       }
 
-      return FileIO.writeStringTo(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_ATTENDEES), toWrite)
-        .catch((error) => {
-          console.log(error);
-          console.dir(error);
-          console.trace();
+     if(platform.isAndroid){
+         return FileIO.writeStringTo(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_ATTENDEES), toWrite)
+             .catch((error) => {
+             console.log(error);
+         console.dir(error);
+         console.trace();
 
-          return this.setRegisteredAtts(oldRegisteredAtts, false)
-            .then(() => {
-              return Promise.reject(error);
-            });
-        });
+         return this.setRegisteredAtts(oldRegisteredAtts, false)
+             .then(() => {
+             return Promise.reject(error);
+     });
+     });
+     }
+     if(platform.isIOS){
+         return Directory.add(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_ATTENDEES), toWrite)
+             .catch((error) => {
+             console.log(error);
+         console.dir(error);
+         console.trace();
+
+         return this.setRegisteredAtts(oldRegisteredAtts, false)
+             .then(() => {
+             return Promise.reject(error);
+     });
+     });
+     }
     } else {
       return new Promise((resolve, reject) => {
         resolve();
@@ -379,17 +431,32 @@ class OrgParty extends Party {
         toWrite = Convert.objectToJson(object);
       }
 
-      return FileIO.writeStringTo(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_DESC_HASH), toWrite)
-        .catch((error) => {
-          console.log(error);
+      if(platform.isAndroid){
+          return FileIO.writeStringTo(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_DESC_HASH), toWrite)
+              .catch((error) => {
+              console.log(error);
           console.dir(error);
           console.trace();
 
           return this.setPopDescHash(oldHash, false)
-            .then(() => {
+              .then(() => {
               return Promise.reject(error);
-            });
-        });
+      });
+      });
+      }
+      if(platform.isIOS){
+          return Directory.add(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_DESC_HASH), toWrite)
+              .catch((error) => {
+              console.log(error);
+          console.dir(error);
+          console.trace();
+
+          return this.setPopDescHash(oldHash, false)
+              .then(() => {
+              return Promise.reject(error);
+      });
+      });
+      }
     } else {
       return new Promise((resolve, reject) => {
         resolve();
@@ -578,7 +645,6 @@ class OrgParty extends Party {
    * the public key of the user were already registered (thus it won't need to ask PIN in the future)
    */
   linkToConode(conode, pin) {
-
     if (!Helper.isOfType(conode, ObjectType.SERVER_IDENTITY)) {
       throw new Error("conode must be an instance of ServerIdentity");
     }
@@ -597,17 +663,13 @@ class OrgParty extends Party {
 
     return cothoritySocket.send(RequestPath.POP_VERIFY_LINK, DecodeType.VERIFY_LINK_REPLY, verifyLinkMessage)
       .then(alreadyLinked => {
-
         return alreadyLinked.exists ?
           Promise.resolve(ALREADY_LINKED) :
-          cothoritySocket.send(RequestPath.POP_PIN_REQUEST, RequestPath.STATUS_REQUEST, pinRequestMessage);
-
+          cothoritySocket.send(RequestPath.POP_PIN_REQUEST, RequestPath.STATUS_REQUEST, pinRequestMessage)
       })
       .then(response => {
-
         return this.setLinkedConode(conode, true)
           .then(() => {
-
             const fields = {
               alreadyLinked: response === ALREADY_LINKED
             };
@@ -619,7 +681,7 @@ class OrgParty extends Party {
         if (error.message === CothorityMessages.READ_PIN_ERROR) {
           return Promise.resolve(error.message)
         }
-       console.log(error);
+        console.log(error);
         console.dir(error);
         console.trace();
 
@@ -844,23 +906,44 @@ class OrgParty extends Party {
    * @returns {Promise} - a promise that gets resolved once the linked conode has been loaded into memory
    */
   loadLinkedConode() {
-    return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_CONODE))
-      .then(jsonLinkedConode => {
-        if (jsonLinkedConode.length > 0) {
-          const linkedConode = Convert.parseJsonServerIdentity(jsonLinkedConode);
+   if(platform.isAndroid){
+       return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_CONODE))
+           .then(jsonLinkedConode => {
+           if (jsonLinkedConode.length > 0) {
+           const linkedConode = Convert.parseJsonServerIdentity(jsonLinkedConode);
 
-          return this.setLinkedConode(linkedConode, false);
-        } else {
-          return Promise.resolve();
-        }
-      })
-      .catch(error => {
-        console.log(error);
-        console.dir(error);
-        console.trace();
+           return this.setLinkedConode(linkedConode, false);
+       } else {
+           return Promise.resolve();
+       }
+   })
+   .catch(error => {
+           console.log(error);
+       console.dir(error);
+       console.trace();
 
-        return Promise.reject(error);
-      });
+       return Promise.reject(error);
+   });
+   }
+   if(platform.isIOS){
+       return Directory.read(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_CONODE))
+           .then(jsonLinkedConode => {
+           if (jsonLinkedConode.length > 0) {
+           const linkedConode = Convert.parseJsonServerIdentity(jsonLinkedConode);
+
+           return this.setLinkedConode(linkedConode, false);
+       } else {
+           return Promise.resolve();
+       }
+   })
+   .catch(error => {
+           console.log(error);
+       console.dir(error);
+       console.trace();
+
+       return Promise.reject(error);
+   });
+   }
   }
 
   /**
@@ -868,23 +951,44 @@ class OrgParty extends Party {
    * @returns {Promise} - a promise that gets resolved once the PopDesc has been loaded into memory
    */
   loadPopDesc() {
-    return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_DESC))
-      .then(jsonPopDesc => {
-        if (jsonPopDesc.length > 0) {
-          const popDesc = Convert.parseJsonPopDesc(jsonPopDesc);
+    if(platform.isAndroid){
+        return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_DESC))
+            .then(jsonPopDesc => {
+            if (jsonPopDesc.length > 0) {
+            const popDesc = Convert.parseJsonPopDesc(jsonPopDesc);
 
-          return this.setPopDesc(popDesc, false);
+            return this.setPopDesc(popDesc, false);
         } else {
-          return Promise.resolve();
+            return Promise.resolve();
         }
-      })
-      .catch(error => {
-        console.log(error);
+    })
+    .catch(error => {
+            console.log(error);
         console.dir(error);
         console.trace();
 
         return Promise.reject(error);
-      });
+    });
+    }
+    if(platform.isIOS){
+        return Directory.read(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_DESC))
+            .then(jsonPopDesc => {
+            if (jsonPopDesc.length > 0) {
+            const popDesc = Convert.parseJsonPopDesc(jsonPopDesc);
+
+            return this.setPopDesc(popDesc, false);
+        } else {
+            return Promise.resolve();
+        }
+    })
+    .catch(error => {
+            console.log(error);
+        console.dir(error);
+        console.trace();
+
+        return Promise.reject(error);
+    });
+    }
   }
 
   /**
@@ -892,23 +996,44 @@ class OrgParty extends Party {
    * @returns {Promise} - a promise that gets resolved once all the registered attendees have been loaded into memory
    */
   loadRegisteredAtts() {
-    return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_ATTENDEES))
-      .then(jsonRegisteredAtts => {
-        if (jsonRegisteredAtts.length > 0) {
-          const registeredAtts = Convert.parseJsonArrayOfKeys(jsonRegisteredAtts);
+    if(platform.isAndroid){
+        return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_ATTENDEES))
+            .then(jsonRegisteredAtts => {
+            if (jsonRegisteredAtts.length > 0) {
+            const registeredAtts = Convert.parseJsonArrayOfKeys(jsonRegisteredAtts);
 
-          return this.setRegisteredAtts(registeredAtts, false);
+            return this.setRegisteredAtts(registeredAtts, false);
         } else {
-          return Promise.resolve();
+            return Promise.resolve();
         }
-      })
-      .catch(error => {
-        console.log(error);
+    })
+    .catch(error => {
+            console.log(error);
         console.dir(error);
         console.trace();
 
         return Promise.reject(error);
-      });
+    });
+    }
+    if(platform.isIOS){
+        return Directory.read(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_ATTENDEES))
+            .then(jsonRegisteredAtts => {
+            if (jsonRegisteredAtts.length > 0) {
+            const registeredAtts = Convert.parseJsonArrayOfKeys(jsonRegisteredAtts);
+
+            return this.setRegisteredAtts(registeredAtts, false);
+        } else {
+            return Promise.resolve();
+        }
+    })
+    .catch(error => {
+            console.log(error);
+        console.dir(error);
+        console.trace();
+
+        return Promise.reject(error);
+    });
+    }
   }
 
   /**
@@ -916,23 +1041,44 @@ class OrgParty extends Party {
    * @returns {Promise} - a promise that gets resolved once the PopDesc hash has been loaded into memory
    */
   loadPopDescHash() {
-    return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_DESC_HASH))
-      .then(jsonPopDescHash => {
-        if (jsonPopDescHash.length > 0) {
-          const popDescHash = Convert.parseJsonPopDescHash(jsonPopDescHash);
+    if(platform.isAndroid){
+        return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_DESC_HASH))
+            .then(jsonPopDescHash => {
+            if (jsonPopDescHash.length > 0) {
+            const popDescHash = Convert.parseJsonPopDescHash(jsonPopDescHash);
 
-          return this.setPopDescHash(popDescHash, false);
+            return this.setPopDescHash(popDescHash, false);
         } else {
-          return Promise.resolve();
+            return Promise.resolve();
         }
-      })
-      .catch(error => {
-        console.log(error);
+    })
+    .catch(error => {
+            console.log(error);
         console.dir(error);
         console.trace();
 
         return Promise.reject(error);
-      });
+    });
+    }
+    if(platform.isIOS){
+        return Directory.read(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_DESC_HASH))
+            .then(jsonPopDescHash => {
+            if (jsonPopDescHash.length > 0) {
+            const popDescHash = Convert.parseJsonPopDescHash(jsonPopDescHash);
+
+            return this.setPopDescHash(popDescHash, false);
+        } else {
+            return Promise.resolve();
+        }
+    })
+    .catch(error => {
+            console.log(error);
+        console.dir(error);
+        console.trace();
+
+        return Promise.reject(error);
+    });
+    }
   }
 
   /**
@@ -940,7 +1086,12 @@ class OrgParty extends Party {
    * @returns {Promise} a promise that gets resolved once the party is deleted
    */
   remove() {
-    return FileIO.removeFolder(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname));
+   if(platform.isAndroid){
+       return FileIO.removeFolder(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname));
+   }
+   if(platform.isIOS){
+       return Directory.deleteFile(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname));
+   }
   }
 }
 

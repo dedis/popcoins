@@ -13,81 +13,10 @@ const CothorityMessages = require("../../network/cothority-messages");
 const RingSig = require("../../RingSig");
 const Kyber = require("@dedis/kyber-js");
 const Suite = new Kyber.curve.edwards25519.Curve;
-const couchbaseModule = require("nativescript-couchbase");
-const observableArrayModule = require("data/observable-array");
 
 const User = require("../user/User").get;
-const personList = new observableArrayModule.ObservableArray([]);
-const database = new couchbaseModule.Couchbase("database3");
-
-
-database.createView("view3", "1", function(document, emitter) {
-    emitter.emit(document._id, document);
-});
-function add(id, text){
-    personList.splice(0);
-
-    var rows = database.executeQuery("view3");
-
-    for(var i in rows) {
-        if(rows.hasOwnProperty(i)) {
-            personList.push(rows[i]);
-            console.log(rows[i])
-        }
-    }
-    for ( s =0; s< personList.length; s++){
-
-        if (personList.getItem(s).id === id){
-            database.deleteDocument(personList.getItem(s));
-            personList.remove(s);
-        }
-
-    }
-    database.createDocument({"id": id, "text":text});
-}
-function remove(id){
-    personList.splice(0);
-
-    var rows = database.executeQuery("view3");
-
-    for(var i in rows) {
-        if(rows.hasOwnProperty(i)) {
-            personList.push(rows[i]);
-            console.log(rows[i])
-        }
-    }
-    for ( s =0; s< personList.length; s++){
-
-        if (personList.getItem(s).id === id){
-            database.deleteDocument(personList.getItem(s));
-            personList.remove(s);
-        }
-
-    }
-
-}
-function get(id){
-    personList.splice(0);
-
-    var rows = database.executeQuery("view3");
-
-    for(var i in rows) {
-        if(rows.hasOwnProperty(i)) {
-            personList.push(rows[i]);
-            console.log(rows[i])
-        }
-    }
-    for ( s =0; s< personList.length; s++){
-
-        if (personList.getItem(s).id === id){
-            return personList.getItems(s);
-        }
-
-    }
-    return "null";
-
-}
-
+const platform = require("tns-core-modules/platform");
+var Directory = require("../../../Directory/Directory");
 /**
  * This singleton is the PoP component of the app. It contains everything related to PoP in general and used by both, the organizer and the attendee.
  */
@@ -283,17 +212,32 @@ class PoP {
         toWrite = Convert.objectToJson(object);
       }
 
-      return add(FilesPath.POP_FINAL_STATEMENTS, toWrite)
-        .catch((error) => {
-          console.log(error);
+      if(platform.isAndroid){
+          return FileIO.writeStringTo(FilesPath.POP_FINAL_STATEMENTS, toWrite)
+              .catch((error) => {
+              console.log(error);
           console.dir(error);
           console.trace();
 
           return this.setFinalStatementsArray(oldFinalStatements, false)
-            .then(() => {
+              .then(() => {
               return Promise.reject(error);
-            });
-        });
+      });
+      });
+      }
+      if(platform.isIOS){
+          return Directory.add(FilesPath.POP_FINAL_STATEMENTS, toWrite)
+              .catch((error) => {
+              console.log(error);
+          console.dir(error);
+          console.trace();
+
+          return this.setFinalStatementsArray(oldFinalStatements, false)
+              .then(() => {
+              return Promise.reject(error);
+      });
+      });
+      }
     } else {
       return new Promise((resolve, reject) => {
         resolve();
@@ -331,17 +275,32 @@ class PoP {
         toWrite = Convert.objectToJson(object);
       }
 
-      return add(FilesPath.POP_TOKEN, toWrite)
-        .catch((error) => {
-          console.log(error);
-          console.dir(error);
-          console.trace();
+     if(platform.isAndroid){
+         return FileIO.writeStringTo(FilesPath.POP_TOKEN, toWrite)
+             .catch((error) => {
+             console.log(error);
+         console.dir(error);
+         console.trace();
 
-          return this.setPopTokenArray(oldPopToken, false)
-            .then(() => {
-              return Promise.reject(error);
-            });
-        });
+         return this.setPopTokenArray(oldPopToken, false)
+             .then(() => {
+             return Promise.reject(error);
+     });
+     });
+     }
+     if(platform.isIOS){
+         return Directory.add(FilesPath.POP_TOKEN, toWrite)
+             .catch((error) => {
+             console.log(error);
+         console.dir(error);
+         console.trace();
+
+         return this.setPopTokenArray(oldPopToken, false)
+             .then(() => {
+             return Promise.reject(error);
+     });
+     });
+     }
     } else {
       return new Promise((resolve, reject) => {
         resolve();
@@ -388,12 +347,22 @@ class PoP {
     if (newArray.length > 0) {
       return this.setFinalStatementsArray(newArray, true);
     } else {
-      return add(FilesPath.POP_FINAL_STATEMENTS, "")
-        .then(() => {
-          this.emptyFinalStatementArray();
+      if(platform.isAndroid){
+          return FileIO.writeStringTo(FilesPath.POP_FINAL_STATEMENTS, "")
+              .then(() => {
+              this.emptyFinalStatementArray();
 
           return Promise.resolve();
-        });
+      });
+      }
+      if(platform.isIOS){
+          return Directory.add(FilesPath.POP_FINAL_STATEMENTS, "")
+              .then(() => {
+              this.emptyFinalStatementArray();
+
+          return Promise.resolve();
+      });
+      }
     }
   }
 
@@ -427,7 +396,13 @@ class PoP {
     } else {
       return this.addFinalStatement(finalStatement, true)
         .then(() => {
-          return add(FilesPath.POP_TOKEN, "");
+
+        if(platform.isIOS){
+            return FileIO.writeStringTo(FilesPath.POP_TOKEN, "");
+        }if(platform.isAndroid){
+            return FileIO.writeStringTo(FilesPath.POP_TOKEN, "");
+        }
+
         })
         .then(() => {
           this.emptyPopTokenArray();
@@ -545,23 +520,46 @@ class PoP {
   reset() {
     this._isLoaded = false;
 
-   add(FilesPath.POP_FINAL_STATEMENTS, "");
+    if(platform.isAndroid){
+        const promises = [FileIO.writeStringTo(FilesPath.POP_FINAL_STATEMENTS, ""), FileIO.writeStringTo(FilesPath.POP_TOKEN, "")];
 
-    return add(FilesPath.POP_TOKEN, "").then(() => {
-        this.emptyFinalStatementArray();
+        return Promise.all(promises)
+            .then(() => {
+            this.emptyFinalStatementArray();
         this.emptyPopTokenArray();
 
         this._isLoaded = true;
 
         return Promise.resolve();
-      })
-      .catch(error => {
-        console.log(error);
+    })
+    .catch(error => {
+            console.log(error);
         console.dir(error);
         console.trace();
 
         return Promise.reject(error);
-      });
+    });
+    }
+    if(platform.isIOS){
+        Directory.add(FilesPath.POP_FINAL_STATEMENTS, "");
+
+        return Directory.add(FilesPath.POP_TOKEN, "")
+            .then(() => {
+            this.emptyFinalStatementArray();
+        this.emptyPopTokenArray();
+
+        this._isLoaded = true;
+
+        return Promise.resolve();
+    })
+    .catch(error => {
+            console.log(error);
+        console.dir(error);
+        console.trace();
+
+        return Promise.reject(error);
+    });
+    }
   }
 
   /**
@@ -591,20 +589,44 @@ class PoP {
    * @returns {Promise} - a promise that gets resolved once all the final statements have been loaded into memory
    */
   loadFinalStatements() {
-  var js = get(FilesPath.POP_FINAL_STATEMENTS);
-     if(js!="null"){
-       var jsonFinalStatements = js.text;
-        if (jsonFinalStatements.length > 0) {
-          const finalStatementsArray = Convert.parseJsonFinalStatementsArray(jsonFinalStatements);
+    if(platform.isAndroid){
+        return FileIO.getStringOf(FilesPath.POP_FINAL_STATEMENTS)
+            .then(jsonFinalStatements => {
+            if (jsonFinalStatements.length > 0) {
+            const finalStatementsArray = Convert.parseJsonFinalStatementsArray(jsonFinalStatements);
 
-          return this.setFinalStatementsArray(finalStatementsArray, false);
+            return this.setFinalStatementsArray(finalStatementsArray, false);
         } else {
-          return Promise.resolve();
+            return Promise.resolve();
         }
-      }else {
+    })
+    .catch(error => {
+            console.log(error);
+        console.dir(error);
+        console.trace();
 
-        return Promise.reject();
-      }
+        return Promise.reject(error);
+    });
+    }
+    if(platform.isIOS){
+        return Directory.read(FilesPath.POP_FINAL_STATEMENTS)
+            .then(jsonFinalStatements => {
+            if (jsonFinalStatements.length > 0) {
+            const finalStatementsArray = Convert.parseJsonFinalStatementsArray(jsonFinalStatements);
+
+            return this.setFinalStatementsArray(finalStatementsArray, false);
+        } else {
+            return Promise.resolve();
+        }
+    })
+    .catch(error => {
+            console.log(error);
+        console.dir(error);
+        console.trace();
+
+        return Promise.reject(error);
+    });
+    }
   }
 
   /**
@@ -612,20 +634,44 @@ class PoP {
    * @returns {Promise} - a promise that gets resolved once all the PoP-Token have been loaded into memory
    */
   loadPopToken() {
-   var js  = get(FilesPath.POP_TOKEN)
-      if(js!="null"){
-     var jsonPopToken = js.text;
-        if (jsonPopToken.length > 0) {
-          const popTokenArray = Convert.parseJsonPopTokenArray(jsonPopToken);
+    if(platform.isAndroid){
+        return FileIO.getStringOf(FilesPath.POP_TOKEN)
+            .then(jsonPopToken => {
+            if (jsonPopToken.length > 0) {
+            const popTokenArray = Convert.parseJsonPopTokenArray(jsonPopToken);
 
-          return this.setPopTokenArray(popTokenArray, false);
+            return this.setPopTokenArray(popTokenArray, false);
         } else {
-          return Promise.resolve();
+            return Promise.resolve();
         }
-      } else {
+    })
+    .catch(error => {
+            console.log(error);
+        console.dir(error);
+        console.trace();
 
-        return Promise.reject();
-      }
+        return Promise.reject(error);
+    });
+    }
+    if(platform.isIOS){
+        return Directory.read(FilesPath.POP_TOKEN)
+            .then(jsonPopToken => {
+            if (jsonPopToken.length > 0) {
+            const popTokenArray = Convert.parseJsonPopTokenArray(jsonPopToken);
+
+            return this.setPopTokenArray(popTokenArray, false);
+        } else {
+            return Promise.resolve();
+        }
+    })
+    .catch(error => {
+            console.log(error);
+        console.dir(error);
+        console.trace();
+
+        return Promise.reject(error);
+    });
+    }
   }
 }
 

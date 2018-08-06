@@ -8,11 +8,12 @@ const Helper = require("./Helper");
 const FileIO = require("../file-io/file-io");
 const FilesPath = require("../../res/files/files-path");
 const ObjectType = require("./ObjectType");
-const couchbaseModule = require("nativescript-couchbase");
-const observableArrayModule = require("data/observable-array");
+
 const CURVE_ED25519_KYBER = new Kyber.curve.edwards25519.Curve;
 
 const EMPTY_KEYPAIR = CothorityMessages.createKeyPair(new Uint8Array(), new Uint8Array(), new Uint8Array());
+var platform = require("tns-core-modules/platform");
+var Directory = require("../Directory/Directory");
 
 
 /**
@@ -52,76 +53,6 @@ function generateRandomKeyPair() {
   return CothorityMessages.createKeyPair(pubKey.marshalBinary(), Convert.hexToByteArray(privateKey.toString()), Convert.hexToByteArray(pubKey.toString()));
 }
 
-const personList = new observableArrayModule.ObservableArray([]);
-const database = new couchbaseModule.Couchbase("database2");
-
-
-database.createView("view2", "1", function(document, emitter) {
-    emitter.emit(document._id, document);
-});
-function add(id, text){
-    personList.splice(0);
-
-    var rows = database.executeQuery("view2");
-
-    for(var i in rows) {
-        if(rows.hasOwnProperty(i)) {
-            personList.push(rows[i]);
-            console.log(rows[i])
-        }
-    }
-    for ( s =0; s< personList.length; s++){
-
-        if (personList.getItem(s).id === id){
-            database.deleteDocument(personList.getItem(s));
-            personList.remove(s);
-        }
-
-    }
-    database.createDocument({"id": id, "text":text});
-}
-function remove(id){
-    personList.splice(0);
-
-    var rows = database.executeQuery("view2");
-
-    for(var i in rows) {
-        if(rows.hasOwnProperty(i)) {
-            personList.push(rows[i]);
-            console.log(rows[i])
-        }
-    }
-    for ( s =0; s< personList.length; s++){
-
-        if (personList.getItem(s).id === id){
-            database.deleteDocument(personList.getItem(s));
-            personList.remove(s);
-        }
-
-    }
-
-}
-function get(id){
-    personList.splice(0);
-
-    var rows = database.executeQuery("view2");
-
-    for(var i in rows) {
-        if(rows.hasOwnProperty(i)) {
-            personList.push(rows[i]);
-            console.log(rows[i])
-        }
-    }
-    for ( s =0; s< personList.length; s++){
-
-        if (personList.getItem(s).id === id){
-            return personList.getItem(s);
-        }
-
-    }
-    return "null";
-
-}
 /**
  * This represent a cryptographic key pair (public key with private key)
  */
@@ -210,17 +141,34 @@ class KeyPair {
       if (newKeyPair.public.length > 0 && newKeyPair.private.length > 0) {
         toWrite = Convert.objectToJson(newKeyPair);
       }
+        console.log("This is toWrite :****"+toWrite+"*****");
 
-      return add(this._dirname, toWrite).catch((error) => {
-          console.log(error);
-          console.dir(error);
-          console.trace();
+        if(platform.isAndroid){
+         return FileIO.writeStringTo(FileIO.join(this._dirname, FilesPath.KEY_PAIR), toWrite)
+             .catch((error) => {
+             console.log(error);
+         console.dir(error);
+         console.trace();
 
-          return this.setKeyPair(oldKeyPair, false)
-            .then(() => {
-              return Promise.reject(error);
-            });
-        });
+         return this.setKeyPair(oldKeyPair, false)
+             .then(() => {
+             return Promise.reject(error);
+     });
+     });
+     }
+     if(platform.isIOS){
+         return Directory.add(FileIO.join(this._dirname, FilesPath.KEY_PAIR), toWrite)
+             .catch((error) => {
+             console.log(error);
+         console.dir(error);
+         console.trace();
+
+         return this.setKeyPair(oldKeyPair, false)
+             .then(() => {
+             return Promise.reject(error);
+     });
+     });
+     }
     } else {
       return new Promise((resolve, reject) => {
         resolve();
@@ -246,28 +194,45 @@ class KeyPair {
    * @returns {Promise} - a promise that gets resolved once the key pair is loaded into memory
    */
   load() {
+    if(platform.isAndroid){
+        return FileIO.getStringOf(FileIO.join(this._dirname, FilesPath.KEY_PAIR))
+                .then(jsonKeyPair => {
+                if (jsonKeyPair.length > 0 && Convert.jsonToObject(jsonKeyPair).public !== ""
+            &&  Convert.jsonToObject(jsonKeyPair).private !== "" && Convert.jsonToObject(jsonKeyPair).private !== "" ) {
+            return this.setKeyPair(Convert.parseJsonKeyPair(jsonKeyPair), false);
+        } else {
+            return this.randomize();
+        }
+    })
 
+    .catch(error => {
+            console.log(error);
+        console.dir(error);
+        console.trace();
 
-      var jsobject = get(this._dirname);
+        return Promise.reject(error);
+    });
+    }
+    if(platform.isIOS){
+        return Directory.read(FileIO.join(this._dirname, FilesPath.KEY_PAIR))
+                .then(jsonKeyPair => {
+                if (jsonKeyPair.length > 0 && Convert.jsonToObject(jsonKeyPair).public !== ""
+            &&  Convert.jsonToObject(jsonKeyPair).private !== "" && Convert.jsonToObject(jsonKeyPair).private !== "" ) {
+            return this.setKeyPair(Convert.parseJsonKeyPair(jsonKeyPair), false);
+        } else {
+            return this.randomize();
+        }
+    })
 
-      if(jsobject!== "null") {
-          var jsonKeyPair = toString(jsobject);
-          if (  jsonKeyPair.length > 0 && jsobject.public !== ""
-              && jsobject.private !== "" && jsobject.private !== "") {
-              return this.setKeyPair(Convert.parseJsonKeyPairJoseph(toString(jsobject.text)), false);
-          } else {
-              return this.randomize();
-          }
+    .catch(error => {
+            console.log(error);
+        console.dir(error);
+        console.trace();
 
-      } else {
-          return Promise.reject();
-
-      }
-
+        return Promise.reject(error);
+    });
+    }
   }
-
-
-
 
 
   /**

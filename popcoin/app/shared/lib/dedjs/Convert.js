@@ -461,26 +461,7 @@ function parseJsonKeyPair(jsonString) {
 
   return CothorityMessages.createKeyPair(base64ToByteArray(keyPair.public), base64ToByteArray(keyPair.private), publicComplete);
 }
-function parseJsonKeyPairJoseph(jsonString) {
 
-    if (typeof jsonString !== "string") {
-        throw new Error("jsonString must be of type string");
-    }
-
-    const keyPair = jsonString;
-
-    let publicComplete = undefined;
-    if (keyPair.publicComplete !== undefined) {
-        publicComplete = base64ToByteArray(keyPair.publicComplete);
-    }
-
-    if (keyPair.private === undefined) {
-        keyPair.private = "";
-    }
-
-    return CothorityMessages.createKeyPair(base64ToByteArray(toString(keyPair.public)), base64ToByteArray(toString(keyPair.private)), publicComplete);
-}
-module.exports.parseJsonKeyPairJoseph=parseJsonKeyPairJoseph;
 /**
  * Parses a JSON string into a ServerIdentity object.
  * @param {string} jsonString - the JSON string to parse into a ServerIdentity object

@@ -46,7 +46,6 @@
                               class="fab-button"
                              />
 
-
         <ActivityIndicator busy="{{ isLoading }}" rowSpan="1" colSpan="2"/>
     </GridLayout>
 </Page>

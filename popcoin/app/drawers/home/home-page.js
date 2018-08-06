@@ -9,7 +9,6 @@ const User = require("../../shared/lib/dedjs/object/user/User").get;
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const Timer = require("timer");
-const addParty = require("./att/att-party-list").addParty;
 const viewModel = ObservableModule.fromObject({
   rosterModule: User.getRosterModule(),
   isRosterEmpty: true
@@ -33,9 +32,7 @@ function onUnloaded() {
 function onNavigatingTo(args) {
   const page = args.object;
   pageObject = page.page;
-    viewModel.set("addParty", function(eventData) {
-        addParty();
-    });
+
   page.bindingContext = viewModel;
 
   // Bind isEmpty to the length of the array
@@ -228,6 +225,5 @@ module.exports.addConode = addConode;
 module.exports.deleteConode = deleteConode;
 module.exports.onLoaded = onLoaded;
 module.exports.onUnloaded = onUnloaded;
-
 
 

@@ -35,7 +35,6 @@ function onLoaded(args) {
 }
 
 function linkToConode() {
-
   if (!User.isKeyPairSet()) {
     return Dialog.alert({
       title: "Key Pair Missing",

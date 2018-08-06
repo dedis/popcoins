@@ -44,9 +44,5 @@
 	<key>NSCameraUsageDescription</key>
     <string>We need camera access in order to scan QR codes (during a scan you can use the volume buttons to toggle the
     torch). Don't forget to turn you volume up to get a feedback when a code is scanned.</string>
-
-        <key>NSPhotoLibraryUsageDescription</key>
-        <string>We need Access to photo</string>
-
 </dict>
 </plist>
