@@ -24,14 +24,19 @@ function MyDrawerViewModel(selectedPage) {
                 icon: "\uf0a1",
                 isSelected: selectedPage === "PoP"
             },
-
+            {
+                title: "Bar",
+                name: "bar",
+                route: "drawers/bar/bar-list",
+                icon: "\uf0fc",
+                isSelected: selectedPage === "Bar"
+            },
             {
                 title: "CISC",
                 name: "cisc",
                 route: "drawers/cisc/cisc-page",
                 icon: "\uf0c1",
-                isSelected: selectedPage === "CISC",
-
+                isSelected: selectedPage === "CISC"
             },
             {
                 title: "Settings",
@@ -45,7 +50,5 @@ function MyDrawerViewModel(selectedPage) {
 
     return viewModel;
 }
-
-
 
 module.exports = MyDrawerViewModel;
