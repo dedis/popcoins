@@ -35,14 +35,9 @@ class User {
      * Constructor for the User class.
      */
     constructor() {
-        this._isLoaded = false;
         this._name = "";
-        new Crypto.KeyPair(FilesPath.USER_PATH).then((key) => {
-            this._keyPair = key;
-        }).catch(error => {
-            console.log(error);
-        });
-            this._roster = ObservableModule.fromObject({
+        this._isLoaded = false;
+        this._roster = ObservableModule.fromObject({
             isLoading: false,
             id: new Uint8Array(),
             list: new ObservableArray(),
@@ -164,18 +159,18 @@ class User {
             toWrite = Convert.objectToJson(nameObject);
 
 
-          return FileIO.writeStringTo(FilesPath.USER_NAME, toWrite)
-              .catch((error) => {
-              console.log(error);
-          console.dir(error);
-          console.trace();
+            return FileIO.writeStringTo(FilesPath.USER_NAME, toWrite)
+                .catch((error) => {
+                    console.log(error);
+                    console.dir(error);
+                    console.trace();
 
-          return this.setName(oldName, false)
-              .then(() => {
-              return Promise.reject(error);
-      });
-      });
-    }
+                    return this.setName(oldName, false)
+                        .then(() => {
+                            return Promise.reject(error);
+                        });
+                });
+        }
 
         return Promise.resolve();
     }
@@ -215,24 +210,24 @@ class User {
                 toWrite = Convert.objectToJson(newRoster);
             }
 
-          return FileIO.writeStringTo(FilesPath.ROSTER, toWrite)
-              .catch((error) => {
-              console.log(error);
-          console.dir(error);
-          console.trace();
+            return FileIO.writeStringTo(FilesPath.ROSTER, toWrite)
+                .catch((error) => {
+                    console.log(error);
+                    console.dir(error);
+                    console.trace();
 
-          return this.setRoster(oldRoster, false)
-              .then(() => {
-              return Promise.reject(error);
-      });
-      });
+                    return this.setRoster(oldRoster, false)
+                        .then(() => {
+                            return Promise.reject(error);
+                        });
+                });
 
-    } else {
-      return new Promise((resolve, reject) => {
-        resolve();
-      });
+        } else {
+            return new Promise((resolve, reject) => {
+                resolve();
+            });
+        }
     }
-  }
 
     /**
      * Action functions.
@@ -466,7 +461,7 @@ class User {
     load() {
         this._isLoaded = false;
 
-        const promises = [this.loadRoster(), this.loadName()];
+        const promises = [this.loadKeyPair(), this.loadRoster(), this.loadName()];
 
         return Promise.all(promises)
             .then(() => {
@@ -481,69 +476,77 @@ class User {
             });
     }
 
-  /**
-   * Loads the users key pair into memory.
-   * @returns {Promise} - a promise that gets resolved once the key pair is loaded into memory
-   */
-  loadKeyPair() {
-    return this._keyPair.load();
-  }
+    /**
+     * Loads the users key pair into memory.
+     * @returns {Promise} - a promise that gets resolved once the key pair is loaded into memory
+     */
+    loadKeyPair() {
+       return  new Crypto.KeyPair(FilesPath.USER_PATH).then((key) => {
+            this._keyPair = key;
+        }).catch(error => {
+            console.log(error);
+            console.dir(error);
+            console.trace();
 
-  /**
-   * Loads the user name into memory.
-   * @returns {Promise} - a promise that gets resolved once the name is loaded into memory
-   */
-  loadName() {
+            return Promise.reject(error);
+        });
+    }
 
-
-            return FileIO.getStringOf(FilesPath.USER_NAME)
-                .then(jsonName => {
-                    let name;
-                    if (jsonName.length > 0) {
-                        name = Convert.parseJsonUserName(jsonName);
-                    }
-                    else {
-                        name = "Undefined";
-                    }
-                    return this.setName(name, false);
-                })
-                .catch(error => {
-                    console.log(error);
-                    console.dir(error);
-                    console.trace();
-
-        return Promise.reject(error);
-    });
-
-  }
-
-  /**
-   * Loads the users roster into memory.
-   * @returns {Promise} - a promise that gets resolved once the complete roster is loaded into memory
-   */
-  loadRoster() {
-
-       return FileIO.getStringOf(FilesPath.ROSTER)
-           .then(jsonRoster => {
-           if (jsonRoster.length > 0) {
-           return Convert.parseJsonRoster(jsonRoster);
-       } else {
-           return EMPTY_ROSTER;
-       }
-   })
-   .then(roster => {
-           return this.setRoster(roster, false);
-   })
-   .catch(error => {
-           console.log(error);
-       console.dir(error);
-       console.trace();
-
-                    return Promise.reject(error);
-                });
+    /**
+     * Loads the user name into memory.
+     * @returns {Promise} - a promise that gets resolved once the name is loaded into memory
+     */
+    loadName() {
 
 
-  }
+        return FileIO.getStringOf(FilesPath.USER_NAME)
+            .then(jsonName => {
+                let name;
+                if (jsonName.length > 0) {
+                    name = Convert.parseJsonUserName(jsonName);
+                }
+                else {
+                    name = "Undefined";
+                }
+                return this.setName(name, false);
+            })
+            .catch(error => {
+                console.log(error);
+                console.dir(error);
+                console.trace();
+
+                return Promise.reject(error);
+            });
+
+    }
+
+    /**
+     * Loads the users roster into memory.
+     * @returns {Promise} - a promise that gets resolved once the complete roster is loaded into memory
+     */
+    loadRoster() {
+
+        return FileIO.getStringOf(FilesPath.ROSTER)
+            .then(jsonRoster => {
+                if (jsonRoster.length > 0) {
+                    return Convert.parseJsonRoster(jsonRoster);
+                } else {
+                    return EMPTY_ROSTER;
+                }
+            })
+            .then(roster => {
+                return this.setRoster(roster, false);
+            })
+            .catch(error => {
+                console.log(error);
+                console.dir(error);
+                console.trace();
+
+                return Promise.reject(error);
+            });
+
+
+    }
 }
 
 /**
