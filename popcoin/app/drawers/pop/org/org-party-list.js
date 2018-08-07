@@ -378,3 +378,4 @@ module.exports.onSwipeCellStarted = onSwipeCellStarted;
 module.exports.deleteParty = deleteParty;
 module.exports.addParty = addParty;
 module.exports.onUnloaded = onUnloaded;
+module.exports.hashAndSave = hashAndSave;
