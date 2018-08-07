@@ -115,8 +115,8 @@ function partyTapped(args) {
               })
           } else if (result === "Show the QR Code of my public key") {
             Frame.topmost().currentPage.showModal("shared/pages/qr-code/qr-code-page", {
-              textToShow: Convert.objectToJson(party.getKeyPair()),
-              title: "Key Pair",
+              textToShow: " { \"public\" :  \""+Convert.byteArrayToBase64(party.getKeyPair().public)+"\"}",
+              title: "Public Key",
 
             }, () => {
             }, true);
