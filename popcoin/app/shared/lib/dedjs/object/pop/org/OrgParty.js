@@ -141,7 +141,7 @@ class OrgParty extends Party {
         toWrite = Convert.objectToJson(newLinkedConode);
       }
 
-      if(platform.isAndroid){
+
           return FileIO.writeStringTo(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_CONODE), toWrite)
               .catch((error) => {
               console.log(error);
@@ -155,22 +155,7 @@ class OrgParty extends Party {
       }).then(() => {
               return this.loadStatus();
       });
-      }
-      if(platform.isIOS){
-          return Directory.add(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_CONODE), toWrite)
-              .catch((error) => {
-              console.log(error);
-          console.dir(error);
-          console.trace();
 
-          return this.setLinkedConode(oldLinkedConode, false)
-              .then(() => {
-              return Promise.reject(error);
-      });
-      }).then(() => {
-              return this.loadStatus();
-      });
-      }
     } else {
       return new Promise((resolve, reject) => {
         resolve();
@@ -244,7 +229,7 @@ class OrgParty extends Party {
         toWrite = Convert.objectToJson(newPopDesc);
       }
 
-      if(platform.isAndroid){
+
           return FileIO.writeStringTo(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_DESC), toWrite)
               .catch((error) => {
               console.log(error);
@@ -259,23 +244,7 @@ class OrgParty extends Party {
       .then(() => {
               return this.updatePopHash();
       });
-      }
-      if(platform.isIOS){
-          return Directory.add(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_DESC), toWrite)
-              .catch((error) => {
-              console.log(error);
-          console.dir(error);
-          console.trace();
 
-          return this.setPopDesc(oldPopDesc, false)
-              .then(() => {
-              return Promise.reject(error);
-      });
-      })
-      .then(() => {
-              return this.updatePopHash();
-      });
-      }
     } else {
       return new Promise((resolve, reject) => {
         resolve();
@@ -337,7 +306,6 @@ class OrgParty extends Party {
         toWrite = Convert.objectToJson(object);
       }
 
-     if(platform.isAndroid){
          return FileIO.writeStringTo(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_ATTENDEES), toWrite)
              .catch((error) => {
              console.log(error);
@@ -349,20 +317,7 @@ class OrgParty extends Party {
              return Promise.reject(error);
      });
      });
-     }
-     if(platform.isIOS){
-         return Directory.add(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_ATTENDEES), toWrite)
-             .catch((error) => {
-             console.log(error);
-         console.dir(error);
-         console.trace();
 
-         return this.setRegisteredAtts(oldRegisteredAtts, false)
-             .then(() => {
-             return Promise.reject(error);
-     });
-     });
-     }
     } else {
       return new Promise((resolve, reject) => {
         resolve();
@@ -431,7 +386,6 @@ class OrgParty extends Party {
         toWrite = Convert.objectToJson(object);
       }
 
-      if(platform.isAndroid){
           return FileIO.writeStringTo(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_DESC_HASH), toWrite)
               .catch((error) => {
               console.log(error);
@@ -443,20 +397,7 @@ class OrgParty extends Party {
               return Promise.reject(error);
       });
       });
-      }
-      if(platform.isIOS){
-          return Directory.add(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_DESC_HASH), toWrite)
-              .catch((error) => {
-              console.log(error);
-          console.dir(error);
-          console.trace();
 
-          return this.setPopDescHash(oldHash, false)
-              .then(() => {
-              return Promise.reject(error);
-      });
-      });
-      }
     } else {
       return new Promise((resolve, reject) => {
         resolve();
@@ -906,7 +847,6 @@ class OrgParty extends Party {
    * @returns {Promise} - a promise that gets resolved once the linked conode has been loaded into memory
    */
   loadLinkedConode() {
-   if(platform.isAndroid){
        return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_CONODE))
            .then(jsonLinkedConode => {
            if (jsonLinkedConode.length > 0) {
@@ -924,26 +864,7 @@ class OrgParty extends Party {
 
        return Promise.reject(error);
    });
-   }
-   if(platform.isIOS){
-       return Directory.read(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_CONODE))
-           .then(jsonLinkedConode => {
-           if (jsonLinkedConode.length > 0) {
-           const linkedConode = Convert.parseJsonServerIdentity(jsonLinkedConode);
 
-           return this.setLinkedConode(linkedConode, false);
-       } else {
-           return Promise.resolve();
-       }
-   })
-   .catch(error => {
-           console.log(error);
-       console.dir(error);
-       console.trace();
-
-       return Promise.reject(error);
-   });
-   }
   }
 
   /**
@@ -951,7 +872,6 @@ class OrgParty extends Party {
    * @returns {Promise} - a promise that gets resolved once the PopDesc has been loaded into memory
    */
   loadPopDesc() {
-    if(platform.isAndroid){
         return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_DESC))
             .then(jsonPopDesc => {
             if (jsonPopDesc.length > 0) {
@@ -969,26 +889,7 @@ class OrgParty extends Party {
 
         return Promise.reject(error);
     });
-    }
-    if(platform.isIOS){
-        return Directory.read(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_DESC))
-            .then(jsonPopDesc => {
-            if (jsonPopDesc.length > 0) {
-            const popDesc = Convert.parseJsonPopDesc(jsonPopDesc);
 
-            return this.setPopDesc(popDesc, false);
-        } else {
-            return Promise.resolve();
-        }
-    })
-    .catch(error => {
-            console.log(error);
-        console.dir(error);
-        console.trace();
-
-        return Promise.reject(error);
-    });
-    }
   }
 
   /**
@@ -996,7 +897,6 @@ class OrgParty extends Party {
    * @returns {Promise} - a promise that gets resolved once all the registered attendees have been loaded into memory
    */
   loadRegisteredAtts() {
-    if(platform.isAndroid){
         return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_ATTENDEES))
             .then(jsonRegisteredAtts => {
             if (jsonRegisteredAtts.length > 0) {
@@ -1014,26 +914,7 @@ class OrgParty extends Party {
 
         return Promise.reject(error);
     });
-    }
-    if(platform.isIOS){
-        return Directory.read(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_ATTENDEES))
-            .then(jsonRegisteredAtts => {
-            if (jsonRegisteredAtts.length > 0) {
-            const registeredAtts = Convert.parseJsonArrayOfKeys(jsonRegisteredAtts);
 
-            return this.setRegisteredAtts(registeredAtts, false);
-        } else {
-            return Promise.resolve();
-        }
-    })
-    .catch(error => {
-            console.log(error);
-        console.dir(error);
-        console.trace();
-
-        return Promise.reject(error);
-    });
-    }
   }
 
   /**
@@ -1041,7 +922,6 @@ class OrgParty extends Party {
    * @returns {Promise} - a promise that gets resolved once the PopDesc hash has been loaded into memory
    */
   loadPopDescHash() {
-    if(platform.isAndroid){
         return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_DESC_HASH))
             .then(jsonPopDescHash => {
             if (jsonPopDescHash.length > 0) {
@@ -1059,26 +939,7 @@ class OrgParty extends Party {
 
         return Promise.reject(error);
     });
-    }
-    if(platform.isIOS){
-        return Directory.read(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_DESC_HASH))
-            .then(jsonPopDescHash => {
-            if (jsonPopDescHash.length > 0) {
-            const popDescHash = Convert.parseJsonPopDescHash(jsonPopDescHash);
 
-            return this.setPopDescHash(popDescHash, false);
-        } else {
-            return Promise.resolve();
-        }
-    })
-    .catch(error => {
-            console.log(error);
-        console.dir(error);
-        console.trace();
-
-        return Promise.reject(error);
-    });
-    }
   }
 
   /**
@@ -1086,12 +947,8 @@ class OrgParty extends Party {
    * @returns {Promise} a promise that gets resolved once the party is deleted
    */
   remove() {
-   if(platform.isAndroid){
        return FileIO.removeFolder(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname));
-   }
-   if(platform.isIOS){
-       return Directory.deleteFile(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname));
-   }
+
   }
 }
 

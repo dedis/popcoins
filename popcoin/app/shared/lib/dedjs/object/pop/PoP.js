@@ -212,7 +212,7 @@ class PoP {
         toWrite = Convert.objectToJson(object);
       }
 
-      if(platform.isAndroid){
+
           return FileIO.writeStringTo(FilesPath.POP_FINAL_STATEMENTS, toWrite)
               .catch((error) => {
               console.log(error);
@@ -224,20 +224,7 @@ class PoP {
               return Promise.reject(error);
       });
       });
-      }
-      if(platform.isIOS){
-          return Directory.add(FilesPath.POP_FINAL_STATEMENTS, toWrite)
-              .catch((error) => {
-              console.log(error);
-          console.dir(error);
-          console.trace();
 
-          return this.setFinalStatementsArray(oldFinalStatements, false)
-              .then(() => {
-              return Promise.reject(error);
-      });
-      });
-      }
     } else {
       return new Promise((resolve, reject) => {
         resolve();
@@ -275,7 +262,7 @@ class PoP {
         toWrite = Convert.objectToJson(object);
       }
 
-     if(platform.isAndroid){
+
          return FileIO.writeStringTo(FilesPath.POP_TOKEN, toWrite)
              .catch((error) => {
              console.log(error);
@@ -287,20 +274,7 @@ class PoP {
              return Promise.reject(error);
      });
      });
-     }
-     if(platform.isIOS){
-         return Directory.add(FilesPath.POP_TOKEN, toWrite)
-             .catch((error) => {
-             console.log(error);
-         console.dir(error);
-         console.trace();
 
-         return this.setPopTokenArray(oldPopToken, false)
-             .then(() => {
-             return Promise.reject(error);
-     });
-     });
-     }
     } else {
       return new Promise((resolve, reject) => {
         resolve();
@@ -347,22 +321,14 @@ class PoP {
     if (newArray.length > 0) {
       return this.setFinalStatementsArray(newArray, true);
     } else {
-      if(platform.isAndroid){
+
           return FileIO.writeStringTo(FilesPath.POP_FINAL_STATEMENTS, "")
               .then(() => {
               this.emptyFinalStatementArray();
 
           return Promise.resolve();
       });
-      }
-      if(platform.isIOS){
-          return Directory.add(FilesPath.POP_FINAL_STATEMENTS, "")
-              .then(() => {
-              this.emptyFinalStatementArray();
 
-          return Promise.resolve();
-      });
-      }
     }
   }
 
@@ -397,11 +363,9 @@ class PoP {
       return this.addFinalStatement(finalStatement, true)
         .then(() => {
 
-        if(platform.isIOS){
+
             return FileIO.writeStringTo(FilesPath.POP_TOKEN, "");
-        }if(platform.isAndroid){
-            return FileIO.writeStringTo(FilesPath.POP_TOKEN, "");
-        }
+
 
         })
         .then(() => {
@@ -520,7 +484,7 @@ class PoP {
   reset() {
     this._isLoaded = false;
 
-    if(platform.isAndroid){
+
         const promises = [FileIO.writeStringTo(FilesPath.POP_FINAL_STATEMENTS, ""), FileIO.writeStringTo(FilesPath.POP_TOKEN, "")];
 
         return Promise.all(promises)
@@ -539,27 +503,7 @@ class PoP {
 
         return Promise.reject(error);
     });
-    }
-    if(platform.isIOS){
-        Directory.add(FilesPath.POP_FINAL_STATEMENTS, "");
 
-        return Directory.add(FilesPath.POP_TOKEN, "")
-            .then(() => {
-            this.emptyFinalStatementArray();
-        this.emptyPopTokenArray();
-
-        this._isLoaded = true;
-
-        return Promise.resolve();
-    })
-    .catch(error => {
-            console.log(error);
-        console.dir(error);
-        console.trace();
-
-        return Promise.reject(error);
-    });
-    }
   }
 
   /**
@@ -589,7 +533,7 @@ class PoP {
    * @returns {Promise} - a promise that gets resolved once all the final statements have been loaded into memory
    */
   loadFinalStatements() {
-    if(platform.isAndroid){
+
         return FileIO.getStringOf(FilesPath.POP_FINAL_STATEMENTS)
             .then(jsonFinalStatements => {
             if (jsonFinalStatements.length > 0) {
@@ -607,26 +551,7 @@ class PoP {
 
         return Promise.reject(error);
     });
-    }
-    if(platform.isIOS){
-        return Directory.read(FilesPath.POP_FINAL_STATEMENTS)
-            .then(jsonFinalStatements => {
-            if (jsonFinalStatements.length > 0) {
-            const finalStatementsArray = Convert.parseJsonFinalStatementsArray(jsonFinalStatements);
 
-            return this.setFinalStatementsArray(finalStatementsArray, false);
-        } else {
-            return Promise.resolve();
-        }
-    })
-    .catch(error => {
-            console.log(error);
-        console.dir(error);
-        console.trace();
-
-        return Promise.reject(error);
-    });
-    }
   }
 
   /**
@@ -634,7 +559,7 @@ class PoP {
    * @returns {Promise} - a promise that gets resolved once all the PoP-Token have been loaded into memory
    */
   loadPopToken() {
-    if(platform.isAndroid){
+
         return FileIO.getStringOf(FilesPath.POP_TOKEN)
             .then(jsonPopToken => {
             if (jsonPopToken.length > 0) {
@@ -652,26 +577,7 @@ class PoP {
 
         return Promise.reject(error);
     });
-    }
-    if(platform.isIOS){
-        return Directory.read(FilesPath.POP_TOKEN)
-            .then(jsonPopToken => {
-            if (jsonPopToken.length > 0) {
-            const popTokenArray = Convert.parseJsonPopTokenArray(jsonPopToken);
 
-            return this.setPopTokenArray(popTokenArray, false);
-        } else {
-            return Promise.resolve();
-        }
-    })
-    .catch(error => {
-            console.log(error);
-        console.dir(error);
-        console.trace();
-
-        return Promise.reject(error);
-    });
-    }
   }
 }
 

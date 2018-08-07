@@ -3,7 +3,7 @@
  */
 
 const FileSystem = require("tns-core-modules/file-system");
-const Documents = FileSystem.knownFolders.currentApp();
+const Documents = FileSystem.knownFolders.documents();
 
 /**
  * Gets the string of the file at filePath and returns a promise with the content.

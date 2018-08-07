@@ -32,9 +32,7 @@ class AttParty extends Party {
         }
         this._folderName = id;
 
-        if (platform.isAndroid) {
-            this._partyExistLocally = FileIO.folderExists(FileIO.join(FilePath.POP_ATT_PATH, this._folderName));
-        }
+        this._partyExistLocally = FileIO.folderExists(FileIO.join(FilePath.POP_ATT_PATH, this._folderName));
         if (!this._partyExistLocally && address === undefined) {
             throw new Error("address should not be undefined as the party isn't stored locally");
         } else if (!this._partyExistLocally && !Helper.isValidAddress(address)) {
@@ -82,40 +80,25 @@ class AttParty extends Party {
 
     }
 
-    /**
-     * Load the final statement from local storage
-     * @returns {Promise} - a promise that gets resolved once the final statement is load in memory
-     */
-    loadFinalStatement() {
-        if (platform.isIOS) {
-            return Directory.read(FileIO.join(FilePath.POP_ATT_PATH, this._folderName, FilePath.POP_ATT_FINAL))
-                .then(string => {
-                    this._finalStatement = Convert.jsonToObject(string);
-                    return Promise.resolve();
-                })
-                .catch(error => {
-                    console.log(error);
-                    console.dir(error);
-                    console.trace();
+  /**
+   * Load the final statement from local storage
+   * @returns {Promise} - a promise that gets resolved once the final statement is load in memory
+   */
+  loadFinalStatement() {
 
-                    return Promise.reject(error);
-                })
-        }
-        if (platform.isAndroid) {
-            return FileIO.getStringOf(FileIO.join(FilePath.POP_ATT_PATH, this._folderName, FilePath.POP_ATT_FINAL))
-                .then(string => {
-                    this._finalStatement = Convert.jsonToObject(string);
-                    return Promise.resolve();
-                })
-                .catch(error => {
-                    console.log(error);
-                    console.dir(error);
-                    console.trace();
+    return FileIO.getStringOf(FileIO.join(FilePath.POP_ATT_PATH, this._folderName, FilePath.POP_ATT_FINAL))
+      .then(string => {
+        this._finalStatement = Convert.jsonToObject(string);
+        return Promise.resolve();
+      })
+      .catch(error => {
+        console.log(error);
+        console.dir(error);
+        console.trace();
 
-                    return Promise.reject(error);
-                })
-        }
-    }
+        return Promise.reject(error);
+      })
+  }
 
     /**
      * Use the final statement in memory to update the party description module
@@ -144,33 +127,23 @@ class AttParty extends Party {
         return Promise.resolve();
     }
 
-    /**
-     * Write the final statement of the party on the disk to speed up the startup
-     * @returns {Promise} - a promise that gets resolved once the file is written
-     */
-    cacheFinalStatement() {
-        const toWrite = Convert.objectToJson(this._finalStatement);
-        if (platform.isAndroid) {
-            return FileIO.writeStringTo(FileIO.join(FilePath.POP_ATT_PATH, this._folderName, FilePath.POP_ATT_FINAL), toWrite)
-                .catch(error => {
-                    console.log(error);
-                    console.dir(error);
-                    console.trace();
+  /**
+   * Write the final statement of the party on the disk to speed up the startup
+   * @returns {Promise} - a promise that gets resolved once the file is written
+   */
+  cacheFinalStatement() {
+    const toWrite = Convert.objectToJson(this._finalStatement);
 
-                    return Promise.reject(error);
-                })
-        }
-        if (platform.isIOS) {
-            return Directory.add(FileIO.join(FilePath.POP_ATT_PATH, this._folderName, FilePath.POP_ATT_FINAL), toWrite)
-                .catch(error => {
-                    console.log(error);
-                    console.dir(error);
-                    console.trace();
+    return FileIO.writeStringTo(FileIO.join(FilePath.POP_ATT_PATH, this._folderName, FilePath.POP_ATT_FINAL), toWrite)
+      .catch(error => {
+        console.log(error);
+        console.dir(error);
+        console.trace();
 
-                    return Promise.reject(error);
-                })
-        }
-    }
+        return Promise.reject(error);
+      })
+
+  }
 
     /**
      * Randomize the key par associated with this party
@@ -278,19 +251,14 @@ class AttParty extends Party {
         );
     }
 
-    /**
-     * Completely remove Party from disk
-     * @returns {Promise} a promise that gets resolved once the party is deleted
-     */
-    remove() {
-        if (platform.isAndroid) {
-            return FileIO.removeFolder(FileIO.join(FilePath.POP_ATT_PATH, this._folderName));
-        }
-        if (platform.isIOS) {
-            Directory.deleteFile(FileIO.join(FilePath.POP_ATT_PATH, this._folderName));
-            return;
-        }
-    }
+  /**
+   * Completely remove Party from disk
+   * @returns {Promise} a promise that gets resolved once the party is deleted
+   */
+  remove() {
+
+        return FileIO.removeFolder(FileIO.join(FilePath.POP_ATT_PATH, this._folderName));
+  }
 }
 
 /**

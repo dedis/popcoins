@@ -146,38 +146,25 @@ class KeyPair {
             }
             console.log("This is toWrite :****" + toWrite + "*****");
 
-            if (platform.isAndroid) {
-                return FileIO.writeStringTo(FileIO.join(this._dirname, FilesPath.KEY_PAIR), toWrite)
-                    .catch((error) => {
-                        console.log(error);
-                        console.dir(error);
-                        console.trace();
 
-                        return this.setKeyPair(oldKeyPair, false)
-                            .then(() => {
-                                return Promise.reject(error);
-                            });
-                    });
-            }
-            if (platform.isIOS) {
-                return Directory.add(FileIO.join(this._dirname, FilesPath.KEY_PAIR), toWrite)
-                    .catch((error) => {
-                        console.log(error);
-                        console.dir(error);
-                        console.trace();
+         return FileIO.writeStringTo(FileIO.join(this._dirname, FilesPath.KEY_PAIR), toWrite)
+             .catch((error) => {
+             console.log(error);
+         console.dir(error);
+         console.trace();
 
-                        return this.setKeyPair(oldKeyPair, false)
-                            .then(() => {
-                                return Promise.reject(error);
-                            });
-                    });
-            }
-        } else {
-            return new Promise((resolve, reject) => {
-                resolve();
-            });
-        }
+         return this.setKeyPair(oldKeyPair, false)
+             .then(() => {
+             return Promise.reject(error);
+     });
+     });
+
+    } else {
+      return new Promise((resolve, reject) => {
+        resolve();
+      });
     }
+  }
 
     /**
      * Randomize the key pair
@@ -192,13 +179,13 @@ class KeyPair {
         return this.setKeyPair(keyPair, true);
     }
 
-    /**
-     * Loads the keypair memory.
-     * @returns {Promise} - a promise that gets resolved once the key pair is loaded into memory
-     */
-    load() {
-        if (platform.isAndroid) {
-            return FileIO.getStringOf(FileIO.join(this._dirname, FilesPath.KEY_PAIR))
+  /**
+   * Loads the keypair memory.
+   * @returns {Promise} - a promise that gets resolved once the key pair is loaded into memory
+   */
+  load() {
+
+        return FileIO.getStringOf(FileIO.join(this._dirname, FilesPath.KEY_PAIR))
                 .then(jsonKeyPair => {
                     if (jsonKeyPair.length > 0 && Convert.jsonToObject(jsonKeyPair).public !== ""
                         && Convert.jsonToObject(jsonKeyPair).private !== "" && Convert.jsonToObject(jsonKeyPair).private !== "") {
@@ -213,29 +200,11 @@ class KeyPair {
                     console.dir(error);
                     console.trace();
 
-                    return Promise.reject(error);
-                });
-        }
-        if (platform.isIOS) {
-            return Directory.read(FileIO.join(this._dirname, FilesPath.KEY_PAIR))
-                .then(jsonKeyPair => {
-                    if (jsonKeyPair.length > 0 && Convert.jsonToObject(jsonKeyPair).public !== ""
-                        && Convert.jsonToObject(jsonKeyPair).private !== "" && Convert.jsonToObject(jsonKeyPair).private !== "") {
-                        return this.setKeyPair(Convert.parseJsonKeyPair(jsonKeyPair), false);
-                    } else {
-                        return this.randomize();
-                    }
-                })
+        return Promise.reject(error);
+    });
 
-                .catch(error => {
-                    console.log(error);
-                    console.dir(error);
-                    console.trace();
 
-                    return Promise.reject(error);
-                });
-        }
-    }
+  }
 
 
     /**
