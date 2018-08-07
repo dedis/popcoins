@@ -90,10 +90,19 @@ function removeFolder(folder) {
   });
 }
 
+function folderExists(path) {
+    return FileSystem.Folder.exists(this.join(Documents.path, path));
+}
+
+function fileExists(path) {
+    return FileSystem.Folder.exists(this.join(Documents.path, path));
+}
+
 module.exports.getStringOf = getStringOf;
 module.exports.writeStringTo = writeStringTo;
 module.exports.forEachFolderElement = forEachFolderElement;
 module.exports.removeFolder = removeFolder;
 module.exports.join = FileSystem.path.join;
-module.exports.folderExists = FileSystem.Folder.exists;
-module.exports.fileExists = FileSystem.File.exists;
+module.exports.fileExists = fileExists;
+module.exports.folderExists = folderExists;
+

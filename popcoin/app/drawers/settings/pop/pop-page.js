@@ -1,6 +1,5 @@
 const Dialog = require("ui/dialogs");
 const PoP = require("../../../shared/lib/dedjs/object/pop/PoP").get;
-const AttParty = require("../../../shared/lib/dedjs/object/pop/att/AttParty").get;
 const Org = require("../../../shared/lib/dedjs/object/pop/org/OrgParty").Party;
 
 function onLoaded(args) {

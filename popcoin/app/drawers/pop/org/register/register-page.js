@@ -4,20 +4,22 @@ const Convert = require("../../../../shared/lib/dedjs/Convert");
 const ScanToReturn = require("../../../../shared/lib/scan-to-return/scan-to-return");
 const topmost = require("ui/frame").topmost;
 const PartyStates = require("../../../../shared/lib/dedjs/object/pop/org/OrgParty").States;
+const AttParty = require("../../../../shared/lib/dedjs/object/pop/att/AttParty").Party;
 
 const User = require("../../../../shared/lib/dedjs/object/user/User").get;
 
 let viewModel = undefined;
 let Party = undefined;
 let pageObject = undefined;
-let isPressed =undefined;
+let isPressed = undefined;
+
 function onLoaded(args) {
   isPressed = "true";
   const page = args.object;
   pageObject = page.page;
   const context = page.navigationContext;
 
-  if(context.party === undefined) {
+  if (context.party === undefined) {
     throw new Error("Party should be given in the context");
   }
 
@@ -32,13 +34,12 @@ function onLoaded(args) {
   const bool = context.finalized;
 
 
-
 }
 
 /**
  * Function that gets called when the user wants to register a public key manually.
  */
-const addPartyMyself = require("../../../home/att/att-party-list").addPartyMyself;
+const loadParties = require("../../../home/att/att-party-list").loadParties;
 
 function addManual() {
   return Dialog.prompt({
@@ -63,7 +64,21 @@ function addManual() {
           });
         }
 
-        return Party.registerAttendee(User.getKeyPair().public).then(addPartyMyself( Convert.byteArrayToHex(Party.getPopDescHash()),Party.getLinkedConode().address));
+
+        let info = {
+          id: Convert.byteArrayToHex(Party.getPopDescHash()),
+          address: Party.getLinkedConode().address
+        };
+
+        var newParty = new AttParty(info.id, info.address);
+
+
+        return newParty.load().then(party => {
+          Party.registerAttendee(party.getKeyPair().public)
+        });
+
+
+        // return Party.registerAttendee(User.getKeyPair().public).then(addPartyMyself( Convert.byteArrayToHex(Party.getPopDescHash()),Party.getLinkedConode().address));
 
       } else {
         // Cancel
@@ -85,9 +100,6 @@ function addManual() {
     });
 }
 
-/**
- * Function that gets called when the user wants to register a public key by scanning it.
- */
 function addScan() {
   return ScanToReturn.scan()
     .then(keyPairJson => {
@@ -203,7 +215,7 @@ function registerKeys() {
     .then((result) => {
 
       if (result === PartyStates.FINALIZING) {
-        isPressed= "false";
+        isPressed = "false";
         return Dialog.alert({
           title: "Finalizing",
           message: "Finalize order has been sent but not all other conodes finalized yet.",
@@ -245,18 +257,20 @@ function addNewKey() {
     actions: ["Scan QR", "Enter manually"]
   }).then(function (result) {
     console.log("Dialog result: " + result);
-    if(result === "Scan QR"){
+    if (result === "Scan QR") {
 
-        addScan().then(function (){
-            setTimeout(()=> { Dialog.alert({
-                title: "Confirmation",
-                message: "The attendee has been added successfully!",
-                okButtonText: "Ok"
-            })});
-        })
+      addScan().then(function () {
+        setTimeout(() => {
+          Dialog.alert({
+            title: "Confirmation",
+            message: "The attendee has been added successfully!",
+            okButtonText: "Ok"
+          })
+        });
+      })
 
 
-    }else if(result === "Enter manually"){
+    } else if (result === "Enter manually") {
       addManual();
     }
   });
@@ -264,13 +278,14 @@ function addNewKey() {
 
 function shareToAttendee() {
   let info = {
-    id:Convert.byteArrayToHex(Party.getPopDescHash()),
-    address:Party.getLinkedConode().address
+    id: Convert.byteArrayToHex(Party.getPopDescHash()),
+    address: Party.getLinkedConode().address
   };
   pageObject.showModal("shared/pages/qr-code/qr-code-page", {
     textToShow: Convert.objectToJson(info),
     title: "Party information"
-  }, () => { }, true);
+  }, () => {
+  }, true);
 
 }
 

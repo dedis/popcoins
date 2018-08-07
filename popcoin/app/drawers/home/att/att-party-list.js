@@ -13,7 +13,6 @@ const PoP = require("../../../shared/lib/dedjs/object/pop/PoP").get;
 var platform = require("tns-core-modules/platform");
 var Directory = require("../../../shared/lib/Directory/Directory");
 
-let loaded = false;
 const viewModel = ObservableModule.fromObject({
   partyListDescriptions: new ObservableArray(),
   isLoading: false,
@@ -33,10 +32,7 @@ function onLoaded(args) {
 
   page.bindingContext = viewModel;
 
-  if (!loaded) {
-    loadParties();
-    loaded = true;
-  }
+  loadParties();
 
 
   // Poll the status every 3s
@@ -61,9 +57,10 @@ function loadParties() {
   let party = undefined;
   viewModel.partyListDescriptions.splice(0);
 
-      FileIO.forEachFolderElement(FilePaths.POP_ATT_PATH, function (partyFolder) {
-          party = new AttParty(partyFolder.name, true);
-          // Observables have to be nested to reflect changes
+    FileIO.forEachFolderElement(FilePaths.POP_ATT_PATH, function (partyFolder) {
+      party = new AttParty(partyFolder.name);
+      party.load();
+      // Observables have to be nested to reflect changes
 
           viewModel.partyListDescriptions.push(ObservableModule.fromObject({
               party: party,
@@ -102,7 +99,7 @@ function partyTapped(args) {
             return Dialog.confirm({
               title: "Warning !",
               message: "The current key pair will by overwritten, so will need to get the new one " +
-              "registered by the organizers. Are you sure you want to continue ?",
+                "registered by the organizers. Are you sure you want to continue ?",
               okButtonText: "Yes",
               cancelButtonText: "No",
             })
@@ -230,14 +227,14 @@ function addParty() {
   return ScanToReturn.scan()
     .then(string => {
       const infos = Convert.jsonToObject(string);
-      const newParty = new AttParty(infos.id, false, infos.address);
+      const newParty = new AttParty(infos.id, infos.address);
       viewModel.partyListDescriptions.push(ObservableModule.fromObject({
         party: newParty,
         desc: newParty.getPopDescModule(),
         status: newParty.getPopStatusModule()
       }));
 
-      return Promise.resolve();
+      return newParty.load();
     })
     .catch(error => {
       console.log(error);
@@ -258,24 +255,10 @@ function addParty() {
 
 }
 
-function addPartyMyself(id, address) {
-
-   // transform party bar code to a string
-
-    const newParty = new AttParty(id, false, address);
-    viewModel.partyListDescriptions.push(ObservableModule.fromObject({
-        party: newParty,
-        desc: newParty.getPopDescModule(),
-        status: newParty.getPopStatusModule()
-    }));
-
-    return Promise.resolve();
-
-}
 function reloadStatuses() {
-    viewModel.partyListDescriptions.forEach(model => {
-        model.party.retrieveFinalStatementAndStatus();
-})
+  viewModel.partyListDescriptions.forEach(model => {
+    model.party.retrieveFinalStatementAndStatus();
+  })
 }
 
 
@@ -286,4 +269,4 @@ module.exports.deleteParty = deleteParty;
 module.exports.addParty = addParty;
 module.exports.onUnloaded = onUnloaded;
 module.exports.onNavigatingTo = onNavigatingTo;
-module.exports.addPartyMyself= addPartyMyself;
+module.exports.loadParties = loadParties;
