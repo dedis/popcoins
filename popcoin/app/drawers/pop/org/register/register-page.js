@@ -104,8 +104,8 @@ function addScan() {
   return ScanToReturn.scan()
     .then(keyPairJson => {
       const keyPair = Convert.parseJsonKeyPair(keyPairJson);
-
-      return Party.registerAttendee(keyPair.public);
+      const view = pageObject.getViewById("list-view-registered-keys");
+      return Party.registerAttendee(keyPair.public).then(view.refresh());
     })
     .catch(error => {
       console.log(error);
