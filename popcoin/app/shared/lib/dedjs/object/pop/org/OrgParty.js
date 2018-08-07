@@ -612,21 +612,17 @@ class OrgParty extends Party {
     var newAttendees = this.getRegisteredAtts().slice();
     newAttendees.push(publicKey);
 
-          for (var i = 0; i < newAttendees.length; i++) {
-              let value = newAttendees[i]
-              // store the current item value so it can be placed right
-              for (var j = i - 1; j > -1 && Convert.byteArrayToHex(newAttendees[j]) > Convert.byteArrayToHex(value); j--) {
-                  // loop through the items in the sorted array (the items from the current to the beginning)
-                  // copy each item to the next one
-                  newAttendees[j + 1] = newAttendees[j]
-              }
-              // the last item we've reached should now hold the value of the currently sorted item
-              newAttendees[j + 1] = value
+    newAttendees.sort((a, b) => {
+        const a_hex = Convert.byteArrayToHex(a);
+        const b_hex = Convert.byteArrayToHex(b);
+        if (a_hex < b_hex) {
+          return -1;
+        } else if (a_hex > b_hex) {
+            return 1;
+        }
 
-          }
-
-
-
+        return 0;
+    });
 
     return this.setRegisteredAtts(newAttendees, true);
   }
