@@ -60,7 +60,6 @@ function loadParties() {
 
   let party = undefined;
   viewModel.partyListDescriptions.splice(0);
-  if(platform.isAndroid){
 
       FileIO.forEachFolderElement(FilePaths.POP_ATT_PATH, function (partyFolder) {
           party = new AttParty(partyFolder.name, true);
@@ -72,21 +71,7 @@ function loadParties() {
               status: party.getPopStatusModule()
           }));
       });
-  }
-  if(platform.isIOS ){
 
-    var array = Directory.getFolders(FilePaths.POP_ATT_PATH, FilePaths.POP_ATT_FINAL);
-      array.forEach( function (partyFolder) {
-          console.log(partyFolder);
-          party = new AttParty(partyFolder, true);
-          // Observables have to be nested to reflect changes
-          viewModel.partyListDescriptions.push(ObservableModule.fromObject({
-              party: party,
-              desc: party.getPopDescModule(),
-              status: party.getPopStatusModule()
-          }));
-      });
-  }
 
   viewModel.isLoading = false;
 }

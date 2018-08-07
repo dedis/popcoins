@@ -32,9 +32,9 @@ class AttParty extends Party {
       throw new Error("id must be of type string and shouldn't be empty");
     }
     this._folderName = id;
-    if(platform.isAndroid) {
+
         this._partyExistLocally = FileIO.folderExists(FileIO.join(FilePath.POP_ATT_PATH, this._folderName));
-    }
+
     this._partyExistLocally = loadLocally;
     if (!this._partyExistLocally && address === undefined) {
       throw new Error("address should not be undefined as the party isn't stored locally");
@@ -91,21 +91,7 @@ class AttParty extends Party {
    * @returns {Promise} - a promise that gets resolved once the final statement is load in memory
    */
   loadFinalStatement() {
-    if(platform.isIOS){
-        return Directory.read(FileIO.join(FilePath.POP_ATT_PATH, this._folderName, FilePath.POP_ATT_FINAL))
-            .then(string => {
-            this._finalStatement = Convert.jsonToObject(string);
-        return Promise.resolve();
-    })
-    .catch(error => {
-            console.log(error);
-        console.dir(error);
-        console.trace();
 
-        return Promise.reject(error);
-    })
-    }
-    if (platform.isAndroid){
     return FileIO.getStringOf(FileIO.join(FilePath.POP_ATT_PATH, this._folderName, FilePath.POP_ATT_FINAL))
       .then(string => {
         this._finalStatement = Convert.jsonToObject(string);
@@ -117,7 +103,7 @@ class AttParty extends Party {
         console.trace();
 
         return Promise.reject(error);
-      })}
+      })
   }
 
   /**
@@ -153,7 +139,7 @@ class AttParty extends Party {
    */
   cacheFinalStatement() {
     const toWrite = Convert.objectToJson(this._finalStatement);
-  if(platform.isAndroid){
+
     return FileIO.writeStringTo(FileIO.join(FilePath.POP_ATT_PATH, this._folderName, FilePath.POP_ATT_FINAL), toWrite)
       .catch(error => {
         console.log(error);
@@ -161,17 +147,8 @@ class AttParty extends Party {
         console.trace();
 
         return Promise.reject(error);
-      })}
-      if(platform.isIOS){
-          return Directory.add(FileIO.join(FilePath.POP_ATT_PATH, this._folderName, FilePath.POP_ATT_FINAL), toWrite)
-              .catch(error => {
-              console.log(error);
-          console.dir(error);
-          console.trace();
-
-          return Promise.reject(error);
       })
-      }
+
   }
 
   /**
@@ -275,13 +252,8 @@ class AttParty extends Party {
    * @returns {Promise} a promise that gets resolved once the party is deleted
    */
   remove() {
-    if(platform.isAndroid) {
+
         return FileIO.removeFolder(FileIO.join(FilePath.POP_ATT_PATH, this._folderName));
-    }
-    if(platform.isIOS){
-      Directory.deleteFile(FileIO.join(FilePath.POP_ATT_PATH, this._folderName));
-      return;
-    }
   }
 }
 
