@@ -17,9 +17,9 @@ function onLoaded(args) {
     page.bindingContext = viewModel;
 
     if (context.bar === undefined) {
-        throw new Error("A bar should be given in the context");
+        throw new Error("A service should be given in the context");
     } else if (!(context.bar instanceof Bar)) {
-        throw new Error("bar given in context should be an instance of Bar")
+        throw new Error("Service given in context should be an instance of Service")
     }
 
     bar = context.bar;

@@ -295,13 +295,13 @@ function barTapped(args) {
         .action({
             message: "What do you want to do ?",
             cancelButtonText: "Cancel",
-            actions: ["Show bar info to user", "Show orders history" , "Delete Bar"]
+            actions: ["Show service info to user", "Show orders history" , "Delete Service"]
         })
         .then(result => {
-        if (result === "Show bar info to user") {
+        if (result === "Show service info to user") {
         pageObject.showModal("shared/pages/qr-code/qr-code-page", {
             textToShow: Convert.objectToJson(signData),
-            title: "Bar informations"
+            title: "Service information"
         }, () => {
             Dialog.confirm({
             title: "Client confirmation",
@@ -326,7 +326,7 @@ function barTapped(args) {
             setTimeout(() => {
             Dialog.alert({
             title: "Success !",
-            message: "The beer is paid !",
+            message: "The item is delivered !",
             okButtonText: "Great"
         })
     });
@@ -359,7 +359,7 @@ function barTapped(args) {
             }
         });
 
-    } else if (result === "Delete Bar"){
+    } else if (result === "Delete Service"){
         bar.remove()
             .then(() => {
             const listView = Frame.topmost().currentPage.getViewById("listView2");
@@ -419,7 +419,7 @@ function addBar() {
     if (PoP.getFinalStatements().length === 0) {
         return Dialog.alert({
             title: "No group available",
-            message: "You didn't participate to any party. Please do so to have a group to which you can pay beers !",
+            message: "You didn't participate to any party. Please do so to have a group to which you can get items !",
             okButtonText: "Ok"
         });
 

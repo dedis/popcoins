@@ -122,7 +122,7 @@
                             <org:org-party-list/>
                         </TabViewItem.view>
                     </TabViewItem>
-                    <TabViewItem title="Bar">
+                    <TabViewItem title="Services">
                         <TabViewItem.view>
                             <Page
                                     class="page"
@@ -137,7 +137,7 @@
 
 
                                 <GridLayout class="page-content" rows="*" columns="*,*,auto">
-                                    <Label text="You don't have any bars. Feel free to open one !"
+                                    <Label text="You don't have any services. Feel free to open one !"
                                            textWrap="true"
                                            class="empty-list-label"
                                            colSpan="3"
