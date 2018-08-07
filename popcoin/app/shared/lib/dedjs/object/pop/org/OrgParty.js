@@ -550,8 +550,20 @@ class OrgParty extends Party {
       throw new Error("publicKey must be an instance of Uint8Array and have the right format");
     }
 
-    const newAttendees = this.getRegisteredAtts().slice();
+    var newAttendees = this.getRegisteredAtts().slice();
     newAttendees.push(publicKey);
+
+    newAttendees.sort((a, b) => {
+        const a_hex = Convert.byteArrayToHex(a);
+        const b_hex = Convert.byteArrayToHex(b);
+        if (a_hex < b_hex) {
+          return -1;
+        } else if (a_hex > b_hex) {
+            return 1;
+        }
+
+        return 0;
+    });
 
     return this.setRegisteredAtts(newAttendees, true);
   }
@@ -951,6 +963,8 @@ class OrgParty extends Party {
 
   }
 }
+
+
 
 /**
  * Enumerate the different possible state for a party
