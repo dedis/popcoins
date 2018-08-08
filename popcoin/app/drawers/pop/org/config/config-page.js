@@ -242,18 +242,6 @@ function deleteConode(args) {
         });
 }
 
-function onSwipeCellStarted(args) {
-    const swipeLimits = args.data.swipeLimits;
-    const swipeView = args.object;
-
-    const deleteButton = swipeView.getViewById("button-delete");
-
-    const width = deleteButton.getMeasuredWidth();
-
-    swipeLimits.right = width;
-    swipeLimits.threshold = width / 2;
-}
-
 /**
  * Parse the date from the data form and save it into the Party
  */
@@ -444,7 +432,6 @@ module.exports.hashAndSave = hashAndSave;
 module.exports.addManual = addManual;
 module.exports.addScan = addScan;
 module.exports.deleteConode = deleteConode;
-module.exports.onSwipeCellStarted = onSwipeCellStarted;
 module.exports.goBack = goBack;
 module.exports.finish = finish;
 module.exports.addOrganizer = addOrganizer;
