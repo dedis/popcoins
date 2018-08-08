@@ -40,7 +40,7 @@ function onLoaded(args) {
  * Function that gets called when the user wants to register a public key manually.
  */
 const loadParties = require("../../../home/att/att-party-list").loadParties;
-
+const addMyself = require("../../../home/att/att-party-list").addMyself;
 function addManual() {
     return Dialog.prompt({
         title: "Public Key",
@@ -70,8 +70,9 @@ function addManual() {
                     address: Party.getLinkedConode().address
                 };
 
-                var newParty = new AttParty(info.id, info.address);
 
+                //var newParty = new AttParty(info.id, info.address);
+                const newParty = addMyself(info);
 
                 return newParty.load().then(party => {
                     Party.registerAttendee(party.getKeyPair().public)

@@ -36,7 +36,8 @@ function onLoaded(args) {
         loadParties();
         loaded = true;
     }
-
+    for (var i =0; i < viewModel.partyListDescriptions.length;i++)
+        console.log(viewModel.partyListDescriptions.getItem(i));
 
     // Poll the status every 3s
     timerId = Timer.setInterval(() => {
@@ -168,7 +169,7 @@ function partyTapped(args) {
                                     message: "Your Token is now accessible under \"My Tokens\".",
                                     okButtonText: "Ok"
                                 });
-                            }).then(pageObject.getViewById("list-view-pop-token").refresh());
+                            }).then(Frame.topmost().getViewById("list-view-pop-token").refresh());
                     }
                 })
                 .catch((error) => {
@@ -227,6 +228,18 @@ function onSwipeCellStarted(args) {
     swipeLimits.threshold = width / 2;
 }
 
+module.exports.addMyself = function(infos){
+    const newParty = new AttParty(infos.id, infos.address);
+    viewModel.partyListDescriptions.push(ObservableModule.fromObject({
+        party: newParty,
+        desc: newParty.getPopDescModule(),
+        status: newParty.getPopStatusModule()
+    }));
+
+
+    return newParty;
+}
+
 function addParty() {
     return ScanToReturn.scan()
         .then(string => {
@@ -238,7 +251,8 @@ function addParty() {
                 status: newParty.getPopStatusModule()
             }));
 
-            return newParty.load();
+
+            return newParty.load().then((st) => {update(st)});
         })
         .catch(error => {
             console.log(error);
@@ -258,7 +272,10 @@ function addParty() {
         });
 
 }
-
+function update(st){
+    Frame.topmost().getViewById("listView").refresh();
+    return Promise.resolve(st);
+}
 function reloadStatuses() {
     viewModel.partyListDescriptions.forEach(model => {
         model.party.retrieveFinalStatementAndStatus();
