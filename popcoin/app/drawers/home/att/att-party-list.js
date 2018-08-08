@@ -168,7 +168,7 @@ function partyTapped(args) {
                                     message: "Your Token is now accessible under \"My Tokens\".",
                                     okButtonText: "Ok"
                                 });
-                            });
+                            }).then(pageObject.getViewById("list-view-pop-token").refresh());
                     }
                 })
                 .catch((error) => {
