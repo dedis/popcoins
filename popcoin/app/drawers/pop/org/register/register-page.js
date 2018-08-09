@@ -106,7 +106,7 @@ function addScan() {
         .then(keyPairJson => {
             const keyPair = Convert.parseJsonKeyPair(keyPairJson);
             const view = pageObject.getViewById("list-view-registered-keys");
-            return Party.registerAttendee(keyPair.public).then(view.refresh());
+            return Party.registerAttendee(keyPair.public).then((text) =>{view.refresh(); return Promise.resolve(text);});
         })
         .catch(error => {
             console.log(error);
@@ -260,11 +260,11 @@ function addNewKey() {
         console.log("Dialog result: " + result);
         if (result === "Scan QR") {
 
-            addScan().then(function () {
+            addScan().then(function (text) {
                 setTimeout(() => {
                     Dialog.alert({
                         title: "Confirmation",
-                        message: "The attendee has been added successfully!",
+                        message: text,
                         okButtonText: "Ok"
                     })
                 });
