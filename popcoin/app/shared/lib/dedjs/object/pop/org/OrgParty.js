@@ -551,8 +551,18 @@ class OrgParty extends Party {
     }
 
     var newAttendees = this.getRegisteredAtts().slice();
-    newAttendees.push(publicKey);
+    var text = undefined;
+      var HexValues  = [];
+      for (var i=0; i<newAttendees.length; i++){
+          HexValues.push(Convert.byteArrayToHex(newAttendees[i]));
+      }
 
+    if(HexValues.includes(Convert.byteArrayToHex(publicKey))) {
+      text = "The attendee is already in the list!"
+    }else {
+        newAttendees.push(publicKey);
+        text = "The attendee has been added successfully!";
+    }
     newAttendees.sort((a, b) => {
         const a_hex = Convert.byteArrayToHex(a);
         const b_hex = Convert.byteArrayToHex(b);
@@ -565,8 +575,10 @@ class OrgParty extends Party {
         return 0;
     });
 
-    return this.setRegisteredAtts(newAttendees, true);
+     this.setRegisteredAtts(newAttendees, true);
+      return Promise.resolve(text);
   }
+
 
   /**
    * Unregisters the public key of the attendee corresponding to the given index.
@@ -963,7 +975,6 @@ class OrgParty extends Party {
 
   }
 }
-
 
 
 /**
