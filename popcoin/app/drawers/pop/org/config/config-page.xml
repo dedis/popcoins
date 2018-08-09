@@ -51,7 +51,6 @@
 
         <nsListView:RadListView items="{{ descModule.roster.list }}" id="list-view-conodes"
                                 itemTap="{{ readOnly ? '' : 'conodeTapped' }}"
-                                itemSwipeProgressStarted="onSwipeCellStarted"
                                 swipeActions="true"
                                 row="3"
                                 col="0"
