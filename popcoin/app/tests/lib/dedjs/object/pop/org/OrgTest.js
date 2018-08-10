@@ -889,7 +889,7 @@ describe("Org", function () {
 
     /*
     it.only("should link and set the linked conode", function () {
-      return User.setKeyPair(KEY_PAIR, false)
+      return User._setKeyPair(KEY_PAIR, false)
         .then(() => {
           return Org.linkToConode(SERVER_IDENTITY, "");
         })
@@ -955,7 +955,7 @@ describe("Org", function () {
 
     /*
     it.only("should register PopDesc and set the PopDesc's hash", function () {
-      return User.setKeyPair(KEY_PAIR, false)
+      return User._setKeyPair(KEY_PAIR, false)
         .then(() => {
           return Org.setPopDesc(POP_DESC, false);
         })
@@ -1085,7 +1085,7 @@ describe("Org", function () {
 
     /*
     it.only("should register attendees and save final statement if it is the last registration", function () {
-      return User.setKeyPair(KEY_PAIR, false)
+      return User._setKeyPair(KEY_PAIR, false)
         .then(() => {
           return Org.setPopDesc(POP_DESC, false);
         })
