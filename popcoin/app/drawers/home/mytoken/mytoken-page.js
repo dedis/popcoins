@@ -127,13 +127,14 @@ function popTokenTapped(args) {
                         const fields = {
                             signature: Convert.byteArrayToHex(sig)
                         };
-
-
-                        pageObject.showModal("shared/pages/qr-code/qr-code-page", {
-                            textToShow: Convert.objectToJson(fields),
-                            title: "Signed informations"
-                        }, () => {
-                        }, true);
+                        
+                        setTimeout(() => {
+                            pageObject.showModal("shared/pages/qr-code/qr-code-page", {
+                                textToShow: Convert.objectToJson(fields),
+                                title: "Signed informations"
+                            }, () => {
+                            }, true);
+                        }, 1);
 
                         return Promise.resolve()
                     })
