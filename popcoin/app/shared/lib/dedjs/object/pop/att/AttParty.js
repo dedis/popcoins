@@ -134,9 +134,6 @@ class AttParty extends Party {
             popDescModule.roster.list.push(server);
         });
 
-        // We loaded from local data, address used should be the one of the leader
-        this._address = popDescModule.roster.list.getItem(0).address;
-
         popDescModule.roster.aggregate = Uint8Array.from(popDesc.roster.aggregate);
 
         return Promise.resolve();
