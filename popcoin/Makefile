@@ -23,6 +23,7 @@ clean-install:
 	make install-dependencies
 	./prepare-hook.sh
 	patch -p0 < nodeify_temporary_patch.patch
+	patch -p0 < websockets_temporary_patch.patch
 
 ### Run App iOS
 run-ios:
