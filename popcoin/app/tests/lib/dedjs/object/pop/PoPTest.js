@@ -571,7 +571,7 @@ describe("PoP", function () {
     });
 
     it("should correctly generate the PoP-Token, save it + delete the final statement", function () {
-      return User.setKeyPair(KEY_PAIR, false)
+      return User._setKeyPair(KEY_PAIR, false)
         .then(() => {
           return PoP.setFinalStatementsArray([FINAL_STATEMENT, FINAL_STATEMENT, FINAL_STATEMENT], true);
         })

@@ -98,7 +98,7 @@ class User {
      * @returns {Promise} - a promise that gets resolved once the new key pair has been set and saved if the save parameter is set to true
      */
     setKeyPair(keyPair, save) {
-        return this._keyPair.setKeyPair(keyPair, save);
+        return this._keyPair._setKeyPair(keyPair, save);
     }
 
     /**
@@ -402,7 +402,6 @@ class User {
 
         conodes.map((server) => {
             const address = Convert.tlsToWebsocket(server, "");
-            // TODO Change to Net instead of Net
             const cothoritySocket = new Net.Socket(address, RequestPath.STATUS);
             return cothoritySocket.send(RequestPath.STATUS_REQUEST, DecodeType.STATUS_RESPONSE, statusRequestMessage)
                 .then(statusResponse => {

@@ -23,6 +23,7 @@ const POP_ORG_ATTENDEES = "attendees.json";
 
 const POP_ATT_PATH = "shared/res/files/pop/att";
 const POP_ATT_FINAL = "final_statements.json";
+const POP_ATT_INFOS = "party_informations.json";
 
 /**
  * CISC Files
@@ -67,3 +68,4 @@ module.exports.BEERCOIN_BAR_CONFIG = BEERCOIN_BAR_CONFIG;
 module.exports.BEERCOIN_LINKED_FINALS = BEERCOIN_LINKED_FINALS;
 module.exports.BEERCOIN_CHECKED_CLIENTS = BEERCOIN_CHECKED_CLIENTS;
 module.exports.BEERCOIN_ORDER_HISTORY = BEERCOIN_ORDER_HISTORY;
+module.exports.POP_ATT_INFOS = POP_ATT_INFOS;

@@ -30,10 +30,6 @@ function onLoaded(args) {
     let finalizeLabel = page.getViewById("finalize");
     // Without this the text is not vertically centered in is own view
     finalizeLabel.android.setGravity(android.view.Gravity.CENTER);
-
-    const bool = context.finalized;
-
-
 }
 
 /**
@@ -41,6 +37,7 @@ function onLoaded(args) {
  */
 const loadParties = require("../../../home/att/att-party-list").loadParties;
 const addMyself = require("../../../home/att/att-party-list").addMyself;
+
 function addManual() {
     return Dialog.prompt({
         title: "Public Key",
@@ -64,23 +61,19 @@ function addManual() {
                     });
                 }
 
-
                 let info = {
                     id: Convert.byteArrayToHex(Party.getPopDescHash()),
                     address: Party.getLinkedConode().address
                 };
 
-
                 //var newParty = new AttParty(info.id, info.address);
-                const newParty = addMyself(info);
-
-                return newParty.load().then(party => {
-                    Party.registerAttendee(party.getKeyPair().public)
+                addMyself(info).then((party) => {
+                    return Party.registerAttendee(party.getKeyPair().public)
+                }).catch(error => {
+                    console.log(error);
+                    console.dir(error);
+                    console.trace();
                 });
-
-
-                // return Party.registerAttendee(User.getKeyPair().public).then(addPartyMyself( Convert.byteArrayToHex(Party.getPopDescHash()),Party.getLinkedConode().address));
-
             } else {
                 // Cancel
                 return Promise.resolve();
@@ -106,7 +99,10 @@ function addScan() {
         .then(keyPairJson => {
             const keyPair = Convert.parseJsonKeyPair(keyPairJson);
             const view = pageObject.getViewById("list-view-registered-keys");
-            return Party.registerAttendee(keyPair.public).then((text) =>{view.refresh(); return Promise.resolve(text);});
+            return Party.registerAttendee(keyPair.public).then((text) => {
+                view.refresh();
+                return Promise.resolve(text);
+            });
         })
         .catch(error => {
             console.log(error);
