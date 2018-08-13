@@ -123,7 +123,7 @@ function hashAndSave(party) {
   return registerPopDesc();
 }
 
-
+const callMe = require("./register/register-page").callMe;
 function partyTapped(args) {
 
   const index = args.index;
@@ -148,6 +148,7 @@ function partyTapped(args) {
             });
           } else if (result === "Publish the party") {
             hashAndSave(party);
+            callMe(party);
           } else if (result === "Remove the party") {
             return party.remove()
               .then(() => {

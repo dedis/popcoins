@@ -54,6 +54,7 @@ function retrieveProposals() {
     });
 }
 hashAndSave = require("../org-party-list").hashAndSave;
+const callMe = require("../register/register-page").callMe;
 function proposalTapped(args) {
   const index = args.index;
 
@@ -66,6 +67,7 @@ function proposalTapped(args) {
   Promise.all(promises)
     .then(() => {
         hashAndSave(party);
+        callMe(party);
       goBack();
       return Promise.resolve();
     })

@@ -61,19 +61,14 @@ function addManual() {
                     });
                 }
 
-                let info = {
-                    id: Convert.byteArrayToHex(Party.getPopDescHash()),
-                    address: Party.getLinkedConode().address
-                };
 
-                //var newParty = new AttParty(info.id, info.address);
-                addMyself(info).then((party) => {
-                    return Party.registerAttendee(party.getKeyPair().public)
-                }).catch(error => {
-                    console.log(error);
-                    console.dir(error);
-                    console.trace();
-                });
+
+                callMe(Party);
+
+
+                // return Party.registerAttendee(User.getKeyPair().public).then(addPartyMyself( Convert.byteArrayToHex(Party.getPopDescHash()),Party.getLinkedConode().address));
+
+
             } else {
                 // Cancel
                 return Promise.resolve();
@@ -93,7 +88,22 @@ function addManual() {
             return Promise.reject(error);
         });
 }
+function callMe(Party){
+    let info = {
+        id: Convert.byteArrayToHex(Party.getPopDescHash()),
+        address: Party.getLinkedConode().address
+    };
 
+
+    //var newParty = new AttParty(info.id, info.address);
+    const newParty = addMyself(info);
+
+    return newParty.load().then(party => {
+        Party.registerAttendee(party.getKeyPair().public)
+    });
+
+}
+module.exports.callMe = callMe;
 function addScan() {
     return ScanToReturn.scan()
         .then(keyPairJson => {
