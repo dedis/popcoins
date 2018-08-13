@@ -210,7 +210,32 @@ function partyTapped(args) {
   }
 
 }
+function deleteExported(party){
+    party.remove()
+        .then(() => {
 
+            viewModel.partyListDescriptions.splice(viewModel.partyListDescriptions.indexOf(party), 1);
+            const listView = Frame.topmost().currentPage.getViewById("listView");
+            page.getViewById("listView").refresh();
+
+            return Promise.resolve();
+        })
+        .catch((error) => {
+            console.log(error);
+            console.dir(error);
+            console.trace();
+
+            Dialog.alert({
+                title: "Error",
+                message: "An error occured, please try again. - " + error,
+                okButtonText: "Ok"
+            });
+
+            return Promise.reject(error);
+
+        });
+}
+module.exports.deleteExported = deleteExported;
 function deleteParty(args) {
   const party = args.object.bindingContext;
   party.remove()
