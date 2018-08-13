@@ -607,17 +607,17 @@ describe("User", function () {
     });
   });
 
-  describe("#setKeyPair", function () {
+  describe("#_setKeyPair", function () {
     it("should throw an error when keyPair is not a key pair", function () {
-      expect(() => User.setKeyPair("KEY_PAIR", true)).to.throw();
+      expect(() => User._setKeyPair("KEY_PAIR", true)).to.throw();
     });
 
     it("should throw an error when save is not a boolean", function () {
-      expect(() => User.setKeyPair(KEY_PAIR, "true")).to.throw();
+      expect(() => User._setKeyPair(KEY_PAIR, "true")).to.throw();
     });
 
     it("should save if save is true", function () {
-      return User.setKeyPair(KEY_PAIR, true)
+      return User._setKeyPair(KEY_PAIR, true)
         .then(() => {
           return FileIO.getStringOf(FileIO.join(FilesPath.USER_PATH, FilesPath.KEY_PAIR));
         })
@@ -629,7 +629,7 @@ describe("User", function () {
     });
 
     it("should not save if save is false", function () {
-      return User.setKeyPair(KEY_PAIR, false)
+      return User._setKeyPair(KEY_PAIR, false)
         .then(() => {
           return FileIO.getStringOf(FileIO.join(FilesPath.USER_PATH, FilesPath.KEY_PAIR));
         })
@@ -639,7 +639,7 @@ describe("User", function () {
     });
 
     it("should correctly store the new key pair in memory when save is false", function () {
-      return User.setKeyPair(KEY_PAIR, false)
+      return User._setKeyPair(KEY_PAIR, false)
         .then(() => {
           const keyPair = User.getKeyPair();
 
@@ -650,7 +650,7 @@ describe("User", function () {
     });
 
     it("should correctly store the new key pair in memory when save is true", function () {
-      return User.setKeyPair(KEY_PAIR, true)
+      return User._setKeyPair(KEY_PAIR, true)
         .then(() => {
           const keyPair = User.getKeyPair();
 
@@ -669,7 +669,7 @@ describe("User", function () {
     });
 
     it("should return the same key pair that has just been set", function () {
-      return User.setKeyPair(KEY_PAIR, true)
+      return User._setKeyPair(KEY_PAIR, true)
         .then(() => {
           const keyPair = User.getKeyPair();
 

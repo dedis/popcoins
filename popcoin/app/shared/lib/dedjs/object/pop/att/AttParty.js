@@ -42,6 +42,7 @@ class AttParty extends Party {
         this._id = Convert.hexToByteArray(id);
         this._isLoaded = false;
         this._finalStatement = undefined;
+        this._keyPair = undefined;
         this._status = ObservableModule.fromObject({
             status: States.UNDEFINED
         });
@@ -54,8 +55,10 @@ class AttParty extends Party {
      * @returns {Promise} - a promise that gets solved once the final statement is retrieved and the status updated
      */
     retrieveFinalStatementAndStatus() {
+        console.log("Party " + this._id + " opens a socket using address " + this._address);
         const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(this._address, ""), RequestPath.POP);
         const fetchRequest = CothorityMessages.createFetchRequest(this._id, true);
+        console.log("SKDEBUG ENTER");
 
         return cothoritySocket.send(RequestPath.POP_FETCH_REQUEST, DecodeType.FINALIZE_RESPONSE, fetchRequest)
             .then((response) => {
@@ -80,25 +83,38 @@ class AttParty extends Party {
 
     }
 
-  /**
-   * Load the final statement from local storage
-   * @returns {Promise} - a promise that gets resolved once the final statement is load in memory
-   */
-  loadFinalStatement() {
+    /**
+     * Load the final statement from local storage
+     * @returns {Promise} - a promise that gets resolved once the final statement is load in memory
+     */
+    loadFinalStatement() {
 
-    return FileIO.getStringOf(FileIO.join(FilePath.POP_ATT_PATH, this._folderName, FilePath.POP_ATT_FINAL))
-      .then(string => {
-        this._finalStatement = Convert.jsonToObject(string);
-        return Promise.resolve();
-      })
-      .catch(error => {
-        console.log(error);
-        console.dir(error);
-        console.trace();
+        return FileIO.getStringOf(FileIO.join(FilePath.POP_ATT_PATH, this._folderName, FilePath.POP_ATT_FINAL))
+            .then(string => {
+                this._finalStatement = Convert.jsonToObject(string);
+                return Promise.resolve();
+            })
+            .catch(error => {
+                console.log(error);
+                console.dir(error);
+                console.trace();
 
-        return Promise.reject(error);
-      })
-  }
+                return Promise.reject(error);
+            })
+    }
+
+    /**
+     * This updates the party (final statement, status and description) by downloading the last
+     * final statement and loading the correct information using it
+     *
+     * @return {Promise}
+     */
+    update() {
+        return this.retrieveFinalStatementAndStatus()
+            .then(() => {
+                return this.loadPopDesc();
+            })
+    }
 
     /**
      * Use the final statement in memory to update the party description module
@@ -112,38 +128,34 @@ class AttParty extends Party {
         popDescModule.location = popDesc.location;
         popDescModule.roster.id = Uint8Array.from(popDesc.roster.id);
 
-        popDescModule.roster.list.splice();
+        popDescModule.roster.list.splice(0);
         popDesc.roster.list.forEach(server => {
             server.toHex = Convert.byteArrayToHex;
             popDescModule.roster.list.push(server);
         });
-
-        // We loaded from local data, address used should be the one of the leader
-        console.dir(popDescModule.roster);
-        this._address = popDescModule.roster.list.getItem(0).address;
 
         popDescModule.roster.aggregate = Uint8Array.from(popDesc.roster.aggregate);
 
         return Promise.resolve();
     }
 
-  /**
-   * Write the final statement of the party on the disk to speed up the startup
-   * @returns {Promise} - a promise that gets resolved once the file is written
-   */
-  cacheFinalStatement() {
-    const toWrite = Convert.objectToJson(this._finalStatement);
+    /**
+     * Write the final statement of the party on the disk to speed up the startup
+     * @returns {Promise} - a promise that gets resolved once the file is written
+     */
+    cacheFinalStatement() {
+        const toWrite = Convert.objectToJson(this._finalStatement);
 
-    return FileIO.writeStringTo(FileIO.join(FilePath.POP_ATT_PATH, this._folderName, FilePath.POP_ATT_FINAL), toWrite)
-      .catch(error => {
-        console.log(error);
-        console.dir(error);
-        console.trace();
+        return FileIO.writeStringTo(FileIO.join(FilePath.POP_ATT_PATH, this._folderName, FilePath.POP_ATT_FINAL), toWrite)
+            .catch(error => {
+                console.log(error);
+                console.dir(error);
+                console.trace();
 
-        return Promise.reject(error);
-      })
+                return Promise.reject(error);
+            })
 
-  }
+    }
 
     /**
      * Randomize the key par associated with this party
@@ -155,51 +167,84 @@ class AttParty extends Party {
 
     /**
      * Load everyhting needed to the party :
-     *  - download the final statement if need
+     *  - get the party infos from the disk
+     *  - download the final statement if need/available
      *  - cache it on the disk
      *  - update the party description with the current final statement
      *  - update the status of the party
-     * @returns {Promise}- a promise that gets resolved once the loading is finished
+     * @returns {Promise.<Party>}- a promise that gets resolved once the loading is finished
      */
-    load() {
-      return new KeyPair(FileIO.join(FilePath.POP_ATT_PATH, this._folderName)).then((key) => {
-        this._keyPair = key;
-        if (this._partyExistLocally) {
-          return this.loadFinalStatement()
-            .then(() => {
-              return this.loadPopDesc();
-            })
-            .then(() => {
-              return this.retrieveFinalStatementAndStatus();
-            })
-            .then(() => {
-              return Promise.resolve(this);
-            })
-            .catch(error => {
-              console.log(error);
-              console.dir(error);
-              console.trace();
-
-              return Promise.reject(error);
-            });
-        } else {
-          return this.retrieveFinalStatementAndStatus()
-            .then(() => {
-              return Promise.all([this.cacheFinalStatement(), this.loadPopDesc()]);
-            })
-            .then(() => {
-              return Promise.resolve(this);
-            })
-            .catch(error => {
-              console.log(error);
-              console.dir(error);
-              console.trace();
-
-              return Promise.reject(error);
-            })
+    static loadFromDisk(id) {
+        if (typeof id !== "string") {
+            throw new Error("id must be of type string");
         }
-      });
 
+        let promises = [FileIO.getStringOf(FileIO.join(FilePath.POP_ATT_PATH, id, FilePath.POP_ATT_INFOS)),
+            new KeyPair(FileIO.join(FilePath.POP_ATT_PATH, id))];
+
+        let party = undefined;
+        let updateDone = true;
+
+        return Promise.all(promises)
+            .then(array => {
+                party = new AttParty(id, Convert.jsonToObject(array[0]).address);
+                party._setKeyPair(array[1]);
+
+                return party.retrieveFinalStatementAndStatus()
+            })
+            .catch(() => {
+                updateDone = false;
+                return party.loadFinalStatement()
+            })
+            .then(() => {
+                return updateDone ? party.cacheFinalStatement() : Promise.resolve()
+            })
+            .then(() => {
+                return party.loadPopDesc()
+            })
+            .then(() => {
+                return Promise.resolve(party)
+            })
+            .catch(error => {
+                console.log(error);
+                console.dir(error);
+                console.trace();
+
+                return Promise.reject("Cannot load party from disk. Error: " + error);
+            });
+    }
+
+    /**
+     * Save the party informations (id, address of leader conode and keypair) on the disk. This does not save
+     * the final statement (see loadFinalStatement and cacheFinalStatement for this). A new key pair is also
+     * generate for this party.
+     *
+     * @return {Promise.<AttParty>}
+     */
+    save() {
+        return new KeyPair(FileIO.join(FilePath.POP_ATT_PATH, this._folderName)).then((key) => {
+            this._keyPair = key;
+
+            const infos = {
+                id: this._id,
+                address: this._address
+            };
+
+            const toWrite = Convert.objectToJson(infos);
+
+            return FileIO.writeStringTo(FileIO.join(FilePath.POP_ATT_PATH, this._folderName, FilePath.POP_ATT_INFOS), toWrite)
+                .then(() => {
+                    return this;
+                })
+                .catch(error => {
+                    console.log(error);
+                    console.dir(error);
+                    console.trace();
+
+                    return Promise.reject(error);
+                })
+
+        })
     }
 
     /**
@@ -251,14 +296,22 @@ class AttParty extends Party {
         );
     }
 
-  /**
-   * Completely remove Party from disk
-   * @returns {Promise} a promise that gets resolved once the party is deleted
-   */
-  remove() {
+    _setKeyPair(newKeyPair) {
+        if (!newKeyPair instanceof KeyPair) {
+            throw "newKeyPair should be an instance of KeyPair"
+        }
+
+        this._keyPair = newKeyPair;
+    }
+
+    /**
+     * Completely remove Party from disk
+     * @returns {Promise} a promise that gets resolved once the party is deleted
+     */
+    remove() {
 
         return FileIO.removeFolder(FileIO.join(FilePath.POP_ATT_PATH, this._folderName));
-  }
+    }
 }
 
 /**

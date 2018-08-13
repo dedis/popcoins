@@ -36,8 +36,6 @@ function onLoaded(args) {
         loadParties();
         loaded = true;
     }
-    for (var i =0; i < viewModel.partyListDescriptions.length;i++)
-        console.log(viewModel.partyListDescriptions.getItem(i));
 
     // Poll the status every 3s
     timerId = Timer.setInterval(() => {
@@ -58,12 +56,11 @@ function loadParties() {
         viewModel.set('isEmpty', viewModel.partyListDescriptions.length === 0);
     });
 
-    let party = undefined;
     viewModel.partyListDescriptions.splice(0);
 
     FileIO.forEachFolderElement(FilePaths.POP_ATT_PATH, function (partyFolder) {
-        party = new AttParty(partyFolder.name);
-        party.load().then(() => {
+        AttParty.loadFromDisk(partyFolder.name).then((party) => {
+            console.log("SKDEBUG FOUND party : " + partyFolder.name);
             // Observables have to be nested to reflect changes
             viewModel.partyListDescriptions.push(ObservableModule.fromObject({
                 party: party,
@@ -228,31 +225,36 @@ function onSwipeCellStarted(args) {
     swipeLimits.threshold = width / 2;
 }
 
-module.exports.addMyself = function(infos){
+module.exports.addMyself = function (infos) {
     const newParty = new AttParty(infos.id, infos.address);
-    viewModel.partyListDescriptions.push(ObservableModule.fromObject({
-        party: newParty,
-        desc: newParty.getPopDescModule(),
-        status: newParty.getPopStatusModule()
-    }));
+    return newParty.save().then(() => {
+        viewModel.partyListDescriptions.push(ObservableModule.fromObject({
+            party: newParty,
+            desc: newParty.getPopDescModule(),
+            status: newParty.getPopStatusModule()
+        }));
 
-
-    return newParty;
-}
+        return Promise.resolve(newParty)
+    });
+};
 
 function addParty() {
     return ScanToReturn.scan()
         .then(string => {
             const infos = Convert.jsonToObject(string);
             const newParty = new AttParty(infos.id, infos.address);
-            viewModel.partyListDescriptions.push(ObservableModule.fromObject({
-                party: newParty,
-                desc: newParty.getPopDescModule(),
-                status: newParty.getPopStatusModule()
-            }));
 
 
-            return newParty.load().then((st) => {update(st)});
+            return newParty.save().then((st) => {
+                viewModel.partyListDescriptions.push(ObservableModule.fromObject({
+                    party: newParty,
+                    desc: newParty.getPopDescModule(),
+                    status: newParty.getPopStatusModule()
+                }));
+
+                update();
+                return newParty.update();
+            });
         })
         .catch(error => {
             console.log(error);
@@ -272,13 +274,24 @@ function addParty() {
         });
 
 }
-function update(st){
+
+function update() {
     Frame.topmost().getViewById("listView").refresh();
-    return Promise.resolve(st);
 }
+
 function reloadStatuses() {
     viewModel.partyListDescriptions.forEach(model => {
-        model.party.retrieveFinalStatementAndStatus();
+        model.party.update()
+            .then(() => {
+                update();
+                return Promise.resolve()
+            })
+            .catch(error => {
+                console.log(error);
+                console.dir(error);
+                console.trace();
+
+            });
     })
 }
 
