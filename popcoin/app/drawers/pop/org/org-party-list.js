@@ -196,11 +196,20 @@ function partyTapped(args) {
     });
       break;
     case PartyStates.FINALIZED:
-      Dialog.alert({
-        title: "Finalized",
-        message: "This party has been finalized by all the organizers.",
-        okButtonText: "Ok"
-      });
+        Dialog
+            .action({
+                message: "This party has been finalized by all the organizers. Do you want to delete it?",
+                cancelButtonText: "Cancel",
+                actions: ["Remove the party"]
+            }).then(result => {
+            if (result === "Remove the party") {
+                return party.remove()
+                    .then(() => {
+                        viewModel.partyListDescriptions.splice(index, 1);
+                        return Promise.resolve();
+                    });
+            }
+        })
       break;
     default:
       Dialog.alert({
