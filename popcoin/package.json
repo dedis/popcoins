@@ -11,10 +11,10 @@
       }
     },
     "tns-android": {
-      "version": "4.0.2"
+      "version": "4.0.1"
     },
     "tns-ios": {
-      "version": "4.0.2"
+      "version": "4.0.1"
     }
   },
   "scripts": {},
