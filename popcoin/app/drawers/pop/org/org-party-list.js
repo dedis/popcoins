@@ -197,11 +197,20 @@ function partyTapped(args) {
     });
       break;
     case PartyStates.FINALIZED:
-      Dialog.alert({
-        title: "Finalized",
-        message: "This party has been finalized by all the organizers.",
-        okButtonText: "Ok"
-      });
+        Dialog
+            .action({
+                message: "This party has been finalized by all the organizers. Do you want to delete it?",
+                cancelButtonText: "Cancel",
+                actions: ["Remove the party"]
+            }).then(result => {
+            if (result === "Remove the party") {
+                return party.remove()
+                    .then(() => {
+                        viewModel.partyListDescriptions.splice(index, 1);
+                        return Promise.resolve();
+                    });
+            }
+        })
       break;
     default:
       Dialog.alert({
@@ -211,7 +220,32 @@ function partyTapped(args) {
   }
 
 }
+function deleteExported(party){
+    party.remove()
+        .then(() => {
 
+            viewModel.partyListDescriptions.splice(viewModel.partyListDescriptions.indexOf(party), 1);
+            const listView = Frame.topmost().currentPage.getViewById("listView");
+            page.getViewById("listView").refresh();
+
+            return Promise.resolve();
+        })
+        .catch((error) => {
+            console.log(error);
+            console.dir(error);
+            console.trace();
+
+            Dialog.alert({
+                title: "Error",
+                message: "An error occured, please try again. - " + error,
+                okButtonText: "Ok"
+            });
+
+            return Promise.reject(error);
+
+        });
+}
+module.exports.deleteExported = deleteExported;
 function deleteParty(args) {
   const party = args.object.bindingContext;
   party.remove()

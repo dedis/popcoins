@@ -94,7 +94,7 @@ function partyTapped(args) {
                 .action({
                     message: "What do you want to do ?",
                     cancelButtonText: "Cancel",
-                    actions: ["Generate a new key pair", "Show the QR Code of my public key", "Display Party Info"]
+                    actions: ["Generate a new key pair", "Show the QR Code of my public key", "Display Party Info","Delete Party"]
                 })
                 .then(result => {
                     if (result === "Generate a new key pair") {
@@ -130,6 +130,11 @@ function partyTapped(args) {
                                 readOnly: true
                             }
                         });
+                    }else if (result === "Delete Party"){
+                        deleteParty(party);
+                        viewModel.partyListDescriptions.splice(index,1)
+                        Frame.topmost().getViewById("listView").refresh();
+
                     }
                 })
                 .catch((error) => {
@@ -188,8 +193,8 @@ function partyTapped(args) {
     }
 }
 
-function deleteParty(args) {
-    const party = args.object.bindingContext;
+function deleteParty(party) {
+
     party.remove()
         .then(() => {
             const listView = Frame.topmost().currentPage.getViewById("listView");

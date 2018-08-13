@@ -299,7 +299,12 @@ function shareToAttendee() {
 function goBack() {
     topmost().goBack();
 }
-
+const deleteExported = require("../org-party-list").deleteExported;
+function deleteParty(){
+    deleteExported(Party);
+    topmost().goBack();
+}
+module.exports.deleteParty = deleteParty;
 module.exports.onLoaded = onLoaded;
 module.exports.addManual = addManual;
 module.exports.addScan = addScan;
