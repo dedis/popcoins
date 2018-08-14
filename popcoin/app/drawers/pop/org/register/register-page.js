@@ -304,9 +304,9 @@ function shareToAttendee() {
 function goBack() {
     topmost().goBack();
 }
-const deleteExported = require("../org-party-list").deleteExported;
 function deleteParty(){
-    deleteExported(Party);
+
+    Party.remove();
     topmost().goBack();
 }
 module.exports.deleteParty = deleteParty;

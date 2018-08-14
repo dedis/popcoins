@@ -219,14 +219,15 @@ function partyTapped(args) {
   }
 
 }
-function deleteExported(party){
+function deleteExported (party){
+    console.log("START")
     party.remove()
         .then(() => {
+            console.log("END")
 
             viewModel.partyListDescriptions.splice(viewModel.partyListDescriptions.indexOf(party), 1);
             const listView = Frame.topmost().currentPage.getViewById("listView");
             page.getViewById("listView").refresh();
-
             return Promise.resolve();
         })
         .catch((error) => {
@@ -244,7 +245,9 @@ function deleteExported(party){
 
         });
 }
-module.exports.deleteExported = deleteExported;
+
+
+
 function deleteParty(args) {
   const party = args.object.bindingContext;
   party.remove()

@@ -17,19 +17,8 @@
 
 
         <nsListView:RadListView items="{{ partyListDescriptions }}" itemTap="partyTapped" row="0" colSpan="3"
-                                itemSwipeProgressStarted="onSwipeCellStarted"
-                                swipeActions="true"
-                                id="listView">
 
-            <nsListView:RadListView.itemSwipeTemplate>
-                <GridLayout class="basic-list-decorated" rows="*" columns="*,auto">
-                    <StackLayout orientation="horizontal" col="0">
-                    </StackLayout>
-                    <StackLayout orientation="horizontal" col="1">
-                        <Button id="button-delete" text="Delete" tap="deleteParty" backgroundColor="red"/>
-                    </StackLayout>
-                </GridLayout>
-            </nsListView:RadListView.itemSwipeTemplate>
+                                id="listView">
 
             <nsListView:RadListView.itemTemplate>
                 <GridLayout rows="*,*" columns="*, auto" backgroundColor="white"
