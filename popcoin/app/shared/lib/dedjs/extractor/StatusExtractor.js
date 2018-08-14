@@ -16,67 +16,67 @@ function throwErrorIfTypeIsWrong(statusResponse) {
 
 function getDescription(statusResponse) {
   throwErrorIfTypeIsWrong(statusResponse)
-  return statusResponse.server.description;
+  return statusResponse.serveridentity.description;
 }
 
 function getAddress(statusResponse) {
   throwErrorIfTypeIsWrong(statusResponse)
-  return statusResponse.server.address;
+  return statusResponse.serveridentity.address;
 }
 
 function getID(statusResponse) {
   throwErrorIfTypeIsWrong(statusResponse)
-  return Convert.byteArrayToHex(statusResponse.server.id);
+  return Convert.byteArrayToHex(statusResponse.serveridentity.id);
 }
 
 function getPublicKey(statusResponse) {
   throwErrorIfTypeIsWrong(statusResponse)
-  return Convert.byteArrayToHex(statusResponse.server.public);
+  return Convert.byteArrayToHex(statusResponse.serveridentity.public);
 }
 
 function getServices(statusResponse) {
   throwErrorIfTypeIsWrong(statusResponse)
-  return statusResponse.system.Generic.field.Available_Services;
+  return statusResponse.status.Generic.field.Available_Services;
 }
 
 function getSystem(statusResponse) {
   throwErrorIfTypeIsWrong(statusResponse)
-  return statusResponse.system.Generic.field.System;
+  return statusResponse.status.Generic.field.System;
 }
 
 function getHost(statusResponse) {
   throwErrorIfTypeIsWrong(statusResponse)
-  return statusResponse.system.Generic.field.Host;
+  return statusResponse.status.Generic.field.Host;
 }
 
 function getPort(statusResponse) {
   throwErrorIfTypeIsWrong(statusResponse)
-  return statusResponse.system.Generic.field.Port;
+  return statusResponse.status.Generic.field.Port;
 }
 
 function getConnectionType(statusResponse) {
   throwErrorIfTypeIsWrong(statusResponse)
-  return statusResponse.system.Generic.field.ConnType;
+  return statusResponse.status.Generic.field.ConnType;
 }
 
 function getVersion(statusResponse) {
   throwErrorIfTypeIsWrong(statusResponse)
-  return statusResponse.system.Generic.field.Version;
+  return statusResponse.status.Generic.field.Version;
 }
 
 function getTXBytes(statusResponse) {
   throwErrorIfTypeIsWrong(statusResponse)
-  return statusResponse.system.Generic.field.TX_bytes;
+  return statusResponse.status.Generic.field.TX_bytes;
 }
 
 function getRXBytes(statusResponse) {
   throwErrorIfTypeIsWrong(statusResponse)
-  return statusResponse.system.Generic.field.RX_bytes;
+  return statusResponse.status.Generic.field.RX_bytes;
 }
 
 function getUptime(statusResponse) {
   throwErrorIfTypeIsWrong(statusResponse)
-  return statusResponse.system.Generic.field.Uptime;
+  return statusResponse.status.Generic.field.Uptime;
 }
 
 module.exports.getDescription = getDescription;

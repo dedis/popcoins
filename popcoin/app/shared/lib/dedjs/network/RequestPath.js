@@ -14,7 +14,7 @@ const CISC = "Cisc";
 /**
  * Status Requests
  */
-const STATUS_REQUEST = `Request`;
+const STATUS_REQUEST = `status.Request`;
 
 /**
  * Identity Requests

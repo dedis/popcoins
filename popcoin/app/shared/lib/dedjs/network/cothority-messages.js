@@ -65,38 +65,6 @@ class CothorityMessages extends CothorityProtobuf {
    */
 
   /**
-   * Creates a KeyPair object from the given public and private keys.
-   * @param {Uint8Array} publicKey - the public key
-   * @param {Uint8Array} privateKey - the private key
-   * @param {Uint8Array} publicCompleteKey - the complete public key
-   * @returns {KeyPair} - the key pair created given the parameters
-   */
-  createKeyPair(publicKey, privateKey, publicCompleteKey) {
-    if (!(publicKey instanceof Uint8Array)) {
-      throw new Error("publicKey must be an instance of Uint8Array");
-    }
-    if (!(privateKey instanceof Uint8Array)) {
-      throw new Error("privateKey must be an instance of Uint8Array");
-    }
-    if (!(publicCompleteKey instanceof Uint8Array || publicCompleteKey === undefined)) {
-      throw new Error("publicCompleteKey must be an instance of Uint8Array or undefined to be skipped");
-    }
-
-    const model = this.getModel(ObjectType.KEY_PAIR);
-
-    const fields = {
-      public: publicKey,
-      private: privateKey
-    };
-
-    if (publicCompleteKey !== undefined) {
-      fields.publicComplete = publicCompleteKey;
-    }
-
-    return model.create(fields);
-  }
-
-  /**
    * Creates a ServerIdentity object from the given parameters.
    * @param {Uint8Array} publicKey - the public key of the conode
    * @param {Uint8Array} id - the id of the conode

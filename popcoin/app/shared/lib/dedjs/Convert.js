@@ -28,11 +28,11 @@ const UUID_VERSION = 5;
  * @returns {string} - the hexadecimal string
  */
 function byteArrayToHex(byteArray) {
-  if (!(byteArray instanceof Uint8Array)) {
-    throw new Error("byteArray must be an instance of Uint8Array");
-  }
+    if (!(byteArray instanceof Uint8Array)) {
+        throw new Error("byteArray must be an instance of Uint8Array");
+    }
 
-  return Buffer.from(byteArray).toString(HEX_KEYWORD);
+    return Buffer.from(byteArray).toString(HEX_KEYWORD);
 }
 
 /**
@@ -41,13 +41,13 @@ function byteArrayToHex(byteArray) {
  * @returns {Uint8Array} - the byte array
  */
 function hexToByteArray(hexString) {
-  if (typeof hexString !== "string") {
-    throw new Error("hexString must be of type string");
-  }
+    if (typeof hexString !== "string") {
+        throw new Error("hexString must be of type string");
+    }
 
-  const hexBuffer = Buffer.from(hexString, HEX_KEYWORD);
+    const hexBuffer = Buffer.from(hexString, HEX_KEYWORD);
 
-  return new Uint8Array(hexBuffer.buffer, hexBuffer.byteOffset, hexBuffer.byteLength / Uint8Array.BYTES_PER_ELEMENT);
+    return new Uint8Array(hexBuffer.buffer, hexBuffer.byteOffset, hexBuffer.byteLength / Uint8Array.BYTES_PER_ELEMENT);
 }
 
 /**
@@ -56,13 +56,13 @@ function hexToByteArray(hexString) {
  * @returns {string} - the base64 string
  */
 function byteArrayToBase64(byteArray) {
-  if (!(byteArray instanceof Uint8Array)) {
-    throw new Error("byteArray must be an instance of Uint8Array");
-  }
+    if (!(byteArray instanceof Uint8Array)) {
+        throw new Error("byteArray must be an instance of Uint8Array");
+    }
 
-  const hexString = byteArrayToHex(byteArray);
+    const hexString = byteArrayToHex(byteArray);
 
-  return hexToBase64(hexString);
+    return hexToBase64(hexString);
 }
 
 /**
@@ -71,13 +71,13 @@ function byteArrayToBase64(byteArray) {
  * @returns {Uint8Array} - the byte array
  */
 function base64ToByteArray(base64String) {
-  if (typeof base64String !== "string") {
-    throw new Error("base64String must be of type string");
-  }
+    if (typeof base64String !== "string") {
+        throw new Error("base64String must be of type string");
+    }
 
-  const hexString = base64ToHex(base64String);
+    const hexString = base64ToHex(base64String);
 
-  return hexToByteArray(hexString);
+    return hexToByteArray(hexString);
 }
 
 /**
@@ -86,11 +86,11 @@ function base64ToByteArray(base64String) {
  * @returns {string} - the base64 string
  */
 function hexToBase64(hexString) {
-  if (typeof hexString !== "string") {
-    throw new Error("hexString must be of type string");
-  }
+    if (typeof hexString !== "string") {
+        throw new Error("hexString must be of type string");
+    }
 
-  return Buffer.from(hexString, HEX_KEYWORD).toString(BASE64_KEYWORD);
+    return Buffer.from(hexString, HEX_KEYWORD).toString(BASE64_KEYWORD);
 }
 
 /**
@@ -99,11 +99,11 @@ function hexToBase64(hexString) {
  * @returns {string} - the hexadecimal string
  */
 function base64ToHex(base64String) {
-  if (typeof base64String !== "string") {
-    throw new Error("base64String must be of type string");
-  }
+    if (typeof base64String !== "string") {
+        throw new Error("base64String must be of type string");
+    }
 
-  return Buffer.from(base64String, BASE64_KEYWORD).toString(HEX_KEYWORD);
+    return Buffer.from(base64String, BASE64_KEYWORD).toString(HEX_KEYWORD);
 }
 
 /**
@@ -112,11 +112,11 @@ function base64ToHex(base64String) {
  * @returns {string} - the JSON string representation
  */
 function objectToJson(object) {
-  if (!(object !== undefined && typeof object === "object" && !Helper.isArray(object))) {
-    throw new Error("object must be of type object (not array!) and not undefined");
-  }
+    if (!(object !== undefined && typeof object === "object" && !Helper.isArray(object))) {
+        throw new Error("object must be of type object (not array!) and not undefined");
+    }
 
-  return JSON.stringify(object, undefined, 4);
+    return JSON.stringify(object, undefined, 4);
 }
 
 /**
@@ -125,11 +125,11 @@ function objectToJson(object) {
  * @returns {object} - the object created from the JSON string
  */
 function jsonToObject(jsonString) {
-  if (typeof jsonString !== "string") {
-    throw new Error("jsonString must be of type string");
-  }
+    if (typeof jsonString !== "string") {
+        throw new Error("jsonString must be of type string");
+    }
 
-  return JSON.parse(jsonString);
+    return JSON.parse(jsonString);
 }
 
 /**
@@ -138,11 +138,11 @@ function jsonToObject(jsonString) {
  * @returns {string} - the TOML string representing the object
  */
 function objectToToml(object) {
-  if (!(object !== undefined && typeof object === "object" && !Helper.isArray(object))) {
-    throw new Error("object must be of type object (not array!) and not undefined");
-  }
+    if (!(object !== undefined && typeof object === "object" && !Helper.isArray(object))) {
+        throw new Error("object must be of type object (not array!) and not undefined");
+    }
 
-  return Tomlify.toToml(object, { space: 4 });
+    return Tomlify.toToml(object, {space: 4});
 }
 
 /**
@@ -151,11 +151,11 @@ function objectToToml(object) {
  * @returns {object} - the object parsed from the TOML string
  */
 function tomlToObject(tomlString) {
-  if (typeof tomlString !== "string") {
-    throw new Error("tomlString must be of type string");
-  }
+    if (typeof tomlString !== "string") {
+        throw new Error("tomlString must be of type string");
+    }
 
-  return TomlParser.parse(tomlString);
+    return TomlParser.parse(tomlString);
 }
 
 /**
@@ -164,13 +164,13 @@ function tomlToObject(tomlString) {
  * @returns {string} - the TOML string converted from the JSON string
  */
 function jsonToToml(jsonString) {
-  if (typeof jsonString !== "string") {
-    throw new Error("jsonString must be of type string");
-  }
+    if (typeof jsonString !== "string") {
+        throw new Error("jsonString must be of type string");
+    }
 
-  const object = jsonToObject(jsonString);
+    const object = jsonToObject(jsonString);
 
-  return objectToToml(object);
+    return objectToToml(object);
 }
 
 /**
@@ -179,13 +179,13 @@ function jsonToToml(jsonString) {
  * @returns {string} - the JSON string converted from the TOML string
  */
 function tomlToJson(tomlString) {
-  if (typeof tomlString !== "string") {
-    throw new Error("tomlString must be of type string");
-  }
+    if (typeof tomlString !== "string") {
+        throw new Error("tomlString must be of type string");
+    }
 
-  const object = tomlToObject(tomlString);
+    const object = tomlToObject(tomlString);
 
-  return objectToJson(object);
+    return objectToJson(object);
 }
 
 /**
@@ -195,22 +195,22 @@ function tomlToJson(tomlString) {
  * @returns {string} - the builded websocket url
  */
 function tlsToWebsocket(serverIdentity, path) {
-  let address = "";
-  if (Helper.isOfType(serverIdentity, ObjectType.SERVER_IDENTITY)) {
-    address = serverIdentity.address
-  } else if (typeof serverIdentity === "string") {
-    address = serverIdentity;
-  } else {
-    throw new Error("serverIdentity must be of type ServerIdentity or string");
-  }
-  if (typeof path !== "string") {
-    throw new Error("path must be of type string");
-  }
+    let address = "";
+    if (Helper.isOfType(serverIdentity, ObjectType.SERVER_IDENTITY)) {
+        address = serverIdentity.address
+    } else if (typeof serverIdentity === "string") {
+        address = serverIdentity;
+    } else {
+        throw new Error("serverIdentity must be of type ServerIdentity or string");
+    }
+    if (typeof path !== "string") {
+        throw new Error("path must be of type string");
+    }
 
-  let [ip, port] = address.replace(BASE_URL_TLS, "").split(URL_PORT_SPLITTER);
-  port = parseInt(port) + 1;
+    let [ip, port] = address.replace(BASE_URL_TLS, "").split(URL_PORT_SPLITTER);
+    port = parseInt(port) + 1;
 
-  return BASE_URL_WS + ip + URL_PORT_SPLITTER + port + path;
+    return BASE_URL_WS + ip + URL_PORT_SPLITTER + port + path;
 }
 
 /**
@@ -219,20 +219,20 @@ function tlsToWebsocket(serverIdentity, path) {
  * @returns {Array} - the parsed array of PopToken objects
  */
 function parseJsonPopTokenArray(jsonString) {
-  if (typeof jsonString !== "string") {
-    throw new Error("jsonString must be of type string");
-  }
+    if (typeof jsonString !== "string") {
+        throw new Error("jsonString must be of type string");
+    }
 
-  const object = jsonToObject(jsonString);
-  if (object.array === undefined || !Array.isArray(object.array)) {
-    throw new Error("object.array is undefined or not an array");
-  }
+    const object = jsonToObject(jsonString);
+    if (object.array === undefined || !Array.isArray(object.array)) {
+        throw new Error("object.array is undefined or not an array");
+    }
 
-  object.array = object.array.map(element => {
-    return parseJsonPopToken(objectToJson(element));
-  });
+    object.array = object.array.map(element => {
+        return parseJsonPopToken(objectToJson(element));
+    });
 
-  return object.array;
+    return object.array;
 }
 
 /**
@@ -241,15 +241,15 @@ function parseJsonPopTokenArray(jsonString) {
  * @returns {PopToken} - the parsed PopToken object
  */
 function parseJsonPopToken(jsonString) {
-  if (typeof jsonString !== "string") {
-    throw new Error("jsonString must be of type string");
-  }
+    if (typeof jsonString !== "string") {
+        throw new Error("jsonString must be of type string");
+    }
 
-  const object = jsonToObject(jsonString);
+    const object = jsonToObject(jsonString);
 
-  object.final = parseJsonFinalStatement(objectToJson(object.final));
+    object.final = parseJsonFinalStatement(objectToJson(object.final));
 
-  return CothorityMessages.createPopToken(object.final, base64ToByteArray(object.private), base64ToByteArray(object.public));
+    return CothorityMessages.createPopToken(object.final, base64ToByteArray(object.private), base64ToByteArray(object.public));
 }
 
 /**
@@ -258,20 +258,20 @@ function parseJsonPopToken(jsonString) {
  * @returns {Array} - the parsed array of FinalStatement objects
  */
 function parseJsonFinalStatementsArray(jsonString) {
-  if (typeof jsonString !== "string") {
-    throw new Error("jsonString must be of type string");
-  }
+    if (typeof jsonString !== "string") {
+        throw new Error("jsonString must be of type string");
+    }
 
-  const object = jsonToObject(jsonString);
-  if (object.array === undefined || !Array.isArray(object.array)) {
-    throw new Error("object.array is undefined or not an array");
-  }
+    const object = jsonToObject(jsonString);
+    if (object.array === undefined || !Array.isArray(object.array)) {
+        throw new Error("object.array is undefined or not an array");
+    }
 
-  object.array = object.array.map(element => {
-    return parseJsonFinalStatement(objectToJson(element));
-  });
+    object.array = object.array.map(element => {
+        return parseJsonFinalStatement(objectToJson(element));
+    });
 
-  return object.array;
+    return object.array;
 }
 
 /**
@@ -280,22 +280,22 @@ function parseJsonFinalStatementsArray(jsonString) {
  * @returns {FinalStatement} - the parsed FinalStatement object
  */
 function parseJsonFinalStatement(jsonString) {
-  if (typeof jsonString !== "string") {
-    throw new Error("jsonString must be of type string");
-  }
+    if (typeof jsonString !== "string") {
+        throw new Error("jsonString must be of type string");
+    }
 
-  const object = jsonToObject(jsonString);
-  if (object.attendees === undefined || !Array.isArray(object.attendees)) {
-    throw new Error("object.attendees is undefined or not an array");
-  }
+    const object = jsonToObject(jsonString);
+    if (object.attendees === undefined || !Array.isArray(object.attendees)) {
+        throw new Error("object.attendees is undefined or not an array");
+    }
 
-  object.attendees = object.attendees.map(base64String => {
-    return base64ToByteArray(base64String.split(" ").join("+"));
-  });
-  object.signature = base64ToByteArray(object.signature.split(" ").join("+"));
-  object.desc = parseJsonPopDesc(objectToJson(object.desc));
+    object.attendees = object.attendees.map(base64String => {
+        return base64ToByteArray(base64String.split(" ").join("+"));
+    });
+    object.signature = base64ToByteArray(object.signature.split(" ").join("+"));
+    object.desc = parseJsonPopDesc(objectToJson(object.desc));
 
-  return CothorityMessages.createFinalStatement(object.desc, object.attendees, object.signature, object.merged);
+    return CothorityMessages.createFinalStatement(object.desc, object.attendees, object.signature, object.merged);
 }
 
 /**
@@ -304,13 +304,13 @@ function parseJsonFinalStatement(jsonString) {
  * @returns {PopDesc} - the parsed PopDesc object
  */
 function parseJsonPopDesc(jsonString) {
-  if (typeof jsonString !== "string") {
-    throw new Error("jsonString must be of type string");
-  }
+    if (typeof jsonString !== "string") {
+        throw new Error("jsonString must be of type string");
+    }
 
-  const object = jsonToObject(jsonString);
+    const object = jsonToObject(jsonString);
 
-  return CothorityMessages.createPopDesc(object.name, object.dateTime, object.location, parseJsonRoster(objectToJson(object.roster)));
+    return CothorityMessages.createPopDesc(object.name, object.dateTime, object.location, parseJsonRoster(objectToJson(object.roster)));
 }
 
 /**
@@ -319,28 +319,28 @@ function parseJsonPopDesc(jsonString) {
  * @returns {Uint8Array} - the parsed PopDesc hash
  */
 function parseJsonPopDescHash(jsonString) {
-  if (typeof jsonString !== "string") {
-    throw new Error("jsonString must be of type string");
-  }
+    if (typeof jsonString !== "string") {
+        throw new Error("jsonString must be of type string");
+    }
 
-  const hash = jsonToObject(jsonString).hash;
+    const hash = jsonToObject(jsonString).hash;
 
-  return base64ToByteArray(hash);
+    return base64ToByteArray(hash);
 }
 
 /**
  * Parses a JSON string into a Cisc username
  * @param {string} jsonString - the JSON string to parse into the Cisc username
  * @returns {String} - the parsed string for the username
- */ 
+ */
 function parseJsonUserName(jsonString) {
-  if (typeof jsonString !== "string") {
-    throw new Error("jsonString must be of type string");
-  }
+    if (typeof jsonString !== "string") {
+        throw new Error("jsonString must be of type string");
+    }
 
-  const name = jsonToObject(jsonString);
+    const name = jsonToObject(jsonString);
 
-  return name.name;
+    return name.name;
 }
 
 /**
@@ -349,117 +349,117 @@ function parseJsonUserName(jsonString) {
  * @returns {Roster} - the parsed Roster object
  */
 function parseJsonRoster(jsonString) {
-  if (typeof jsonString !== "string") {
-    throw new Error("jsonString must be of type string");
-  }
+    if (typeof jsonString !== "string") {
+        throw new Error("jsonString must be of type string");
+    }
 
-  const roster = jsonToObject(jsonString);
-  if (roster.list === undefined || !Array.isArray(roster.list)) {
-    throw new Error("roster.list is undefined or not an array");
-  }
+    const roster = jsonToObject(jsonString);
+    if (roster.list === undefined || !Array.isArray(roster.list)) {
+        throw new Error("roster.list is undefined or not an array");
+    }
 
-  let rosterId = roster.id;
-  if (rosterId !== undefined) {
-    rosterId = base64ToByteArray(rosterId.split(" ").join("+"));
-  }
+    let rosterId = roster.id;
+    if (rosterId !== undefined) {
+        rosterId = base64ToByteArray(rosterId.split(" ").join("+"));
+    }
 
-  let aggregate = (roster.aggregate === undefined) ? undefined : base64ToByteArray(roster.aggregate.split(" ").join("+"));
+    let aggregate = (roster.aggregate === undefined) ? undefined : base64ToByteArray(roster.aggregate.split(" ").join("+"));
 
-  const points = [];
-  const list = roster.list.map((server) => {
+    const points = [];
+    const list = roster.list.map((server) => {
+        if (aggregate === undefined) {
+            let point = CURVE_ED25519.point();
+            point.unmarshalBinary(base64ToByteArray(server.public.split(" ").join("+")));
+            points.push(point);
+        }
+
+        let serverId = server.id;
+        if (serverId !== undefined) {
+            serverId = base64ToByteArray(serverId.split(" ").join("+"));
+        }
+
+        return toServerIdentity(server.address, base64ToByteArray(server.public.split(" ").join("+")), server.description, serverId);
+    });
+
     if (aggregate === undefined) {
-      let point = CURVE_ED25519.point();
-      point.unmarshalBinary(base64ToByteArray(server.public.split(" ").join("+")));
-      points.push(point);
+        aggregate = Crypto.aggregatePublicKeys(points);
     }
 
-    let serverId = server.id;
-    if (serverId !== undefined) {
-      serverId = base64ToByteArray(serverId.split(" ").join("+"));
-    }
-
-    return toServerIdentity(server.address, base64ToByteArray(server.public.split(" ").join("+")), server.description, serverId);
-  });
-
-  if (aggregate === undefined) {
-    aggregate = Crypto.aggregatePublicKeys(points);
-  }
-
-  return CothorityMessages.createRoster(rosterId, list, aggregate);
+    return CothorityMessages.createRoster(rosterId, list, aggregate);
 }
 
 /**
  * Parses a TOML string into a Roster object, if the ServerIdentities does not have an ID yet it will be computed.
  *
  * The TOML has to be in this format:
-  "[[servers]]\n" +
-  "  Address = \"tls://10.0.2.2:7002\"\n" +
-  "  Public = \"HkDzpR5Imd7WNx8kl2lJcIVRVn8gfDByJnmlfrYh/zU=\"\n" +
-  "  Description = \"Conode_1\"\n" +
-  "[[servers]]\n" +
-  "  Address = \"tls://10.0.2.2:7004\"\n" +
-  "  Public = \"Fx6zzvJM6VzxfByLY2+uArGPtd2lHKPVmoXGMhdaFCA=\"\n" +
-  "  Description = \"Conode_2\"\n" +
-  "[[servers]]\n" +
-  "  Address = \"tls://10.0.2.2:7006\"\n" +
-  "  Public = \"j53MMKZNdtLlglcK9Ct1YYtkbbEOfq3R8ZoJOFIu6tE=\"\n" +
-  "  Description = \"Conode_3\""
+ "[[servers]]\n" +
+ "  Address = \"tls://10.0.2.2:7002\"\n" +
+ "  Public = \"HkDzpR5Imd7WNx8kl2lJcIVRVn8gfDByJnmlfrYh/zU=\"\n" +
+ "  Description = \"Conode_1\"\n" +
+ "[[servers]]\n" +
+ "  Address = \"tls://10.0.2.2:7004\"\n" +
+ "  Public = \"Fx6zzvJM6VzxfByLY2+uArGPtd2lHKPVmoXGMhdaFCA=\"\n" +
+ "  Description = \"Conode_2\"\n" +
+ "[[servers]]\n" +
+ "  Address = \"tls://10.0.2.2:7006\"\n" +
+ "  Public = \"j53MMKZNdtLlglcK9Ct1YYtkbbEOfq3R8ZoJOFIu6tE=\"\n" +
+ "  Description = \"Conode_3\""
  *
  * @param {string} tomlString - the TOML string to parse into a Roster object
  * @returns {Roster} - the parsed Roster object
  */
 function parseTomlRoster(tomlString) {
-  if (typeof tomlString !== "string") {
-    throw new Error("tomlString must be of type string");
-  }
+    if (typeof tomlString !== "string") {
+        throw new Error("tomlString must be of type string");
+    }
 
-  const roster = tomlToObject(tomlString);
-  if (roster.servers === undefined) {
-    throw new Error("roster.servers is undefined");
-  }
+    const roster = tomlToObject(tomlString);
+    if (roster.servers === undefined) {
+        throw new Error("roster.servers is undefined");
+    }
 
-  roster.servers.forEach(server => {
-    Object.getOwnPropertyNames(server).forEach((propertyName, index, array) => {
-      const lowerCased = propertyName.toLocaleLowerCase();
+    roster.servers.forEach(server => {
+        Object.getOwnPropertyNames(server).forEach((propertyName, index, array) => {
+            const lowerCased = propertyName.toLocaleLowerCase();
 
-      if (lowerCased !== propertyName) {
-        server[lowerCased] = server[propertyName];
-        delete server[propertyName];
-      }
+            if (lowerCased !== propertyName) {
+                server[lowerCased] = server[propertyName];
+                delete server[propertyName];
+            }
+        });
     });
-  });
 
-  roster.list = [];
-  roster.servers.forEach(server => {
-    roster.list.push(Helper.deepCopy(server));
-  });
-  delete roster.servers;
+    roster.list = [];
+    roster.servers.forEach(server => {
+        roster.list.push(Helper.deepCopy(server));
+    });
+    delete roster.servers;
 
-  return parseJsonRoster(JSON.stringify(roster));
+    return parseJsonRoster(JSON.stringify(roster));
 }
 
 /**
  * Parses a JSON string into a KeyPair object.
  * @param {string} jsonString - the JSON string to parse into a KeyPair object
- * @returns {KeyPair} - the parsed KeyPair object
+ * @returns {Object} - the parsed KeyPair object
  */
 function parseJsonKeyPair(jsonString) {
-  if (typeof jsonString !== "string") {
-    throw new Error("jsonString must be of type string");
-  }
+    if (typeof jsonString !== "string") {
+        throw new Error("jsonString must be of type string");
+    }
 
-  const keyPair = jsonToObject(jsonString);
+    const keyPair = jsonToObject(jsonString);
 
-  let publicComplete = undefined;
-  if (keyPair.publicComplete !== undefined) {
-    publicComplete = base64ToByteArray(keyPair.publicComplete);
-  }
+    console.log("SKDEBUG " + jsonString);
 
-  if (keyPair.private === undefined) {
-    keyPair.private = "";
-  }
+    if (keyPair.private === undefined) {
+        keyPair.private = "";
+    }
 
-  return CothorityMessages.createKeyPair(base64ToByteArray(keyPair.public), base64ToByteArray(keyPair.private), publicComplete);
+    return {
+        public: base64ToByteArray(keyPair.public),
+        private: base64ToByteArray(keyPair.private),
+    };
 }
 
 /**
@@ -468,16 +468,16 @@ function parseJsonKeyPair(jsonString) {
  * @returns {ServerIdentity} - the parsed ServerIdentity object
  */
 function parseJsonServerIdentity(jsonString) {
-  if (typeof jsonString !== "string") {
-    throw new Error("jsonString must be of type string");
-  }
+    if (typeof jsonString !== "string") {
+        throw new Error("jsonString must be of type string");
+    }
 
-  const serverIdentity = jsonToObject(jsonString);
+    const serverIdentity = jsonToObject(jsonString);
 
-  const publicKey = base64ToByteArray(serverIdentity.public);
-  const id = base64ToByteArray(serverIdentity.id);
+    const publicKey = base64ToByteArray(serverIdentity.public);
+    const id = base64ToByteArray(serverIdentity.id);
 
-  return toServerIdentity(serverIdentity.address, publicKey, serverIdentity.description, id);
+    return toServerIdentity(serverIdentity.address, publicKey, serverIdentity.description, id);
 }
 
 /**
@@ -486,20 +486,20 @@ function parseJsonServerIdentity(jsonString) {
  * @returns {Array} - the parsed an array of Uint8Array
  */
 function parseJsonArrayOfKeys(jsonString) {
-  if (typeof jsonString !== "string") {
-    throw new Error("jsonString must be of type string");
-  }
+    if (typeof jsonString !== "string") {
+        throw new Error("jsonString must be of type string");
+    }
 
-  let array = jsonToObject(jsonString).array;
-  if (array === undefined || !Array.isArray(array)) {
-    throw new Error("object.array is undefined or not an array");
-  }
+    let array = jsonToObject(jsonString).array;
+    if (array === undefined || !Array.isArray(array)) {
+        throw new Error("object.array is undefined or not an array");
+    }
 
-  array = array.map(base64String => {
-    return base64ToByteArray(base64String);
-  });
+    array = array.map(base64String => {
+        return base64ToByteArray(base64String);
+    });
 
-  return array;
+    return array;
 }
 
 /**
@@ -511,24 +511,24 @@ function parseJsonArrayOfKeys(jsonString) {
  * @returns {ServerIdentity} - the server identity object created from the given parameters
  */
 function toServerIdentity(address, publicKey, description, id) {
-  if (typeof address !== "string" || !Helper.isValidAddress(address)) {
-    throw new Error("address must be of type string and have the right format");
-  }
-  if (!(publicKey instanceof Uint8Array) || !Helper.isValidPublicKey(publicKey)) {
-    throw new Error("publicKey must be an instance of Uint8Array and have the right format");
-  }
-  if (typeof description !== "string") {
-    throw new Error("description must be of type string");
-  }
-  if (!(id === undefined || id instanceof Uint8Array)) {
-    throw new Error("id must be an instance of Uint8Array or be undefined to be skipped");
-  }
+    if (typeof address !== "string" || !Helper.isValidAddress(address)) {
+        throw new Error("address must be of type string and have the right format");
+    }
+    if (!(publicKey instanceof Uint8Array) || !Helper.isValidPublicKey(publicKey)) {
+        throw new Error("publicKey must be an instance of Uint8Array and have the right format");
+    }
+    if (typeof description !== "string") {
+        throw new Error("description must be of type string");
+    }
+    if (!(id === undefined || id instanceof Uint8Array)) {
+        throw new Error("id must be an instance of Uint8Array or be undefined to be skipped");
+    }
 
-  if (id === undefined) {
-    id = publicKeyToUuid(publicKey);
-  }
+    if (id === undefined) {
+        id = publicKeyToUuid(publicKey);
+    }
 
-  return CothorityMessages.createServerIdentity(publicKey, id, address, description);
+    return CothorityMessages.createServerIdentity(publicKey, id, address, description);
 }
 
 /**
@@ -537,13 +537,13 @@ function toServerIdentity(address, publicKey, description, id) {
  * @returns {Uint8Array} - the uuid of the server
  */
 function publicKeyToUuid(publicKey) {
-  if (!(publicKey instanceof Uint8Array)) {
-    throw new Error("publicKey must be an instance of Uint8Array");
-  }
+    if (!(publicKey instanceof Uint8Array)) {
+        throw new Error("publicKey must be an instance of Uint8Array");
+    }
 
-  const url = BASE_URL_CONODE_ID + byteArrayToHex(publicKey);
+    const url = BASE_URL_CONODE_ID + byteArrayToHex(publicKey);
 
-  return new Uint8Array(new UUID(UUID_VERSION, NAME_SPACE_URL, url).export());
+    return new Uint8Array(new UUID(UUID_VERSION, NAME_SPACE_URL, url).export());
 }
 
 module.exports.byteArrayToHex = byteArrayToHex;
