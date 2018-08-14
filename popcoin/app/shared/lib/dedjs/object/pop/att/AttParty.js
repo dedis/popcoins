@@ -278,7 +278,7 @@ class AttParty extends Party {
      * @returns {KeyPair}
      */
     getKeyPair() {
-        return this._keyPair.getKeyPair();
+        return this._keyPair;
     }
 
     /**

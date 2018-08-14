@@ -9,13 +9,11 @@ const ObservableModule = require("data/observable");
 const viewModel = ObservableModule.fromObject({
   privateKey: Convert.byteArrayToHex(User.getKeyPairModule().private),
   publicKey: Convert.byteArrayToHex(User.getKeyPairModule().public),
-  publicCompleteKey: Convert.byteArrayToHex(User.getKeyPairModule().publicComplete),
   nameModule: User.getName()
 });
 
 let textFieldPublic = undefined;
 let textFieldPrivate = undefined;
-let textFieldPublicComplete = undefined;
 let textFieldUserName = undefined;
 
 let pageObject = undefined;
@@ -25,7 +23,7 @@ function onLoaded(args) {
   pageObject = page.parent.page;
 
   loadViews(page);
-  if (textFieldPublic === undefined || textFieldPrivate === undefined || textFieldPublicComplete === undefined) {
+  if (textFieldPublic === undefined || textFieldPrivate === undefined) {
     throw new Error("one of the fields is undefined, but it shouldn't");
   }
 
@@ -39,7 +37,6 @@ function onLoaded(args) {
 function loadViews(page) {
   textFieldPublic = page.getViewById("text-field-public");
   textFieldPrivate = page.getViewById("text-field-private");
-  textFieldPublicComplete = page.getViewById("text-field-public-complete");
   textFieldUserName = page.getViewById("text-field-username");
 }
 
@@ -55,8 +52,7 @@ function generateKeyPair() {
           title: "New Key Pair",
           message: "The new key pair has been stored in your settings." +
             "\n\nPublic:\n" + Convert.byteArrayToHex(User.getKeyPair().public) +
-            "\n\nPrivate:\n" + Convert.byteArrayToHex(User.getKeyPair().private) +
-            "\n\nPublic Complete:\n" + Convert.byteArrayToHex(User.getKeyPair().publicComplete),
+            "\n\nPrivate:\n" + Convert.byteArrayToHex(User.getKeyPair().private),
           okButtonText: "Ok"
         });
       })
@@ -140,7 +136,7 @@ function changeUserName() {
               });
         });
       }
-      
+
       return Promise.resolve();
     })
     .catch(error => {

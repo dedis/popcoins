@@ -898,6 +898,7 @@ class OrgParty extends Party {
   loadPopDesc() {
         return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_DESC))
             .then(jsonPopDesc => {
+              console.log("PopDesc is : " + jsonPopDesc);
             if (jsonPopDesc.length > 0) {
             const popDesc = Convert.parseJsonPopDesc(jsonPopDesc);
 

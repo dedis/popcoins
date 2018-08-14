@@ -88,7 +88,7 @@ class User {
      * @returns {KeyPair} - a key pair object containg the keys of the user
      */
     getKeyPair() {
-        return this._keyPair.getKeyPair();
+        return this._keyPair;
     }
 
     /**
@@ -98,7 +98,7 @@ class User {
      * @returns {Promise} - a promise that gets resolved once the new key pair has been set and saved if the save parameter is set to true
      */
     setKeyPair(keyPair, save) {
-        return this._keyPair._setKeyPair(keyPair, save);
+        return this._keyPair._setKeyPair(keyPair.public, keyPair.private, save);
     }
 
     /**
