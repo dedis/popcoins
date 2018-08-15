@@ -111,7 +111,7 @@ function popTokenTapped(args) {
     return Dialog.action({
         message: "Choose an Action",
         cancelButtonText: "Cancel",
-        actions: [POP_TOKEN_OPTION_REVOKE, POP_TOKEN_OPTION_SIGN]
+        actions: [ POP_TOKEN_OPTION_SIGN]
     })
         .then(result => {
             if (result === POP_TOKEN_OPTION_REVOKE) {

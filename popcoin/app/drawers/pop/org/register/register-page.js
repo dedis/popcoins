@@ -63,7 +63,7 @@ function addManual() {
 
 
 
-                callMe(Party);
+                addMyselfAttendee(Party);
 
 
                 // return Party.registerAttendee(User.getKeyPair().public).then(addPartyMyself( Convert.byteArrayToHex(Party.getPopDescHash()),Party.getLinkedConode().address));
@@ -88,7 +88,10 @@ function addManual() {
             return Promise.reject(error);
         });
 }
-function callMe(Party){
+
+/*This method creates a new attendee and adds its key to the list of keys
+ */
+function addMyselfAttendee(Party){
     let info = {
         id: Convert.byteArrayToHex(Party.getPopDescHash()),
         address: Party.getLinkedConode().address
@@ -96,14 +99,16 @@ function callMe(Party){
 
 
     //var newParty = new AttParty(info.id, info.address);
-    const newParty = addMyself(info);
+    addMyself(info).then((party)=>{
+        Party.registerAttendee(party.getKeyPair().public);
+    })
 
-    return newParty.load().then(party => {
-        Party.registerAttendee(party.getKeyPair().public)
-    });
+
+
+
 
 }
-module.exports.callMe = callMe;
+module.exports.addMyselfAttendee = addMyselfAttendee;
 function addScan() {
     return ScanToReturn.scan()
         .then(keyPairJson => {
@@ -299,9 +304,9 @@ function shareToAttendee() {
 function goBack() {
     topmost().goBack();
 }
-const deleteExported = require("../org-party-list").deleteExported;
 function deleteParty(){
-    deleteExported(Party);
+
+    Party.remove();
     topmost().goBack();
 }
 module.exports.deleteParty = deleteParty;

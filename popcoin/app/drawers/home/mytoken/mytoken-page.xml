@@ -16,8 +16,6 @@
         />
 
         <nsListView:RadListView items="{{ popToken }}" itemTap="popTokenTapped"
-                                itemSwipeProgressStarted="onSwipeCellStartedPopToken"
-                                swipeActions="true"
                                 id="list-view-pop-token">
 
             <nsListView:RadListView.itemTemplate>

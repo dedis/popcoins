@@ -54,7 +54,7 @@ function retrieveProposals() {
     });
 }
 hashAndSave = require("../org-party-list").hashAndSave;
-const callMe = require("../register/register-page").callMe;
+const addMyselfAttendee = require("../register/register-page").addMyselfAttendee;
 function proposalTapped(args) {
   const index = args.index;
 
