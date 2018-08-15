@@ -310,7 +310,7 @@ function parseJsonPopDesc(jsonString) {
 
     const object = jsonToObject(jsonString);
 
-    return CothorityMessages.createPopDesc(object.name, object.dateTime, object.location, parseJsonRoster(objectToJson(object.roster)));
+    return CothorityMessages.createPopDesc(object.name, object.datetime, object.location, parseJsonRoster(objectToJson(object.roster)));
 }
 
 /**

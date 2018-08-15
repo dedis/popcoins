@@ -148,17 +148,17 @@ class CothorityMessages extends CothorityProtobuf {
   /**
    * Creates a PopDesc using the information given as parameters.
    * @param {string} name - the name of the pop party
-   * @param {string} dateTime - the date and time of the pop party
+   * @param {string} datetime - the date and time of the pop party
    * @param {string} location - the location of the pop party
    * @param {Roster} roster - the roster used to host the pop party
    * @returns {PopDesc} - the PopDesc object created using the given parameters
    */
-  createPopDesc(name, dateTime, location, roster) {
+  createPopDesc(name, datetime, location, roster) {
     if (typeof name !== "string") {
       throw new Error("name must be of type string");
     }
-    if (typeof dateTime !== "string") {
-      throw new Error("dateTime must be of type string");
+    if (typeof datetime !== "string") {
+      throw new Error("datetime must be of type string");
     }
     if (typeof location !== "string") {
       throw new Error("location must be of type string");
@@ -171,7 +171,7 @@ class CothorityMessages extends CothorityProtobuf {
 
     const fields = {
       name: name,
-      dateTime: dateTime,
+      datetime: datetime,
       location: location,
       roster: roster
     };

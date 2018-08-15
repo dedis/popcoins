@@ -11,7 +11,7 @@ class Party {
   constructor() {
     this._popDesc = ObservableModule.fromObjectRecursive({
       name: "",
-      dateTime: "",
+      datetime: "",
       location: "",
       roster: {
         id: new Uint8Array(),
@@ -54,7 +54,7 @@ class Party {
 
     const roster = CothorityMessages.createRoster(id, list, Uint8Array.from(popDescModule.roster.aggregate));
 
-    return CothorityMessages.createPopDesc(popDescModule.name, popDescModule.dateTime, popDescModule.location, roster);
+    return CothorityMessages.createPopDesc(popDescModule.name, popDescModule.datetime, popDescModule.location, roster);
   }
 
 }
