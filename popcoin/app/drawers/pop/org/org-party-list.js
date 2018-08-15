@@ -120,10 +120,10 @@ function hashAndSave(party) {
       });
   }
 
-  return registerPopDesc();
+  return registerPopDesc().then((p)=>{ addMyselfAttendee(party); return Promise.resolve(p);});
 }
 
-const callMe = require("./register/register-page").callMe;
+const addMyselfAttendee = require("./register/register-page").addMyselfAttendee;
 function partyTapped(args) {
 
   const index = args.index;
@@ -148,7 +148,6 @@ function partyTapped(args) {
             });
           } else if (result === "Publish the party") {
             hashAndSave(party);
-            callMe(party);
           } else if (result === "Remove the party") {
             return party.remove()
               .then(() => {
@@ -220,14 +219,15 @@ function partyTapped(args) {
   }
 
 }
-function deleteExported(party){
+function deleteExported (party){
+    console.log("START")
     party.remove()
         .then(() => {
+            console.log("END")
 
             viewModel.partyListDescriptions.splice(viewModel.partyListDescriptions.indexOf(party), 1);
             const listView = Frame.topmost().currentPage.getViewById("listView");
             page.getViewById("listView").refresh();
-
             return Promise.resolve();
         })
         .catch((error) => {
@@ -245,7 +245,9 @@ function deleteExported(party){
 
         });
 }
-module.exports.deleteExported = deleteExported;
+
+
+
 function deleteParty(args) {
   const party = args.object.bindingContext;
   party.remove()
