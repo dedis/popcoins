@@ -43,10 +43,31 @@ class AttParty extends Party {
         this._isLoaded = false;
         this._finalStatement = undefined;
         this._keyPair = undefined;
-        this._status = ObservableModule.fromObject({
-            status: States.UNDEFINED
-        });
+        this._poptoken = undefined;
 
+
+        this._status = ObservableModule.fromObject({
+                status: States.UNDEFINED
+            });
+
+
+
+
+    }
+
+    /*
+    Sets the popToken
+     */
+    setPopToken(pop){
+        this._poptoken = pop;
+        this._status.status = States.POPTOKEN;
+    }
+
+    /*
+    Gets the popToken
+     */
+    getPopToken(pop){
+        return this._poptoken;
     }
 
     /**
@@ -63,13 +84,18 @@ class AttParty extends Party {
         return cothoritySocket.send(RequestPath.POP_FETCH_REQUEST, DecodeType.FINALIZE_RESPONSE, fetchRequest)
             .then((response) => {
                 this._finalStatement = response.final;
+                if(this._poptoken == undefined) {
+                    if (Object.keys(response.final.attendees).length === 0) {
+                        this._status.status = States.PUBLISHED;
+                    } else if (response.final.signature.length === 0) {
+                        this._status.status = States.FINALIZING;
+                    } else {
+                        this._status.status = States.POPTOKEN;
 
-                if (Object.keys(response.final.attendees).length === 0) {
-                    this._status.status = States.PUBLISHED;
-                } else if (response.final.signature.length === 0) {
-                    this._status.status = States.FINALIZING;
-                } else {
-                    this._status.status = States.FINALIZED;
+                    }
+                }
+                else {
+                    this._status.status = States.POPTOKEN;
                 }
 
                 return Promise.resolve();
@@ -332,6 +358,8 @@ const States = Object.freeze({
     /** Party is fianlized **/
     FINALIZED: "finalized",
 
+    /**POP TOKEN GENERATED**/
+    POPTOKEN: "poptoken",
     /** Used if the status connot be retrieved **/
     ERROR: "offline"
 });

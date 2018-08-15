@@ -63,26 +63,7 @@
         Always wrap content in a layout component.
         -->
         <nsDrawer:RadSideDrawer.mainContent>
-
-            <TabView class="page-content" selectedIndex="0">
-                <TabView.items>
-
-                    <TabViewItem title="My Tokens">
-                        <TabViewItem.view>
-                            <tok:mytoken-page/>
-                        </TabViewItem.view>
-                    </TabViewItem>
-
-                    <TabViewItem title="Attendee">
-                        <TabViewItem.view>
-                           <att:att-party-list/>
-                        </TabViewItem.view>
-                    </TabViewItem>
-
-
-                </TabView.items>
-            </TabView>
-
+            <att:att-party-list/>
         </nsDrawer:RadSideDrawer.mainContent>
     </nsDrawer:RadSideDrawer>
 </Page>

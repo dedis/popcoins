@@ -67,7 +67,7 @@ function proposalTapped(args) {
   Promise.all(promises)
     .then(() => {
         hashAndSave(party);
-        callMe(party);
+        addMyselfAttendee(party);
       goBack();
       return Promise.resolve();
     })

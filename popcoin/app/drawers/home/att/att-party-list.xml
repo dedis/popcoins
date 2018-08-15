@@ -21,11 +21,10 @@
                                 id="listView">
 
             <nsListView:RadListView.itemTemplate>
-                <GridLayout rows="*,*" columns="*, auto" backgroundColor="white"
-                            class="basic-list-decorated">
-                    <Label class="list-title" text="{{ desc.name }}" row="0" col="0"
-                           textWrap="true"/>
-                    <Label text="{{ desc.location }}" row="1" col="0" textWrap="true"/>
+                <GridLayout id="grid-layout" rows="*,*,*,*,auto" columns="*, auto" backgroundColor="white" class="basic-list-decorated">
+                    <Label text="{{ desc.name }}" class="list-title" row="0" col ="0" textWrap="true"/>
+                    <Label text="{{ desc.dateTime }}" row="1" col ="0" textWrap="true"/>
+                    <Label text="{{ desc.location }}" row="2" col ="0" textWrap="true"/>
                     <Label class="status-text" text="{{ status.status }}" col="1" rowSpan="2" textWrap="true"/>
                 </GridLayout>
             </nsListView:RadListView.itemTemplate>
