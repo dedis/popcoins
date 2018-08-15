@@ -10,6 +10,7 @@ const TomlParser = require("toml");
 const Tomlify = require('tomlify-j0.4');
 const UUID = require("pure-uuid");
 const CothorityMessages = require("./network/cothority-messages");
+const PopToken = require("./object/pop/att/PopToken");
 
 const HEX_KEYWORD = "hex";
 const BASE64_KEYWORD = "base64";
@@ -249,7 +250,7 @@ function parseJsonPopToken(jsonString) {
 
     object.final = parseJsonFinalStatement(objectToJson(object.final));
 
-    return CothorityMessages.createPopToken(object.final, base64ToByteArray(object.private), base64ToByteArray(object.public));
+    return new PopToken(object.final, base64ToByteArray(object.private), base64ToByteArray(object.public));
 }
 
 /**

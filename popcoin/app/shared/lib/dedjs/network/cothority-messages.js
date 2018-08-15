@@ -180,35 +180,6 @@ class CothorityMessages extends CothorityProtobuf {
   }
 
   /**
-   * Creates a PopToken given the parameters.
-   * @param {FinalStatement} final - the FinalStatement of the pop party
-   * @param {Uint8Array} privateKey - the private key
-   * @param {Uint8Array} publicKey - the public key
-   * @returns {PopToken} - the pop token created using the given parameters
-   */
-  createPopToken(final, privateKey, publicKey) {
-    if (!Helper$1.isOfType(final, ObjectType.FINAL_STATEMENT)) {
-      throw new Error("final must be an instance of FinalStatement");
-    }
-    if (!(privateKey instanceof Uint8Array)) {
-      throw new Error("privateKey must be an instance of Uint8Array");
-    }
-    if (!(publicKey instanceof Uint8Array)) {
-      throw new Error("publicKey must be an instance of Uint8Array");
-    }
-
-    const model = this.getModel(ObjectType.POP_TOKEN);
-
-    const fields = {
-      final: final,
-      private: privateKey,
-      public: publicKey
-    };
-
-    return model.create(fields);
-  }
-
-  /**
    * Creates an message to store configuration information of a given PoP party on a conode.
    * @param {PopDesc} desc - the pop description
    * @param {Uint8Array} signature - the signature of the message
@@ -221,10 +192,11 @@ class CothorityMessages extends CothorityProtobuf {
     if (!(signature instanceof Uint8Array)) {
       throw new Error("signature must be an instance of Uint8Array");
     }
-
+    /*
     if (desc.roster.id !== undefined) {
       delete desc.roster.id;
     }
+    */
 
     const fields = {
       desc: desc,
@@ -293,7 +265,7 @@ class CothorityMessages extends CothorityProtobuf {
     }
 
     const fields = {
-      descId: descId,
+      descid: descId,
       attendees: attendees,
       signature: signature
     };
@@ -384,7 +356,7 @@ class CothorityMessages extends CothorityProtobuf {
 
     const fields = {
       id: id,
-      returnUncomplete: returnUncomplete
+      returnuncomplete: returnUncomplete
     };
 
     return fields;

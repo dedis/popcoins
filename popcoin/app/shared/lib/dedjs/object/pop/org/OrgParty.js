@@ -697,7 +697,12 @@ class OrgParty extends Party {
         const signature = Schnorr.sign(CURVE_ED25519_KYBER, privateKey, descHash);
 
         const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(this.getLinkedConode(), ""), RequestPath.POP);
+
+        // delete popDesc.roster;
+
         const storeConfigMessage = CothorityMessages.createStoreConfig(popDesc, signature);
+
+        console.log("Byte array length = " + signature.length);
 
         return cothoritySocket.send(RequestPath.POP_STORE_CONFIG, DecodeType.STORE_CONFIG_REPLY, storeConfigMessage)
             .then(response => {
