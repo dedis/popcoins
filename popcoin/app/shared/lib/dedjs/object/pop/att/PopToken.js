@@ -16,10 +16,10 @@ class PopToken {
         if(!Helper.isOfType(finalStatement, ObjectType.FINAL_STATEMENT)) {
             throw "finalStatement should be of type FinalStatement"
         }
-        if(!privateKey instanceof Uint8Array) {
+        if(!(privateKey instanceof Uint8Array)) {
             throw "privateKey should be of type UInt8Array"
         }
-        if(!publicKey instanceof Uint8Array) {
+        if(!(publicKey instanceof Uint8Array)) {
             throw "publicKey should be of type UInt8Array"
         }
         this.final = finalStatement;

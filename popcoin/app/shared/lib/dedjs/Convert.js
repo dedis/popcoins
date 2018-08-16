@@ -250,7 +250,10 @@ function parseJsonPopToken(jsonString) {
 
     object.final = parseJsonFinalStatement(objectToJson(object.final));
 
-    return new PopToken(object.final, base64ToByteArray(object.private), base64ToByteArray(object.public));
+    return new PopToken(
+        object.final,
+        Uint8Array.from(Object.keys(object.private).map(function (key) { return object.private[key]; })),
+        Uint8Array.from(Object.keys(object.public).map(function (key) { return object.public[key]; })));
 }
 
 /**
