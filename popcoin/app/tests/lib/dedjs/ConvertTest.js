@@ -663,7 +663,7 @@ describe("Convert", function () {
       const popDesc = Convert.parseJsonPopDesc(JSON.stringify(FINAL_POP_DESC));
 
       popDesc.name.should.equal(FINAL_POP_DESC.name);
-      popDesc.dateTime.should.equal(FINAL_POP_DESC.dateTime);
+      popDesc.datetime.should.equal(FINAL_POP_DESC.datetime);
       popDesc.location.should.equal(FINAL_POP_DESC.location);
 
       popDesc.roster.id.should.deep.equal(FINAL_POP_DESC.roster.id);

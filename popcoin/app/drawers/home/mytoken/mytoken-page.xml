@@ -21,7 +21,7 @@
             <nsListView:RadListView.itemTemplate>
                 <GridLayout id="grid-layout-pop-token" rows="*,*,*,*,auto" columns="*" class="basic-list-decorated">
                     <Label text="{{ final.desc.name }}" class="list-title" row="0" textWrap="true"/>
-                    <Label text="{{ final.desc.dateTime }}" row="1" textWrap="true"/>
+                    <Label text="{{ final.desc.datetime }}" row="1" textWrap="true"/>
                     <Label text="{{ final.desc.location }}" row="2" textWrap="true"/>
                 </GridLayout>
             </nsListView:RadListView.itemTemplate>

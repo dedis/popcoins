@@ -229,7 +229,7 @@ describe("CothorityMessages", function () {
       expect(() => CothorityMessages.createPopDesc(42, POP_DESC_DATETIME, POP_DESC_LOCATION, POP_DESC_ROSTER)).to.throw();
     });
 
-    it("should throw an error when dateTime is not a string", function () {
+    it("should throw an error when datetime is not a string", function () {
       expect(() => CothorityMessages.createPopDesc(POP_DESC_NAME, 42, POP_DESC_LOCATION, POP_DESC_ROSTER)).to.throw();
     });
 
@@ -251,7 +251,7 @@ describe("CothorityMessages", function () {
       const popDesc = CothorityMessages.createPopDesc(POP_DESC_NAME, POP_DESC_DATETIME, POP_DESC_LOCATION, POP_DESC_ROSTER);
 
       popDesc.name.should.equal(POP_DESC_NAME);
-      popDesc.dateTime.should.equal(POP_DESC_DATETIME);
+      popDesc.datetime.should.equal(POP_DESC_DATETIME);
       popDesc.location.should.equal(POP_DESC_LOCATION);
 
       const roster = popDesc.roster;
@@ -291,7 +291,7 @@ describe("CothorityMessages", function () {
       const final = popToken.final;
       const desc = final.desc;
       desc.name.should.equal(FINAL_STATEMENT.desc.name);
-      desc.dateTime.should.equal(FINAL_STATEMENT.desc.dateTime);
+      desc.datetime.should.equal(FINAL_STATEMENT.desc.datetime);
       desc.location.should.equal(FINAL_STATEMENT.desc.location);
 
       const roster = desc.roster;
@@ -362,7 +362,7 @@ describe("CothorityMessages", function () {
 
       const popDesc = finalStatement.desc;
       popDesc.name.should.equal(FINAL_POP_DESC.name);
-      popDesc.dateTime.should.equal(FINAL_POP_DESC.dateTime);
+      popDesc.datetime.should.equal(FINAL_POP_DESC.datetime);
       popDesc.location.should.equal(FINAL_POP_DESC.location);
 
       const roster = popDesc.roster;

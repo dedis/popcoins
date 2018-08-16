@@ -13,6 +13,7 @@ const CothorityMessages = require("../../network/cothority-messages");
 const RingSig = require("../../RingSig");
 const Kyber = require("@dedis/kyber-js");
 const Suite = new Kyber.curve.edwards25519.Curve;
+const PopToken = require("./att/PopToken");
 
 const User = require("../user/User").get;
 const platform = require("tns-core-modules/platform");
@@ -293,7 +294,7 @@ class PoP {
       throw new Error("keyPair must be an instance of KeyPair");
     }
 
-    const popToken = CothorityMessages.createPopToken(finalStatement, keyPair.private, keyPair.public);
+    const popToken = new PopToken(finalStatement, keyPair.private, keyPair.public);
 
     return this.addPopToken(popToken, save);
   }

@@ -63,7 +63,7 @@ function finalStatementTapped(args) {
                 const popDesc = PoP.getFinalStatements().getItem(args.index).desc;
                 const descHash = Convert.hexToByteArray(HashJs.sha256()
                     .update(popDesc.name)
-                    .update(popDesc.dateTime)
+                    .update(popDesc.datetime)
                     .update(popDesc.location)
                     .update(popDesc.roster.aggregate)
                     .digest("hex"));
@@ -127,7 +127,7 @@ function popTokenTapped(args) {
                         const fields = {
                             signature: Convert.byteArrayToHex(sig)
                         };
-                        
+
                         setTimeout(() => {
                             pageObject.showModal("shared/pages/qr-code/qr-code-page", {
                                 textToShow: Convert.objectToJson(fields),
