@@ -11,7 +11,11 @@ const DecodeType = require("../../../network/DecodeType");
 const Party = require("../Party");
 var platform = require("tns-core-modules/platform");
 var Directory = require("../../../../Directory/Directory");
-
+const PlatformModule = require("tns-core-modules/platform");
+const ZXing = require("nativescript-zxing");
+const ImageSource = require("image-source");
+const QRGenerator = new ZXing();
+var text = undefined;
 /**
  * We define the AttParty class which is the object representing the attendee.
  */
@@ -47,7 +51,8 @@ class AttParty extends Party {
 
 
         this._status = ObservableModule.fromObject({
-                status: States.UNDEFINED
+                status: States.UNDEFINED,
+                qrcode : undefined
             });
 
 
@@ -61,6 +66,15 @@ class AttParty extends Party {
     setPopToken(pop){
         this._poptoken = pop;
         this._status.status = States.POPTOKEN;
+    }
+
+
+    getQRCode(){
+        return this._status.qrcode;
+    }
+
+    setQRCode(code){
+        this._status.qrcode = code;
     }
 
     /*
@@ -84,6 +98,8 @@ class AttParty extends Party {
         return cothoritySocket.send(RequestPath.POP_FETCH_REQUEST, DecodeType.FINALIZE_RESPONSE, fetchRequest)
             .then((response) => {
                 this._finalStatement = response.final;
+                console.log("FINAL STATEMENT")
+                console.log(this._finalStatement.desc.roster.list)
                 if(this._poptoken == undefined) {
                     if (Object.keys(response.final.attendees).length === 0) {
                         this._status.status = States.PUBLISHED;
@@ -97,6 +113,24 @@ class AttParty extends Party {
                 else {
                     this._status.status = States.POPTOKEN;
                 }
+
+                if(this._status.status !== States.POPTOKEN){
+                if(text !== " { \"public\" :  \"" + Convert.byteArrayToBase64(this.getKeyPair().public) + "\"}") {
+                    text = " { \"public\" :  \"" + Convert.byteArrayToBase64(this.getKeyPair().public) + "\"}";
+                    let sideLength = PlatformModule.screen.mainScreen.widthPixels / 4;
+                    const QR_CODE = QRGenerator.createBarcode({
+                        encode: text,
+                        format: ZXing.QR_CODE,
+                        height: sideLength,
+                        width: sideLength
+                    });
+
+
+                    this._status.qrcode = ImageSource.fromNativeSource(QR_CODE);
+
+                }}
+
+
 
                 return Promise.resolve();
             })

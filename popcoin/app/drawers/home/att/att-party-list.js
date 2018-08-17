@@ -36,6 +36,8 @@ function onLoaded(args) {
     pageObject = args.object.page;
     if (!loaded) {
         loadParties();
+        pageObject.getViewById("listView").refresh();
+
         loaded = true;
     }
 
@@ -73,11 +75,11 @@ function loadParties() {
 
     });
 
-
     viewModel.isLoading = false;
 }
 
 function partyTapped(args) {
+
     const index = args.index;
     const status = viewModel.partyListDescriptions.getItem(index).status.status;
     const party = viewModel.partyListDescriptions.getItem(index).party;
@@ -109,7 +111,9 @@ function partyTapped(args) {
                             cancelButtonText: "No",
                         })
                             .then(accepted => {
-                                return !accepted ? Promise.resolve() : party.randomizeKeyPair()
+                                return !accepted ? Promise.resolve() : (party.randomizeKeyPair().then(Frame.topmost().navigate({
+                                    clearHistory: true, moduleName:"drawers/home/home-page"
+                                })))
                                     .then(() => {
                                         return Dialog.alert({
                                             title: "A new key pair has been generated !",
@@ -136,7 +140,6 @@ function partyTapped(args) {
                     }else if (result === "Delete Party"){
                         deleteParty(party);
                         viewModel.partyListDescriptions.splice(index,1)
-                        Frame.topmost().getViewById("listView").refresh();
 
                     }
                 })
@@ -302,7 +305,9 @@ function addParty() {
                 }));
 
                 update();
-                return newParty.update();
+                return newParty.update()
+                    .then(Frame.topmost().navigate({clearHistory: true, moduleName:"drawers/home/home-page"
+                }));
             });
         })
         .catch(error => {
@@ -325,16 +330,17 @@ function addParty() {
 }
 
 function update() {
-    Frame.topmost().getViewById("listView").refresh();
+    pageObject.getViewById("listView").refresh();
+
+    if(page.frame !== undefined) {
+        Frame.topmost().getViewById("listView").refresh();
+    }
 }
 
 function reloadStatuses() {
     viewModel.partyListDescriptions.forEach(model => {
         model.party.update()
-            .then(() => {
-                update();
-                return Promise.resolve()
-            })
+
             .catch(error => {
                 console.log(error);
                 console.dir(error);
