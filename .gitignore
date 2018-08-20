@@ -2,11 +2,6 @@
 .idea/
 .vscode/
 node_modules/
-cpmac/.vscode/
-cpmac/.nsbuildinfo
-cpmac/hooks/
-cpmac/platforms/
-cpmac/package-lock.json
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
