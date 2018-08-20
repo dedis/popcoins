@@ -7,6 +7,7 @@ const FileIO = require("../../../../../shared/lib/file-io/file-io");
 const Convert = require("../../../../../shared/lib/dedjs/Convert");
 const CothorityMessages = require("../../../../../shared/lib/dedjs/network/cothority-messages");
 const User = require("../../../../../shared/lib/dedjs/object/user/User").get;
+const PopToken = require("../../../../../shared/lib/dedjs/object/pop/att/PopToken");
 
 const PoP = require("../../../../../shared/lib/dedjs/object/pop/PoP").get;
 
@@ -68,7 +69,7 @@ const JSON_KEY_PAIR = JSON.stringify({
 });
 const KEY_PAIR = Convert.parseJsonKeyPair(JSON_KEY_PAIR);
 
-const POP_TOKEN = CothorityMessages.createPopToken(FINAL_STATEMENT, KEY_PAIR.private, KEY_PAIR.public);
+const POP_TOKEN = new PopToken(FINAL_STATEMENT, KEY_PAIR.private, KEY_PAIR.public);
 
 const POP_DESC_HASH = "is4ISmQqzyEcbzTqDQEo6jP42SU4DTijtPYam5kwsoI=";
 const POP_DESC_HASH_JSON = Convert.objectToJson({

@@ -7,8 +7,8 @@ const Tomlify = require("tomlify-j0.4");
 const Helper = require("../../../shared/lib/dedjs/Helper");
 const ObjectType = require("../../../shared/lib/dedjs/ObjectType");
 const CothorityMessages = require("../../../shared/lib/dedjs/network/cothority-messages");
-
 const Convert = require("../../../shared/lib/dedjs/Convert");
+const PopToken = require("../../../shared/lib/dedjs/object/pop/att/PopToken");
 
 const BYTE_ARRAY = new Uint8Array([243, 39, 52, 77, 162, 48, 121, 100, 114, 48]);
 const HEX_STRING = "f327344da23079647230";
@@ -185,7 +185,7 @@ const FINAL_SIGNATURE = Convert.base64ToByteArray("q+G+7n6FXsY7hpxK3m119GuDHnchS
 const FINAL_MERGED = false;
 const FINAL_STATEMENT = CothorityMessages.createFinalStatement(FINAL_POP_DESC, FINAL_ATTENDEES, FINAL_SIGNATURE, FINAL_MERGED);
 
-const POP_TOKEN = CothorityMessages.createPopToken(FINAL_STATEMENT, PRIVATE_KEY_BYTE_ARRAY, PUBLIC_KEY_BYTE_ARRAY);
+const POP_TOKEN = new PopToken(FINAL_STATEMENT, PRIVATE_KEY_BYTE_ARRAY, PUBLIC_KEY_BYTE_ARRAY);
 
 const POP_DESC_HASH_JSON = Convert.objectToJson({
   hash: PRIVATE_KEY
