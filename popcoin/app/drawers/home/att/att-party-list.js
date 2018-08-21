@@ -14,6 +14,7 @@ var platform = require("tns-core-modules/platform");
 var Directory = require("../../../shared/lib/Directory/Directory");
 const POP_TOKEN_OPTION_SIGN = "Sign";
 const POP_TOKEN_OPTION_REVOKE = "Revoke";
+const repeaterModule = require("tns-core-modules/ui/repeater");
 
 const viewModel = ObservableModule.fromObject({
     partyListDescriptions: new ObservableArray(),
@@ -83,6 +84,7 @@ function partyTapped(args) {
     const index = args.index;
     const status = viewModel.partyListDescriptions.getItem(index).status.status;
     const party = viewModel.partyListDescriptions.getItem(index).party;
+    console.log(party)
 
     switch (status) {
         case PartyStates.ERROR:
@@ -112,7 +114,7 @@ function partyTapped(args) {
                         })
                             .then(accepted => {
                                 return !accepted ? Promise.resolve() : (party.randomizeKeyPair().then(Frame.topmost().navigate({
-                                    clearHistory: true, moduleName:"drawers/home/home-page"
+                                  animated: false,  clearHistory: true, moduleName:"drawers/home/home-page"
                                 })))
                                     .then(() => {
                                         return Dialog.alert({
@@ -306,7 +308,7 @@ function addParty() {
 
                 update();
                 return newParty.update()
-                    .then(Frame.topmost().navigate({clearHistory: true, moduleName:"drawers/home/home-page"
+                    .then(Frame.topmost().navigate({animated: false, clearHistory: true, moduleName:"drawers/home/home-page"
                 }));
             });
         })
@@ -338,7 +340,16 @@ function update() {
 }
 
 function reloadStatuses() {
+
+if(page !== undefined) {
+    page.getViewById("repeater").refresh();
+}
+    if(page.frame !== undefined) {
+        Frame.topmost().getViewById("repeater").refresh();
+    }
     viewModel.partyListDescriptions.forEach(model => {
+
+
         model.party.update()
 
             .catch(error => {
