@@ -1,62 +1,26 @@
 UNAME_S := $(shell uname -s)
-install_dep_command :=
+npm :=
 ifeq ($(UNAME_S),Darwin)
-	install_dep_command += CXX=clang++
+	npm += CXX=clang++
 endif
-install_dep_command += npm install --no-package-lock
+npm += npm
 
+start-dev: clean apply-patches
+	@echo "You are ready to start developing."
+	@echo "use \"tns run ios\" or \"tns run android\""
+	@echo "for tests:"
+	@echo "use \"tns test ios\" or \"tns test android\""
 
-### Clean
-clean:
-	-rm -rf node_modules/
-	-rm -rf platforms/
-	-rm -rf hooks/
-	-rm -f package-lock.json
+clean-install: clean apply-patches
 
-### Install local and global dependencies
-install-dependencies:
-	$(install_dep_command)
-
-### Clean Install for EcmaScript6
-clean-install:
-	make clean
-	make install-dependencies
-	./prepare-hook.sh
+# This is where we apply patches needed to the modules that we depend on.
+apply-patches: init-npm
 	patch -p0 < nodeify_temporary_patch.patch
 	patch -p0 < websockets_temporary_patch.patch
 
-### Run App iOS
-run-ios:
-	tns run ios
+init-npm:
+	$(npm) install
 
-### Clean Run App iOS
-clean-run-ios:
-	make clean-install
-	tns run ios
+clean:
+	rm -rf node_modules platforms
 
-### Run App Android
-run-android:
-	tns run android
-
-### Clean Run App Android
-clean-run-android:
-	make clean-install
-	tns run android
-
-### Test App iOS
-test-ios:
-	tns test ios
-
-### Clean Test App iOS
-clean-test-ios:
-	make clean-install
-	tns test ios
-
-### Test App Android
-test-android:
-	tns test android
-
-### Clean Test App Android
-clean-test-android:
-	make clean-install
-	tns test android

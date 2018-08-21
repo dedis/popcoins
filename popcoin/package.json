@@ -17,7 +17,9 @@
       "version": "4.0.1"
     }
   },
-  "scripts": {},
+  "scripts": {
+    "tslint": "tslint -p tsconfig.json"
+  },
   "dependencies": {
     "@dedis/cothority": "^1.1.15",
     "@dedis/kyber-js": "^0.0.9",
@@ -34,7 +36,6 @@
     "lodash.clonedeep": "^4.5.0",
     "nativescript-barcodescanner": "^2.7.0",
     "nativescript-clipboard": "^1.1.7",
-    "nativescript-couchbase": "1.0.18",
     "nativescript-floatingactionbutton": "^4.1.3",
     "nativescript-iqkeyboardmanager": "^1.1.0",
     "nativescript-modal-datetimepicker": "^1.0.3",
@@ -69,6 +70,8 @@
     "nativescript-dev-sass": "^1.3.0",
     "rollup": "^0.50.1",
     "rollup-plugin-babel": "^3.0.2",
-    "semver": "^5.5.0"
+    "semver": "^5.5.0",
+    "tslint": "^5.11.0",
+    "typescript": "^3.0.1"
   }
 }
