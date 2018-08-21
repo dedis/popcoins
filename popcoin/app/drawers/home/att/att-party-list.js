@@ -341,9 +341,7 @@ function update() {
 
 function reloadStatuses() {
 
-if(page !== undefined) {
-    page.getViewById("repeater").refresh();
-}
+
     if(page.frame !== undefined) {
         Frame.topmost().getViewById("repeater").refresh();
     }
