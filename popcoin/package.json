@@ -1,10 +1,10 @@
 {
-  "description": "NativeScript Application",
+  "description": "An application to attend and organize PoP Parties.",
   "license": "SEE LICENSE IN <your-license-filename>",
   "readme": "NativeScript Application",
-  "repository": "<fill-your-repository-here>",
+  "repository": "https://github.com/dedis/student_18_xplatform",
   "nativescript": {
-    "id": "org.nativescript.popcoin",
+    "id": "ch.epfl.popcoins",
     "nodeify": {
       "global-dependencies": {
         "ws": "nativescript-websockets"

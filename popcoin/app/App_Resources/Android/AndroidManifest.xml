@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+<!-- update versionCode (an int) as follows: for version x.y.z version code is X*10000+Y*100+Z, 1.2.3 -> 10203
+Thus, y and z cannot be greater than 99.
+When editing this, also edit ../iOS/Info.plist.
+-->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="__PACKAGE__"
-	android:versionCode="1"
-	android:versionName="1.0">
+		  package="__PACKAGE__"
+	android:versionCode="10003"
+	android:versionName="1.0.3">
 
 	<supports-screens
 		android:smallScreens="true"
