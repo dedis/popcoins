@@ -283,7 +283,7 @@ class PoP {
     }
   }
 
-  addPopTokenFromFinalStatement(finalStatement, keyPair, save) {
+  addPopTokenFromFinalStatement(finalStatement, keyPair, save, party) {
     if (!Helper.isOfType(finalStatement, ObjectType.FINAL_STATEMENT)) {
       throw new Error("finalStatement must be an instance of FinalStatement");
     }
@@ -295,7 +295,6 @@ class PoP {
     }
 
     const popToken = new PopToken(finalStatement, keyPair.private, keyPair.public);
-
     return this.addPopToken(popToken, save);
   }
 
@@ -474,7 +473,44 @@ class PoP {
     return RingSig.Sign(Suite, message, [...anonimitySet], scope, mine, minePrivate)
   }
 
-  /**
+
+    /**
+     * Sign a message using (un)linkable ring signature
+     *
+     * @param PopToken Instance - the  pop token used to sign the message
+     * @param {Uint8Array} message -  the message to be signed
+     * @param {Uint8Array} [scope] - has to be given if linkable ring signature is used
+     * @return {Uint8Array} - the signature
+     */
+    signWithPopToken(popToken, message, scope) {
+
+
+        let attendees = popToken.final.attendees;
+        let anonimitySet = new Set();
+        let minePublic = Suite.point();
+        minePublic.unmarshalBinary(popToken.public);
+        let minePrivate = Suite.scalar();
+        minePrivate.unmarshalBinary(popToken.private);
+        let mine = -1;
+        for (let i = 0; i < attendees.length; i++) {
+            let attendee = attendees[i];
+
+            let point = Suite.point();
+            point.unmarshalBinary(attendee);
+            anonimitySet.add(point);
+            if (point.equal(minePublic)) {
+                mine = i;
+            }
+        }
+
+        if (mine < 0) {
+            throw "Pop Token is invalid"
+        }
+
+        return RingSig.Sign(Suite, message, [...anonimitySet], scope, mine, minePrivate)
+    }
+
+    /**
    * Load and reset functions and sub-functions to load/reset PoP.
    */
 

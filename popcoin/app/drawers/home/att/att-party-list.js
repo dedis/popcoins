@@ -12,6 +12,9 @@ const PartyStates = require("../../../shared/lib/dedjs/object/pop/att/AttParty")
 const PoP = require("../../../shared/lib/dedjs/object/pop/PoP").get;
 var platform = require("tns-core-modules/platform");
 var Directory = require("../../../shared/lib/Directory/Directory");
+const POP_TOKEN_OPTION_SIGN = "Sign";
+const POP_TOKEN_OPTION_REVOKE = "Revoke";
+const repeaterModule = require("tns-core-modules/ui/repeater");
 
 const viewModel = ObservableModule.fromObject({
     partyListDescriptions: new ObservableArray(),
@@ -31,9 +34,11 @@ function onLoaded(args) {
     page = args.object;
 
     page.bindingContext = viewModel;
-
+    pageObject = args.object.page;
     if (!loaded) {
         loadParties();
+        pageObject.getViewById("listView").refresh();
+
         loaded = true;
     }
 
@@ -71,14 +76,16 @@ function loadParties() {
 
     });
 
-
     viewModel.isLoading = false;
 }
 
 function partyTapped(args) {
+
     const index = args.index;
     const status = viewModel.partyListDescriptions.getItem(index).status.status;
     const party = viewModel.partyListDescriptions.getItem(index).party;
+    console.log(party)
+
     switch (status) {
         case PartyStates.ERROR:
             Dialog.alert({
@@ -106,7 +113,9 @@ function partyTapped(args) {
                             cancelButtonText: "No",
                         })
                             .then(accepted => {
-                                return !accepted ? Promise.resolve() : party.randomizeKeyPair()
+                                return !accepted ? Promise.resolve() : (party.randomizeKeyPair().then(Frame.topmost().navigate({
+                                  animated: false,  clearHistory: true, moduleName:"drawers/home/home-page"
+                                })))
                                     .then(() => {
                                         return Dialog.alert({
                                             title: "A new key pair has been generated !",
@@ -133,7 +142,6 @@ function partyTapped(args) {
                     }else if (result === "Delete Party"){
                         deleteParty(party);
                         viewModel.partyListDescriptions.splice(index,1)
-                        Frame.topmost().getViewById("listView").refresh();
 
                     }
                 })
@@ -149,42 +157,83 @@ function partyTapped(args) {
                 });
             break;
         case PartyStates.FINALIZED:
-            Dialog
-                .action({
-                    message: "The party is finished ! What do you want to do ?",
-                    cancelButtonText: "Cancel",
-                    actions: ["Generate my PoP-Token"]
-                })
+
+        case PartyStates.POPTOKEN:
+
+            if (!party.isAttendee(party.getKeyPair().public)) {
+                return Promise.reject("You are not part of the attendees.");
+
+            }
+            if(party.getPopToken() === undefined) {
+                PoP.addPopTokenFromFinalStatement(party.getFinalStatement(), party.getKeyPair(), true, party)
+                    .then(Frame.topmost().getViewById("listView").refresh());
+            }
+
+            return Dialog.action({
+                message: "Choose an Action",
+                cancelButtonText: "Cancel",
+                actions: [ POP_TOKEN_OPTION_SIGN]
+            })
                 .then(result => {
-                    if (result === "Generate my PoP-Token") {
-                        if (!party.isAttendee(party.getKeyPair().public)) {
-                            return Promise.reject("You are not part of the attendees.");
-                        }
-                        return PoP.addPopTokenFromFinalStatement(party.getFinalStatement(), party.getKeyPair(), true)
-                            .then(() => {
-                                return party.remove();
+                    if (result === POP_TOKEN_OPTION_REVOKE) {
+                        // Revoke Token
+                        return PoP.revokePopTokenByIndex(args.index);
+                    } else if (result === POP_TOKEN_OPTION_SIGN) {
+                        return ScanToReturn.scan()
+                            .then(signDataJson => {
+                                console.dir(signDataJson);
+                                const sigData = Convert.jsonToObject(signDataJson);
+                                const sig = PoP.signWithPopToken(party.getPopToken(), Convert.hexToByteArray(sigData.nonce), Convert.hexToByteArray(sigData.scope));
+
+                                const fields = {
+                                    signature: Convert.byteArrayToHex(sig)
+                                };
+
+                                setTimeout(() => {
+                                    pageObject.showModal("shared/pages/qr-code/qr-code-page", {
+                                        textToShow: Convert.objectToJson(fields),
+                                        title: "Signed informations"
+                                    }, () => {
+                                    }, true);
+                                }, 1);
+
+                                return Promise.resolve()
                             })
-                            .then(() => {
-                                viewModel.partyListDescriptions.splice(index, 1);
-                                return Dialog.alert({
-                                    title: "Success !",
-                                    message: "Your Token is now accessible under \"My Tokens\".",
-                                    okButtonText: "Ok"
-                                });
-                            }).then(Frame.topmost().getViewById("list-view-pop-token").refresh());
+                            .catch(error => {
+                                console.log(error);
+                                console.dir(error);
+                                console.trace();
+
+                                if (error !== ScanToReturn.SCAN_ABORTED) {
+                                    setTimeout(() => {
+                                        Dialog.alert({
+                                            title: "Error",
+                                            message: "An error occured, please retry. - " + error,
+                                            okButtonText: "Ok"
+                                        });
+                                    });
+                                }
+
+                            })
                     }
+
+                    return Promise.resolve();
                 })
-                .catch((error) => {
-                    Dialog.alert({
-                        title: "Error",
-                        message: error,
-                        okButtonText: "Ok"
-                    });
+                .catch(error => {
                     console.log(error);
                     console.dir(error);
-                    console.trace(error);
+                    console.trace();
+
+                    Dialog.alert({
+                        title: "Error",
+                        message: "An error occured, please retry. - " + error,
+                        okButtonText: "Ok"
+                    });
+
+                    return Promise.reject(error);
                 });
             break;
+
         default:
             Dialog.alert({
                 title: "Not implemented",
@@ -258,7 +307,9 @@ function addParty() {
                 }));
 
                 update();
-                return newParty.update();
+                return newParty.update()
+                    .then(Frame.topmost().navigate({animated: false, clearHistory: true, moduleName:"drawers/home/home-page"
+                }));
             });
         })
         .catch(error => {
@@ -281,16 +332,24 @@ function addParty() {
 }
 
 function update() {
-    Frame.topmost().getViewById("listView").refresh();
+    pageObject.getViewById("listView").refresh();
+
+    if(page.frame !== undefined) {
+        Frame.topmost().getViewById("listView").refresh();
+    }
 }
 
 function reloadStatuses() {
+
+
+    if(page.frame !== undefined) {
+        Frame.topmost().getViewById("repeater").refresh();
+    }
     viewModel.partyListDescriptions.forEach(model => {
+
+
         model.party.update()
-            .then(() => {
-                update();
-                return Promise.resolve()
-            })
+
             .catch(error => {
                 console.log(error);
                 console.dir(error);
