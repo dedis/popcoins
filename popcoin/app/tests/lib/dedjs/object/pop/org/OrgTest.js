@@ -170,7 +170,7 @@ describe("Org", function () {
     const popDesc = Org.getPopDesc();
 
     popDesc.name.should.be.empty;
-    popDesc.dateTime.should.be.empty;
+    popDesc.datetime.should.be.empty;
     popDesc.location.should.be.empty;
     popDesc.roster.id.should.be.empty;
     popDesc.roster.list.should.be.empty;
@@ -186,7 +186,7 @@ describe("Org", function () {
         const popDesc = Org.getPopDesc();
 
         popDesc.name.should.equal(POP_DESC_NAME);
-        popDesc.dateTime.should.equal(POP_DESC_DATETIME);
+        popDesc.datetime.should.equal(POP_DESC_DATETIME);
         popDesc.location.should.equal(POP_DESC_LOCATION);
         popDesc.roster.id.should.deep.equal(POP_DESC_ROSTER.id);
 
@@ -271,7 +271,7 @@ describe("Org", function () {
 
         const popDesc = Org.getPopDesc();
         popDesc.name.should.not.be.empty;
-        popDesc.dateTime.should.not.be.empty;
+        popDesc.datetime.should.not.be.empty;
         popDesc.location.should.not.be.empty;
         popDesc.roster.id.should.not.be.empty;
         popDesc.roster.list.should.not.be.empty;
@@ -298,7 +298,7 @@ describe("Org", function () {
 
         const popDesc = Org.getPopDesc();
         popDesc.name.should.be.empty;
-        popDesc.dateTime.should.be.empty;
+        popDesc.datetime.should.be.empty;
         popDesc.location.should.be.empty;
         popDesc.roster.id.should.be.empty;
         popDesc.roster.list.should.be.empty;
@@ -445,7 +445,7 @@ describe("Org", function () {
           const popDesc = Org.getPopDesc();
 
           popDesc.name.should.equal(POP_DESC_NAME);
-          popDesc.dateTime.should.equal(POP_DESC_DATETIME);
+          popDesc.datetime.should.equal(POP_DESC_DATETIME);
           popDesc.location.should.equal(POP_DESC_LOCATION);
           popDesc.roster.id.should.deep.equal(POP_DESC_ROSTER.id);
 
@@ -477,7 +477,7 @@ describe("Org", function () {
           const popDesc = Org.getPopDesc();
 
           popDesc.name.should.equal(POP_DESC_NAME);
-          popDesc.dateTime.should.equal(POP_DESC_DATETIME);
+          popDesc.datetime.should.equal(POP_DESC_DATETIME);
           popDesc.location.should.equal(POP_DESC_LOCATION);
           popDesc.roster.id.should.deep.equal(POP_DESC_ROSTER.id);
 
@@ -504,7 +504,7 @@ describe("Org", function () {
           const popDesc = Org.getPopDesc();
 
           popDesc.name.should.equal(POP_DESC_NAME);
-          popDesc.dateTime.should.equal(POP_DESC_DATETIME);
+          popDesc.datetime.should.equal(POP_DESC_DATETIME);
           popDesc.location.should.equal(POP_DESC_LOCATION);
           popDesc.roster.id.should.deep.equal(POP_DESC_ROSTER.id);
 
@@ -656,11 +656,11 @@ describe("Org", function () {
   });
 
   describe("#setPopDescDateTime", function () {
-    it("should throw an error when dateTime is not a string", function () {
+    it("should throw an error when datetime is not a string", function () {
       expect(() => Org.setPopDescDateTime(42)).to.throw();
     });
 
-    it("should correctly set and save the new dateTime", function () {
+    it("should correctly set and save the new datetime", function () {
       return Org.setPopDesc(POP_DESC, true)
         .then(() => {
           Org.setPopDescDateTime("NEW_DATETIME");
@@ -668,14 +668,14 @@ describe("Org", function () {
         .then(() => {
           const popDesc = Org.getPopDesc();
 
-          popDesc.dateTime.should.equal("NEW_DATETIME");
+          popDesc.datetime.should.equal("NEW_DATETIME");
 
           return FileIO.getStringOf(FileIO.join(FilesPath.POP_ORG_PATH, PARTY_FOLDER, FilesPath.POP_ORG_DESC));
         })
         .then(popDescString => {
           const popDescObject = Convert.jsonToObject(popDescString);
 
-          popDescObject.dateTime.should.equal("NEW_DATETIME");
+          popDescObject.datetime.should.equal("NEW_DATETIME");
         });
     });
   });
@@ -832,7 +832,7 @@ describe("Org", function () {
       Org._popDesc.name = POP_DESC_NAME;
       Org.isPopDescBeingSet().should.be.true;
 
-      Org._popDesc.dateTime = POP_DESC_DATETIME;
+      Org._popDesc.datetime = POP_DESC_DATETIME;
       Org.isPopDescBeingSet().should.be.true;
 
       Org._popDesc.location = POP_DESC_LOCATION;
@@ -850,7 +850,7 @@ describe("Org", function () {
       Org._popDesc.name = POP_DESC_NAME;
       Org.isPopDescComplete().should.be.false;
 
-      Org._popDesc.dateTime = POP_DESC_DATETIME;
+      Org._popDesc.datetime = POP_DESC_DATETIME;
       Org.isPopDescComplete().should.be.false;
 
       Org._popDesc.location = POP_DESC_LOCATION;
@@ -912,7 +912,7 @@ describe("Org", function () {
     it("should throw an error when the user's key pair is not set", function () {
       expect(() => {
         Org._popDesc.name = POP_DESC_NAME;
-        Org._popDesc.dateTime = POP_DESC_DATETIME;
+        Org._popDesc.datetime = POP_DESC_DATETIME;
         Org._popDesc.location = POP_DESC_LOCATION;
         Org._popDesc.roster = POP_DESC_ROSTER;
 
@@ -945,7 +945,7 @@ describe("Org", function () {
         User._keyPair.private = PRIVATE_KEY_BYTE_ARRAY;
 
         Org._popDesc.name = POP_DESC_NAME;
-        Org._popDesc.dateTime = POP_DESC_DATETIME;
+        Org._popDesc.datetime = POP_DESC_DATETIME;
         Org._popDesc.location = POP_DESC_LOCATION;
         Org._popDesc.roster = POP_DESC_ROSTER;
 
@@ -988,7 +988,7 @@ describe("Org", function () {
     it("should throw an error when the user's key pair is not set", function () {
       expect(() => {
         Org._popDesc.name = POP_DESC_NAME;
-        Org._popDesc.dateTime = POP_DESC_DATETIME;
+        Org._popDesc.datetime = POP_DESC_DATETIME;
         Org._popDesc.location = POP_DESC_LOCATION;
         Org._popDesc.roster = POP_DESC_ROSTER;
 
@@ -1029,7 +1029,7 @@ describe("Org", function () {
         User._keyPair.private = PRIVATE_KEY_BYTE_ARRAY;
 
         Org._popDesc.name = POP_DESC_NAME;
-        Org._popDesc.dateTime = POP_DESC_DATETIME;
+        Org._popDesc.datetime = POP_DESC_DATETIME;
         Org._popDesc.location = POP_DESC_LOCATION;
         Org._popDesc.roster = POP_DESC_ROSTER;
 
@@ -1047,7 +1047,7 @@ describe("Org", function () {
         User._keyPair.private = PRIVATE_KEY_BYTE_ARRAY;
 
         Org._popDesc.name = POP_DESC_NAME;
-        Org._popDesc.dateTime = POP_DESC_DATETIME;
+        Org._popDesc.datetime = POP_DESC_DATETIME;
         Org._popDesc.location = POP_DESC_LOCATION;
         Org._popDesc.roster = POP_DESC_ROSTER;
 
@@ -1068,7 +1068,7 @@ describe("Org", function () {
         User._keyPair.private = PRIVATE_KEY_BYTE_ARRAY;
 
         Org._popDesc.name = POP_DESC_NAME;
-        Org._popDesc.dateTime = POP_DESC_DATETIME;
+        Org._popDesc.datetime = POP_DESC_DATETIME;
         Org._popDesc.location = POP_DESC_LOCATION;
         Org._popDesc.roster = POP_DESC_ROSTER;
 

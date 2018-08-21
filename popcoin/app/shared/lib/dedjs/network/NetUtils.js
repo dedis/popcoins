@@ -7,22 +7,22 @@ const CothorityMessages = require("../../../lib/dedjs/network/cothority-messages
 const Helper = require("../../../lib/dedjs/Helper");
 
 function getServerIdentiyFromAddress(address) {
-  if (!Helper.isValidAddress(address)) {
-    return Promise.reject("Invalid address.")
-  }
+    if (!Helper.isValidAddress(address)) {
+        return Promise.reject("Invalid address.")
+    }
 
-  const statusRequestMessage = CothorityMessages.createStatusRequest();
-  const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(address, ""), RequestPath.STATUS);
+    const statusRequestMessage = CothorityMessages.createStatusRequest();
+    const cothoritySocket = new NetDedis.Socket(Convert.tlsToWebsocket(address, ""), RequestPath.STATUS);
 
-  return cothoritySocket.send(RequestPath.STATUS_REQUEST, DecodeType.STATUS_RESPONSE, statusRequestMessage)
-    .then(statusResponse => {
-      const hexKey = StatusExtractor.getPublicKey(statusResponse);
-      const description = StatusExtractor.getDescription(statusResponse);
-      const id = StatusExtractor.getID(statusResponse);
-      const server = Convert.toServerIdentity(address, Convert.hexToByteArray(hexKey), description, Convert.hexToByteArray(id));
+    return cothoritySocket.send(RequestPath.STATUS_REQUEST, DecodeType.STATUS_RESPONSE, statusRequestMessage)
+        .then(statusResponse => {
+            const hexKey = StatusExtractor.getPublicKey(statusResponse);
+            const description = StatusExtractor.getDescription(statusResponse);
+            const id = StatusExtractor.getID(statusResponse);
+            const server = Convert.toServerIdentity(address, Convert.hexToByteArray(hexKey), description, Convert.hexToByteArray(id));
 
-      return Promise.resolve(server);
-    })
+            return Promise.resolve(server);
+        })
 
 }
 

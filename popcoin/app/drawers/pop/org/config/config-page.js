@@ -79,9 +79,9 @@ function initDate() {
     dataForm.set("name", Party.getPopDesc().name);
     dataForm.set("location", Party.getPopDesc().location);
 
-    let todayDate = desc.dateTime === "";
+    let todayDate = desc.datetime === "";
 
-    let date = new Date(todayDate ? Date.now() : Date.parse(desc.dateTime));
+    let date = new Date(todayDate ? Date.now() : Date.parse(desc.datetime));
 
     dataForm.set("date", date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate());
     dataForm.set("time", date.getHours() + ":" + date.getMinutes());
@@ -264,23 +264,13 @@ function setDate() {
 
     let dateString = new Date(date[0], date[1], date[2], time[0], time[1], 0, 0).toString();
 
+    console.log("dateString = " + dateString + "| and is a " + typeof dateString);
+    console.dir(dateString);
+    console.log("DATAFORM date = " + viewModel.dataForm.date);
+    console.log("DATAFORM time = " + viewModel.dataForm.time);
+
+
     return Party.setPopDescDateTime(dateString);
-}
-
-/**
- * Conclude the creation of the party : save all the infos and register
- * on the conode
- */
-function finish() {
-    let promises = [
-        Party.setPopDescLocation(viewModel.dataForm.location),
-        Party.setPopDescName(viewModel.dataForm.name),
-        setDate()
-    ];
-
-    Promise.all(promises).then(hashAndSave).then(() => {
-        goBack(false);
-    })
 }
 
 /**
@@ -433,7 +423,6 @@ module.exports.addManual = addManual;
 module.exports.addScan = addScan;
 module.exports.deleteConode = deleteConode;
 module.exports.goBack = goBack;
-module.exports.finish = finish;
 module.exports.addOrganizer = addOrganizer;
 module.exports.removeAndGoBack = removeAndGoBack;
 module.exports.save = save;

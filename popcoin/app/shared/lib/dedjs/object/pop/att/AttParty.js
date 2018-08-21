@@ -184,7 +184,7 @@ class AttParty extends Party {
         const popDesc = this._finalStatement.desc;
         const popDescModule = this.getPopDescModule();
         popDescModule.name = popDesc.name;
-        popDescModule.dateTime = popDesc.dateTime;
+        popDescModule.datetime = popDesc.datetime;
         popDescModule.location = popDesc.location;
         popDescModule.roster.id = Uint8Array.from(popDesc.roster.id);
 
@@ -338,7 +338,7 @@ class AttParty extends Party {
      * @returns {KeyPair}
      */
     getKeyPair() {
-        return this._keyPair.getKeyPair();
+        return this._keyPair;
     }
 
     /**

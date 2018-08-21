@@ -65,38 +65,6 @@ class CothorityMessages extends CothorityProtobuf {
    */
 
   /**
-   * Creates a KeyPair object from the given public and private keys.
-   * @param {Uint8Array} publicKey - the public key
-   * @param {Uint8Array} privateKey - the private key
-   * @param {Uint8Array} publicCompleteKey - the complete public key
-   * @returns {KeyPair} - the key pair created given the parameters
-   */
-  createKeyPair(publicKey, privateKey, publicCompleteKey) {
-    if (!(publicKey instanceof Uint8Array)) {
-      throw new Error("publicKey must be an instance of Uint8Array");
-    }
-    if (!(privateKey instanceof Uint8Array)) {
-      throw new Error("privateKey must be an instance of Uint8Array");
-    }
-    if (!(publicCompleteKey instanceof Uint8Array || publicCompleteKey === undefined)) {
-      throw new Error("publicCompleteKey must be an instance of Uint8Array or undefined to be skipped");
-    }
-
-    const model = this.getModel(ObjectType.KEY_PAIR);
-
-    const fields = {
-      public: publicKey,
-      private: privateKey
-    };
-
-    if (publicCompleteKey !== undefined) {
-      fields.publicComplete = publicCompleteKey;
-    }
-
-    return model.create(fields);
-  }
-
-  /**
    * Creates a ServerIdentity object from the given parameters.
    * @param {Uint8Array} publicKey - the public key of the conode
    * @param {Uint8Array} id - the id of the conode
@@ -180,17 +148,17 @@ class CothorityMessages extends CothorityProtobuf {
   /**
    * Creates a PopDesc using the information given as parameters.
    * @param {string} name - the name of the pop party
-   * @param {string} dateTime - the date and time of the pop party
+   * @param {string} datetime - the date and time of the pop party
    * @param {string} location - the location of the pop party
    * @param {Roster} roster - the roster used to host the pop party
    * @returns {PopDesc} - the PopDesc object created using the given parameters
    */
-  createPopDesc(name, dateTime, location, roster) {
+  createPopDesc(name, datetime, location, roster) {
     if (typeof name !== "string") {
       throw new Error("name must be of type string");
     }
-    if (typeof dateTime !== "string") {
-      throw new Error("dateTime must be of type string");
+    if (typeof datetime !== "string") {
+      throw new Error("datetime must be of type string");
     }
     if (typeof location !== "string") {
       throw new Error("location must be of type string");
@@ -203,38 +171,9 @@ class CothorityMessages extends CothorityProtobuf {
 
     const fields = {
       name: name,
-      dateTime: dateTime,
+      datetime: datetime,
       location: location,
       roster: roster
-    };
-
-    return model.create(fields);
-  }
-
-  /**
-   * Creates a PopToken given the parameters.
-   * @param {FinalStatement} final - the FinalStatement of the pop party
-   * @param {Uint8Array} privateKey - the private key
-   * @param {Uint8Array} publicKey - the public key
-   * @returns {PopToken} - the pop token created using the given parameters
-   */
-  createPopToken(final, privateKey, publicKey) {
-    if (!Helper$1.isOfType(final, ObjectType.FINAL_STATEMENT)) {
-      throw new Error("final must be an instance of FinalStatement");
-    }
-    if (!(privateKey instanceof Uint8Array)) {
-      throw new Error("privateKey must be an instance of Uint8Array");
-    }
-    if (!(publicKey instanceof Uint8Array)) {
-      throw new Error("publicKey must be an instance of Uint8Array");
-    }
-
-    const model = this.getModel(ObjectType.POP_TOKEN);
-
-    const fields = {
-      final: final,
-      private: privateKey,
-      public: publicKey
     };
 
     return model.create(fields);
@@ -253,10 +192,11 @@ class CothorityMessages extends CothorityProtobuf {
     if (!(signature instanceof Uint8Array)) {
       throw new Error("signature must be an instance of Uint8Array");
     }
-
+    /*
     if (desc.roster.id !== undefined) {
       delete desc.roster.id;
     }
+    */
 
     const fields = {
       desc: desc,
@@ -325,7 +265,7 @@ class CothorityMessages extends CothorityProtobuf {
     }
 
     const fields = {
-      descId: descId,
+      descid: descId,
       attendees: attendees,
       signature: signature
     };
@@ -416,7 +356,7 @@ class CothorityMessages extends CothorityProtobuf {
 
     const fields = {
       id: id,
-      returnUncomplete: returnUncomplete
+      returnuncomplete: returnUncomplete
     };
 
     return fields;

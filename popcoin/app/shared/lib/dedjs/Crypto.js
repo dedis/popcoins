@@ -4,16 +4,10 @@ const Convert = require("./Convert");
 const CothorityMessages = require("./network/cothority-messages");
 const Kyber = require("@dedis/kyber-js");
 const ObservableModule = require("data/observable");
-const Helper = require("./Helper");
 const FileIO = require("../file-io/file-io");
 const FilesPath = require("../../res/files/files-path");
-const ObjectType = require("./ObjectType");
 
 const CURVE_ED25519_KYBER = new Kyber.curve.edwards25519.Curve;
-
-const EMPTY_KEYPAIR = CothorityMessages.createKeyPair(new Uint8Array(), new Uint8Array(), new Uint8Array());
-var platform = require("tns-core-modules/platform");
-var Directory = require("../Directory/Directory");
 
 
 /**
@@ -42,18 +36,6 @@ function aggregatePublicKeys(points) {
 }
 
 /**
- * Generates a random ED25519 key pair.
- * @returns {KeyPair} - the generated key pair
- */
-function generateRandomKeyPair() {
-    const privateKey = CURVE_ED25519_KYBER.newKey();
-    const basePoint = CURVE_ED25519_KYBER.point().base();
-    const pubKey = CURVE_ED25519_KYBER.point().mul(privateKey, basePoint);
-
-    return CothorityMessages.createKeyPair(pubKey.marshalBinary(), Convert.hexToByteArray(privateKey.toString()), Convert.hexToByteArray(pubKey.toString()));
-}
-
-/**
  * This represent a cryptographic key pair (public key with private key)
  */
 class KeyPair {
@@ -70,7 +52,6 @@ class KeyPair {
         this._keyPair = ObservableModule.fromObject({
             public: new Uint8Array(),
             private: new Uint8Array(),
-            publicComplete: new Uint8Array(),
             toHex: Convert.byteArrayToHex
         });
 
@@ -78,6 +59,14 @@ class KeyPair {
             .then(() => {
                 return Promise.resolve(this);
             });
+    }
+
+    get public() {
+        return this.getModule().public.slice(0);
+    }
+
+    get private() {
+        return this.getModule().private.slice(0);
     }
 
     /**
@@ -100,71 +89,61 @@ class KeyPair {
     }
 
     /**
-     * Gets the users key pair.
-     * @returns {KeyPair} - a key pair object containg the keys of the user
-     */
-    getKeyPair() {
-        let publicComplete = undefined;
-        if (this.getModule().publicComplete.length > 0) {
-            publicComplete = this.getModule().publicComplete;
-        }
-
-        return CothorityMessages.createKeyPair(this.getModule().public, this.getModule().private, publicComplete);
-    }
-
-    /**
      * Sets the new key pair given in parameters.
-     * @param {KeyPair} keyPair - the new key pair to set
+     * @param {Uint8Array} publicKey - the new public key
+     * @param {Uint8Array} privateKey - the new private key
      * @param {boolean} save - if the new key pair should be saved permanently
      * @returns {Promise} - a promise that gets resolved once the new key pair has been set and saved if the save parameter is set to true
      */
-    setKeyPair(keyPair, save) {
-        if (!Helper.isOfType(keyPair, ObjectType.KEY_PAIR)) {
-            throw new Error("keyPair must be an instance of KeyPair");
+    setKeyPair(publicKey, privateKey, save) {
+        if (!publicKey instanceof Uint8Array) {
+            throw new Error("publicKey must be of type UInt8Array");
+        }
+        if (!privateKey instanceof Uint8Array) {
+            throw new Error("privateKey must be of type UInt8Array");
         }
         if (typeof save !== "boolean") {
             throw new Error("save must be of type boolean");
         }
 
-        const oldKeyPair = this.getKeyPair();
+        const oldKeyPair = {
+            public: this.public,
+            private: this.private,
+        };
 
-        this.getModule().public = keyPair.public;
-        this.getModule().private = keyPair.private;
+        this.getModule().public = publicKey;
+        this.getModule().private = privateKey;
 
-        if (keyPair.publicComplete !== undefined) {
-            this.getModule().publicComplete = keyPair.publicComplete;
-        } else {
-            this.getModule().publicComplete = new Uint8Array();
-        }
-
-        const newKeyPair = this.getKeyPair();
 
         if (save) {
             let toWrite = "";
-            if (newKeyPair.public.length > 0 && newKeyPair.private.length > 0) {
-                toWrite = Convert.objectToJson(newKeyPair);
+            if (publicKey.length > 0 && privateKey.length > 0) {
+                toWrite = Convert.objectToJson({
+                    public: Convert.byteArrayToBase64(publicKey),
+                    private: Convert.byteArrayToBase64(privateKey),
+                });
             }
             console.log("This is toWrite :****" + toWrite + "*****");
 
 
-         return FileIO.writeStringTo(FileIO.join(this._dirname, FilesPath.KEY_PAIR), toWrite)
-             .catch((error) => {
-             console.log(error);
-         console.dir(error);
-         console.trace();
+            return FileIO.writeStringTo(FileIO.join(this._dirname, FilesPath.KEY_PAIR), toWrite)
+                .catch((error) => {
+                    console.log(error);
+                    console.dir(error);
+                    console.trace();
 
-         return this.setKeyPair(oldKeyPair, false)
-             .then(() => {
-             return Promise.reject(error);
-     });
-     });
+                    return this.setKeyPair(oldKeyPair.public, oldKeyPair.private, false)
+                        .then(() => {
+                            return Promise.reject(error);
+                        });
+                });
 
-    } else {
-      return new Promise((resolve, reject) => {
-        resolve();
-      });
+        } else {
+            return new Promise((resolve) => {
+                resolve();
+            });
+        }
     }
-  }
 
     /**
      * Randomize the key pair
@@ -174,37 +153,37 @@ class KeyPair {
         const privateKey = CURVE_ED25519_KYBER.newKey();
         const basePoint = CURVE_ED25519_KYBER.point().base();
         const pubKey = CURVE_ED25519_KYBER.point().mul(privateKey, basePoint);
-        const keyPair = CothorityMessages.createKeyPair(pubKey.marshalBinary(), Convert.hexToByteArray(privateKey.toString()), Convert.hexToByteArray(pubKey.toString()));
 
-        return this.setKeyPair(keyPair, true);
+        return this.setKeyPair(pubKey.marshalBinary(), Convert.hexToByteArray(privateKey.toString()), true);
     }
 
-  /**
-   * Loads the keypair memory.
-   * @returns {Promise} - a promise that gets resolved once the key pair is loaded into memory
-   */
-  load() {
+    /**
+     * Loads the keypair memory.
+     * @returns {Promise} - a promise that gets resolved once the key pair is loaded into memory
+     */
+    load() {
 
         return FileIO.getStringOf(FileIO.join(this._dirname, FilesPath.KEY_PAIR))
-                .then(jsonKeyPair => {
-                    if (jsonKeyPair.length > 0 && Convert.jsonToObject(jsonKeyPair).public !== ""
-                        && Convert.jsonToObject(jsonKeyPair).private !== "" && Convert.jsonToObject(jsonKeyPair).private !== "") {
-                        return this.setKeyPair(Convert.parseJsonKeyPair(jsonKeyPair), false);
-                    } else {
-                        return this.randomize();
-                    }
-                })
+            .then(jsonKeyPair => {
+                if (jsonKeyPair.length > 0 && Convert.jsonToObject(jsonKeyPair).public !== ""
+                    && Convert.jsonToObject(jsonKeyPair).private !== "" && Convert.jsonToObject(jsonKeyPair).private !== "") {
+                    const parsed = Convert.parseJsonKeyPair(jsonKeyPair);
+                    return this.setKeyPair(parsed.public, parsed.private, false);
+                } else {
+                    return this.randomize();
+                }
+            })
 
-                .catch(error => {
-                    console.log(error);
-                    console.dir(error);
-                    console.trace();
+            .catch(error => {
+                console.log(error);
+                console.dir(error);
+                console.trace();
 
-        return Promise.reject(error);
-    });
+                return Promise.reject(error);
+            });
 
 
-  }
+    }
 
 
     /**
@@ -212,7 +191,7 @@ class KeyPair {
      * @returns {Promise} - a promise that gets completed once the keypair has been reset
      */
     reset() {
-        return this.setKeyPair(EMPTY_KEYPAIR, true)
+        return this.setKeyPair(new Uint8Array([]), new Uint8Array([]), true)
             .catch(error => {
                 console.log(error);
                 console.dir(error);
@@ -224,6 +203,5 @@ class KeyPair {
 }
 
 module.exports.aggregatePublicKeys = aggregatePublicKeys;
-module.exports.generateRandomKeyPair = generateRandomKeyPair;
 module.exports.KeyPair = KeyPair;
 
