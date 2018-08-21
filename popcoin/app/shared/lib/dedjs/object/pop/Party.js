@@ -42,9 +42,6 @@ class Party {
             id = popDescModule.roster.id;
         }
 
-        // Temporary fix as CothrorityJS needs a mandatory ID
-        id = Uint8Array.from([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
-
         const list = [];
         popDescModule.roster.list.forEach(server => {
             list.push(CothorityMessages.createServerIdentity(
