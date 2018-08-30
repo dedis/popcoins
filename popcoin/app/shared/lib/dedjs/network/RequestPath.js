@@ -1,6 +1,7 @@
 /**
  * @file File containing different available paths for the Cothority.
  */
+const OMNILEDGER_INSTANCE_ID = "ce999a89a1f0391a647096a75bd19411a348af7374d0cfb81386f4759e24d194";
 /**
  * Services
  */
@@ -9,6 +10,7 @@ const IDENTITY = "Identity";
 const SKIPCHAIN = "Skipchain";
 const POP = "PoPServer";
 const CISC = "Cisc";
+const OMNILEDGER = "OmniLedger";
 
 
 /**
@@ -41,6 +43,9 @@ const POP_PIN_REQUEST = `PinRequest`;
 const POP_GET_PROPOSALS = 'GetProposals';
 const POP_CHECK_CONFIG = 'CheckConfig';
 const POP_VERIFY_LINK = 'VerifyLink';
+const POP_GET_INSTANCE_ID = `GetInstanceID`;
+const POP_GET_INSTANCE_ID_REPLY = `GetInstanceIDReply`;
+
 
 /**
  * CISC Requests
@@ -52,6 +57,10 @@ const CISC_PROPOSE_VOTE = `ProposeVote`;
 const CISC_PROPOSE_SEND = `ProposeSend`;
 const CISC_PROPOSE_UPDATE = `ProposeUpdate`;
 const CISC_SCHNORR_SIG = `SchnorrSig`;
+
+/**
+ * OmnieLedger Requests
+ */
 
 // Exports --------------------------------------------------------------------
 module.exports.STATUS = STATUS;
@@ -81,3 +90,7 @@ module.exports.CISC_PROPOSE_UPDATE = CISC_PROPOSE_UPDATE;
 module.exports.CISC_SCHNORR_SIG = CISC_SCHNORR_SIG;
 module.exports.IDENTITY_PROPOSE_VOTE = IDENTITY_PROPOSE_VOTE;
 module.exports.POP_VERIFY_LINK = POP_VERIFY_LINK;
+module.exports.OMNILEDGER_INSTANCE_ID = OMNILEDGER_INSTANCE_ID;
+module.exports.OMNILEDGER = OMNILEDGER;
+module.exports.POP_GET_INSTANCE_ID = POP_GET_INSTANCE_ID;
+module.exports.POP_GET_INSTANCE_ID_REPLY = POP_GET_INSTANCE_ID_REPLY;

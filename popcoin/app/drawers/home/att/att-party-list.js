@@ -15,6 +15,7 @@ var Directory = require("../../../shared/lib/Directory/Directory");
 const POP_TOKEN_OPTION_SIGN = "Sign";
 const POP_TOKEN_OPTION_REVOKE = "Revoke";
 const repeaterModule = require("tns-core-modules/ui/repeater");
+const Buffer = require("buffer").Buffer;
 
 const viewModel = ObservableModule.fromObject({
     partyListDescriptions: new ObservableArray(),
@@ -280,7 +281,7 @@ function onSwipeCellStarted(args) {
 }
 
 module.exports.addMyself = function (infos) {
-    const newParty = new AttParty(infos.id, infos.address);
+    const newParty = new AttParty(infos.id, infos.omniledgerId, infos.address);
     return newParty.save().then(() => {
         viewModel.partyListDescriptions.push(ObservableModule.fromObject({
             party: newParty,
@@ -296,7 +297,7 @@ function addParty() {
     return ScanToReturn.scan()
         .then(string => {
             const infos = Convert.jsonToObject(string);
-            const newParty = new AttParty(infos.id, infos.address);
+            const newParty = new AttParty(infos.id, infos.omniledgerId, infos.address);
 
 
             return newParty.save().then((st) => {

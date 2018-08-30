@@ -5,6 +5,7 @@ const ScanToReturn = require("../../../../shared/lib/scan-to-return/scan-to-retu
 const topmost = require("ui/frame").topmost;
 const PartyStates = require("../../../../shared/lib/dedjs/object/pop/org/OrgParty").States;
 const AttParty = require("../../../../shared/lib/dedjs/object/pop/att/AttParty").Party;
+const RequestPath = require("../../../../shared/lib/dedjs/network/RequestPath");
 
 const User = require("../../../../shared/lib/dedjs/object/user/User").get;
 
@@ -76,8 +77,7 @@ function addManual() {
         })
         .catch(error => {
             console.log(error);
-            console.dir(error);
-            console.trace();
+            console.log(error.stack);
 
             Dialog.alert({
                 title: "Error",
@@ -94,6 +94,7 @@ function addManual() {
 function addMyselfAttendee(Party){
     let info = {
         id: Convert.byteArrayToHex(Party.getPopDescHash()),
+        omniledgerId: RequestPath.OMNILEDGER_INSTANCE_ID,
         address: Party.getLinkedConode().address
     };
 
@@ -291,6 +292,7 @@ function addNewKey() {
 function shareToAttendee() {
     let info = {
         id: Convert.byteArrayToHex(Party.getPopDescHash()),
+        omniledgerId: RequestPath.OMNILEDGER_INSTANCE_ID,
         address: Party.getLinkedConode().address
     };
     pageObject.showModal("shared/pages/qr-code/qr-code-page", {
@@ -319,4 +321,3 @@ module.exports.onSwipeCellStarted = onSwipeCellStarted;
 module.exports.addNewKey = addNewKey;
 module.exports.goBack = goBack;
 module.exports.shareToAttendee = shareToAttendee;
-module.exports.isPressed = isPressed;

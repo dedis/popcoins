@@ -295,6 +295,7 @@ class PoP {
     }
 
     const popToken = new PopToken(finalStatement, keyPair.private, keyPair.public);
+    party.setPopToken(popToken);
     return this.addPopToken(popToken, save);
   }
 

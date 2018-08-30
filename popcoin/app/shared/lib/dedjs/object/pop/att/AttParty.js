@@ -9,13 +9,13 @@ const CothorityMessages = require("../../../network/cothority-messages");
 const RequestPath = require("../../../network/RequestPath");
 const DecodeType = require("../../../network/DecodeType");
 const Party = require("../Party");
-var platform = require("tns-core-modules/platform");
-var Directory = require("../../../../Directory/Directory");
 const PlatformModule = require("tns-core-modules/platform");
 const ZXing = require("nativescript-zxing");
 const ImageSource = require("image-source");
 const QRGenerator = new ZXing();
+const OmniLedger = require("@dedis/cothority").omniledger;
 var text = undefined;
+
 /**
  * We define the AttParty class which is the object representing the attendee.
  */
@@ -25,11 +25,12 @@ class AttParty extends Party {
     /**
      * Constructor for the AttParty class.
      * @param {string} id - the hash of the party
+     * @param {string} omniledgerId - the id of the omniledger hosting this party
      * @param {string} [address] - address of the conode in the format tls://XXX.XXX.XXX.XXX:XXX. It is required
      * if the party needs to be retrieved from the conode. If the address is not specified, the leader conode is used.
      *
      */
-    constructor(id, address) {
+    constructor(id, omniledgerId, address) {
         super();
         if (typeof id !== "string" || id === "") {
             throw new Error("id must be of type string and shouldn't be empty");
@@ -48,14 +49,16 @@ class AttParty extends Party {
         this._finalStatement = undefined;
         this._keyPair = undefined;
         this._poptoken = undefined;
+        this._popPartyOlInstance = undefined;
+        this._coinInstance= undefined;
+        this._omniledgerId = Convert.hexToByteArray(omniledgerId);
 
 
         this._status = ObservableModule.fromObject({
-                status: States.UNDEFINED,
-                qrcode : undefined
-            });
-
-
+            status: States.UNDEFINED,
+            balance: undefined,
+            qrcode: undefined
+        });
 
 
     }
@@ -63,24 +66,24 @@ class AttParty extends Party {
     /*
     Sets the popToken
      */
-    setPopToken(pop){
+    setPopToken(pop) {
         this._poptoken = pop;
         this._status.status = States.POPTOKEN;
     }
 
 
-    getQRCode(){
+    getQRCode() {
         return this._status.qrcode;
     }
 
-    setQRCode(code){
+    setQRCode(code) {
         this._status.qrcode = code;
     }
 
     /*
     Gets the popToken
      */
-    getPopToken(pop){
+    getPopToken(pop) {
         return this._poptoken;
     }
 
@@ -90,49 +93,44 @@ class AttParty extends Party {
      * @returns {Promise} - a promise that gets solved once the final statement is retrieved and the status updated
      */
     retrieveFinalStatementAndStatus() {
-        console.log("Party " + this._id + " opens a socket using address " + this._address);
-        const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(this._address, ""), RequestPath.POP);
-        const fetchRequest = CothorityMessages.createFetchRequest(this._id, true);
-        console.log("SKDEBUG ENTER");
-
-        return cothoritySocket.send(RequestPath.POP_FETCH_REQUEST, DecodeType.FINALIZE_RESPONSE, fetchRequest)
-            .then((response) => {
-                this._finalStatement = response.final;
-                console.log("FINAL STATEMENT")
-                console.log(this._finalStatement.desc.roster.list)
-                if(this._poptoken == undefined) {
-                    if (Object.keys(response.final.attendees).length === 0) {
+        return this._popPartyOlInstance.update()
+            .then(() => {
+                this._finalStatement = this._popPartyOlInstance.finalStatement;
+                if (this._poptoken == undefined) {
+                    if (this._popPartyOlInstance.state === 1) {
                         this._status.status = States.PUBLISHED;
-                    } else if (response.final.signature.length === 0) {
-                        this._status.status = States.FINALIZING;
-                    } else {
+                    } else if (this._popPartyOlInstance.state === 2) {
                         this._status.status = States.POPTOKEN;
+                    } else {
+                        console.log("Error: invalid state number " + this._popPartyOlInstance.state);
+                        this._status.status = States.ERROR;
 
                     }
                 }
                 else {
+
                     this._status.status = States.POPTOKEN;
                 }
 
-                if(this._status.status !== States.POPTOKEN){
-                if(text !== " { \"public\" :  \"" + Convert.byteArrayToBase64(this.getKeyPair().public) + "\"}") {
-                    text = " { \"public\" :  \"" + Convert.byteArrayToBase64(this.getKeyPair().public) + "\"}";
-                    let sideLength = PlatformModule.screen.mainScreen.widthPixels / 4;
-                    const QR_CODE = QRGenerator.createBarcode({
-                        encode: text,
-                        format: ZXing.QR_CODE,
-                        height: sideLength,
-                        width: sideLength
-                    });
+                if (this._status.status !== States.POPTOKEN) {
+                    if (text !== " { \"public\" :  \"" + Convert.byteArrayToBase64(this.getKeyPair().public) + "\"}") {
+                        text = " { \"public\" :  \"" + Convert.byteArrayToBase64(this.getKeyPair().public) + "\"}";
+                        let sideLength = PlatformModule.screen.mainScreen.widthPixels / 4;
+                        const QR_CODE = QRGenerator.createBarcode({
+                            encode: text,
+                            format: ZXing.QR_CODE,
+                            height: sideLength,
+                            width: sideLength
+                        });
 
 
-                    this._status.qrcode = ImageSource.fromNativeSource(QR_CODE);
+                        this._status.qrcode = ImageSource.fromNativeSource(QR_CODE);
 
-                }}
+                    }
+                }
 
 
-
-                return Promise.resolve();
+                return this._status.status == States.FINALIZED ? this.updateCoinInstance : Promise.resolve();
             })
             .catch(error => {
                 this._status.status = States.ERROR;
@@ -170,10 +168,23 @@ class AttParty extends Party {
      * @return {Promise}
      */
     update() {
-        return this.retrieveFinalStatementAndStatus()
-            .then(() => {
-                return this.loadPopDesc();
-            })
+
+        let omniLegder = undefined;
+        if(this._popPartyOlInstance === undefined) {
+            this._popPartyOlInstance = {}; // avoid concurrent calls problems
+            omniLegder = this.initPopInstance()
+        } else {
+            omniLegder = Promise.resolve();
+        }
+
+        console.log(omniLegder);
+        console.dir(omniLegder);
+
+        return omniLegder.then(() => {
+            return this.retrieveFinalStatementAndStatus()
+        }).then(() => {
+            return this.loadPopDesc();
+        })
     }
 
     /**
@@ -197,6 +208,41 @@ class AttParty extends Party {
         popDescModule.roster.aggregate = Uint8Array.from(popDesc.roster.aggregate);
 
         return Promise.resolve();
+    }
+
+    initPopInstance() {
+        const cothoritySocketPop = new Net.Socket(Convert.tlsToWebsocket(this._address, ""), RequestPath.POP);
+        const message = {
+            partyid: this._id
+        };
+        let instanceIdBuffer = undefined;
+        return cothoritySocketPop.send(RequestPath.POP_GET_INSTANCE_ID, RequestPath.POP_GET_INSTANCE_ID_REPLY, message)
+            .then(reply => {
+                instanceIdBuffer = reply.instanceid;
+
+                const cothoritySocketOl = new Net.Socket(Convert.tlsToWebsocket(this._address, ""), RequestPath.OMNILEDGER);
+
+                return OmniLedger.OmniledgerRPC.fromKnownConfiguration(cothoritySocketOl, this._omniledgerId);
+            })
+            .then(ol => {
+                return OmniLedger.contracts.PopPartyInstance.fromInstanceId(ol, instanceIdBuffer)
+            })
+            .then(inst => {
+                this._popPartyOlInstance = inst;
+                return Promise.resolve(inst);
+            })
+    }
+
+    updateCoinInstance() {
+        let signer = OmniLedger.darc.SignerEd25519.fromByteArray(this._keyPair.private);
+        let identity = OmniLedger.darc.IdentityEd25519.fromSigner(signer);
+        let instId = this._popPartyOlInstance.getAccountInstanceId(identity)
+        let update = this._coinInstance === undefined ? OmniLedger.contracts.CoinsInstance.fromInstanceId(this._popPartyOlInstance, instId) : this._coinInstance.update();
+
+        return update.then(coinInst => {
+            this._status.balance = coinInst.balance;
+            return Promise.resolve();
+        })
     }
 
     /**
@@ -247,7 +293,8 @@ class AttParty extends Party {
 
         return Promise.all(promises)
             .then(array => {
-                party = new AttParty(id, Convert.jsonToObject(array[0]).address);
+                let object = Convert.jsonToObject(array[0]);
+                party = new AttParty(id, object.omniledgerId, object.address);
                 party._setKeyPair(array[1]);
 
                 return party.retrieveFinalStatementAndStatus()
@@ -277,7 +324,7 @@ class AttParty extends Party {
     /**
      * Save the party informations (id, address of leader conode and keypair) on the disk. This does not save
      * the final statement (see loadFinalStatement and cacheFinalStatement for this). A new key pair is also
-     * generate for this party.
+     * generate for this party if this is the first saving.
      *
      * @return {Promise.<AttParty>}
      */
@@ -286,7 +333,8 @@ class AttParty extends Party {
             this._keyPair = key;
 
             const infos = {
-                id: this._id,
+                id: Convert.byteArrayToHex(this._id),
+                omniledgerId: Convert.byteArrayToHex(this._omniledgerId),
                 address: this._address
             };
 
