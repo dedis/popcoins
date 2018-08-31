@@ -801,7 +801,6 @@ class Cisc {
     return FileIO.getStringOf(FileIO.join(FilesPath.CISC_PATH, this._dirname, FilesPath.CISC_IDENTITY_LINK))
       .then(jsonAddress => {
         const obj = JSON.parse(jsonAddress);
-        console.log("SKDEBUG DIR JSON obj = ");
         console.dir(obj);
         return this.setIdentity(obj.id, obj.address, obj.label, obj.name, false)
       })

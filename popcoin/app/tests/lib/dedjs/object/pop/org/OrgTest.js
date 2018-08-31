@@ -736,7 +736,6 @@ describe("Org", function () {
     });
 
     it("should correctly add and save the new conode", function () {
-      console.log("SKDEBUG before : " + POP_DESC);
       return Org.setPopDesc(POP_DESC, true)
         .then(() => {
           Org.removePopDescConodeByIndex(1);
@@ -750,8 +749,6 @@ describe("Org", function () {
         })
         .then(popDescString => {
           const popDescObject = Convert.jsonToObject(popDescString);
-          console.log("SKDEBUG after : " + popDescString);
-
           popDescObject.roster.list.length.should.equal(POP_DESC_ROSTER.list.length - 1);
         });
     });

@@ -69,7 +69,6 @@ function loadParties() {
 
     FileIO.forEachFolderElement(FilePaths.POP_ATT_PATH, function (partyFolder) {
         AttParty.loadFromDisk(partyFolder.name).then((party) => {
-            console.log("SKDEBUG FOUND party : " + partyFolder.name);
             // Observables have to be nested to reflect changes
             viewModel.partyListDescriptions.push(ObservableModule.fromObject({
                 party: party,
@@ -84,7 +83,6 @@ function loadParties() {
 }
 
 function partyTapped(args) {
-    console.log("SKDEBUG Here -1");
 
 
     const index = args.index;
@@ -92,7 +90,6 @@ function partyTapped(args) {
     const party = viewModel.partyListDescriptions.getItem(index).party;
     console.log(party)
 
-    console.log("SKDEBUG Here 0");
 
     switch (status) {
         case PartyStates.ERROR:
@@ -167,19 +164,15 @@ function partyTapped(args) {
         case PartyStates.FINALIZED:
 
         case PartyStates.POPTOKEN:
-            console.log("SKDEBUG Here 1");
 
             if (!party.isAttendee(party.getKeyPair().public)) {
-                console.log("SKDEBUG Here 2");
 
                 return Promise.reject("You are not part of the attendees.");
 
             }
             if (party.getPopToken() === undefined) {
-                console.log("SKDEBUG Here 3");
                 PoP.addPopTokenFromFinalStatement(party.getFinalStatement(), party.getKeyPair(), true, party)
                     .then(() => {
-                        console.log("SKDEBUG Here 4");
                         return Frame.topmost().getViewById("listView").refresh()
                     })
                     .catch(error => {
@@ -191,7 +184,6 @@ function partyTapped(args) {
                         console.log(error.stack);
                     });
             }
-            console.log("SKDEBUG Here 5");
 
 
             return Dialog.action({
@@ -200,7 +192,6 @@ function partyTapped(args) {
                 actions: [POP_TOKEN_OPTION_SIGN, POP_TOKEN_OPTION_TRANSFER_COINS]
             })
                 .then(result => {
-                    console.log("SKDEBUG Here 6");
                     if (result === POP_TOKEN_OPTION_REVOKE) {
                         // Revoke Token
                         return PoP.revokePopTokenByIndex(args.index);

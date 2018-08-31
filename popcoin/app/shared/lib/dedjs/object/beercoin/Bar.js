@@ -92,7 +92,6 @@ class Bar {
         configModule.date = new Date(+config.date); // + permforms the conversion to Int
 
 
-        console.log("SKDEBUG");
         console.log("val 1 = " + Date.now());
         console.log("valval 2 = " + configModule.date);
         console.log("json = " + configJson);

@@ -129,7 +129,6 @@ class AttParty extends Party {
 
                     }
                 }
-                console.log("States SKDEBUG = " + this._status.status + " is equal ?" + (this._status.status === States.POPTOKEN));
 
                 return this._status.status === States.POPTOKEN ? this.updateCoinInstance() : Promise.resolve();
             })
@@ -257,12 +256,10 @@ class AttParty extends Party {
         let instId = this._popPartyOlInstance.getAccountInstanceId(identity);
         let update = this._coinInstance === undefined ? OmniLedger.contracts.CoinsInstance.fromInstanceId(this._olRPC, instId) : this._coinInstance.update();
 
-        console.log("I'm here SKDEBUG");
 
         return update.then(coinInst => {
             this._coinInstance = coinInst;
             this._status.balance = coinInst.balance;
-            console.log("SKDEBUG COIN BALANCE = " + this._status.balance);
             return Promise.resolve();
         }).catch(err => {
             console.log(err);

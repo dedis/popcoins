@@ -454,8 +454,6 @@ function parseJsonKeyPair(jsonString) {
 
     const keyPair = jsonToObject(jsonString);
 
-    console.log("SKDEBUG " + jsonString);
-
     if (keyPair.private === undefined) {
         keyPair.private = "";
     }

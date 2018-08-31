@@ -186,8 +186,6 @@ function addScan() {
 
             return Party.addPopDescConode(conode)
                 .then(() => {
-                        console.log("ADDED : SKDEBUG : ");
-                        console.dir(viewModel.descModule.roster.list)
                         pageObject.getViewById("list-view-conodes").refresh();
                     }
                 );
