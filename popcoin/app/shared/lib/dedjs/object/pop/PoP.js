@@ -284,19 +284,19 @@ class PoP {
   }
 
   addPopTokenFromFinalStatement(finalStatement, keyPair, save, party) {
-    if (!Helper.isOfType(finalStatement, ObjectType.FINAL_STATEMENT)) {
-      throw new Error("finalStatement must be an instance of FinalStatement");
-    }
-    if (typeof save !== "boolean") {
-      throw new Error("save must be of type boolean");
-    }
-    if (!Helper.isOfType(keyPair, ObjectType.KEY_PAIR)) {
-      throw new Error("keyPair must be an instance of KeyPair");
-    }
+      if (!Helper.isOfType(finalStatement, ObjectType.FINAL_STATEMENT)) {
+          throw new Error("finalStatement must be an instance of FinalStatement");
+      }
+      if (typeof save !== "boolean") {
+          throw new Error("save must be of type boolean");
+      }
+      if (!Helper.isOfType(keyPair, ObjectType.KEY_PAIR)) {
+          throw new Error("keyPair must be an instance of KeyPair");
+      }
 
-    const popToken = new PopToken(finalStatement, keyPair.private, keyPair.public);
-    party.setPopToken(popToken);
-    return this.addPopToken(popToken, save);
+      const popToken = new PopToken(finalStatement, keyPair.private, keyPair.public);
+      party.setPopToken(popToken);
+      return this.addPopToken(popToken, save);
   }
 
   /**
