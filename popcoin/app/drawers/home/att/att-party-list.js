@@ -13,9 +13,12 @@ const PoP = require("../../../shared/lib/dedjs/object/pop/PoP").get;
 var platform = require("tns-core-modules/platform");
 var Directory = require("../../../shared/lib/Directory/Directory");
 const POP_TOKEN_OPTION_SIGN = "Sign";
+const POP_TOKEN_OPTION_TRANSFER_COINS = "Transfer coins";
 const POP_TOKEN_OPTION_REVOKE = "Revoke";
 const repeaterModule = require("tns-core-modules/ui/repeater");
 const Buffer = require("buffer").Buffer;
+
+const USER_CANCELED = "USER_CANCELED_STRING";
 
 const viewModel = ObservableModule.fromObject({
     partyListDescriptions: new ObservableArray(),
@@ -81,11 +84,15 @@ function loadParties() {
 }
 
 function partyTapped(args) {
+    console.log("SKDEBUG Here -1");
+
 
     const index = args.index;
     const status = viewModel.partyListDescriptions.getItem(index).status.status;
     const party = viewModel.partyListDescriptions.getItem(index).party;
     console.log(party)
+
+    console.log("SKDEBUG Here 0");
 
     switch (status) {
         case PartyStates.ERROR:
@@ -102,7 +109,7 @@ function partyTapped(args) {
                 .action({
                     message: "What do you want to do ?",
                     cancelButtonText: "Cancel",
-                    actions: ["Generate a new key pair", "Show the QR Code of my public key", "Display Party Info","Delete Party"]
+                    actions: ["Generate a new key pair", "Show the QR Code of my public key", "Display Party Info", "Delete Party"]
                 })
                 .then(result => {
                     if (result === "Generate a new key pair") {
@@ -115,7 +122,7 @@ function partyTapped(args) {
                         })
                             .then(accepted => {
                                 return !accepted ? Promise.resolve() : (party.randomizeKeyPair().then(Frame.topmost().navigate({
-                                  animated: false,  clearHistory: true, moduleName:"drawers/home/home-page"
+                                    animated: false, clearHistory: true, moduleName: "drawers/home/home-page"
                                 })))
                                     .then(() => {
                                         return Dialog.alert({
@@ -140,9 +147,9 @@ function partyTapped(args) {
                                 readOnly: true
                             }
                         });
-                    }else if (result === "Delete Party"){
+                    } else if (result === "Delete Party") {
                         deleteParty(party);
-                        viewModel.partyListDescriptions.splice(index,1)
+                        viewModel.partyListDescriptions.splice(index, 1)
 
                     }
                 })
@@ -160,22 +167,40 @@ function partyTapped(args) {
         case PartyStates.FINALIZED:
 
         case PartyStates.POPTOKEN:
+            console.log("SKDEBUG Here 1");
 
             if (!party.isAttendee(party.getKeyPair().public)) {
+                console.log("SKDEBUG Here 2");
+
                 return Promise.reject("You are not part of the attendees.");
 
             }
-            if(party.getPopToken() === undefined) {
+            if (party.getPopToken() === undefined) {
+                console.log("SKDEBUG Here 3");
                 PoP.addPopTokenFromFinalStatement(party.getFinalStatement(), party.getKeyPair(), true, party)
-                    .then(Frame.topmost().getViewById("listView").refresh());
+                    .then(() => {
+                        console.log("SKDEBUG Here 4");
+                        return Frame.topmost().getViewById("listView").refresh()
+                    })
+                    .catch(error => {
+                        Dialog.alert({
+                            title: "Error",
+                            message: "An error occured, please retry. - " + error,
+                            okButtonText: "Ok"
+                        });
+                        console.log(error.stack);
+                    });
             }
+            console.log("SKDEBUG Here 5");
+
 
             return Dialog.action({
                 message: "Choose an Action",
                 cancelButtonText: "Cancel",
-                actions: [ POP_TOKEN_OPTION_SIGN]
+                actions: [POP_TOKEN_OPTION_SIGN, POP_TOKEN_OPTION_TRANSFER_COINS]
             })
                 .then(result => {
+                    console.log("SKDEBUG Here 6");
                     if (result === POP_TOKEN_OPTION_REVOKE) {
                         // Revoke Token
                         return PoP.revokePopTokenByIndex(args.index);
@@ -216,6 +241,50 @@ function partyTapped(args) {
                                 }
 
                             })
+                    } else if (result === POP_TOKEN_OPTION_TRANSFER_COINS) {
+                        let amount = undefined;
+                        const USER_WRONG_INPUT = "USER_WRONG_INPUT";
+
+                        return Dialog.prompt({
+                            title: "Amount",
+                            message: "Please choose the amount of PoP-Coin you want to transfer",
+                            okButtonText: "Transfer",
+                            cancelButtonText: "Cancel",
+                            defaultText: "",
+                        }).then((r) => {
+                            if (!r.result) {
+                                return Promise.reject(USER_CANCELED)
+                            }
+                            amount = Number(r.text);
+                            if (isNaN(amount) || !(Number.isInteger(amount))) {
+                                return Promise.reject(USER_WRONG_INPUT)
+                            }
+                            return ScanToReturn.scan()
+                        }).then(publicKeyJson => {
+                            const publicKeyObject = Convert.jsonToObject(publicKeyJson);
+                            return party.transferCoin(amount, Convert.base64ToByteArray(publicKeyObject.public));
+                        }).then(() => {
+                            return Dialog.alert({
+                                title: "Success !",
+                                message: "" + amount + " PoP-Coins have been transferred",
+                                okButtonText: "Ok"
+                            });
+                        }).catch(err => {
+                            if (err === USER_CANCELED) {
+                                return Promise.resolve()
+                            } else if (err === USER_WRONG_INPUT) {
+                                return Dialog.alert({
+                                    title: "Wrong input",
+                                    message: "You can only enter an integer number. Please try again.",
+                                    okButtonText: "Ok"
+                                });
+
+                            }
+
+                            console.log(err.stack);
+
+                            return Promise.reject(err)
+                        })
                     }
 
                     return Promise.resolve();
@@ -309,8 +378,9 @@ function addParty() {
 
                 update();
                 return newParty.update()
-                    .then(Frame.topmost().navigate({animated: false, clearHistory: true, moduleName:"drawers/home/home-page"
-                }));
+                    .then(Frame.topmost().navigate({
+                        animated: false, clearHistory: true, moduleName: "drawers/home/home-page"
+                    }));
             });
         })
         .catch(error => {
@@ -335,7 +405,7 @@ function addParty() {
 function update() {
     pageObject.getViewById("listView").refresh();
 
-    if(page.frame !== undefined) {
+    if (page.frame !== undefined) {
         Frame.topmost().getViewById("listView").refresh();
     }
 }
@@ -343,7 +413,7 @@ function update() {
 function reloadStatuses() {
 
 
-    if(page.frame !== undefined) {
+    if (page.frame !== undefined) {
         Frame.topmost().getViewById("repeater").refresh();
     }
     viewModel.partyListDescriptions.forEach(model => {

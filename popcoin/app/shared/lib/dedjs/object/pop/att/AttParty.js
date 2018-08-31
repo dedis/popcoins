@@ -49,21 +49,22 @@ class AttParty extends Party {
         this._finalStatement = undefined;
         this._keyPair = undefined;
         this._poptoken = undefined;
+        this._olRPC = undefined;
         this._popPartyOlInstance = undefined;
-        this._coinInstance= undefined;
+        this._coinInstance = undefined;
         this._omniledgerId = Convert.hexToByteArray(omniledgerId);
 
 
         this._status = ObservableModule.fromObject({
             status: States.UNDEFINED,
-            balance: undefined,
+            balance: "loading...",
             qrcode: undefined
         });
 
 
     }
 
-    /*
+    /**
     Sets the popToken
      */
     setPopToken(pop) {
@@ -80,7 +81,7 @@ class AttParty extends Party {
         this._status.qrcode = code;
     }
 
-    /*
+    /**
     Gets the popToken
      */
     getPopToken(pop) {
@@ -96,7 +97,7 @@ class AttParty extends Party {
         return this._popPartyOlInstance.update()
             .then(() => {
                 this._finalStatement = this._popPartyOlInstance.finalStatement;
-                if (this._poptoken == undefined) {
+                if (this._poptoken === undefined) {
                     if (this._popPartyOlInstance.state === 1) {
                         this._status.status = States.PUBLISHED;
                     } else if (this._popPartyOlInstance.state === 2) {
@@ -128,11 +129,13 @@ class AttParty extends Party {
 
                     }
                 }
+                console.log("States SKDEBUG = " + this._status.status + " is equal ?" + (this._status.status === States.POPTOKEN));
 
-
-                return this._status.status == States.FINALIZED ? this.updateCoinInstance : Promise.resolve();
+                return this._status.status === States.POPTOKEN ? this.updateCoinInstance() : Promise.resolve();
             })
             .catch(error => {
+                console.log(error);
+                console.log(error.stack);
                 this._status.status = States.ERROR;
 
                 //Promise is resolved as the status is set to "error"
@@ -170,7 +173,7 @@ class AttParty extends Party {
     update() {
 
         let omniLegder = undefined;
-        if(this._popPartyOlInstance === undefined) {
+        if (this._popPartyOlInstance === undefined) {
             this._popPartyOlInstance = {}; // avoid concurrent calls problems
             omniLegder = this.initPopInstance()
         } else {
@@ -180,11 +183,15 @@ class AttParty extends Party {
         console.log(omniLegder);
         console.dir(omniLegder);
 
-        return omniLegder.then(() => {
-            return this.retrieveFinalStatementAndStatus()
-        }).then(() => {
-            return this.loadPopDesc();
-        })
+        return omniLegder
+            .catch(err => {
+                this._popPartyOlInstance = undefined;
+                return Promise.reject(err)
+            }).then(() => {
+                return this.retrieveFinalStatementAndStatus()
+            }).then(() => {
+                return this.loadPopDesc();
+            })
     }
 
     /**
@@ -210,6 +217,11 @@ class AttParty extends Party {
         return Promise.resolve();
     }
 
+    /**
+     * Creates the pop instance (that interact with the contract instance)
+     *
+     * @return {PromiseLike<>}
+     */
     initPopInstance() {
         const cothoritySocketPop = new Net.Socket(Convert.tlsToWebsocket(this._address, ""), RequestPath.POP);
         const message = {
@@ -225,6 +237,7 @@ class AttParty extends Party {
                 return OmniLedger.OmniledgerRPC.fromKnownConfiguration(cothoritySocketOl, this._omniledgerId);
             })
             .then(ol => {
+                this._olRPC = ol;
                 return OmniLedger.contracts.PopPartyInstance.fromInstanceId(ol, instanceIdBuffer)
             })
             .then(inst => {
@@ -233,16 +246,42 @@ class AttParty extends Party {
             })
     }
 
+    /**
+     * Creates the pop coin instance (that interacts with the contract instance) if it doesn't exist and the
+     * updates it to get the last info
+     * @return {Promise} - a promise that resolves once it's up to date
+     */
     updateCoinInstance() {
         let signer = OmniLedger.darc.SignerEd25519.fromByteArray(this._keyPair.private);
         let identity = OmniLedger.darc.IdentityEd25519.fromSigner(signer);
-        let instId = this._popPartyOlInstance.getAccountInstanceId(identity)
-        let update = this._coinInstance === undefined ? OmniLedger.contracts.CoinsInstance.fromInstanceId(this._popPartyOlInstance, instId) : this._coinInstance.update();
+        let instId = this._popPartyOlInstance.getAccountInstanceId(identity);
+        let update = this._coinInstance === undefined ? OmniLedger.contracts.CoinsInstance.fromInstanceId(this._olRPC, instId) : this._coinInstance.update();
+
+        console.log("I'm here SKDEBUG");
 
         return update.then(coinInst => {
+            this._coinInstance = coinInst;
             this._status.balance = coinInst.balance;
+            console.log("SKDEBUG COIN BALANCE = " + this._status.balance);
             return Promise.resolve();
+        }).catch(err => {
+            console.log(err);
+            return Promise.reject(err);
         })
+    }
+
+    /**
+     *  Transfer an amount of PoP-Coins to a destination public key
+     * @param {number} amount
+     * @param {Uint8Array} destination - the public key of the destination
+     * @return {*}
+     */
+    transferCoin(amount, destination) {
+        let identity = OmniLedger.darc.IdentityEd25519.fromPublicKey(destination);
+        let accountId = this._popPartyOlInstance.getAccountInstanceId(identity);
+        let signer = OmniLedger.darc.SignerEd25519.fromByteArray(this._keyPair.private);
+
+        return this._coinInstance.transfer(amount, accountId, signer);
     }
 
     /**

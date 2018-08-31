@@ -43,7 +43,7 @@ function onUnloaded() {
 function loadParties() {
   viewModel.isLoading = true;
 
-  // Bind isEmpty to the length of the array
+  // Bind isEmpty to the length of the arra
   viewModel.partyListDescriptions.on(ObservableArray.changeEvent, () => {
     viewModel.set('isEmpty', viewModel.partyListDescriptions.length === 0);
   });

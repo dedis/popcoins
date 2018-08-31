@@ -27,7 +27,8 @@
                     <Label text="{{ desc.name }}" class="list-title" row="0" col ="0" textWrap="true" textTransform="capitalize"/>
                     <Label text="{{ desc.dateTime }}" row="1" rowSpan="2" col ="0" textWrap="true" fontSize="15%"/>
                     <Label text="{{ desc.location }}" row="2" col ="0" textWrap="true" fontSize="15%" textTransform="capitalize"/>
-                        <Label text="Organizers :" row ="3" col="0"  textWrap="true" fontSize="15%" visibility ="{{ status.status !=='poptoken' ? 'visible' : 'collapse'}}"  />
+                    <Label text="{{ 'Balance: ' + status.balance }}" row="3" col ="0" visibility="{{ status.status !=='poptoken' ? 'visible' : 'collapse'}}" textWrap="true" fontSize="15%" textTransform="capitalize"/>
+                        <Label text="Organizers :" row ="4" col="0"  textWrap="true" fontSize="15%" visibility ="{{ status.status !=='poptoken' ? 'visible' : 'collapse'}}"  />
                         <GridLayout visibility ="{{ status.status !=='poptoken' ? 'visible' : 'collapse'}}" >
                      <!--
                         <nsListView:RadListView items="{{ desc.roster.list }}" id="list-view-conodes" paddingLeft="20%" >
@@ -52,9 +53,9 @@
                     </GridLayout>
                     </StackLayout>
                     <StackLayout class="status-text" paddingTop="100%" paddingRight="20%" >
-                    <Image src = "{{ (status.qrcode === undefined)? status.qrcode : status.qrcode }} " visibility ="{{ status.status !=='poptoken' ? 'visible' : 'collapse'}}" width="40%" height="40%" stretch="aspectFill"  />
-                    <Label text="{{ status.status }}"  visibility ="{{ status.status !=='poptoken' ? 'visible' : 'collapse'}}" row ="3" col="0"  textWrap="true" paddingLeft="30%" paddingRight="40%" stretch="aspectFill" textTransform="uppercase"/>
-                     <Label text="{{ status.status }}"  visibility ="{{ status.status =='poptoken' ? 'visible' : 'collapse'}}" row ="3" col="0"  textWrap="true" paddingTop="10%" stretch="aspectFill" textTransform="uppercase"/>
+                    <Image src = "{{ (status.qrcode === undefined)? status.qrcode : status.qrcode }} " visibility ="visible" width="40%" height="40%" stretch="aspectFill"  />
+                    <Label text="{{ status.status }}"  visibility ="{{ status.status !=='poptoken' ? 'visible' : 'collapse'}}" row ="4" col="0"  textWrap="true" paddingLeft="30%" paddingRight="40%" stretch="aspectFill" textTransform="uppercase"/>
+                     <Label text="{{ status.status }}"  visibility ="{{ status.status =='poptoken' ? 'visible' : 'collapse'}}" row ="4" col="0"  textWrap="true" paddingTop="10%" stretch="aspectFill" textTransform="uppercase"/>
 
                     </StackLayout>
                 </GridLayout>
