@@ -49,7 +49,7 @@ function onLoaded(args) {
     // Poll the status every 3s
     timerId = Timer.setInterval(() => {
         reloadStatuses();
-    }, 5000)
+    }, 5000);
 }
 
 function onUnloaded(args) {

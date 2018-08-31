@@ -1,3 +1,6 @@
+"use strict";
+"use 'esversion: 6'";
+
 const Frame = require("ui/frame");
 const Dialog = require("ui/dialogs");
 const Helper = require("../../shared/lib/dedjs/Helper");
@@ -20,7 +23,7 @@ function onLoaded() {
   // Poll the statuses every 2s
   timerId = Timer.setInterval(() => {
     loadConodeList();
-  }, 2000)
+  }, 2000);
 
 }
 

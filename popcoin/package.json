@@ -21,7 +21,7 @@
     "tslint": "tslint -p tsconfig.json"
   },
   "dependencies": {
-    "@dedis/cothority": "file:dedis-cothority-1.1.16.tgz",
+    "@dedis/cothority": "^1.1.16",
     "@dedis/kyber-js": "^0.0.9",
     "@stablelib/blake2xs": "^0.10.4",
     "bn.js": "^4.11.8",

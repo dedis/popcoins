@@ -83,7 +83,7 @@ function initDate() {
 
     let date = new Date(todayDate ? Date.now() : Date.parse(desc.datetime));
 
-    dataForm.set("date", date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate());
+    dataForm.set("date", date.getFullYear() + "-" + (date.getMonth()+1) + "-" + date.getDate());
     dataForm.set("time", date.getHours() + ":" + date.getMinutes());
 }
 

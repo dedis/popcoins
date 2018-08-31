@@ -10,13 +10,24 @@ function MyDrawerViewModel(selectedPage) {
          * The navigationItems property is initialized here and is data bound to <ListView> in the MyDrawer view file.
          * Add, remove or edit navigationItems to change what is displayed in the app drawer list.
          *************************************************************/
-        navigationItems: [{
+        navigationItems: [
+            {
+                title: "Messages",
+                name: "messages",
+                route: "drawers/messages/messages",
+                icon: "\uf086",
+                isSelected: selectedPage === "Messages"
+            },
+
+            {
                 title: "Home",
                 name: "home",
                 route: "drawers/home/home-page",
                 icon: "\uf015",
                 isSelected: selectedPage === "Home"
             },
+
+
             {
                 title: "PoP",
                 name: "pop",
@@ -32,7 +43,7 @@ function MyDrawerViewModel(selectedPage) {
                 route: "drawers/settings/settings-page",
                 icon: "\uf013",
                 isSelected: selectedPage === "Settings"
-            }
+            },
         ]
     });
 
