@@ -1,6 +1,8 @@
 'use strict';
 
 const DedisProtobuf = require("@dedis/cothority").protobuf;
+const Crypto = require("crypto-browserify");
+
 
 /**
  * Base class for the protobuf library that provides helpers to encode and decode
@@ -490,17 +492,39 @@ class CothorityMessages extends CothorityProtobuf {
         // required bytes popinstance = 1;
     }
 
+    createMessage(msg){
+        const msgProto = this.getModel(ObjectType.MESSAGE);
+
+        const fields = {
+            subject: msg.subject,
+            date: 0,
+            text: msg.text,
+            author: Crypto.randomBytes(32),
+            balance: msg.balance,
+            reward: msg.reward,
+            id: Crypto.randomBytes(32)
+        }
+
+        return msgProto.create(fields);
+    }
+
     createSendMessage(msg) {
-        return {
+        const fields = {
             message: msg
         };
+
+        console.dir(fields);
+
+        return fields;
     }
 
     createListMessages(start, number) {
-        return {
+        const fields = {
             start: start,
             number: number
         };
+
+        return fields;
     }
 
     createReadMessage(id, party, reader) {

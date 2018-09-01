@@ -9,6 +9,8 @@ const OrgParty = require("../../shared/lib/dedjs/object/pop/org/OrgParty").Party
 const User = require("../../shared/lib/dedjs/object/user/User").get;
 const Convert = require("../../shared/lib/dedjs/Convert");
 const PartyStates = require("../../shared/lib/dedjs/object/pop/org/OrgParty").States;
+const ObjectType = require("../../shared/lib/dedjs/ObjectType");
+const PoPMessages = require("../../shared/lib/dedjs/object/pop/Messages").get;
 
 const CANCELED_BY_USER = "CANCELED_BY_USER_STRING";
 
@@ -20,27 +22,24 @@ const viewModel = ObservableModule.fromObject({
 
 let page = undefined;
 let timerId = undefined;
+let conode = undefined;
 
 function onLoaded(args) {
     page = args.object;
 
     page.bindingContext = viewModel;
 
-    viewModel.messageList.splice(0);
-    viewModel.isEmpty = false;
-    viewModel.messageList.push(
-        ObservableModule.fromObject({
-            subject: "test1",
-            balance: 1000,
-            reward: 10
-        }));
-    viewModel.messageList.push(
-        ObservableModule.fromObject({
-            subject: "test2",
-            balance: 2000,
-            reward: 20
-        }));
-
+    var roster = User.getRoster();
+    if (roster.list.length == 0){
+        console.dir("no roster yet");
+        return;
+    } else {
+        conode = roster.list[0];
+    }
+    updateMessages()
+    // timerId = Timer.setInterval(() => {
+    //     updateMessages();
+    // }, 2000)
 }
 
 function onUnloaded() {
@@ -51,16 +50,61 @@ function onUnloaded() {
 function messageTapped(args) {
     console.log("message tapped");
     console.dir(args)
+    updateMessages()
+}
+
+function updateMessages(){
+    viewModel.messageList.splice(0);
+    PoPMessages.fetchListMessages(conode, 0, 10)
+        .then(response =>{
+            viewModel.messageList.slice();
+            for (var i = 0; i < response.subjects.length; i++) {
+                console.log("Appending message " + i + ": " + response.subjects[i])
+                viewModel.messageList.push(
+                    ObservableModule.fromObject({
+                        subject: response.subjects[i],
+                        balance: response.balances[i],
+                        reward: response.rewards[i],
+                    })
+                )
+            }
+        })
+        .catch(error =>{
+            console.log("error: " + error);
+        })
+    viewModel.isEmpty = false;
+    // viewModel.messageList.push(
+    //     ObservableModule.fromObject({
+    //         subject: "test1",
+    //         balance: 1000,
+    //         reward: 10
+    //     }));
+    // viewModel.messageList.push(
+    //     ObservableModule.fromObject({
+    //         subject: "test2",
+    //         balance: 2000,
+    //         reward: 20
+    //     }));
 }
 
 function addMessage() {
     page.showModal("shared/pages/messages/newMessage", undefined, addNewMessage, true);
+    // PoPMessages.sendMessage(conode, {
+    //     subject: "test123",
+    //     text: "more text",
+    //     balance: 1000,
+    //     reward: 100,
+    // })
+    //     .then(result =>{
+    //         console.log("success:" + result);
+    //     })
+    //     .catch(error =>{
+    //         console.log("error: " + error);
+    //     })
 }
 
 function addNewMessage(arg) {
-    console.dir(arg);
     if (arg !== undefined) {
-        console.log("new message");
         Dialog.confirm({
             title: "Send message",
             message: "Subject: " + arg.subject + "\n" +
@@ -69,13 +113,22 @@ function addNewMessage(arg) {
             cancelButtonText: "Abort",
         }).then(function (result) {
             if (result) {
-                viewModel.messageList.push(
-                    ObservableModule.fromObject({
-                        subject: arg.subject,
-                        balance: arg.balance,
-                        reward: arg.reward
+                console.dir(arg);
+                PoPMessages.sendMessage(conode, arg)
+                    .then(result =>{
+                        console.log("Successfully sent message");
+                        updateMessages();
                     })
-                )
+                    .catch(error =>{
+                        console.log("error while sending message: " + error);
+                    })
+                // viewModel.messageList.push(
+                //     ObservableModule.fromObject({
+                //         subject: arg.subject,
+                //         balance: arg.balance,
+                //         reward: arg.reward
+                //     })
+                // )
             }
         })
     }

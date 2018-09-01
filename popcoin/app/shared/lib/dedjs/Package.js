@@ -16,6 +16,7 @@ const USER = `${APP}.user`;
 const POP = `${APP}.pop`;
 const ORG = `${POP}.org`;
 const ATT = `${POP}.att`;
+const POPMSG = `${POP}.msg`;
 
 /**
  * Cisc
@@ -27,3 +28,4 @@ module.exports.POP = POP;
 module.exports.ORG = ORG;
 module.exports.ATT = ATT;
 module.exports.CISC = CISC;
+module.exports.POPMSG = POPMSG;

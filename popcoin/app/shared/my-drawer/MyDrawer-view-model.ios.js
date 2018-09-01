@@ -20,6 +20,14 @@ function MyDrawerViewModel(selectedPage) {
             },
 
             {
+                title: "PoP",
+                name: "pop",
+                route: "drawers/pop/pop-page",
+                icon: "\uf0a1",
+                isSelected: selectedPage === "PoP"
+            },
+
+            {
                 title: "Home",
                 name: "home",
                 route: "drawers/home/home-page",
