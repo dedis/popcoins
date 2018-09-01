@@ -11,6 +11,7 @@ const SKIPCHAIN = "Skipchain";
 const POP = "PoPServer";
 const CISC = "Cisc";
 const OMNILEDGER = "OmniLedger";
+const PERSONHOOD = "Personhood"
 
 
 /**
@@ -59,7 +60,14 @@ const CISC_PROPOSE_UPDATE = `ProposeUpdate`;
 const CISC_SCHNORR_SIG = `SchnorrSig`;
 
 /**
- * OmnieLedger Requests
+ * Personhood Requests
+ */
+const PERSONHOOD_SENDMESSAGE = `SendMessage`;
+const PERSONHOOD_LISTMESSAGES = `ListMessages`;
+const PERSONHOOD_READMESSAGE = `ReadMessage`;
+
+/**
+ * OmniLedger Requests
  */
 
 // Exports --------------------------------------------------------------------
@@ -68,6 +76,7 @@ module.exports.IDENTITY = IDENTITY;
 module.exports.SKIPCHAIN = SKIPCHAIN;
 module.exports.POP = POP;
 module.exports.CISC = CISC;
+module.exports.PERSONHOOD = PERSONHOOD;
 module.exports.STATUS_REQUEST = STATUS_REQUEST;
 module.exports.IDENTITY_PIN_REQUEST = IDENTITY_PIN_REQUEST;
 module.exports.IDENTITY_DATA_UPDATE = IDENTITY_DATA_UPDATE;
@@ -94,3 +103,6 @@ module.exports.OMNILEDGER_INSTANCE_ID = OMNILEDGER_INSTANCE_ID;
 module.exports.OMNILEDGER = OMNILEDGER;
 module.exports.POP_GET_INSTANCE_ID = POP_GET_INSTANCE_ID;
 module.exports.POP_GET_INSTANCE_ID_REPLY = POP_GET_INSTANCE_ID_REPLY;
+module.exports.PERSONHOOD_SENDMESSAGE = PERSONHOOD_SENDMESSAGE;
+module.exports.PERSONHOOD_LISTMESSAGES = PERSONHOOD_LISTMESSAGES;
+module.exports.PERSONHOOD_READMESSAGE = PERSONHOOD_READMESSAGE;

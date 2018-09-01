@@ -41,6 +41,13 @@ const PROPOSE_UPDATE_REPLY = "ProposeUpdateReply";
 const PROPOSE_VOTE_REPLY = "ProposeVoteReply";
 
 /**
+ * Personhood response types.
+ */
+const STRING_REPLY = "StringReply";
+const LISTMESSAGES_REPLY = "ListMessagesReply";
+const READMESSAGES_REPLY = "ReadMessagesReply";
+
+/**
  * MISC response types.
  */
   // This points to an empty message type as cothority doesn't provide one by default
@@ -68,3 +75,6 @@ module.exports.GET_PROPOSALS_REPLY = GET_PROPOSALS_REPLY;
 module.exports.CHECK_CONFIG_REPLY = CHECK_CONFIG_REPLY;
 module.exports.VERIFY_LINK_REPLY = VERIFY_LINK_REPLY;
 module.exports.EMPTY_REPLY = EMPTY_REPLY;
+module.exports.STRING_REPLY = STRING_REPLY;
+module.exports.LISTMESSAGES_REPLY = LISTMESSAGES_REPLY;
+module.exports.READMESSAGES_REPLY = READMESSAGES_REPLY;
