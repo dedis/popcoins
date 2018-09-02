@@ -12,12 +12,21 @@ function MyDrawerViewModel(selectedPage) {
          *************************************************************/
         navigationItems: [
             {
-                title: "Messages",
-                name: "messages",
-                route: "drawers/messages/main",
-                icon: "\uf086",
-                isSelected: selectedPage === "Messages"
+                title: "Home",
+                name: "home",
+                route: "drawers/home/home-page",
+                icon: "\uf015",
+                isSelected: selectedPage === "Home"
             },
+
+
+            // {
+            //     title: "Messages",
+            //     name: "messages",
+            //     route: "drawers/messages/main",
+            //     icon: "\uf086",
+            //     isSelected: selectedPage === "Messages"
+            // },
 
             {
                 title: "PoP",
@@ -26,15 +35,6 @@ function MyDrawerViewModel(selectedPage) {
                 icon: "\uf0a1",
                 isSelected: selectedPage === "PoP"
             },
-
-            {
-                title: "Home",
-                name: "home",
-                route: "drawers/home/home-page",
-                icon: "\uf015",
-                isSelected: selectedPage === "Home"
-            },
-
 
             {
                 title: "Settings",

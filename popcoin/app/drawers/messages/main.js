@@ -89,18 +89,6 @@ function updateMessages(){
 
 function addMessage() {
     page.showModal("shared/pages/messages/newMessage", undefined, addNewMessage, true);
-    // PoPMessages.sendMessage(conode, {
-    //     subject: "test123",
-    //     text: "more text",
-    //     balance: 1000,
-    //     reward: 100,
-    // })
-    //     .then(result =>{
-    //         console.log("success:" + result);
-    //     })
-    //     .catch(error =>{
-    //         console.log("error: " + error);
-    //     })
 }
 
 function addNewMessage(arg) {
@@ -122,13 +110,6 @@ function addNewMessage(arg) {
                     .catch(error =>{
                         console.log("error while sending message: " + error);
                     })
-                // viewModel.messageList.push(
-                //     ObservableModule.fromObject({
-                //         subject: arg.subject,
-                //         balance: arg.balance,
-                //         reward: arg.reward
-                //     })
-                // )
             }
         })
     }

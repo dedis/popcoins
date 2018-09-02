@@ -6,10 +6,10 @@ const MyDrawerViewModel = require("./MyDrawer-view-model");
  * Use the "loaded" event handler of the wrapping layout element to bind the view model to your view.
  *************************************************************/
 function onLoaded(args) {
-  const component = args.object;
-  const componentTitle = component.selectedPage;
+    const component = args.object;
+    const componentTitle = component.selectedPage;
 
-  component.bindingContext = new MyDrawerViewModel(componentTitle);
+    component.bindingContext = new MyDrawerViewModel(componentTitle);
 }
 
 /* ***********************************************************
@@ -18,15 +18,16 @@ function onLoaded(args) {
  * based on the tapped navigationItem's route.
  *************************************************************/
 function onNavigationItemTap(args) {
-  const navigationItem = args.view.bindingContext;
+    console.log(args);
+    const navigationItem = args.view.bindingContext;
 
-  frameModule.topmost().navigate({
-                                   clearHistory: true,
-                                   moduleName: navigationItem.route,
-                                   transition: {
-                                     name: "slide"
-                                   }
-                                 });
+    frameModule.topmost().navigate({
+        clearHistory: true,
+        moduleName: navigationItem.route,
+        transition: {
+            name: "slide"
+        }
+    });
 }
 
 exports.onLoaded = onLoaded;
