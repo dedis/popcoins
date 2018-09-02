@@ -629,14 +629,16 @@ class OrgParty extends Party {
         const verifyLinkMessage = CothorityMessages.createVerifyLinkMessage(User.getKeyPair().public);
 
         // TODO change status request return type
-
+        console.log("verify link");
         return cothoritySocket.send(RequestPath.POP_VERIFY_LINK, DecodeType.VERIFY_LINK_REPLY, verifyLinkMessage)
             .then(alreadyLinked => {
+                console.log("sending request");
                 return alreadyLinked.exists ?
                     Promise.resolve(ALREADY_LINKED) :
                     cothoritySocket.send(RequestPath.POP_PIN_REQUEST, RequestPath.STATUS_REQUEST, pinRequestMessage)
             })
             .then(response => {
+                console.log("set linked");
                 return this.setLinkedConode(conode, true)
                     .then(() => {
                         const fields = {
@@ -647,6 +649,7 @@ class OrgParty extends Party {
 
             })
             .catch(error => {
+                console.log("link error: " + error.message);
                 if (error.message === CothorityMessages.READ_PIN_ERROR) {
                     return Promise.resolve(error.message)
                 }

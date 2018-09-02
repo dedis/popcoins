@@ -63,12 +63,8 @@ class PoPMsg {
         const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(conode, ""), RequestPath.PERSONHOOD);
         const requestLM = CothorityMessages.createListMessages(start, number);
 
-        console.log("going to get message")
-        const statusRequestMessage = {};
-        // return cothoritySocket.send(RequestPath.STATUS_REQUEST, DecodeType.STATUS_RESPONSE, statusRequestMessage)
         return cothoritySocket.send(RequestPath.PERSONHOOD_LISTMESSAGES, DecodeType.LISTMESSAGES_REPLY, requestLM)
             .then(response => {
-                console.log("got message")
                 return Promise.resolve(response);
             })
             .catch(error => {
@@ -85,17 +81,12 @@ class PoPMsg {
             throw new Error("conode must be an instance of ServerIdentity");
         }
 
-        console.log("preparing to send");
         const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(conode, ""), RequestPath.PERSONHOOD);
-        console.log("creating message");
         const msgProto = CothorityMessages.createMessage(msg);
-        console.log("creating send message")
         const sendMessage = CothorityMessages.createSendMessage(msgProto);
 
-        console.log("sending message");
         return cothoritySocket.send(RequestPath.PERSONHOOD_SENDMESSAGE, DecodeType.STRING_REPLY, sendMessage)
             .then(response =>{
-                console.log("received reply");
                 return Promise.resolve(response);
             })
             .catch(error =>{
@@ -106,6 +97,28 @@ class PoPMsg {
                 return Promise.reject(error);
             })
     }
+
+    readMessage(conode, msgID, partyID, readerID){
+        if (!Helper.isOfType(conode, ObjectType.SERVER_IDENTITY)) {
+            throw new Error("conode must be an instance of ServerIdentity");
+        }
+
+        const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(conode, ""), RequestPath.PERSONHOOD);
+        const readMessage = CothorityMessages.createReadMessage(msgID, partyID, readerID);
+
+        return cothoritySocket.send(RequestPath.PERSONHOOD_READMESSAGE, DecodeType.READMESSAGES_REPLY, readMessage)
+            .then(response =>{
+                return Promise.resolve(response);
+            })
+            .catch(error =>{
+                console.log(error);
+                console.dir(error);
+                console.trace();
+
+                return Promise.reject(error);
+            })
+    }
+
 }
 
 // The symbol key reference that the singleton will use.

@@ -20,13 +20,13 @@ function MyDrawerViewModel(selectedPage) {
             },
 
 
-            // {
-            //     title: "Messages",
-            //     name: "messages",
-            //     route: "drawers/messages/main",
-            //     icon: "\uf086",
-            //     isSelected: selectedPage === "Messages"
-            // },
+            {
+                title: "Messages",
+                name: "messages",
+                route: "drawers/messages/main",
+                icon: "\uf086",
+                isSelected: selectedPage === "Messages"
+            },
 
             {
                 title: "PoP",

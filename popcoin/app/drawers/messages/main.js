@@ -11,6 +11,7 @@ const Convert = require("../../shared/lib/dedjs/Convert");
 const PartyStates = require("../../shared/lib/dedjs/object/pop/org/OrgParty").States;
 const ObjectType = require("../../shared/lib/dedjs/ObjectType");
 const PoPMessages = require("../../shared/lib/dedjs/object/pop/Messages").get;
+const Crypto = require("crypto-browserify");
 
 const CANCELED_BY_USER = "CANCELED_BY_USER_STRING";
 
@@ -49,7 +50,26 @@ function onUnloaded() {
 
 function messageTapped(args) {
     console.log("message tapped");
-    console.dir(args)
+    console.dir(args);
+    msg = viewModel.messageList.getItem(args.index);
+    console.dir(msg)
+    PoPMessages.readMessage(conode, msg.id, Crypto.randomBytes(32), Crypto.randomBytes(32))
+        .then(response => {
+            console.log("got response to read message:");
+            console.dir(response);
+            Dialog.alert({
+                title: response.message.subject,
+                message: response.message.text,
+                okButtonText: "Confirm"
+            })
+        })
+        .catch(error=>{
+            Dialog.alert({
+                title: "Error while reading",
+                message: error,
+                okButtonText: "Continue"
+            })
+        });
     updateMessages()
 }
 
@@ -65,6 +85,7 @@ function updateMessages(){
                         subject: response.subjects[i],
                         balance: response.balances[i],
                         reward: response.rewards[i],
+                        id: response.ids[i],
                     })
                 )
             }
