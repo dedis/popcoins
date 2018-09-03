@@ -360,19 +360,27 @@ function addParty() {
             const newParty = new AttParty(infos.id, infos.omniledgerId, infos.address);
 
 
-            return newParty.save().then((st) => {
-                viewModel.partyListDescriptions.push(ObservableModule.fromObject({
-                    party: newParty,
-                    desc: newParty.getPopDescModule(),
-                    status: newParty.getPopStatusModule()
-                }));
-
-                update();
-                return newParty.update()
-                    .then(Frame.topmost().navigate({
-                        animated: false, clearHistory: true, moduleName: "drawers/home/home-page"
+            return newParty.save()
+                .then((st) => {
+                    viewModel.partyListDescriptions.push(ObservableModule.fromObject({
+                        party: newParty,
+                        desc: newParty.getPopDescModule(),
+                        status: newParty.getPopStatusModule()
                     }));
-            });
+
+                    update();
+                    return newParty.update()
+                        .then(Frame.topmost().navigate({
+                            animated: false, clearHistory: true, moduleName: "drawers/home/home-page"
+                        }));
+                })
+                .catch(error => {
+                    Dialog.alert({
+                        title: "Saving error",
+                        message: "Couldn't save the party: " + error,
+                        okButtonText: "OK"
+                    });
+                });
         })
         .catch(error => {
             console.log(error);

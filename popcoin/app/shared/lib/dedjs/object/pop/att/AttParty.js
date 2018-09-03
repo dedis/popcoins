@@ -65,7 +65,7 @@ class AttParty extends Party {
     }
 
     /**
-    Sets the popToken
+     Sets the popToken
      */
     setPopToken(pop) {
         this._poptoken = pop;
@@ -82,7 +82,7 @@ class AttParty extends Party {
     }
 
     /**
-    Gets the popToken
+     Gets the popToken
      */
     getPopToken(pop) {
         return this._poptoken;
