@@ -1,6 +1,8 @@
+
 require("nativescript-nodeify");
 
 const Kyber = require("@dedis/kyber-js");
+const NetUtils = require("../../network/NetUtils");
 const CURVE_ED25519 = new Kyber.curve.edwards25519.Curve;
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
@@ -400,7 +402,27 @@ class User {
         const conodes = Array.from(this.getRoster().list);
         const statusRequestMessage = {};
 
-        conodes.map((server) => {
+        if (conodes.length == 0){
+            for (var port = 7002; port <= 7006; port= 2){
+                console.log("creating conode at port: 10.0.0.1:" port);
+                NetUtils.getServerIdentiyFromAddress("tls://10.0.0.1:" port)
+                    .then(server => {
+                        console.dir(server);
+                        conodes.push(server);
+                        this.addServer(server)
+                            .catch(error => {
+                                return Promise.reject(error.message);
+                            });
+                    })
+                    .catch(error =>{
+                        console.dir("couldn't get address");
+                        return Promise.reject("couldn't get server: " error.message);
+                    })
+            }
+        }
+
+
+            conodes.map((server) => {
             const address = Convert.tlsToWebsocket(server, "");
             const cothoritySocket = new Net.Socket(address, RequestPath.STATUS);
             return cothoritySocket.send(RequestPath.STATUS_REQUEST, DecodeType.STATUS_RESPONSE, statusRequestMessage)
