@@ -1,17 +1,5 @@
 const Frame = require("ui/frame");
 
-function onNavigatingTo(args) {
-  const page = args.object;
-}
-
-function onDrawerButtonTap(args) {
-  const sideDrawer = Frame.topmost().getViewById("sideDrawer");
-  sideDrawer.showDrawer();
-}
-
-module.exports.onNavigatingTo = onNavigatingTo;
-module.exports.onDrawerButtonTap = onDrawerButtonTap;
-
 const topmost = require("ui/frame").topmost;
 const Dialog = require("ui/dialogs");
 const Helper = require("../../shared/lib/dedjs/Helper");
@@ -37,7 +25,6 @@ function onLoaded() {
     timerId = Timer.setInterval(() => {
         loadConodeList();
     }, 2000)
-
 }
 
 function onUnloaded() {
@@ -59,6 +46,11 @@ function onNavigatingTo(args) {
     if (viewModel.rosterModule.statusList.length !== viewModel.rosterModule.list.length) {
         loadConodeList();
     }
+}
+
+function onDrawerButtonTap(args) {
+    const sideDrawer = Frame.topmost().getViewById("sideDrawer");
+    sideDrawer.showDrawer();
 }
 
 function loadConodeList() {
@@ -146,12 +138,14 @@ function addConode() {
 
                         try {
                             conode = Convert.parseJsonServerIdentity(string);
-                        } catch (error) { }
+                        } catch (error) {
+                        }
 
                         if (conode === undefined) {
                             try {
                                 conode = Convert.parseTomlRoster(string).list[0];
-                            } catch (error) { }
+                            } catch (error) {
+                            }
                         }
 
                         if (conode === undefined) {
@@ -189,7 +183,7 @@ function addConode() {
 
 function deleteConode(conode) {
     // We do not get the index of the item swiped/clicked...
-  //  const conode = args.object.bindingContext;
+    //  const conode = args.object.bindingContext;
 
     return User.substractRoster(CothorityMessages.createRoster(undefined, [conode], conode.public))
         .then(() => {
@@ -213,9 +207,7 @@ function deleteConode(conode) {
         });
 
 
-
 }
-
 
 
 function onDrawerButtonTap(args) {
@@ -231,8 +223,6 @@ module.exports.addConode = addConode;
 module.exports.deleteConode = deleteConode;
 module.exports.onLoaded = onLoaded;
 module.exports.onUnloaded = onUnloaded;
-
-
 
 
 const FileIO = require("../../shared/lib/file-io/file-io");
@@ -271,7 +261,7 @@ function loadBars() {
     // Bind isEmpty to the length of the array
     viewModel2.barListDescriptions.on(ObservableArray.changeEvent, () => {
         viewModel2.set('isEmpty', viewModel2.barListDescriptions.length === 0);
-});
+    });
 
     let bar = undefined;
     viewModel2.barListDescriptions.splice(0);
@@ -295,95 +285,95 @@ function barTapped(args) {
         .action({
             message: "What do you want to do ?",
             cancelButtonText: "Cancel",
-            actions: ["Show service info to user", "Show orders history" , "Delete Service"]
+            actions: ["Show service info to user", "Show orders history", "Delete Service"]
         })
         .then(result => {
-        if (result === "Show service info to user") {
-        pageObject.showModal("shared/pages/qr-code/qr-code-page", {
-            textToShow: Convert.objectToJson(signData),
-            title: "Service information"
-        }, () => {
-            Dialog.confirm({
-            title: "Client confirmation",
-            message: "Do you want to also scan the client confirmation ?",
-            okButtonText: "Yes",
-            cancelButtonText: "No"
-        }).then(function (result) {
-            if (!result) {
-                return Promise.reject(USER_CANCELED);
+            if (result === "Show service info to user") {
+                pageObject.showModal("shared/pages/qr-code/qr-code-page", {
+                    textToShow: Convert.objectToJson(signData),
+                    title: "Service information"
+                }, () => {
+                    Dialog.confirm({
+                        title: "Client confirmation",
+                        message: "Do you want to also scan the client confirmation ?",
+                        okButtonText: "Yes",
+                        cancelButtonText: "No"
+                    }).then(function (result) {
+                        if (!result) {
+                            return Promise.reject(USER_CANCELED);
+                        }
+                        return ScanToReturn.scan();
+                    }).then(signatureJson => {
+                        console.log(signatureJson);
+                        const sig = Convert.hexToByteArray(Convert.jsonToObject(signatureJson).signature);
+                        console.dir(sig);
+                        return bar.registerClient(sig, signData)
+                    }).then(() => {
+                        return bar.addOrderToHistory(new Date(Date.now()));
+                    })
+                        .then(() => {
+                            // Alert is shown in the modal page if not enclosed in setTimeout
+                            setTimeout(() => {
+                                Dialog.alert({
+                                    title: "Success !",
+                                    message: "The item is delivered !",
+                                    okButtonText: "Great"
+                                })
+                            });
+                        }).catch(error => {
+                        if (error === USER_CANCELED) {
+                            return Promise.resolve();
+                        }
+                        console.log(error);
+                        console.dir(error);
+                        console.trace();
+
+                        // Alert is shown in the modal page if not enclosed in setTimeout
+                        setTimeout(() => {
+                            Dialog.alert({
+                                title: "Error",
+                                message: error,
+                                okButtonText: "Ok"
+                            });
+                        });
+
+                        return Promise.reject(error);
+                    });
+
+                }, true);
+            } else if (result === "Show orders history") {
+                Frame.topmost().navigate({
+                    moduleName: "drawers/pop/bar/order-history/bar-history-list",
+                    context: {
+                        bar: bar,
+                    }
+                });
+
+            } else if (result === "Delete Service") {
+                bar.remove()
+                    .then(() => {
+                        const listView = Frame.topmost().currentPage.getViewById("listView2");
+                        listView.notifySwipeToExecuteFinished();
+
+                        return loadBars();
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                        console.dir(error);
+                        console.trace();
+
+                        Dialog.alert({
+                            title: "Error",
+                            message: "An error occured, please try again. - " + error,
+                            okButtonText: "Ok"
+                        });
+
+                        return Promise.reject(error);
+
+                    });
             }
-            return ScanToReturn.scan();
-        }).then(signatureJson => {
-            console.log(signatureJson);
-        const sig = Convert.hexToByteArray(Convert.jsonToObject(signatureJson).signature);
-        console.dir(sig);
-        return bar.registerClient(sig, signData)
-    }).then(() => {
-            return bar.addOrderToHistory(new Date(Date.now()));
-    })
-    .then(() => {
-            // Alert is shown in the modal page if not enclosed in setTimeout
-            setTimeout(() => {
-            Dialog.alert({
-            title: "Success !",
-            message: "The item is delivered !",
-            okButtonText: "Great"
+
         })
-    });
-    }).catch(error => {
-            if (error === USER_CANCELED) {
-            return Promise.resolve();
-        }
-        console.log(error);
-        console.dir(error);
-        console.trace();
-
-        // Alert is shown in the modal page if not enclosed in setTimeout
-        setTimeout(() => {
-            Dialog.alert({
-            title: "Error",
-            message: error,
-            okButtonText: "Ok"
-        });
-    });
-
-        return Promise.reject(error);
-    });
-
-    }, true);
-    } else if (result === "Show orders history") {
-        Frame.topmost().navigate({
-            moduleName: "drawers/pop/bar/order-history/bar-history-list",
-            context: {
-                bar: bar,
-            }
-        });
-
-    } else if (result === "Delete Service"){
-        bar.remove()
-            .then(() => {
-            const listView = Frame.topmost().currentPage.getViewById("listView2");
-        listView.notifySwipeToExecuteFinished();
-
-        return loadBars();
-    })
-    .catch((error) => {
-            console.log(error);
-        console.dir(error);
-        console.trace();
-
-        Dialog.alert({
-            title: "Error",
-            message: "An error occured, please try again. - " + error,
-            okButtonText: "Ok"
-        });
-
-        return Promise.reject(error);
-
-    });
-    }
-
-})
 
 }
 
@@ -392,27 +382,26 @@ function deleteBar(args) {
     const bar = args.object.bindingContext.bar;
     bar.remove()
         .then(() => {
-        const listView = Frame.topmost().currentPage.getViewById("listView2");
-    listView.notifySwipeToExecuteFinished();
+            const listView = Frame.topmost().currentPage.getViewById("listView2");
+            listView.notifySwipeToExecuteFinished();
 
-    return loadBars();
-})
-.catch((error) => {
-        console.log(error);
-    console.dir(error);
-    console.trace();
+            return loadBars();
+        })
+        .catch((error) => {
+            console.log(error);
+            console.dir(error);
+            console.trace();
 
-    Dialog.alert({
-        title: "Error",
-        message: "An error occured, please try again. - " + error,
-        okButtonText: "Ok"
-    });
+            Dialog.alert({
+                title: "Error",
+                message: "An error occured, please try again. - " + error,
+                okButtonText: "Ok"
+            });
 
-    return Promise.reject(error);
+            return Promise.reject(error);
 
-});
+        });
 }
-
 
 
 function addBar() {
@@ -443,7 +432,5 @@ module.exports.addBar = addBar;
 module.exports.onNavigatingTo2 = onNavigatingTo2;
 module.exports.onDrawerButtonTap = onDrawerButtonTap;
 module.exports.barTapped = barTapped;
-
-
-
-
+module.exports.onNavigatingTo = onNavigatingTo;
+module.exports.onDrawerButtonTap = onDrawerButtonTap;

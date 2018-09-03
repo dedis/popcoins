@@ -141,8 +141,14 @@ function onDrawerButtonTap(args) {
     sideDrawer.showDrawer();
 }
 
+function onNavigatingTo(args){
+    console.dir(args);
+    page = args.object.page;
+}
+
 module.exports.onDrawerButtonTap = onDrawerButtonTap;
 module.exports.onLoaded = onLoaded;
 module.exports.messageTapped = messageTapped;
 module.exports.onUnloaded = onUnloaded;
 module.exports.addMessage = addMessage;
+module.exports.onNavigatingTo = onNavigatingTo;

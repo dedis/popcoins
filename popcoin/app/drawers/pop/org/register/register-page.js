@@ -61,15 +61,8 @@ function addManual() {
                         okButtonText: "Ok"
                     });
                 }
-
-
-
                 addMyselfAttendee(Party);
-
-
                 // return Party.registerAttendee(User.getKeyPair().public).then(addPartyMyself( Convert.byteArrayToHex(Party.getPopDescHash()),Party.getLinkedConode().address));
-
-
             } else {
                 // Cancel
                 return Promise.resolve();
@@ -91,25 +84,19 @@ function addManual() {
 
 /*This method creates a new attendee and adds its key to the list of keys
  */
-function addMyselfAttendee(Party){
+function addMyselfAttendee(Party) {
     let info = {
         id: Convert.byteArrayToHex(Party.getPopDescHash()),
         omniledgerId: RequestPath.OMNILEDGER_INSTANCE_ID,
         address: Party.getLinkedConode().address
     };
 
-
     //var newParty = new AttParty(info.id, info.address);
-    addMyself(info).then((party)=>{
+    addMyself(info).then((party) => {
         Party.registerAttendee(party.getKeyPair().public);
     })
-
-
-
-
-
 }
-module.exports.addMyselfAttendee = addMyselfAttendee;
+
 function addScan() {
     return ScanToReturn.scan()
         .then(keyPairJson => {
@@ -306,11 +293,13 @@ function shareToAttendee() {
 function goBack() {
     topmost().goBack();
 }
-function deleteParty(){
+
+function deleteParty() {
 
     Party.remove();
     topmost().goBack();
 }
+
 module.exports.deleteParty = deleteParty;
 module.exports.onLoaded = onLoaded;
 module.exports.addManual = addManual;
@@ -321,3 +310,4 @@ module.exports.onSwipeCellStarted = onSwipeCellStarted;
 module.exports.addNewKey = addNewKey;
 module.exports.goBack = goBack;
 module.exports.shareToAttendee = shareToAttendee;
+module.exports.addMyselfAttendee = addMyselfAttendee;

@@ -9,82 +9,85 @@ const OrgParty = require("../../../../shared/lib/dedjs/object/pop/org/OrgParty")
 
 let conodeAddress = undefined;
 
-let viewModel =  {
-  proposals: new ObservableArray()
+let viewModel = {
+    proposals: new ObservableArray()
 };
 
 function onLoaded(args) {
-  const page = args.object;
-  const context = page.navigationContext;
+    const page = args.object;
+    const context = page.navigationContext;
 
-  page.bindingContext = viewModel;
+    page.bindingContext = viewModel;
 
-  if (context.conode === undefined) {
-    throw new Error("Conode address should be given in the context");
-  }
+    if (context.conode === undefined) {
+        throw new Error("Conode address should be given in the context");
+    }
 
-  conodeAddress = context.conode;
+    conodeAddress = context.conode;
 
-  retrieveProposals();
+    retrieveProposals();
 
 }
 
 function retrieveProposals() {
-  viewModel.proposals.splice(0);
-  const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(conodeAddress, ""), RequestPath.POP);
+    viewModel.proposals.splice(0);
+    const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(conodeAddress, ""), RequestPath.POP);
 
-  return cothoritySocket.send(RequestPath.POP_GET_PROPOSALS, DecodeType.GET_PROPOSALS_REPLY, {})
-    .then(response => {
-      viewModel.proposals.push(response.proposals);
-      return Promise.resolve();
-    })
-    .catch(error => {
-      console.log(error);
-      console.dir(error);
-      console.trace();
+    return cothoritySocket.send(RequestPath.POP_GET_PROPOSALS, DecodeType.GET_PROPOSALS_REPLY, {})
+        .then(response => {
+            viewModel.proposals.push(response.proposals);
+            return Promise.resolve();
+        })
+        .catch(error => {
+            console.log(error);
+            console.dir(error);
+            console.trace();
 
-      Dialog.alert({
-        title: "Error",
-        message: "An error occured, please try again. - " + error,
-        okButtonText: "Ok"
-      });
+            Dialog.alert({
+                title: "Error",
+                message: "An error occured, please try again. - " + error,
+                okButtonText: "Ok"
+            });
 
 
-      return Promise.reject(error);
-    });
+            return Promise.reject(error);
+        });
 }
+
 hashAndSave = require("../org-party-list").hashAndSave;
-const addMyselfAttendee = require("../register/register-page").addMyselfAttendee;
+// const addMyselfAttendee = require("../register/register-page").addMyselfAttendee;
+
 function proposalTapped(args) {
-  const index = args.index;
+    const index = args.index;
 
-  // create the party
-  let party = new OrgParty();
-  let promises = [
-    party.setPopDesc(viewModel.proposals.getItem(index), true),
-    party.setLinkedConode(conodeAddress, true)
-  ];
-  Promise.all(promises)
-    .then(() => {
-        hashAndSave(party);
-        addMyselfAttendee(party);
-      goBack();
-      return Promise.resolve();
-    })
-    .catch(error => {
-      Dialog.alert({
-        title: "Error",
-        message: "An error occured, please try again. - " + error,
-        okButtonText: "Ok"
-      });
+    // create the party
+    let party = new OrgParty();
+    let promises = [
+        party.setPopDesc(viewModel.proposals.getItem(index), true),
+        party.setLinkedConode(conodeAddress, true)
+    ];
+    Promise.all(promises)
+        .then(() => {
+            hashAndSave(party);
+            // Probably not needed as it is done somewhere else already...
+            // addMyselfAttendee(party);
+            goBack();
+            return Promise.resolve();
+        })
+        .catch(error => {
+            Dialog.alert({
+                title: "Error",
+                message: "An error occured, please try again. - " + error,
+                okButtonText: "Ok"
+            });
 
-      return Promise.reject(error);
-    });
+            return Promise.reject(error);
+        });
 
 }
 
 function goBack() {
-  topmost().goBack();
+    topmost().goBack();
 }
 
 module.exports.goBack = goBack;

@@ -1,4 +1,3 @@
-
 require("nativescript-nodeify");
 
 const Kyber = require("@dedis/kyber-js");
@@ -402,10 +401,11 @@ class User {
         const conodes = Array.from(this.getRoster().list);
         const statusRequestMessage = {};
 
-        if (conodes.length == 0){
-            for (var port = 7002; port <= 7006; port= 2){
-                console.log("creating conode at port: 10.0.0.1:" port);
-                NetUtils.getServerIdentiyFromAddress("tls://10.0.0.1:" port)
+        if (conodes.length == 0) {
+            // SIMULATING
+            for (var port = 7002; port <= 7006; port += 2) {
+                console.log("creating conode at port: 10.0.0.1:" + port);
+                NetUtils.getServerIdentiyFromAddress("tls://10.0.0.1:" + port)
                     .then(server => {
                         console.dir(server);
                         conodes.push(server);
@@ -414,15 +414,15 @@ class User {
                                 return Promise.reject(error.message);
                             });
                     })
-                    .catch(error =>{
+                    .catch(error => {
                         console.dir("couldn't get address");
-                        return Promise.reject("couldn't get server: " error.message);
+                        return Promise.reject("couldn't get server: " + error.message);
                     })
             }
         }
 
 
-            conodes.map((server) => {
+        conodes.map((server) => {
             const address = Convert.tlsToWebsocket(server, "");
             const cothoritySocket = new Net.Socket(address, RequestPath.STATUS);
             return cothoritySocket.send(RequestPath.STATUS_REQUEST, DecodeType.STATUS_RESPONSE, statusRequestMessage)
@@ -502,7 +502,7 @@ class User {
      * @returns {Promise} - a promise that gets resolved once the key pair is loaded into memory
      */
     loadKeyPair() {
-       return  new Crypto.KeyPair(FilesPath.USER_PATH).then((key) => {
+        return new Crypto.KeyPair(FilesPath.USER_PATH).then((key) => {
             this._keyPair = key;
         }).catch(error => {
             console.log(error);

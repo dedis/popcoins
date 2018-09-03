@@ -9,6 +9,7 @@ if (global.TNS_WEBPACK) {
   global.registerModule("shared/my-drawer/MyDrawer", () => require("./shared/my-drawer/MyDrawer"));
   global.registerModule("home/home-page", () => require("./drawers/home/home-page"));
   global.registerModule("pop/pop-page", () => require("./drawers/pop/pop-page"));
+  global.registerModule("messages/main", () => require("./drawers/messages/main"));
   global.registerModule("cisc/cisc-page", () => require("./drawers/cisc/cisc-page"));
   global.registerModule("settings/settings-page", () => require("./drawers/settings/settings-page"));
 }

@@ -5,7 +5,7 @@ Feel free to customize layouts and components to change how your app drawer look
 <StackLayout class="sidedrawer sidedrawer-left" loaded="onLoaded">
     <StackLayout class="sidedrawer-header">
         <Label text="PopCoins" id="app-name"/>
-        <Label text="by DEDIS lab ('18)"/>
+        <Label text="by DEDIS lab ('18.1)"/>
     </StackLayout>
 
     <StackLayout class="sidedrawer-content">

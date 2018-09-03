@@ -5,7 +5,6 @@
         unloaded="onUnloaded"
         xmlns:nsDrawer="nativescript-ui-sidedrawer"
         xmlns:myDrawer="shared/my-drawer"
-        xmlns:tok ="drawers/home/mytoken"
         xmlns:att="drawers/home/att"
         xmlns="http://www.nativescript.org/tns.xsd">
 

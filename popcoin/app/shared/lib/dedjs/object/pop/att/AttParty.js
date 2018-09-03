@@ -148,9 +148,9 @@ class AttParty extends Party {
      * @returns {Promise} - a promise that gets resolved once the final statement is load in memory
      */
     loadFinalStatement() {
-
         return FileIO.getStringOf(FileIO.join(FilePath.POP_ATT_PATH, this._folderName, FilePath.POP_ATT_FINAL))
             .then(string => {
+                console.log("Got string: " + string);
                 this._finalStatement = Convert.jsonToObject(string);
                 return Promise.resolve();
             })
@@ -365,6 +365,7 @@ class AttParty extends Party {
      * @return {Promise.<AttParty>}
      */
     save() {
+        console.log("saving attparty");
         return new KeyPair(FileIO.join(FilePath.POP_ATT_PATH, this._folderName)).then((key) => {
             this._keyPair = key;
 
@@ -375,9 +376,11 @@ class AttParty extends Party {
             };
 
             const toWrite = Convert.objectToJson(infos);
-
+            const folder = this._folderName;
             return FileIO.writeStringTo(FileIO.join(FilePath.POP_ATT_PATH, this._folderName, FilePath.POP_ATT_INFOS), toWrite)
                 .then(() => {
+                    console.log("successfully wrote attparty to SD: " + toWrite);
+                    console.log(folder);
                     return this;
                 })
                 .catch(error => {

@@ -2,6 +2,7 @@
         class="page"
         loaded="onLoaded"
         unloaded="onUnloaded"
+        navigatingTo="onNavigatingTo"
         xmlns:nsDrawer="nativescript-ui-sidedrawer"
         xmlns:myDrawer="shared/my-drawer"
         xmlns:nsListView="nativescript-ui-listview"

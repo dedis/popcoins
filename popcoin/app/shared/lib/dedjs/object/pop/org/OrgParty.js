@@ -550,6 +550,7 @@ class OrgParty extends Party {
      * @returns {Promise} - a promise that gets completed once the attendee has been registered
      */
     registerAttendee(publicKey) {
+        console.log("registering attendee");
         if (!(publicKey instanceof Uint8Array) || !Helper.isValidPublicKey(publicKey)) {
             throw new Error("publicKey must be an instance of Uint8Array and have the right format");
         }

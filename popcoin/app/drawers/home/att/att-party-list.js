@@ -31,6 +31,7 @@ let timerId = undefined;
 let pageObject = undefined;
 
 function onNavigatingTo(args) {
+    console.log("navigating to");
     pageObject = args.object.page;
 }
 
@@ -39,6 +40,8 @@ function onLoaded(args) {
 
     page.bindingContext = viewModel;
     pageObject = args.object.page;
+    console.log("loaded is: " + loaded);
+    loaded = false;
     if (!loaded) {
         loadParties();
         pageObject.getViewById("listView").refresh();
@@ -58,6 +61,7 @@ function onUnloaded(args) {
 }
 
 function loadParties() {
+    console.log("loading parties");
     viewModel.isLoading = true;
 
     // Bind isEmpty to the length of the array
@@ -68,6 +72,7 @@ function loadParties() {
     viewModel.partyListDescriptions.splice(0);
 
     FileIO.forEachFolderElement(FilePaths.POP_ATT_PATH, function (partyFolder) {
+        console.log("loading party: " + partyFolder.name);
         AttParty.loadFromDisk(partyFolder.name).then((party) => {
             // Observables have to be nested to reflect changes
             viewModel.partyListDescriptions.push(ObservableModule.fromObject({

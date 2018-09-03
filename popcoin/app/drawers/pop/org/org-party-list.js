@@ -121,6 +121,7 @@ function hashAndSave(party) {
     }
 
     return registerPopDesc().then((p) => {
+        console.log("adding myself to party");
         addMyselfAttendee(party);
         return Promise.resolve(p);
     });

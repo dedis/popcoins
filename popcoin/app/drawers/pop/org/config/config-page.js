@@ -37,7 +37,6 @@ function onNavigatingTo(args) {
         throw new Error("Party should be given in the context");
     }
 
-
     Party = context.party;
     if (!Party instanceof PartyClass) {
         throw new Error("Party should be an instance of a Party");
@@ -56,35 +55,40 @@ function onNavigatingTo(args) {
     if (newParty && context.leader === undefined) {
         throw new Error("Leader conode should be given in the context");
     } else if (newParty) {
-        Party.addPopDescConode(context.leader)
-            .catch(error => {
-                console.log(error);
-                console.dir(error);
-                console.trace();
+        // SIMULATING
+        User.getRoster().list.map(server => {
+            Party.addPopDescConode(server)
+                .catch(error => {
+                    console.log(error);
+                    console.dir(error);
+                    console.trace();
 
-                Dialog.alert({
-                    title: "Error",
-                    message: "An error occured, please try again. - " + error,
-                    okButtonText: "Ok"
+                    Dialog.alert({
+                        title: "Error",
+                        message: "An error occured, please try again. - " + error,
+                        okButtonText: "Ok"
+                    });
                 });
-            });
-
+        })
     }
-
-
 }
 
 function initDate() {
     const desc = Party.getPopDesc();
-    dataForm.set("name", Party.getPopDesc().name);
-    dataForm.set("location", Party.getPopDesc().location);
+    // SIMULATING
+    // dataForm.set("name", Party.getPopDesc().name);
+    // dataForm.set("location", Party.getPopDesc().location);
 
     let todayDate = desc.datetime === "";
 
     let date = new Date(todayDate ? Date.now() : Date.parse(desc.datetime));
 
-    dataForm.set("date", date.getFullYear() + "-" + (date.getMonth()+1) + "-" + date.getDate());
+    dataForm.set("date", date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate());
     dataForm.set("time", date.getHours() + ":" + date.getMinutes());
+
+    // SIMULATING
+    dataForm.set("name", "test");
+    dataForm.set("location", "house "+ dataForm.get("time"));
 }
 
 /**
