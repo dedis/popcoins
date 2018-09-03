@@ -2,7 +2,8 @@ require("./bundle-config");
 const application = require("application");
 
 // application.start({ moduleName: "drawers/home/home-page" });
-application.start({ moduleName: "drawers/messages/main" });
+application.start({ moduleName: "drawers/tokens/main" });
+// application.start({ moduleName: "drawers/messages/main" });
 // application.start({ moduleName: "drawers/pop/pop-page" });
 
 /*

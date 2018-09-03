@@ -36,8 +36,8 @@ function onLoaded(args) {
 /**
  * Function that gets called when the user wants to register a public key manually.
  */
-const loadParties = require("../../../home/att/att-party-list").loadParties;
-const addMyself = require("../../../home/att/att-party-list").addMyself;
+const loadParties = require("../../../tokens/main").loadParties;
+const addMyself = require("../../../tokens/main").addMyself;
 
 function addManual() {
     return Dialog.prompt({
@@ -305,7 +305,7 @@ module.exports.onLoaded = onLoaded;
 module.exports.addManual = addManual;
 module.exports.addScan = addScan;
 module.exports.registerKeys = registerKeys;
-module.exports.deleteAttendee = deleteAttendee;
+module.exports.deleteattendee = deleteAttendee;
 module.exports.onSwipeCellStarted = onSwipeCellStarted;
 module.exports.addNewKey = addNewKey;
 module.exports.goBack = goBack;

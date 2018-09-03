@@ -1,11 +1,11 @@
 const Frame = require("ui/frame");
 const Dialog = require("ui/dialogs");
-const Helper = require("../../shared/lib/dedjs/Helper");
-const Convert = require("../../shared/lib/dedjs/Convert");
-const ObjectType = require("../../shared/lib/dedjs/ObjectType");
-const CothorityMessages = require("../../shared/lib/dedjs/network/cothority-messages");
-const ScanToReturn = require("../../shared/lib/scan-to-return/scan-to-return");
-const User = require("../../shared/lib/dedjs/object/user/User").get;
+const Helper = require("../../../shared/lib/dedjs/Helper");
+const Convert = require("../../../shared/lib/dedjs/Convert");
+const ObjectType = require("../../../shared/lib/dedjs/ObjectType");
+const CothorityMessages = require("../../../shared/lib/dedjs/network/cothority-messages");
+const ScanToReturn = require("../../../shared/lib/scan-to-return/scan-to-return");
+const User = require("../../../shared/lib/dedjs/object/user/User").get;
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const Timer = require("timer");
@@ -57,7 +57,7 @@ function loadConodeList() {
 function deblockConodeList() {
     Frame.topmost().navigate({
         clearHistory: true,
-        moduleName: "drawers/home/home-page",
+        moduleName: "drawers/tokens/home",
         transition: {
             name: "fade",
             duration: 0
@@ -218,8 +218,8 @@ function onDrawerButtonTap(args) {
     sideDrawer.showDrawer();
 }
 
-module.exports.onNavigatingTo = onNavigatingTo;
 module.exports.onDrawerButtonTap = onDrawerButtonTap;
+module.exports.onNavigatingTo = onNavigatingTo;
 module.exports.onSwipeCellStarted = onSwipeCellStarted;
 module.exports.loadConodeList = loadConodeList;
 module.exports.deblockConodeList = deblockConodeList;

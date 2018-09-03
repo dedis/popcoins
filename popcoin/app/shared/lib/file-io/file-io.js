@@ -11,18 +11,22 @@ const Documents = FileSystem.knownFolders.documents();
  * @returns {Promise} - a promise that gets resolved once the content of the file has been read
  */
 function getStringOf(filePath) {
-  if (typeof filePath !== "string") {
-    throw new Error("filePath must be of type string");
-  }
+    if (typeof filePath !== "string") {
+        throw new Error("filePath must be of type string");
+    }
 
-  return Documents.getFile(filePath)
-    .readText()
-    .catch((error) => {
-      console.log("READING ERROR:");
-      console.log(error);
-      console.dir(error);
-      console.trace();
-    });
+    return Documents.getFile(filePath)
+        .readText()
+        .then(string =>{
+            console.log("read from " + filePath + ":" + string);
+            return Promise.resolve(string);
+        })
+        .catch((error) => {
+            console.log("READING ERROR:");
+            console.log(error);
+            console.dir(error);
+            console.trace();
+        });
 }
 
 /**
@@ -32,21 +36,22 @@ function getStringOf(filePath) {
  * @returns {Promise} - a promise that gets resolved once the content has been written to the file
  */
 function writeStringTo(filePath, string) {
-  if (typeof filePath !== "string") {
-    throw new Error("filePath must be of type string");
-  }
-  if (typeof string !== "string") {
-    throw new Error("string must be of type string");
-  }
+    if (typeof filePath !== "string") {
+        throw new Error("filePath must be of type string");
+    }
+    if (typeof string !== "string") {
+        throw new Error("string must be of type string");
+    }
 
-  return Documents.getFile(filePath)
-    .writeText(string)
-    .catch((error) => {
-      console.log("WRITING ERROR:");
-      console.log(error);
-      console.dir(error);
-      console.trace();
-    });
+    console.log("writing: " + filePath);
+    return Documents.getFile(filePath)
+        .writeText(string)
+        .catch((error) => {
+            console.log("WRITING ERROR:");
+            console.log(error);
+            console.dir(error);
+            console.trace();
+        });
 }
 
 /**
@@ -56,20 +61,20 @@ function writeStringTo(filePath, string) {
  * function (elementName: string)
  */
 function forEachFolderElement(folder, closure) {
-  if (typeof folder !== "string") {
-    throw new Error("folder must be of type string");
-  }
+    if (typeof folder !== "string") {
+        throw new Error("folder must be of type string");
+    }
 
-  if (typeof closure !== "function") {
-    throw new Error("closure must be of type function");
-  }
+    if (typeof closure !== "function") {
+        throw new Error("closure must be of type function");
+    }
 
-  Documents.getFolder(folder).eachEntity(function (entity) {
-    closure(entity);
+    Documents.getFolder(folder).eachEntity(function (entity) {
+        closure(entity);
 
-    // continue until the last file
-    return true;
-  })
+        // continue until the last file
+        return true;
+    })
 }
 
 /**
@@ -78,16 +83,16 @@ function forEachFolderElement(folder, closure) {
  * @retuns {Promise} - a promise that gets resolved once the folder has been deleted
  */
 function removeFolder(folder) {
-  if (typeof folder !== "string") {
-    throw new Error("folder must be of type string");
-  }
+    if (typeof folder !== "string") {
+        throw new Error("folder must be of type string");
+    }
 
-  return Documents.getFolder(folder).remove().catch((error) => {
-    console.log("REMOVING ERROR :");
-    console.log(error);
-    console.dir(error);
-    console.trace();
-  });
+    return Documents.getFolder(folder).remove().catch((error) => {
+        console.log("REMOVING ERROR :");
+        console.log(error);
+        console.dir(error);
+        console.trace();
+    });
 }
 
 function folderExists(path) {

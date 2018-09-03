@@ -1,17 +1,17 @@
-const ScanToReturn = require("../../../shared/lib/scan-to-return/scan-to-return");
+const ScanToReturn = require("../../shared/lib/scan-to-return/scan-to-return");
 const Frame = require("ui/frame");
 const Dialog = require("ui/dialogs");
 const Timer = require("timer");
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
-const FileIO = require("../../../shared/lib/file-io/file-io");
-const FilePaths = require("../../../shared/res/files/files-path");
-const AttParty = require("../../../shared/lib/dedjs/object/pop/att/AttParty").Party;
-const Convert = require("../../../shared/lib/dedjs/Convert");
-const PartyStates = require("../../../shared/lib/dedjs/object/pop/att/AttParty").States;
-const PoP = require("../../../shared/lib/dedjs/object/pop/PoP").get;
+const FileIO = require("../../shared/lib/file-io/file-io");
+const FilePaths = require("../../shared/res/files/files-path");
+const AttParty = require("../../shared/lib/dedjs/object/pop/att/AttParty").Party;
+const Convert = require("../../shared/lib/dedjs/Convert");
+const PartyStates = require("../../shared/lib/dedjs/object/pop/att/AttParty").States;
+const PoP = require("../../shared/lib/dedjs/object/pop/PoP").get;
 var platform = require("tns-core-modules/platform");
-var Directory = require("../../../shared/lib/Directory/Directory");
+var Directory = require("../../shared/lib/Directory/Directory");
 const POP_TOKEN_OPTION_SIGN = "Sign";
 const POP_TOKEN_OPTION_TRANSFER_COINS = "Transfer coins";
 const POP_TOKEN_OPTION_REVOKE = "Revoke";
@@ -124,7 +124,7 @@ function partyTapped(args) {
                         })
                             .then(accepted => {
                                 return !accepted ? Promise.resolve() : (party.randomizeKeyPair().then(Frame.topmost().navigate({
-                                    animated: false, clearHistory: true, moduleName: "drawers/home/home-page"
+                                    animated: false, clearHistory: true, moduleName: "drawers/tokens/main"
                                 })))
                                     .then(() => {
                                         return Dialog.alert({
@@ -376,7 +376,7 @@ function addParty() {
                     update();
                     return newParty.update()
                         .then(Frame.topmost().navigate({
-                            animated: false, clearHistory: true, moduleName: "drawers/home/home-page"
+                            animated: false, clearHistory: true, moduleName: "drawers/tokens/main"
                         }));
                 })
                 .catch(error => {
@@ -415,26 +415,31 @@ function update() {
 }
 
 function reloadStatuses() {
-
-
-    if (page.frame !== undefined) {
-        Frame.topmost().getViewById("repeater").refresh();
-    }
+    // if (viewModel.partyListDescriptions.length > 0){
+    //     console.dir(viewModel.partyListDescriptions);
+    // }
+    // if (page.frame !== undefined) {
+    //     console.dir(Frame.topmost());
+    //     console.dir(Frame.topmost().getViewById("repeater"));
+    //     Frame.topmost().getViewById("repeater").refresh();
+    // }
     viewModel.partyListDescriptions.forEach(model => {
-
-
         model.party.update()
-
             .catch(error => {
                 console.log(error);
                 console.dir(error);
                 console.trace();
-
             });
     })
 }
 
 
+function onDrawerButtonTap(args) {
+    const sideDrawer = Frame.topmost().getViewById("sideDrawer");
+    sideDrawer.showDrawer();
+}
+
+module.exports.onDrawerButtonTap = onDrawerButtonTap;
 module.exports.onLoaded = onLoaded;
 module.exports.partyTapped = partyTapped;
 module.exports.onSwipeCellStarted = onSwipeCellStarted;

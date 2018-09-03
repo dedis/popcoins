@@ -144,26 +144,6 @@ class AttParty extends Party {
     }
 
     /**
-     * Load the final statement from local storage
-     * @returns {Promise} - a promise that gets resolved once the final statement is load in memory
-     */
-    loadFinalStatement() {
-        return FileIO.getStringOf(FileIO.join(FilePath.POP_ATT_PATH, this._folderName, FilePath.POP_ATT_FINAL))
-            .then(string => {
-                console.log("Got string: " + string);
-                this._finalStatement = Convert.jsonToObject(string);
-                return Promise.resolve();
-            })
-            .catch(error => {
-                console.log(error);
-                console.dir(error);
-                console.trace();
-
-                return Promise.reject(error);
-            })
-    }
-
-    /**
      * This updates the party (final statement, status and description) by downloading the last
      * final statement and loading the correct information using it
      *
@@ -191,6 +171,22 @@ class AttParty extends Party {
             }).then(() => {
                 return this.loadPopDesc();
             })
+    }
+
+    /**
+     * Load the final statement from local storage
+     * @returns {Promise} - a promise that gets resolved once the final statement is load in memory
+     */
+    loadFinalStatement() {
+        return FileIO.getStringOf(FileIO.join(FilePath.POP_ATT_PATH, this._folderName, FilePath.POP_ATT_FINAL))
+            .then(string => {
+                console.log("Got string: " + string);
+                this._finalStatement = Convert.jsonToObject(string);
+            })
+            .catch(error => {
+                console.log("No final statement yet.");
+            })
+        return Promise.resolve();
     }
 
     /**
