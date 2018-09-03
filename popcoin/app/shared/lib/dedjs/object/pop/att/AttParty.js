@@ -209,7 +209,7 @@ class AttParty extends Party {
 
         popDescModule.roster.aggregate = Uint8Array.from(popDesc.roster.aggregate);
 
-        return Promise.resolve();
+        return Promise.resolve(popDesc);
     }
 
     /**
@@ -321,36 +321,31 @@ class AttParty extends Party {
             new KeyPair(FileIO.join(FilePath.POP_ATT_PATH, id))];
 
         let party = undefined;
-        let updateDone = true;
 
         return Promise.all(promises)
             .then(array => {
                 let object = Convert.jsonToObject(array[0]);
                 party = new AttParty(id, object.omniledgerId, object.address);
                 party._setKeyPair(array[1]);
-
-                return party.retrieveFinalStatementAndStatus()
-            })
-            .catch(() => {
-                updateDone = false;
                 return party.loadFinalStatement()
-            })
-            .then(() => {
-                return updateDone ? party.cacheFinalStatement() : Promise.resolve()
-            })
-            .then(() => {
-                return party.loadPopDesc()
-            })
-            .then(() => {
-                return Promise.resolve(party)
+                    .then(() => {
+                        console.log("loading pop desc");
+                        return party.loadPopDesc()
+                    })
+                    .catch(() => {
+                        party.retrieveFinalStatementAndStatus()
+                            .then(() => {
+                                return party.cacheFinalStatement();
+                            })
+                            .catch(error => {
+                                console.dir(error);
+                                return Promise.resolve(party)
+                            })
+                    })
             })
             .catch(error => {
-                console.log(error);
-                console.dir(error);
-                console.trace();
-
-                return Promise.reject("Cannot load party from disk. Error: " + error);
-            });
+                return Promise.reject("couldn't load from disk: " + error);
+            })
     }
 
     /**

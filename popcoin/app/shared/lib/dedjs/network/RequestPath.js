@@ -1,7 +1,7 @@
 /**
  * @file File containing different available paths for the Cothority.
  */
-const OMNILEDGER_INSTANCE_ID = "ce999a89a1f0391a647096a75bd19411a348af7374d0cfb81386f4759e24d194";
+const OMNILEDGER_INSTANCE_ID = "8159ae6f45a51f58f550412f96e335904dc6080c55dd893192883cc81b8ce6b4";
 /**
  * Services
  */
