@@ -2,12 +2,12 @@
         class="page"
         loaded="onLoaded"
         unloaded="onUnloaded"
-        navigatingTo="onNavigatingTo"
         xmlns:nsDrawer="nativescript-ui-sidedrawer"
         xmlns:myDrawer="shared/my-drawer"
         xmlns:nsListView="nativescript-ui-listview"
         xmlns:nsFloatingButton="nativescript-floatingactionbutton"
         xmlns="http://www.nativescript.org/tns.xsd">
+<!--navigatingTo="onNavigatingTo"-->
 
     <ActionBar class="action-bar">
         <!--
@@ -65,7 +65,7 @@
         <nsDrawer:RadSideDrawer.mainContent>
 
             <GridLayout class="page-content" rows="*" columns="*,*,auto">
-                <Label text="You don't have any party. Find an organizer to join parties !"
+                <Label text="To add a token, you must join a party."
                        textWrap="true"
                        class="empty-list-label"
                        colSpan="3"
@@ -76,7 +76,7 @@
                                         id="listView">
                     <nsListView:RadListView.itemTemplate>
                         <GridLayout id="grid-layout" rows="*,*,*,*,auto" columns="*, auto" backgroundColor="white"
-                                    class="basic-list-decorated">
+                        class="basic-list-decorated">
                             <StackLayout>
                                 <Label text="{{ desc.name }}" class="list-title" row="0" col="0" textWrap="true"
                                        textTransform="capitalize"/>
@@ -96,7 +96,8 @@
                                             <StackLayout orientation="vertical"/>
                                         </Repeater.itemsLayout>
                                         <Repeater.itemTemplate>
-                                            <Label text="{{ description }}" margin="10" visibility="visible"/>
+                                            <Label text="{{ description }}" visibility="visible"/>
+                                            <!--<Label text="{{ description }}" margin="10" visibility="visible"/>-->
                                         </Repeater.itemTemplate>
                                     </Repeater>
                                 </GridLayout>
@@ -114,7 +115,7 @@
                                        col="0"
                                        textWrap="true" paddingTop="10%" stretch="aspectFill" textTransform="uppercase"/>
                             </StackLayout>
-                        </GridLayout>
+                            </GridLayout>
                     </nsListView:RadListView.itemTemplate>
                 </nsListView:RadListView>
                 <nsFloatingButton:fab tap="addParty"

@@ -1,10 +1,10 @@
 <Page class="page"
-      navigatingTo="onNavigatingTo">
+      loaded="onLoaded">
 
     <ActionBar class="action-bar">
         <NavigationButton text="Go Back" android:icon="res://ic_arrow_back" tap="goBack"/>
         <Label class="action-bar-title" text="Conode Stats"/>
-        <ActionItem tap="deleteC"
+        <ActionItem tap="deleteConode"
                     android:icon="res://ic_delete_white"
                     ios.systemIcon="16" ios.position="right"
                     text="Delete" android.position="actionBar"/>

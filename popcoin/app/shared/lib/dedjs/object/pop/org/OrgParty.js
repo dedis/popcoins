@@ -32,8 +32,6 @@ const EMPTY_ROSTER = CothorityMessages.createRoster(new Uint8Array(), [], new Ui
 const EMPTY_POP_DESC = CothorityMessages.createPopDesc("", "", "", EMPTY_ROSTER);
 
 class OrgParty extends Party {
-
-
     /**
      * Constructor for the Org class.
      * @param {string} [dirname] - directory of the party data (directory is created if non existent).
@@ -157,9 +155,7 @@ class OrgParty extends Party {
                 });
 
         } else {
-            return new Promise((resolve, reject) => {
-                resolve();
-            });
+            return Promise.resolve();
         }
     }
 
@@ -236,9 +232,7 @@ class OrgParty extends Party {
 
             return FileIO.writeStringTo(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_DESC), toWrite)
                 .catch((error) => {
-                    console.log(error);
-                    console.dir(error);
-                    console.trace();
+                    console.log("couldn't write pop-description:", error);
 
                     return this.setPopDesc(oldPopDesc, false)
                         .then(() => {
@@ -250,9 +244,7 @@ class OrgParty extends Party {
                 });
 
         } else {
-            return new Promise((resolve, reject) => {
-                resolve();
-            });
+            return Promise.resolve();
         }
     }
 
@@ -289,8 +281,6 @@ class OrgParty extends Party {
             throw new Error("save must be of type boolean");
         }
 
-        const oldRegisteredAtts = this.getRegisteredAtts().slice();
-
         this.emptyRegisteredAttsArray();
         array.forEach(publicKey => {
             publicKey.toHex = Convert.byteArrayToHex;
@@ -312,20 +302,12 @@ class OrgParty extends Party {
 
             return FileIO.writeStringTo(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_ATTENDEES), toWrite)
                 .catch((error) => {
-                    console.log(error);
-                    console.dir(error);
-                    console.trace();
-
-                    return this.setRegisteredAtts(oldRegisteredAtts, false)
-                        .then(() => {
-                            return Promise.reject(error);
-                        });
+                    console.dir("couldn't write party-update:", error);
+                    throw new Error(error);
                 });
 
         } else {
-            return new Promise((resolve, reject) => {
-                resolve();
-            });
+            return Promise.resolve();
         }
     }
 
@@ -350,6 +332,7 @@ class OrgParty extends Party {
      * @returns {ObservableModule}
      */
     getPopStatusModule() {
+        console.log("getting pop status");
         return this._status;
     }
 
@@ -392,9 +375,7 @@ class OrgParty extends Party {
 
             return FileIO.writeStringTo(FileIO.join(FilesPath.POP_ORG_PATH, this._dirname, FilesPath.POP_ORG_DESC_HASH), toWrite)
                 .catch((error) => {
-                    console.log(error);
-                    console.dir(error);
-                    console.trace();
+                    console.log("couldn't write popdesc to file:", error);
 
                     return this.setPopDescHash(oldHash, false)
                         .then(() => {
@@ -403,9 +384,7 @@ class OrgParty extends Party {
                 });
 
         } else {
-            return new Promise((resolve, reject) => {
-                resolve();
-            });
+            return Promise.reject();
         }
     }
 
@@ -580,8 +559,10 @@ class OrgParty extends Party {
             return 0;
         });
 
-        this.setRegisteredAtts(newAttendees, true);
-        return Promise.resolve(text);
+        return this.setRegisteredAtts(newAttendees, true)
+            .then(() => {
+                return text;
+            });
     }
 
 
@@ -654,9 +635,7 @@ class OrgParty extends Party {
                 if (error.message === CothorityMessages.READ_PIN_ERROR) {
                     return Promise.resolve(error.message)
                 }
-                console.log(error);
-                console.dir(error);
-                console.trace();
+                console.log("link error:", error);
 
                 return Promise.reject(error);
             });
@@ -717,9 +696,7 @@ class OrgParty extends Party {
                 }
             })
             .catch(error => {
-                console.log(error);
-                console.dir(error);
-                console.trace();
+                console.log("hash error:", error);
 
                 return Promise.reject(error);
             });
@@ -776,9 +753,7 @@ class OrgParty extends Party {
                 if (error.message !== undefined && error.message.includes("Not all other conodes finalized yet")) {
                     return Promise.resolve(States.FINALIZING);
                 }
-                console.log(error);
-                console.dir(error);
-                console.trace();
+                console.log("not finalized:", error);
 
                 return Promise.reject(error);
             });
@@ -806,9 +781,7 @@ class OrgParty extends Party {
                 return Promise.resolve();
             })
             .catch(error => {
-                console.log(error);
-                console.dir(error);
-                console.trace();
+                console.log("couldn't reset:", error);
 
                 return Promise.reject(error);
             });
@@ -836,9 +809,7 @@ class OrgParty extends Party {
                 this._isLoaded = true;
             })
             .catch(error => {
-                console.log(error);
-                console.dir(error);
-                console.trace();
+                console.log("couldn't load:", error);
 
                 return Promise.reject(error);
             });
@@ -895,9 +866,7 @@ class OrgParty extends Party {
                 }
             })
             .catch(error => {
-                console.log(error);
-                console.dir(error);
-                console.trace();
+                console.log("couldn't load linked:", error);
 
                 return Promise.reject(error);
             });
@@ -920,9 +889,7 @@ class OrgParty extends Party {
                 }
             })
             .catch(error => {
-                console.log(error);
-                console.dir(error);
-                console.trace();
+                console.log("couldn't load popDesc:", error);
 
                 return Promise.reject(error);
             });
@@ -945,9 +912,7 @@ class OrgParty extends Party {
                 }
             })
             .catch(error => {
-                console.log(error);
-                console.dir(error);
-                console.trace();
+                console.log("couldn't load registeredatts:", error);
 
                 return Promise.reject(error);
             });
@@ -970,13 +935,79 @@ class OrgParty extends Party {
                 }
             })
             .catch(error => {
-                console.log(error);
-                console.dir(error);
-                console.trace();
+                console.log("couldn't load deschash:", error);
 
                 return Promise.reject(error);
             });
 
+    }
+
+    /**
+     * Stores the organizers public key in the pop-service. Sends it to the address given in this._address.
+     * @param pub
+     */
+    storeOrganizer(pub) {
+        console.log("storing organizer in:", this.getLinkedConode());
+        const cothoritySocketPop = new Net.Socket(Convert.tlsToWebsocket(this.getLinkedConode(), ""), RequestPath.POP);
+        let id = this.getPopDescHash();
+        let idArray = new Uint8Array(id.buffer, id.byteOffset, id.byteLength);
+        console.dir("id = ", id);
+        console.dir("idArray = ", idArray);
+        const message = {
+            id: idArray,
+            keys: [pub],
+            signature: [],
+        };
+        console.dir("message is:", message);
+        return cothoritySocketPop.send(RequestPath.POP_STORE_KEYS, RequestPath.POP_STORE_KEYS_REPLY, message);
+    }
+
+    /**
+     * Fetches the organizer's keys from the services. Each organizer should have sent his keys to its conode.
+     * @returns {Promise<Array | never>} a promise with the loaded pubKeys from the organizer
+     */
+    fetchOrganizerKeys() {
+        let pubKeys = []
+        // Loop over all nodes from the roster and put together all public keys.
+        let roster = this.getPopDescModule().roster;
+        console.dir("roster for fetchOranizer is:", roster.list);
+        console.dir("id is:",)
+        return Promise.all(
+            roster.list.map(server => {
+                console.dir("server is:", server)
+                const cothoritySocketPop = new Net.Socket(Convert.tlsToWebsocket(server, ""), RequestPath.POP);
+                const message = {
+                    id: this.getPopDescHash(),
+                };
+                return cothoritySocketPop.send(RequestPath.POP_GET_KEYS, RequestPath.POP_GET_KEYS_REPLY, message);
+            })
+        )
+            .then(replies => {
+                return Promise.all(
+                    replies.map(reply => {
+                        console.dir("adding other key:", reply.keys);
+                        pubKeys = pubKeys.concat(reply.keys);
+                    })
+                )
+            })
+            .then(() => {
+                return Promise.all(
+                    pubKeys.map(key => {
+                        return this.registerAttendee((key));
+                    })
+                )
+                    .catch(err => {
+                        console.log("registring key error:", err)
+                        // This is normal, as we might have double keys
+                    })
+            })
+            .then(() => {
+                return pubKeys;
+            })
+            .catch(err => {
+                console.log("couldn't contact all servers for key-updates:", err);
+                throw new Error("couldn't get other organizers keys");
+            })
     }
 
     /**

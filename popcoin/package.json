@@ -4,17 +4,17 @@
   "readme": "NativeScript Application",
   "repository": "https://github.com/dedis/student_18_xplatform",
   "nativescript": {
-    "id": "ch.epfl.popcoins",
+    "id": "ch.epfl.popcoins2",
     "nodeify": {
       "global-dependencies": {
         "ws": "nativescript-websockets"
       }
     },
-    "tns-ios": {
-      "version": "4.2.0"
-    },
     "tns-android": {
-      "version": "4.2.0"
+      "version": "4.3.0-2018-09-03-01"
+    },
+    "tns-ios": {
+      "version": "4.3.0-2018-09-05-01"
     }
   },
   "scripts": {
@@ -49,7 +49,7 @@
     "nativescript-zxing": "^1.5.3",
     "pure-uuid": "^1.4.8",
     "ssl-utils": "^0.3.0",
-    "tns-core-modules": "^4.2.0",
+    "tns-core-modules": "^4.3.0-2018-09-07-01",
     "toml": "^2.3.3",
     "tomlify-j0.4": "^3.0.0",
     "uuid": "^3.2.1",

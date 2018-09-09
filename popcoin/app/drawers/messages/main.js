@@ -1,19 +1,16 @@
+const Log = require("../../shared/lib/dedjs/Log");
+let log = new Log(3);
+
 const Frame = require("ui/frame");
 const Dialog = require("ui/dialogs");
-const Timer = require("timer");
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const FileIO = require("../../shared/lib/file-io/file-io");
 const FilePaths = require("../../shared/res/files/files-path");
-const OrgParty = require("../../shared/lib/dedjs/object/pop/org/OrgParty").Party;
-const User = require("../../shared/lib/dedjs/object/user/User").get;
-const Convert = require("../../shared/lib/dedjs/Convert");
-const PartyStates = require("../../shared/lib/dedjs/object/pop/org/OrgParty").States;
-const ObjectType = require("../../shared/lib/dedjs/ObjectType");
 const PoPMessages = require("../../shared/lib/dedjs/object/pop/Messages").get;
-const Crypto = require("crypto-browserify");
-
-const CANCELED_BY_USER = "CANCELED_BY_USER_STRING";
+const AttParty = require("../../shared/lib/dedjs/object/pop/att/AttParty").Party;
+const OmniLedger = require("@dedis/cothority").omniledger;
+const Convert = require("../../shared/lib/dedjs/Convert");
 
 const viewModel = ObservableModule.fromObject({
     messageList: new ObservableArray(),
@@ -24,59 +21,90 @@ const viewModel = ObservableModule.fromObject({
 let page = undefined;
 let timerId = undefined;
 let conode = undefined;
+// AttParty
+let myParty = undefined;
 
 function onLoaded(args) {
     page = args.object;
-
     page.bindingContext = viewModel;
 
-    var roster = User.getRoster();
-    if (roster.list.length == 0){
-        console.dir("no roster yet");
-        return;
-    } else {
-        conode = roster.list[0];
-    }
-    updateMessages()
-    // timerId = Timer.setInterval(() => {
-    //     updateMessages();
-    // }, 2000)
+    let files = [];
+    FileIO.forEachFolderElement(FilePaths.POP_ATT_PATH, function (partyFolder) {
+        console.log("loading party: " + partyFolder.name);
+        AttParty.loadFromDisk(partyFolder.name)
+            .then(party => {
+                myParty = party;
+                return myParty.update()
+            })
+            .then(() => {
+                return myParty.loadFinalStatement()
+            })
+            .then(fs => {
+                let ser = fs.desc.roster.list[0];
+                let public = Convert.base64ToByteArray(ser.public);
+                let id = Convert.base64ToByteArray(ser.id);
+
+                conode = Convert.toServerIdentity(ser.address, public, ser.description, id);
+                if (conode !== undefined) {
+                    console.dir("having conode:", conode);
+                    viewModel.isEmpty = false;
+                    return updateMessages();
+                }
+                return Promise.resolve();
+            })
+            .then(() => {
+                console.log("finished loading");
+            })
+            .catch(error => {
+                console.dir("error:", error);
+                return Promise.resolve();
+            })
+    });
 }
 
 function onUnloaded() {
     // remove polling when page is leaved
-    Timer.clearInterval(timerId);
+    // Timer.clearInterval(timerId);
 }
 
 function messageTapped(args) {
-    console.log("message tapped");
-    console.dir(args);
-    msg = viewModel.messageList.getItem(args.index);
-    console.dir(msg)
-    PoPMessages.readMessage(conode, msg.id, Crypto.randomBytes(32), Crypto.randomBytes(32))
+    console.dir("message tapped. Args are:", args);
+    let msg = viewModel.messageList.getItem(args.index);
+    // console.dir("reading message:", msg);
+    // console.dir("myparty is:", myParty);
+    let pol = myParty._popPartyOlInstance;
+    let partyId = pol._instanceId;
+    let ourCoinsId = pol.getAccountInstanceId(myParty._keyPair.public);
+    console.dir("reading from conode:", conode);
+    return PoPMessages.readMessage(conode, msg.id, partyId, ourCoinsId)
         .then(response => {
             console.log("got response to read message:");
             console.dir(response);
-            Dialog.alert({
+            return Dialog.alert({
                 title: response.message.subject,
                 message: response.message.text,
                 okButtonText: "Confirm"
             })
+                .then(() => {
+                    return updateMessages();
+                })
         })
-        .catch(error=>{
+        .then(() => {
+            console.log("finished updating messages");
+        })
+        .catch(error => {
             Dialog.alert({
                 title: "Error while reading",
                 message: error,
                 okButtonText: "Continue"
             })
         });
-    updateMessages()
 }
 
-function updateMessages(){
+function updateMessages() {
     viewModel.messageList.splice(0);
-    PoPMessages.fetchListMessages(conode, 0, 10)
-        .then(response =>{
+    return PoPMessages.fetchListMessages(conode, 0, 10)
+        .then(response => {
             viewModel.messageList.slice();
             for (var i = 0; i < response.subjects.length; i++) {
                 console.log("Appending message " + i + ": " + response.subjects[i])
@@ -90,22 +118,9 @@ function updateMessages(){
                 )
             }
         })
-        .catch(error =>{
+        .catch(error => {
             console.log("error: " + error);
         })
-    viewModel.isEmpty = false;
-    // viewModel.messageList.push(
-    //     ObservableModule.fromObject({
-    //         subject: "test1",
-    //         balance: 1000,
-    //         reward: 10
-    //     }));
-    // viewModel.messageList.push(
-    //     ObservableModule.fromObject({
-    //         subject: "test2",
-    //         balance: 2000,
-    //         reward: 20
-    //     }));
 }
 
 function addMessage() {
@@ -123,12 +138,29 @@ function addNewMessage(arg) {
         }).then(function (result) {
             if (result) {
                 console.dir(arg);
-                PoPMessages.sendMessage(conode, arg)
-                    .then(result =>{
-                        console.log("Successfully sent message");
-                        updateMessages();
+                console.log("sending coins");
+
+                let ci = myParty.getCoinInstance();
+                if (ci == undefined) {
+                    throw new Error("coininstance not defined");
+                }
+                if (ci.balance < arg.balance) {
+                    return Dialog.alert({
+                        title: "Balance is not high enough",
+                        message: "Please top up your account or make smaller balance in message",
                     })
-                    .catch(error =>{
+                }
+                myParty.transferCoin(arg.balance, myParty.getPopPartyInstance().getServiceCoinInstanceId())
+                    .then(() => {
+                        // log.lvl3("Sending message");
+                        return PoPMessages.sendMessage(conode, arg)
+                    })
+                    .then(result => {
+                        // log.lvl3("Sent message - searching for new messages", result);
+                        return updateMessages();
+                    })
+                    .catch(error => {
+                        // log.error(error)
                         console.log("error while sending message: " + error);
                     })
             }
@@ -141,7 +173,7 @@ function onDrawerButtonTap(args) {
     sideDrawer.showDrawer();
 }
 
-function onNavigatingTo(args){
+function onNavigatingTo(args) {
     console.dir(args);
     page = args.object.page;
 }
@@ -152,3 +184,4 @@ module.exports.messageTapped = messageTapped;
 module.exports.onUnloaded = onUnloaded;
 module.exports.addMessage = addMessage;
 module.exports.onNavigatingTo = onNavigatingTo;
+module.exports.updateMessages = updateMessages;

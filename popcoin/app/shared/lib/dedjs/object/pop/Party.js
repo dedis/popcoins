@@ -52,7 +52,6 @@ class Party {
         });
 
         const roster = CothorityMessages.createRoster(id, list, Uint8Array.from(popDescModule.roster.aggregate));
-
         return CothorityMessages.createPopDesc(popDescModule.name, popDescModule.datetime, popDescModule.location, roster);
     }
 

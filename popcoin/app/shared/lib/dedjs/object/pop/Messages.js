@@ -106,7 +106,7 @@ class PoPMsg {
         const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(conode, ""), RequestPath.PERSONHOOD);
         const readMessage = CothorityMessages.createReadMessage(msgID, partyID, readerID);
 
-        return cothoritySocket.send(RequestPath.PERSONHOOD_READMESSAGE, DecodeType.READMESSAGES_REPLY, readMessage)
+        return cothoritySocket.send(RequestPath.PERSONHOOD_READMESSAGE, DecodeType.READMESSAGE_REPLY, readMessage)
             .then(response =>{
                 return Promise.resolve(response);
             })

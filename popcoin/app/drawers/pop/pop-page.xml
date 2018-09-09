@@ -1,14 +1,15 @@
 <Page
         class="page"
-        navigatingTo="onNavigatingTo"
         xmlns:nsDrawer="nativescript-ui-sidedrawer"
         xmlns:myDrawer="shared/my-drawer"
         xmlns:nsFloatingButton="nativescript-floatingactionbutton"
         xmlns:nsListView="nativescript-ui-listview"
         xmlns="http://www.nativescript.org/tns.xsd"
         xmlns:org="drawers/pop/org"
-        xmlns:bar="drawers/pop/bar"
+        xmlns:conodes="drawers/pop/conodes"
+        xmlns:service="drawers/pop/service"
         xmlns="http://www.nativescript.org/tns.xsd">
+    <!--navigatingTo="onNavigatingTo"-->
 
     <ActionBar class="action-bar">
         <!--
@@ -73,108 +74,17 @@
                     </TabViewItem>
                     <TabViewItem title="Services">
                         <TabViewItem.view>
-                            <Page
-                                    class="page"
-                                    loaded="onLoaded2"
-                                    navigatingTo="onNavigatingTo2"
-                                    xmlns:nsListView="nativescript-ui-listview"
-                                    xmlns:nsDrawer="nativescript-ui-sidedrawer"
-                                    xmlns:myDrawer="shared/my-drawer"
-                                    xmlns:nsFloatingButton="nativescript-floatingactionbutton"
-                                    xmlns="http://www.nativescript.org/tns.xsd">
-
-
-
-                                <GridLayout class="page-content" rows="*" columns="*,*,auto">
-                                    <Label text="You don't have any services. Feel free to open one !"
-                                           textWrap="true"
-                                           class="empty-list-label"
-                                           colSpan="3"
-                                           visibility="{{ isEmpty ? 'visible' : 'collapsed' }}"
-                                    />
-
-
-                                    <nsListView:RadListView items="{{ barListDescriptions }}" itemTap="barTapped" row="0" colSpan="3"
-
-                                                            id="listView">
-
-
-
-                                        <nsListView:RadListView.itemTemplate>
-                                            <GridLayout rows="*,*" columns="*, auto" backgroundColor="white"
-                                                        class="basic-list-decorated">
-                                                <Label class="list-title" text="{{ desc.name }}" row="0" col="0"
-                                                       textWrap="true"/>
-                                                <Label text="{{ desc.frequency }}" row="1" col="0" textWrap="true" textTransform="capitalize"/>
-                                                <!-- <Label class="status-text" horizontalAlignment="right" verticalAlignment="center" text="{{ status.status }}"
-                                                        col="1" rowSpan="2" textWrap="true"/> -->
-                                            </GridLayout>
-                                        </nsListView:RadListView.itemTemplate>
-                                    </nsListView:RadListView>
-                                    <nsFloatingButton:fab tap="addBar"
-                                                          row="0" col="3"
-                                                          icon="res://ic_add_white_48dp"
-                                                          rippleColor="#f1f1f1"
-                                                          class="fab-button"/>
-
-                                    <ActivityIndicator busy="{{ isLoading }}" rowSpan="1" colSpan="2"/>
-                                </GridLayout>
-
-                            </Page>
+                            <service:main/>
                         </TabViewItem.view>
 
                     </TabViewItem>
                     <TabViewItem title="Conodes">
                         <TabViewItem.view>
-                            <Page
-                                    class="page"
-                                    navigatingTo="onNavigatingTo"
-                                    loaded="onLoaded"
-                                    unloaded="onUnloaded"
-                                    xmlns:nsDrawer="nativescript-ui-sidedrawer"
-                                    xmlns:nsListView="nativescript-ui-listview"
-                                    xmlns:myDrawer="shared/my-drawer"
-                                    xmlns="http://www.nativescript.org/tns.xsd">
-
-                                <GridLayout class="page-content" rows="*" columns="*">
-                                    <Label text="You don't have any conode. Feel free to add one !"
-                                           textWrap="true"
-                                           class="empty-list-label"
-                                           visibility="{{ isRosterEmpty ? 'visible' : 'collapsed' }}"
-                                    />
-
-                                    <nsListView:RadListView items="{{ rosterModule.list }}" itemTap="conodeTapped"
-
-
-                                                            id="listView2">
-
-
-
-                                        <nsListView:RadListView.itemTemplate>
-                                            <GridLayout class="basic-list-decorated" id="grid-layout-conode-stats" rows="*,*" columns="*">
-                                                <Label class="list-title" text="{{ description }}" row="0" textWrap="true"/>
-                                                <Label text="{{ address }}" row="1" textWrap="true"/>
-                                            </GridLayout>
-                                        </nsListView:RadListView.itemTemplate>
-                                    </nsListView:RadListView>
-
-                                    <ActivityIndicator busy="{{ rosterModule.isLoading }}"/>
-                                    <nsFloatingButton:fab tap="addConode"
-                                                          row="0" col="3"
-                                                          icon="res://ic_add_white_48dp"
-                                                          rippleColor="#f1f1f1"
-                                                          class="fab-button"/>
-                                </GridLayout>
-
-                            </Page>
-
-
+                            <conodes:main/>
                         </TabViewItem.view>
                     </TabViewItem>
-
                 </TabView.items>
             </TabView>
-
         </nsDrawer:RadSideDrawer.mainContent>
     </nsDrawer:RadSideDrawer>
 </Page>

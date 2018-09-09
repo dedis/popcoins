@@ -224,9 +224,7 @@ class User {
                 });
 
         } else {
-            return new Promise((resolve, reject) => {
-                resolve();
-            });
+            return Promise.resolve();
         }
     }
 
@@ -260,13 +258,9 @@ class User {
         }
 
         if (this.getRosterModule().list.length === 0) {
-            return new Promise((resolve, reject) => {
-                resolve();
-            });
+            return Promise.resolve();
         } else if (roster.list.length === 0) {
-            return new Promise((resolve, reject) => {
-                resolve();
-            });
+            return Promise.resolve();
         } else {
             const idsToExclude = roster.list.map(server => {
                 return Convert.byteArrayToBase64(server.id);
@@ -341,9 +335,7 @@ class User {
         if (this.getRosterModule().list.length === 0) {
             return this.setRoster(roster, true);
         } else if (roster.list.length === 0) {
-            return new Promise((resolve, reject) => {
-                resolve();
-            });
+            return Promise.resolve();
         } else {
             const newList = [];
             const points = [];

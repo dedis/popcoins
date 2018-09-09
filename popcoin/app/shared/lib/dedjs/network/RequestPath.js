@@ -1,7 +1,7 @@
 /**
  * @file File containing different available paths for the Cothority.
  */
-const OMNILEDGER_INSTANCE_ID = "8159ae6f45a51f58f550412f96e335904dc6080c55dd893192883cc81b8ce6b4";
+const OMNILEDGER_INSTANCE_ID = "0d75236a47c8b61b27b47da1df6af68e793ae68fa895eed95c6e5310846d5eab";
 /**
  * Services
  */
@@ -37,15 +37,19 @@ const SKIPCHAIN_GET_ALL_SKIPCHAINS = `GetAllSkipchains`;
 /**
  * PoP Requests
  */
-const POP_STORE_CONFIG = `StoreConfig`;
-const POP_FINALIZE_REQUEST = `FinalizeRequest`;
-const POP_FETCH_REQUEST = `FetchRequest`;
-const POP_PIN_REQUEST = `PinRequest`;
-const POP_GET_PROPOSALS = 'GetProposals';
-const POP_CHECK_CONFIG = 'CheckConfig';
-const POP_VERIFY_LINK = 'VerifyLink';
-const POP_GET_INSTANCE_ID = `GetInstanceID`;
-const POP_GET_INSTANCE_ID_REPLY = `GetInstanceIDReply`;
+const POP_STORE_CONFIG = `pop.StoreConfig`;
+const POP_FINALIZE_REQUEST = `pop.FinalizeRequest`;
+const POP_FETCH_REQUEST = `pop.FetchRequest`;
+const POP_PIN_REQUEST = `pop.PinRequest`;
+const POP_GET_PROPOSALS = 'pop.GetProposals';
+const POP_CHECK_CONFIG = 'pop.CheckConfig';
+const POP_VERIFY_LINK = 'pop.VerifyLink';
+const POP_GET_INSTANCE_ID = `pop.GetInstanceID`;
+const POP_GET_INSTANCE_ID_REPLY = `pop.GetInstanceIDReply`;
+const POP_STORE_KEYS = `pop.StoreKeys`;
+const POP_STORE_KEYS_REPLY = `pop.StoreKeysReply`
+const POP_GET_KEYS = `pop.GetKeys`;
+const POP_GET_KEYS_REPLY = `pop.GetKeysReply`
 
 
 /**
@@ -90,6 +94,13 @@ module.exports.POP_FETCH_REQUEST = POP_FETCH_REQUEST;
 module.exports.POP_PIN_REQUEST = POP_PIN_REQUEST;
 module.exports.POP_GET_PROPOSALS = POP_GET_PROPOSALS;
 module.exports.POP_CHECK_CONFIG = POP_CHECK_CONFIG;
+module.exports.POP_VERIFY_LINK = POP_VERIFY_LINK;
+module.exports.POP_GET_INSTANCE_ID = POP_GET_INSTANCE_ID;
+module.exports.POP_GET_INSTANCE_ID_REPLY = POP_GET_INSTANCE_ID_REPLY;
+module.exports.POP_STORE_KEYS = POP_STORE_KEYS;
+module.exports.POP_STORE_KEYS_REPLY = POP_STORE_KEYS_REPLY;
+module.exports.POP_GET_KEYS = POP_GET_KEYS;
+module.exports.POP_GET_KEYS_REPLY = POP_GET_KEYS_REPLY;
 module.exports.CISC_CONFIG = CISC_CONFIG;
 module.exports.CISC_CONFIG_UPDATE = CISC_CONFIG_UPDATE;
 module.exports.CISC_DEVICE = CISC_DEVICE;
@@ -98,11 +109,8 @@ module.exports.CISC_PROPOSE_SEND = CISC_PROPOSE_SEND;
 module.exports.CISC_PROPOSE_UPDATE = CISC_PROPOSE_UPDATE;
 module.exports.CISC_SCHNORR_SIG = CISC_SCHNORR_SIG;
 module.exports.IDENTITY_PROPOSE_VOTE = IDENTITY_PROPOSE_VOTE;
-module.exports.POP_VERIFY_LINK = POP_VERIFY_LINK;
 module.exports.OMNILEDGER_INSTANCE_ID = OMNILEDGER_INSTANCE_ID;
 module.exports.OMNILEDGER = OMNILEDGER;
-module.exports.POP_GET_INSTANCE_ID = POP_GET_INSTANCE_ID;
-module.exports.POP_GET_INSTANCE_ID_REPLY = POP_GET_INSTANCE_ID_REPLY;
 module.exports.PERSONHOOD_SENDMESSAGE = PERSONHOOD_SENDMESSAGE;
 module.exports.PERSONHOOD_LISTMESSAGES = PERSONHOOD_LISTMESSAGES;
 module.exports.PERSONHOOD_READMESSAGE = PERSONHOOD_READMESSAGE;

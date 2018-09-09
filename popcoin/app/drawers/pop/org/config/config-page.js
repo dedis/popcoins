@@ -83,12 +83,12 @@ function initDate() {
 
     let date = new Date(todayDate ? Date.now() : Date.parse(desc.datetime));
 
-    dataForm.set("date", date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate());
+    dataForm.set("date", date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate());
     dataForm.set("time", date.getHours() + ":" + date.getMinutes());
 
     // SIMULATING
     dataForm.set("name", "test");
-    dataForm.set("location", "house "+ dataForm.get("time"));
+    dataForm.set("location", "house " + dataForm.get("time"));
 }
 
 /**
@@ -213,36 +213,6 @@ function addScan() {
         });
 }
 
-function deleteConode(args) {
-    // We do not get the index of the item swiped/clicked...
-    const conodeId = Convert.byteArrayToBase64(args.object.bindingContext.id);
-    const conodesList = Party.getPopDesc().roster.list.map(server => {
-        return Convert.byteArrayToBase64(server.id);
-    });
-
-    const index = conodesList.indexOf(conodeId);
-
-    return Party.removePopDescConodeByIndex(index)
-        .then(() => {
-            const listView = Frame.topmost().currentPage.getViewById("list-view-conodes");
-            listView.notifySwipeToExecuteFinished();
-
-            return Promise.resolve();
-        })
-        .catch(error => {
-            console.log(error);
-            console.dir(error);
-            console.trace();
-
-            Dialog.alert({
-                title: "Error",
-                message: "An error occured, please try again. - " + error,
-                okButtonText: "Ok"
-            });
-
-            return Promise.reject(error);
-        });
-}
 
 /**
  * Parse the date from the data form and save it into the Party
@@ -423,7 +393,6 @@ module.exports.onNavigatingTo = onNavigatingTo;
 module.exports.hashAndSave = hashAndSave;
 module.exports.addManual = addManual;
 module.exports.addScan = addScan;
-module.exports.deleteConode = deleteConode;
 module.exports.goBack = goBack;
 module.exports.addOrganizer = addOrganizer;
 module.exports.removeAndGoBack = removeAndGoBack;

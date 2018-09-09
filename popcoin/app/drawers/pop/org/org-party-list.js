@@ -22,6 +22,7 @@ let page = undefined;
 let timerId = undefined;
 
 function onLoaded(args) {
+    console.log("party-list loading");
     page = args.object;
 
     page.bindingContext = viewModel;
@@ -36,20 +37,16 @@ function onLoaded(args) {
 }
 
 function onUnloaded() {
+    console.log("party-list unloading")
     // remove polling when page is leaved
     Timer.clearInterval(timerId);
 }
 
 function loadParties() {
     viewModel.isLoading = true;
-
-    // Bind isEmpty to the length of the arra
-    viewModel.partyListDescriptions.on(ObservableArray.changeEvent, () => {
-        viewModel.set('isEmpty', viewModel.partyListDescriptions.length === 0);
-    });
-
     let party = undefined;
     viewModel.partyListDescriptions.splice(0);
+
     FileIO.forEachFolderElement(FilePaths.POP_ORG_PATH, function (partyFolder) {
         party = new OrgParty(partyFolder.name);
         // Observables have to be nested to reflect changes
@@ -59,72 +56,90 @@ function loadParties() {
             status: party.getPopStatusModule()
         }));
     });
+
+    viewModel.isEmpty = viewModel.partyListDescriptions.length == 0;
     viewModel.isLoading = false;
 }
 
 function hashAndSave(party) {
 
     if (!User.isKeyPairSet()) {
-        Dialog.alert({
+        return Dialog.alert({
             title: "Key Pair Missing",
             message: "Please generate a key pair.",
             okButtonText: "Ok"
-        });
-
-        return Promise.reject("Key Pair Missing");
+        })
+            .then(() => {
+                throw new Error("Key Pair Missing");
+            });
     }
     if (!party.isPopDescComplete()) {
-        Dialog.alert({
+        return Dialog.alert({
             title: "Missing Information",
             message: "Please provide a name, date, time, location and the list (min 3) of conodes" +
                 " of the organizers of your PoP Party.",
             okButtonText: "Ok"
-        });
-
-        return Promise.reject("Missing Information");
+        })
+            .then(() => {
+                throw new Error("Missing information");
+            });
     }
     if (!party.isLinkedConodeSet()) {
-        Dialog.alert({
+        return Dialog.alert({
             title: "Not Linked to Conode",
             message: "Please link to a conode first.",
             okButtonText: "Ok"
-        });
-
-        return Promise.reject("Not Linked to Conode");
-    }
-
-    function registerPopDesc() {
-        return party.registerPopDesc()
+        })
             .then(() => {
-                return party.loadStatus();
-            })
-            .then(() => {
-                return Dialog.alert({
-                    title: "Successfully Registered",
-                    message: "Your party has been correctly published ! You can now register the public key of each attendee.",
-                    okButtonText: "Ok"
-                });
-            })
-            .catch(error => {
-                console.log(error);
-                console.dir(error);
-                console.trace();
-
-                Dialog.alert({
-                    title: "Error",
-                    message: "An error occured, please try again. - " + error,
-                    okButtonText: "Ok"
-                });
-
-                return Promise.reject(error);
+                throw new Error("Not linked to Conode");
             });
     }
 
-    return registerPopDesc().then((p) => {
-        console.log("adding myself to party");
-        addMyselfAttendee(party);
-        return Promise.resolve(p);
-    });
+    return party.registerPopDesc()
+        .then(() => {
+            return party.loadStatus();
+        })
+        // .then(() => {
+        //     return Dialog.alert({
+        //         title: "Successfully Registered",
+        //         message: "Your party has been correctly published ! You can now register the public key of each attendee.",
+        //         okButtonText: "Ok"
+        //     });
+        // })
+        .then(() => {
+            console.log("adding myself to party");
+            return addMyselfAttendee(party);
+        })
+        .then(() => {
+            console.log("sending my public key to server");
+            console.dir(party.getRegisteredAtts());
+            let pubKey = party.getRegisteredAtts().getItem(0);
+            console.log("Pubkey is:", pubKey);
+            return party.storeOrganizer(pubKey);
+        })
+        .then(() => {
+            console.log("fetching other keys");
+            return party.fetchOrganizerKeys()
+                .catch(err=>{
+                    console.log("non-fatal error while fetching keys:", err)
+                    return [];
+                });
+        })
+        .then(keys => {
+            console.log("all keys registered:", keys.length);
+        })
+        .catch(error => {
+            console.log("error while adding my key:", error);
+
+            return Dialog.alert({
+                title: "Error",
+                message: "An error occured, please try again. - " + error,
+                okButtonText: "Ok"
+            })
+                .then(() => {
+                    throw new Error("couldn't add key: " + error);
+                });
+        });
 }
 
 const addMyselfAttendee = require("./register/register-page").addMyselfAttendee;
@@ -154,11 +169,20 @@ function partyTapped(args) {
                     } else if (result === "Publish the party") {
                         hashAndSave(party);
                     } else if (result === "Remove the party") {
-                        return party.remove()
-                            .then(() => {
-                                viewModel.partyListDescriptions.splice(index, 1);
-                                return Promise.resolve();
-                            });
+                        return Dialog.confirm({
+                            title: "Removing the party",
+                            message: "Are you sure to remove the party?",
+                            okButtonText: "Yes, remove",
+                            cancelButtonText: "No, keep",
+                        })
+                            .then(res => {
+                                if (res) {
+                                    return party.remove()
+                                        .then(() => {
+                                            viewModel.partyListDescriptions.splice(index, 1);
+                                        });
+                                }
+                            })
                     }
                 })
                 .catch((error) => {
@@ -207,14 +231,24 @@ function partyTapped(args) {
                     cancelButtonText: "Cancel",
                     actions: ["Remove the party"]
                 }).then(result => {
-                if (result === "Remove the party") {
-                    return party.remove()
-                        .then(() => {
-                            viewModel.partyListDescriptions.splice(index, 1);
-                            return Promise.resolve();
-                        });
+                    if (result === "Remove the party") {
+                        return Dialog.confirm({
+                            title: "Removing the party",
+                            message: "Are you sure to remove the party?",
+                            okButtonText: "Yes, remove",
+                            cancelButtonText: "No, keep",
+                        })
+                            .then(res => {
+                                if (res) {
+                                    return party.remove()
+                                        .then(() => {
+                                            viewModel.partyListDescriptions.splice(index, 1);
+                                        });
+                                }
+                            })
+                    }
                 }
-            })
+            );
             break;
         default:
             Dialog.alert({

@@ -15,32 +15,32 @@ const SCAN_ABORTED = "Scan aborted";
  * @returns {Promise} - a promise that gets resolved once the user took a photo
  */
 function scan() {
-  return BarCodeScanner.available()
-    .then(available => {
-      if (!available) {
-        return Promise.reject();
-      }
+    return BarCodeScanner.available()
+        .then(available => {
+            if (!available) {
+                console.log("scanner not available!");
+                return Promise.reject();
+            }
 
-      return BarCodeScanner.scan({
-          message: "Scan the QR code.",
-          showFlipCameraButton: true,
-          showTorchButton: true,
-          resultDisplayDuration: 1000,
-          openSettingsIfPermissionWasPreviouslyDenied: true,
-          beepOnScan: true,
-          closeCallback: () => {}
+            return BarCodeScanner.scan({
+                message: "Scan the QR code.",
+                showFlipCameraButton: true,
+                showTorchButton: true,
+                resultDisplayDuration: 1000,
+                openSettingsIfPermissionWasPreviouslyDenied: true,
+                beepOnScan: true,
+                closeCallback: () => {
+                }
+            });
+        })
+        .then(scanResult => {
+            console.dir("scanned the following text:", scanResult);
+            return scanResult.text;
+        })
+        .catch(error => {
+            console.dir("some error occured:", error);
+            return Promise.reject(error);
         });
-    })
-    .then(scanResult => {
-      return scanResult.text;
-    })
-    .catch(error => {
-      console.log(error);
-      console.dir(error);
-      console.trace();
-
-      return Promise.reject(error);
-    });
 }
 
 // Exports --------------------------------------------------------------------

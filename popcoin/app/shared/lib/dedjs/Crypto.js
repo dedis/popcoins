@@ -139,9 +139,7 @@ class KeyPair {
                 });
 
         } else {
-            return new Promise((resolve) => {
-                resolve();
-            });
+            return Promise.resolve();
         }
     }
 

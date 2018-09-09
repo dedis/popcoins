@@ -4,7 +4,6 @@ const Convert = require("../../../../shared/lib/dedjs/Convert");
 const ScanToReturn = require("../../../../shared/lib/scan-to-return/scan-to-return");
 const topmost = require("ui/frame").topmost;
 const PartyStates = require("../../../../shared/lib/dedjs/object/pop/org/OrgParty").States;
-const AttParty = require("../../../../shared/lib/dedjs/object/pop/att/AttParty").Party;
 const RequestPath = require("../../../../shared/lib/dedjs/network/RequestPath");
 
 const User = require("../../../../shared/lib/dedjs/object/user/User").get;
@@ -31,12 +30,16 @@ function onLoaded(args) {
     let finalizeLabel = page.getViewById("finalize");
     // Without this the text is not vertically centered in is own view
     finalizeLabel.android.setGravity(android.view.Gravity.CENTER);
+
+    return Party.fetchOrganizerKeys()
+        .then(() => {
+            console.log("got keys")
+        })
 }
 
 /**
  * Function that gets called when the user wants to register a public key manually.
  */
-const loadParties = require("../../../tokens/main").loadParties;
 const addMyself = require("../../../tokens/main").addMyself;
 
 function addManual() {
@@ -92,37 +95,38 @@ function addMyselfAttendee(Party) {
     };
 
     //var newParty = new AttParty(info.id, info.address);
-    addMyself(info).then((party) => {
-        Party.registerAttendee(party.getKeyPair().public);
-    })
+    return addMyself(info)
+        .then((p) => {
+            console.dir("adding my new public key to party");
+            return Party.registerAttendee(p.getKeyPair().public);
+        })
 }
 
 function addScan() {
+    let returnText = undefined;
     return ScanToReturn.scan()
         .then(keyPairJson => {
             const keyPair = Convert.parseJsonKeyPair(keyPairJson);
+            return Party.registerAttendee(keyPair.public)
+        })
+        .then((text) => {
+            returnText = text;
             const view = pageObject.getViewById("list-view-registered-keys");
-            return Party.registerAttendee(keyPair.public).then((text) => {
-                view.refresh();
-                return Promise.resolve(text);
-            });
+            return view.refresh();
+        })
+        .then(() => {
+            return returnText;
         })
         .catch(error => {
-            console.log(error);
-            console.dir(error);
-            console.trace();
-
-            if (error !== ScanToReturn.SCAN_ABORTED) {
-                setTimeout(() => {
-                    Dialog.alert({
-                        title: "Error",
-                        message: "An error occured, please try again. - " + error,
-                        okButtonText: "Ok"
-                    });
+            console.dir("couldn't add new key:", error);
+            return Dialog.alert({
+                title: "Error",
+                message: "An error occured, please try again. - " + error,
+                okButtonText: "Ok"
+            })
+                .then(() => {
+                    throw new Error("couldn't scan");
                 });
-            }
-
-            return Promise.reject(error);
         });
 
 }
@@ -251,29 +255,22 @@ function registerKeys() {
 }
 
 function addNewKey() {
-    Dialog.action({
-        message: "How would you like to specify the key ?",
-        cancelButtonText: "Cancel",
-        actions: ["Scan QR", "Enter manually"]
-    }).then(function (result) {
-        console.log("Dialog result: " + result);
-        if (result === "Scan QR") {
-
-            addScan().then(function (text) {
-                setTimeout(() => {
-                    Dialog.alert({
-                        title: "Confirmation",
-                        message: text,
-                        okButtonText: "Ok"
-                    })
-                });
+    const choices = ["SCAN NEXT", "Stop scanning"]
+    addScan().then(function (text) {
+        setTimeout(() => {
+            Dialog.confirm({
+                title: "Scanned key",
+                message: text,
+                okButtonText: choices[0],
+                cancelButtonText: choices[1]
             })
-
-
-        } else if (result === "Enter manually") {
-            addManual();
-        }
-    });
+                .then(ok => {
+                    if (ok) {
+                        addNewKey();
+                    }
+                })
+        })
+    })
 }
 
 function shareToAttendee() {
@@ -295,11 +292,36 @@ function goBack() {
 }
 
 function deleteParty() {
-
-    Party.remove();
-    topmost().goBack();
+    Dialog.confirm({
+        title: "Deleting party",
+        message: "You're about to delete the party - \n" +
+            "are you sure?",
+        okButtonText: "Yes, delete",
+        cancelButtonText: "No, keep"
+    })
+        .then(del => {
+            if (del) {
+                Party.remove();
+                topmost().goBack();
+            }
+        })
 }
 
+function keyTapped(arg) {
+    console.dir("keyTapped:", arg);
+    console.dir("keyTapped:", arg.index);
+    console.dir("keyTapped:", viewModel);
+    console.dir("keyTapped:", viewModel.array);
+    const key = viewModel.array.getItem(arg.index);
+    console.dir(key);
+    Frame.topmost().currentPage.showModal("shared/pages/qr-code/qr-code-page", {
+        textToShow: " { \"public\" :  \"" + Convert.byteArrayToBase64(key) + "\"}",
+        title: "Public Key",
+    }, () => {
+    }, true);
+}
+
+module.exports.keyTapped = keyTapped;
 module.exports.deleteParty = deleteParty;
 module.exports.onLoaded = onLoaded;
 module.exports.addManual = addManual;

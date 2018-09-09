@@ -18,7 +18,7 @@ function getStringOf(filePath) {
     return Documents.getFile(filePath)
         .readText()
         .then(string =>{
-            console.log("read from " + filePath + ":" + string);
+            // console.log("read from " + filePath + ":" + string);
             return Promise.resolve(string);
         })
         .catch((error) => {
@@ -43,7 +43,7 @@ function writeStringTo(filePath, string) {
         throw new Error("string must be of type string");
     }
 
-    console.log("writing: " + filePath);
+    // console.log("writing: " + filePath);
     return Documents.getFile(filePath)
         .writeText(string)
         .catch((error) => {
@@ -71,7 +71,6 @@ function forEachFolderElement(folder, closure) {
 
     Documents.getFolder(folder).eachEntity(function (entity) {
         closure(entity);
-
         // continue until the last file
         return true;
     })

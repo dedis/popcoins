@@ -25,7 +25,8 @@
         <nsListView:RadListView items="{{ array }}" id="list-view-registered-keys"
                                 itemSwipeProgressStarted="onSwipeCellStarted"
                                 swipeActions="true"
-                                row="1">
+                                row="1"
+                                itemTap="keyTapped">
 
             <nsListView:RadListView.itemSwipeTemplate>
                 <GridLayout class="basic-list" rows="*" columns="*,auto">

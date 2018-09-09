@@ -327,7 +327,7 @@ class Bar {
     if (!verifInfo.valid) {
       return Promise.reject("You are not part of the right group !")
     } else if (this.isAlreadyChecked(verifInfo.tag)) {
-      return Promise.reject("You already had a beer ! Please come back later")
+      return Promise.reject("You already participated in this service ! Please come back later")
     }
 
     const hexString = Convert.byteArrayToHex(verifInfo.tag);

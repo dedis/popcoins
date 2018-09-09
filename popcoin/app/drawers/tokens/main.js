@@ -25,76 +25,83 @@ const viewModel = ObservableModule.fromObject({
     isLoading: false,
     isEmpty: true
 });
-let loaded = false;
+
 let page = undefined;
 let timerId = undefined;
 let pageObject = undefined;
 
-function onNavigatingTo(args) {
-    console.log("navigating to");
-    pageObject = args.object.page;
-}
-
 function onLoaded(args) {
+    console.log("tokens: onloaded");
     page = args.object;
 
     page.bindingContext = viewModel;
     pageObject = args.object.page;
-    console.log("loaded is: " + loaded);
-    loaded = false;
-    if (!loaded) {
-        loadParties();
-        pageObject.getViewById("listView").refresh();
+    loadParties()
+        .then(() => {
+            // Poll the status every 5s
+            timerId = Timer.setInterval(() => {
+                reloadStatuses();
+            }, 5000);
 
-        loaded = true;
-    }
-
-    // Poll the status every 3s
-    timerId = Timer.setInterval(() => {
-        reloadStatuses();
-    }, 5000);
+            console.log("tokens: onloaded end");
+        });
+    // Timer.setInterval(() => {
+    //     viewModel.partyListDescriptions.forEach(model => {
+    //         console.dir("partylistdescriptions.status.balance is:", model.status.balance);
+    //     });
+    // }, 5000)
 }
 
 function onUnloaded(args) {
     // remove polling when page is leaved
+    console.log("tokens: unloading");
     Timer.clearInterval(timerId);
+    console.log("tokens: unloading - 2");
 }
 
 function loadParties() {
-    console.log("loading parties");
     viewModel.isLoading = true;
-
-    // Bind isEmpty to the length of the array
-    viewModel.partyListDescriptions.on(ObservableArray.changeEvent, () => {
-        viewModel.set('isEmpty', viewModel.partyListDescriptions.length === 0);
-    });
-
+    viewModel.isEmpty = true;
     viewModel.partyListDescriptions.splice(0);
 
+    let parties = [];
     FileIO.forEachFolderElement(FilePaths.POP_ATT_PATH, function (partyFolder) {
-        console.log("loading party: " + partyFolder.name);
-        AttParty.loadFromDisk(partyFolder.name).then((party) => {
-            // Observables have to be nested to reflect changes
-            viewModel.partyListDescriptions.push(ObservableModule.fromObject({
-                party: party,
-                desc: party.getPopDescModule(),
-                status: party.getPopStatusModule()
-            }));
-        });
-
+        parties.push(AttParty.loadFromDisk(partyFolder.name))
     });
 
-    viewModel.isLoading = false;
+    return Promise.all(parties)
+    // .then(parties => {
+    //     return Promise.all(
+    //         parties.map(party => {
+    //             return party.update();
+    //         })
+    //     )
+    // })
+        .then(parties => {
+            console.log("all parties loaded from disk");
+            parties.forEach(party => {
+                console.dir("party is:", party);
+                // Observables have to be nested to reflect changes
+                const partyModule = ObservableModule.fromObject({
+                    party: party,
+                    desc: party.getPopDescModule(),
+                    status: party.getPopStatusModule()
+                });
+                viewModel.partyListDescriptions.push(partyModule);
+                viewModel.isEmpty = false;
+            })
+            viewModel.isLoading = false;
+            pageObject.getViewById("listView").refresh();
+        })
+        .catch(error => {
+            console.dir("error in loading:", error);
+        });
 }
 
 function partyTapped(args) {
-
-
     const index = args.index;
     const status = viewModel.partyListDescriptions.getItem(index).status.status;
     const party = viewModel.partyListDescriptions.getItem(index).party;
-    console.log(party)
-
 
     switch (status) {
         case PartyStates.ERROR:
@@ -106,77 +113,18 @@ function partyTapped(args) {
             break;
         case PartyStates.PUBLISHED: //RUNNING
 
-        case PartyStates.FINALIZING:
-            Dialog
-                .action({
-                    message: "What do you want to do ?",
-                    cancelButtonText: "Cancel",
-                    actions: ["Generate a new key pair", "Show the QR Code of my public key", "Display Party Info", "Delete Party"]
-                })
-                .then(result => {
-                    if (result === "Generate a new key pair") {
-                        return Dialog.confirm({
-                            title: "Warning !",
-                            message: "The current key pair will by overwritten, so will need to get the new one " +
-                                "registered by the organizers. Are you sure you want to continue ?",
-                            okButtonText: "Yes",
-                            cancelButtonText: "No",
-                        })
-                            .then(accepted => {
-                                return !accepted ? Promise.resolve() : (party.randomizeKeyPair().then(Frame.topmost().navigate({
-                                    animated: false, clearHistory: true, moduleName: "drawers/tokens/main"
-                                })))
-                                    .then(() => {
-                                        return Dialog.alert({
-                                            title: "A new key pair has been generated !",
-                                            message: "You can now use it to register to this party.",
-                                            okButtonText: "Ok"
-                                        })
-                                    })
-                            })
-                    } else if (result === "Show the QR Code of my public key") {
-                        Frame.topmost().currentPage.showModal("shared/pages/qr-code/qr-code-page", {
-                            textToShow: " { \"public\" :  \"" + Convert.byteArrayToBase64(party.getKeyPair().public) + "\"}",
-                            title: "Public Key",
-
-                        }, () => {
-                        }, true);
-                    } else if (result === "Display Party Info") {
-                        Frame.topmost().navigate({
-                            moduleName: "drawers/pop/org/config/config-page",
-                            context: {
-                                party: party,
-                                readOnly: true
-                            }
-                        });
-                    } else if (result === "Delete Party") {
-                        deleteParty(party);
-                        viewModel.partyListDescriptions.splice(index, 1)
-
-                    }
-                })
-                .catch((error) => {
-                    Dialog.alert({
-                        title: "Error",
-                        message: "An error occured, please try again. - " + error,
-                        okButtonText: "Ok"
-                    });
-                    console.log(error);
-                    console.dir(error);
-                    console.trace(error);
-                });
-            break;
         case PartyStates.FINALIZED:
 
         case PartyStates.POPTOKEN:
 
             if (!party.isAttendee(party.getKeyPair().public)) {
-
                 return Promise.reject("You are not part of the attendees.");
-
             }
             if (party.getPopToken() === undefined) {
-                PoP.addPopTokenFromFinalStatement(party.getFinalStatement(), party.getKeyPair(), true, party)
+                party.retrieveFinalStatementAndStatus()
+                    .then(()=> {
+                        return PoP.addPopTokenFromFinalStatement(party.getFinalStatement(), party.getKeyPair(), true, party)
+                    })
                     .then(() => {
                         return Frame.topmost().getViewById("listView").refresh()
                     })
@@ -186,10 +134,9 @@ function partyTapped(args) {
                             message: "An error occured, please retry. - " + error,
                             okButtonText: "Ok"
                         });
-                        console.log(error.stack);
+                        console.log("error: ", error.stack);
                     });
             }
-
 
             return Dialog.action({
                 message: "Choose an Action",
@@ -203,7 +150,6 @@ function partyTapped(args) {
                     } else if (result === POP_TOKEN_OPTION_SIGN) {
                         return ScanToReturn.scan()
                             .then(signDataJson => {
-                                console.dir(signDataJson);
                                 const sigData = Convert.jsonToObject(signDataJson);
                                 const sig = PoP.signWithPopToken(party.getPopToken(), Convert.hexToByteArray(sigData.nonce), Convert.hexToByteArray(sigData.scope));
 
@@ -222,9 +168,7 @@ function partyTapped(args) {
                                 return Promise.resolve()
                             })
                             .catch(error => {
-                                console.log(error);
-                                console.dir(error);
-                                console.trace();
+                                console.log("couldn't scan:", error);
 
                                 if (error !== ScanToReturn.SCAN_ABORTED) {
                                     setTimeout(() => {
@@ -258,7 +202,7 @@ function partyTapped(args) {
                             return ScanToReturn.scan()
                         }).then(publicKeyJson => {
                             const publicKeyObject = Convert.jsonToObject(publicKeyJson);
-                            return party.transferCoin(amount, Convert.base64ToByteArray(publicKeyObject.public));
+                            return party.transferCoin(amount, Convert.base64ToByteArray(publicKeyObject.public), true);
                         }).then(() => {
                             return Dialog.alert({
                                 title: "Success !",
@@ -277,8 +221,7 @@ function partyTapped(args) {
 
                             }
 
-                            console.log(err.stack);
-
+                            console.log("wrong number:", err.stack);
                             return Promise.reject(err)
                         })
                     }
@@ -286,9 +229,7 @@ function partyTapped(args) {
                     return Promise.resolve();
                 })
                 .catch(error => {
-                    console.log(error);
-                    console.dir(error);
-                    console.trace();
+                    console.log("error while interacting with token:", error);
 
                     Dialog.alert({
                         title: "Error",
@@ -301,35 +242,96 @@ function partyTapped(args) {
             break;
 
         default:
-            Dialog.alert({
-                title: "Not implemented",
-                okButtonText: "Ok"
+        case PartyStates.FINALIZING:
+            Dialog.action({
+                message: "What do you want to do ?",
+                cancelButtonText: "Cancel",
+                actions: ["Generate a new key pair", "Show the QR Code of my public key", "Display Party Info", "Delete Party"]
             })
+                .then(result => {
+                    if (result === "Generate a new key pair") {
+                        return Dialog.confirm({
+                            title: "Warning !",
+                            message: "The current key pair will by overwritten, so will need to get the new one " +
+                                "registered by the organizers. Are you sure you want to continue ?",
+                            okButtonText: "Yes",
+                            cancelButtonText: "No",
+                        })
+                            .then(accepted => {
+                                return !accepted ? Promise.resolve() : (party.randomizeKeyPair().then(Frame.topmost().navigate({
+                                    animated: false, clearHistory: true, moduleName: "drawers/tokens/main"
+                                })))
+                                    .then(() => {
+                                        return Dialog.alert({
+                                            title: "A new key pair has been generated !",
+                                            message: "You can now use it to register to this party.",
+                                            okButtonText: "Ok"
+                                        })
+                                    })
+                            })
+                    } else if (result === "Show the QR Code of my public key") {
+                        Frame.topmost().currentPage.showModal("shared/pages/qr-code/qr-code-page", {
+                            textToShow: " { \"public\" :  \"" + Convert.byteArrayToBase64(party.getKeyPair().public) + "\"}",
+                            title: "Public Key",
+                        }, () => {
+                        }, true);
+                    } else if (result === "Display Party Info") {
+                        Frame.topmost().navigate({
+                            moduleName: "drawers/pop/org/config/config-page",
+                            context: {
+                                party: party,
+                                readOnly: true
+                            }
+                        });
+                    } else if (result === "Delete Party") {
+                        Dialog.confirm({
+                            title: "Deleting party-token",
+                            message: "You're about to delete the party-token - \n" +
+                                "are you sure?",
+                            okButtonText: "Yes, delete",
+                            cancelButtonText: "No, keep"
+                        })
+                            .then(del => {
+                                if (del) {
+                                    return deleteParty(party);
+                                }
+                            })
+                            .then(() => {
+                                viewModel.partyListDescriptions.splice(index, 1);
+                                pageObject.getViewById("listView").refresh();
+                            })
+                            .catch(err => {
+                                console.log("error while deleting:", err);
+                            })
+                    }
+                })
+                .catch((error) => {
+                    Dialog.alert({
+                        title: "Error",
+                        message: "An error occured, please try again. - " + error,
+                        okButtonText: "Ok"
+                    });
+                    console.log("error while interacting with finalizing token:", error);
+                });
+            break;
     }
 }
 
 function deleteParty(party) {
-
-    party.remove()
+    return party.remove()
         .then(() => {
             const listView = Frame.topmost().currentPage.getViewById("listView");
             listView.notifySwipeToExecuteFinished();
-
             return Promise.resolve();
         })
         .catch((error) => {
-            console.log(error);
-            console.dir(error);
-            console.trace();
-
+            console.log("error while deleting party:", error);
             Dialog.alert({
                 title: "Error",
                 message: "An error occured, please try again. - " + error,
                 okButtonText: "Ok"
             });
-
             return Promise.reject(error);
-
         });
 }
 
@@ -345,17 +347,19 @@ function onSwipeCellStarted(args) {
     swipeLimits.threshold = width / 2;
 }
 
-module.exports.addMyself = function (infos) {
+function addMyself(infos) {
     const newParty = new AttParty(infos.id, infos.omniledgerId, infos.address);
-    return newParty.save().then(() => {
-        viewModel.partyListDescriptions.push(ObservableModule.fromObject({
-            party: newParty,
-            desc: newParty.getPopDescModule(),
-            status: newParty.getPopStatusModule()
-        }));
+    return newParty.save()
+        .then(() => {
+            viewModel.partyListDescriptions.push(ObservableModule.fromObject({
+                party: newParty,
+                desc: newParty.getPopDescModule(),
+                status: newParty.getPopStatusModule()
+            }));
 
-        return Promise.resolve(newParty)
-    });
+            console.log("returning new party", newParty.name);
+            return newParty
+        });
 };
 
 function addParty() {
@@ -388,9 +392,7 @@ function addParty() {
                 });
         })
         .catch(error => {
-            console.log(error);
-            console.dir(error);
-            console.trace();
+            console.dir("error while scanning:", error);
             if (error !== ScanToReturn.SCAN_ABORTED) {
                 setTimeout(() => {
                     Dialog.alert({
@@ -408,31 +410,40 @@ function addParty() {
 
 function update() {
     pageObject.getViewById("listView").refresh();
-
-    if (page.frame !== undefined) {
-        Frame.topmost().getViewById("listView").refresh();
-    }
 }
 
 function reloadStatuses() {
-    // if (viewModel.partyListDescriptions.length > 0){
-    //     console.dir(viewModel.partyListDescriptions);
-    // }
-    // if (page.frame !== undefined) {
-    //     console.dir(Frame.topmost());
-    //     console.dir(Frame.topmost().getViewById("repeater"));
-    //     Frame.topmost().getViewById("repeater").refresh();
-    // }
-    viewModel.partyListDescriptions.forEach(model => {
-        model.party.update()
-            .catch(error => {
-                console.log(error);
-                console.dir(error);
-                console.trace();
+    // console.dir("tokens: reloadStatuses.length=", viewModel.partyListDescriptions.length);
+    // console.dir("tokens: reloadStatuses", viewModel.partyListDescriptions);
+    Promise.all(viewModel.partyListDescriptions.map(model => {
+        // console.dir("desc is:", model.desc);
+        // console.dir("status is:", model.status);
+        // console.dir("model is:", model);
+        return model.party.updateCoinInstance();
+        // return Promise.resolve();
+    }))
+        .then(() => {
+            // viewModel.partyListDescriptions.forEach(model => {
+            //     console.dir("desc is after update:", model.desc);
+            //     console.dir("status is after update:", model.status);
+            //     // console.dir("models.foreach:", model);
+            //     model.desc = model.party.getPopDescModule();
+            //     model.status = model.party.getPopStatusModule();
+            // })
+            // This is to update the radlistview with the new changes.
+            // viewModel.partyListDescriptions = viewModel.partyListDescriptions.slice();
+            viewModel.partyListDescriptions.forEach(model => {
+                if (!isNaN(model.status.balance)) {
+                    model.status.status = PartyStates.FINALIZED;
+                }
             });
-    })
+            return pageObject.getViewById("listView").refresh();
+            // console.log("tokens: reloadStatuses done");
+        })
+        .catch(err => {
+            console.log("reloadStat error:", err);
+        });
 }
-
 
 function onDrawerButtonTap(args) {
     const sideDrawer = Frame.topmost().getViewById("sideDrawer");
@@ -446,5 +457,5 @@ module.exports.onSwipeCellStarted = onSwipeCellStarted;
 module.exports.deleteParty = deleteParty;
 module.exports.addParty = addParty;
 module.exports.onUnloaded = onUnloaded;
-module.exports.onNavigatingTo = onNavigatingTo;
 module.exports.loadParties = loadParties;
+module.exports.addMyself = addMyself;

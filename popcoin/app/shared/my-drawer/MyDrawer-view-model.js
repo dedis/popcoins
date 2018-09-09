@@ -5,7 +5,7 @@ const platformModule = require("tns-core-modules/platform");
  * Keep data that is displayed in your app drawer in the MyDrawer custom component view model.
  *************************************************************/
 function MyDrawerViewModel(selectedPage) {
-  const   viewModel = observableModule.fromObject({
+    const viewModel = observableModule.fromObject({
         /* ***********************************************************
          * Use the MyDrawer view model to initialize the properties data values.
          * The navigationItems property is initialized here and is data bound to <ListView> in the MyDrawer view file.
@@ -42,15 +42,15 @@ function MyDrawerViewModel(selectedPage) {
         message = "You are using IOS device";
     }
 
-    viewModel.navigationItems.push(
-        {
-            title: "Settings",
-            name: "settings",
-            route: "drawers/settings/settings-page",
-            icon: "\uf013",
-            isSelected: selectedPage === "Settings"
-        }
-    );
+    // viewModel.navigationItems.push(
+    //     {
+    //         title: "Settings",
+    //         name: "settings",
+    //         route: "drawers/settings/settings-page",
+    //         icon: "\uf013",
+    //         isSelected: selectedPage === "Settings"
+    //     }
+    // );
 
     // viewModel.navigationItems.push( {
     //     title: "CISC",

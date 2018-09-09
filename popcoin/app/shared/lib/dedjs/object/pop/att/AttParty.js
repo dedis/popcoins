@@ -36,7 +36,6 @@ class AttParty extends Party {
             throw new Error("id must be of type string and shouldn't be empty");
         }
         this._folderName = id;
-
         this._partyExistLocally = FileIO.folderExists(FileIO.join(FilePath.POP_ATT_PATH, this._folderName));
         if (!this._partyExistLocally && address === undefined) {
             throw new Error("address should not be undefined as the party isn't stored locally");
@@ -53,15 +52,11 @@ class AttParty extends Party {
         this._popPartyOlInstance = undefined;
         this._coinInstance = undefined;
         this._omniledgerId = Convert.hexToByteArray(omniledgerId);
-
-
         this._status = ObservableModule.fromObject({
             status: States.UNDEFINED,
             balance: "loading...",
             qrcode: undefined
         });
-
-
     }
 
     /**
@@ -72,8 +67,16 @@ class AttParty extends Party {
         this._status.status = States.POPTOKEN;
     }
 
-
-    getQRCode() {
+    updateQRCode() {
+        let text = " { \"public\" :  \"" + Convert.byteArrayToBase64(this.getKeyPair().public) + "\"}";
+        let sideLength = PlatformModule.screen.mainScreen.widthPixels / 4;
+        const QR_CODE = QRGenerator.createBarcode({
+            encode: text,
+            format: ZXing.QR_CODE,
+            height: sideLength,
+            width: sideLength
+        });
+        this._status.qrcode = ImageSource.fromNativeSource(QR_CODE);
         return this._status.qrcode;
     }
 
@@ -84,8 +87,16 @@ class AttParty extends Party {
     /**
      Gets the popToken
      */
-    getPopToken(pop) {
+    getPopToken() {
         return this._poptoken;
+    }
+
+    /**
+     * Gets the popPartyInstance
+     * @returns {PopPartyInstance}
+     */
+    getPopPartyInstance(){
+        return this._popPartyOlInstance;
     }
 
     /**
@@ -105,36 +116,19 @@ class AttParty extends Party {
                     } else {
                         console.log("Error: invalid state number " + this._popPartyOlInstance.state);
                         this._status.status = States.ERROR;
-
                     }
-                }
-                else {
-
+                } else {
                     this._status.status = States.POPTOKEN;
                 }
 
-                if (this._status.status !== States.POPTOKEN) {
-                    if (text !== " { \"public\" :  \"" + Convert.byteArrayToBase64(this.getKeyPair().public) + "\"}") {
-                        text = " { \"public\" :  \"" + Convert.byteArrayToBase64(this.getKeyPair().public) + "\"}";
-                        let sideLength = PlatformModule.screen.mainScreen.widthPixels / 4;
-                        const QR_CODE = QRGenerator.createBarcode({
-                            encode: text,
-                            format: ZXing.QR_CODE,
-                            height: sideLength,
-                            width: sideLength
-                        });
-
-
-                        this._status.qrcode = ImageSource.fromNativeSource(QR_CODE);
-
-                    }
-                }
-
+                this.cacheFinalStatement()
+                    .catch(err => {
+                        console.log("couldn't save fs:", err)
+                    });
                 return this._status.status === States.POPTOKEN ? this.updateCoinInstance() : Promise.resolve();
             })
             .catch(error => {
-                console.log(error);
-                console.log(error.stack);
+                console.log("couldn't update:", error);
                 this._status.status = States.ERROR;
 
                 //Promise is resolved as the status is set to "error"
@@ -150,7 +144,6 @@ class AttParty extends Party {
      * @return {Promise}
      */
     update() {
-
         let omniLegder = undefined;
         if (this._popPartyOlInstance === undefined) {
             this._popPartyOlInstance = {}; // avoid concurrent calls problems
@@ -159,39 +152,37 @@ class AttParty extends Party {
             omniLegder = Promise.resolve();
         }
 
-        console.log(omniLegder);
-        console.dir(omniLegder);
-
         return omniLegder
             .catch(err => {
                 this._popPartyOlInstance = undefined;
-                return Promise.reject(err)
+                return Promise.reject(err);
             }).then(() => {
-                return this.retrieveFinalStatementAndStatus()
+                return this.retrieveFinalStatementAndStatus();
             }).then(() => {
                 return this.loadPopDesc();
+            }).then(() => {
+                return this;
             })
     }
 
     /**
      * Load the final statement from local storage
-     * @returns {Promise} - a promise that gets resolved once the final statement is load in memory
+     * @returns {Promise<FinalStatement>} - a promise that gets resolved once the final statement is load in memory
      */
     loadFinalStatement() {
         return FileIO.getStringOf(FileIO.join(FilePath.POP_ATT_PATH, this._folderName, FilePath.POP_ATT_FINAL))
             .then(string => {
-                console.log("Got string: " + string);
                 this._finalStatement = Convert.jsonToObject(string);
+                console.log("final statement loaded from disk:", this._finalStatement.attendees)
+                return this._finalStatement;
             })
             .catch(error => {
                 console.log("No final statement yet.");
             })
-        return Promise.resolve();
     }
 
     /**
      * Use the final statement in memory to update the party description module
-     * @returns {Promise} - the promise gets resolved as soon as the description is updated
      */
     loadPopDesc() {
         const popDesc = this._finalStatement.desc;
@@ -237,7 +228,7 @@ class AttParty extends Party {
             })
             .then(inst => {
                 this._popPartyOlInstance = inst;
-                return Promise.resolve(inst);
+                return inst;
             })
     }
 
@@ -247,20 +238,39 @@ class AttParty extends Party {
      * @return {Promise} - a promise that resolves once it's up to date
      */
     updateCoinInstance() {
-        let signer = OmniLedger.darc.SignerEd25519.fromByteArray(this._keyPair.private);
-        let identity = OmniLedger.darc.IdentityEd25519.fromSigner(signer);
-        let instId = this._popPartyOlInstance.getAccountInstanceId(identity);
-        let update = this._coinInstance === undefined ? OmniLedger.contracts.CoinsInstance.fromInstanceId(this._olRPC, instId) : this._coinInstance.update();
+        // let signer = OmniLedger.darc.SignerEd25519.fromByteArray(this._keyPair.private);
+        // let identity = OmniLedger.darc.IdentityEd25519.fromSigner(signer);
+        let olInst = Promise.resolve();
+        console.log("updateCoinInstance");
+        if (this._popPartyOlInstance === undefined) {
+            console.log("initPopInstance")
+            olInst = this.initPopInstance();
+        }
+        olInst
+            .then(() => {
+                console.log("going to update coinInstance");
+                let instId = this._popPartyOlInstance.getAccountInstanceId(this._keyPair.public);
+                return this._coinInstance === undefined ? OmniLedger.contracts.CoinsInstance.fromInstanceId(this._olRPC,
+                    instId) : this._coinInstance.update();
+            })
+            .then(coinInst => {
+                this._coinInstance = coinInst;
+                this._status.balance = coinInst.balance;
+                console.log("coins are: " + coinInst.balance);
+                return this._coinInstance;
+            })
+            .catch(err => {
+                console.log("error while updating coin instance:", err);
+                return err;
+            })
+    }
 
-
-        return update.then(coinInst => {
-            this._coinInstance = coinInst;
-            this._status.balance = coinInst.balance;
-            return Promise.resolve();
-        }).catch(err => {
-            console.log(err);
-            return Promise.reject(err);
-        })
+    /**
+     * returns the coininstance stored in the attParty.
+     * @return {CoinInstance}
+     */
+    getCoinInstance(){
+        return this._coinInstance;
     }
 
     /**
@@ -269,9 +279,16 @@ class AttParty extends Party {
      * @param {Uint8Array} destination - the public key of the destination
      * @return {*}
      */
-    transferCoin(amount, destination) {
-        let identity = OmniLedger.darc.IdentityEd25519.fromPublicKey(destination);
-        let accountId = this._popPartyOlInstance.getAccountInstanceId(identity);
+    transferCoin(amount, destination, isPub) {
+        console.log("before log")
+        // let identity = OmniLedger.darc.IdentityEd25519.fromPublicKey(destination);
+        console.log("transferring", amount, "coins to", Convert.byteArrayToHex(destination));
+        console.log("after log")
+        let accountId = destination;
+        if (isPub) {
+            accountId = this._popPartyOlInstance.getAccountInstanceId(destination);
+        }
+        console.log("destination account:", Convert.byteArrayToHex(destination));
         let signer = OmniLedger.darc.SignerEd25519.fromByteArray(this._keyPair.private);
 
         return this._coinInstance.transfer(amount, accountId, signer);
@@ -283,13 +300,9 @@ class AttParty extends Party {
      */
     cacheFinalStatement() {
         const toWrite = Convert.objectToJson(this._finalStatement);
-
         return FileIO.writeStringTo(FileIO.join(FilePath.POP_ATT_PATH, this._folderName, FilePath.POP_ATT_FINAL), toWrite)
             .catch(error => {
-                console.log(error);
-                console.dir(error);
-                console.trace();
-
+                console.dir("couldn't cache final statement:", error);
                 return Promise.reject(error);
             })
 
@@ -310,7 +323,7 @@ class AttParty extends Party {
      *  - cache it on the disk
      *  - update the party description with the current final statement
      *  - update the status of the party
-     * @returns {Promise.<Party>}- a promise that gets resolved once the loading is finished
+     * @returns {Promise.<AttParty>}- a promise that gets resolved once the loading is finished
      */
     static loadFromDisk(id) {
         if (typeof id !== "string") {
@@ -325,27 +338,26 @@ class AttParty extends Party {
         return Promise.all(promises)
             .then(array => {
                 let object = Convert.jsonToObject(array[0]);
-                party = new AttParty(id, object.omniledgerId, object.address);
+                // SIMULATING
+                party = new AttParty(id, RequestPath.OMNILEDGER_INSTANCE_ID, object.address);
+                // party = new AttParty(id, object.omniledgerId, object.address);
                 party._setKeyPair(array[1]);
                 return party.loadFinalStatement()
                     .then(() => {
-                        console.log("loading pop desc");
-                        return party.loadPopDesc()
+                        return party.loadPopDesc();
                     })
-                    .catch(() => {
-                        party.retrieveFinalStatementAndStatus()
-                            .then(() => {
-                                return party.cacheFinalStatement();
-                            })
-                            .catch(error => {
-                                console.dir(error);
-                                return Promise.resolve(party)
-                            })
+                    .catch(err => {
+                        console.dir("couldn't load finalStatement from disk - this might be normal: " + err)
                     })
             })
-            .catch(error => {
-                return Promise.reject("couldn't load from disk: " + error);
+            .then(() => {
+                party.updateQRCode();
+                return party;
             })
+            .catch(err => {
+                console.log("couldn't load files: " + err);
+                throw new Error(err);
+            });
     }
 
     /**
@@ -356,7 +368,6 @@ class AttParty extends Party {
      * @return {Promise.<AttParty>}
      */
     save() {
-        console.log("saving attparty");
         return new KeyPair(FileIO.join(FilePath.POP_ATT_PATH, this._folderName)).then((key) => {
             this._keyPair = key;
 
@@ -367,18 +378,12 @@ class AttParty extends Party {
             };
 
             const toWrite = Convert.objectToJson(infos);
-            const folder = this._folderName;
             return FileIO.writeStringTo(FileIO.join(FilePath.POP_ATT_PATH, this._folderName, FilePath.POP_ATT_INFOS), toWrite)
                 .then(() => {
-                    console.log("successfully wrote attparty to SD: " + toWrite);
-                    console.log(folder);
                     return this;
                 })
                 .catch(error => {
-                    console.log(error);
-                    console.dir(error);
-                    console.trace();
-
+                    console.dir("error while saving attparty:", error);
                     return Promise.reject(error);
                 })
 
@@ -395,7 +400,9 @@ class AttParty extends Party {
         let attendees = this._finalStatement.attendees;
         let publicKeyHexString = Convert.byteArrayToHex(publicKey);
         for (let i = 0; i < attendees.length; i++) {
-            if (Convert.byteArrayToHex(attendees[i]) === publicKeyHexString) {
+            let attendee = Convert.base64ToHex(attendees[i]);
+            console.dir("Attendee is:", i, attendees[i], attendee);
+            if (attendee === publicKeyHexString) {
                 return true;
             }
         }

@@ -45,7 +45,7 @@ const PROPOSE_VOTE_REPLY = "ProposeVoteReply";
  */
 const STRING_REPLY = "StringReply";
 const LISTMESSAGES_REPLY = "ListMessagesReply";
-const READMESSAGES_REPLY = "ReadMessagesReply";
+const READMESSAGE_REPLY = "ReadMessageReply";
 
 /**
  * MISC response types.
@@ -77,4 +77,4 @@ module.exports.VERIFY_LINK_REPLY = VERIFY_LINK_REPLY;
 module.exports.EMPTY_REPLY = EMPTY_REPLY;
 module.exports.STRING_REPLY = STRING_REPLY;
 module.exports.LISTMESSAGES_REPLY = LISTMESSAGES_REPLY;
-module.exports.READMESSAGES_REPLY = READMESSAGES_REPLY;
+module.exports.READMESSAGE_REPLY = READMESSAGE_REPLY;
