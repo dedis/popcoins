@@ -1,7 +1,10 @@
 *.DS_Store
 .idea/
 .vscode/
+
 node_modules/
+platforms
+
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
@@ -28,3 +31,4 @@ node_modules/
 *.run.xml
 # listings
 *.lol
+
