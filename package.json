@@ -11,7 +11,7 @@
       }
     },
     "tns-android": {
-      "version": "4.3.0-2018-09-03-01"
+      "version": "4.2.0"
     },
     "tns-ios": {
       "version": "4.2.0"
@@ -45,9 +45,10 @@
     "nativescript-ui-listview": "^3.6.0",
     "nativescript-ui-sidedrawer": "^4.3.0",
     "nativescript-unit-test-runner": "^0.3.4",
-    "nativescript-websockets": "^1.5.1",
+    "nativescript-websockets": "^1.5.2",
     "nativescript-zxing": "^1.5.3",
     "pure-uuid": "^1.4.8",
+    "shuffle-array": "^1.0.1",
     "ssl-utils": "^0.3.0",
     "tns-core-modules": "^4.3.0-2018-09-07-01",
     "toml": "^2.3.3",

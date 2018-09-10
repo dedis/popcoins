@@ -388,7 +388,7 @@ function addParty() {
         })
         .catch(error => {
             console.dir("error while scanning:", error);
-            return new AttParty("72e9c865b355726f88cd78566a3c50b44331f120abf9eada9efd2886e4183ede", RequestPath.OMNILEDGER_INSTANCE_ID, "tls://gasser.blue:7002");
+            return new AttParty("b73b5efd15eb6bd808da4ae7ecd0c696f505172dddfa045aa063c8f92506df05", RequestPath.OMNILEDGER_INSTANCE_ID, "tls://gasser.blue:7002");
 
             return Dialog.prompt({
                 title: "Enter address manually",

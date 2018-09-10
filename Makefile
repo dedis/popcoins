@@ -21,7 +21,8 @@ apply-patches: init-npm
 
 init-npm:
 	$(npm) install
+	npm link @dedis/cothority
 
 clean:
-	rm -rf node_modules platforms
+	rm -rf node_modules platforms hooks
 

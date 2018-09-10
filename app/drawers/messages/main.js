@@ -75,6 +75,7 @@ function onUnloaded() {
 function messageTapped(args) {
     console.dir("message tapped. Args are:", args);
     let msg = viewModel.messageList.getItem(args.index);
+    console.dir("Message is:", msg);
     // console.dir("reading message:", msg);
     // console.dir("myparty is:", myParty);
     let pol = myParty._popPartyOlInstance;
@@ -114,12 +115,16 @@ function updateMessages() {
             viewModel.messageList.slice();
             for (var i = 0; i < response.subjects.length; i++) {
                 console.log("Appending message " + i + ": " + response.subjects[i])
+                console.dir("message is:", response.subjects)
+                console.dir("balance is:", response.balances)
+                console.dir("rewards is:", response.rewards)
+                console.dir("ids is:", response.msgids)
                 viewModel.messageList.push(
                     ObservableModule.fromObject({
                         subject: response.subjects[i],
                         balance: response.balances[i],
                         reward: response.rewards[i],
-                        id: response.ids[i],
+                        id: response.msgids[i],
                     })
                 )
             }

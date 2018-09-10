@@ -4,9 +4,10 @@
 
 node_modules/
 platforms/
+hooks/
 
 conodes/
-dedis/
+#dedis/
 package-lock.json
 
 ## Core latex/pdflatex auxiliary files:

@@ -529,15 +529,15 @@ class CothorityMessages extends CothorityProtobuf {
 
     createReadMessage(id, party, reader) {
         return {
-            id: id,
-            party: party,
+            msgid: id,
+            partyiid: party,
             reader: reader,
         };
     }
 
     createTopupMessage(id, amount) {
         return {
-            id: id,
+            msgid: id,
             amount: amount
         };
     }
