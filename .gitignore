@@ -3,7 +3,11 @@
 .vscode/
 
 node_modules/
-platforms
+platforms/
+
+conodes/
+dedis/
+package-lock.json
 
 ## Core latex/pdflatex auxiliary files:
 *.aux
