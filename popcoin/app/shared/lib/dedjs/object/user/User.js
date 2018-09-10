@@ -396,8 +396,10 @@ class User {
         if (conodes.length == 0) {
             // SIMULATING
             for (var port = 7002; port <= 7006; port += 2) {
-                console.log("creating conode at port: 10.0.0.1:" + port);
-                NetUtils.getServerIdentiyFromAddress("tls://10.0.0.1:" + port)
+                // console.log("creating conode at port: 10.0.0.1:" + port);
+                // NetUtils.getServerIdentiyFromAddress("tls://10.0.0.1:" + port)
+                console.log("creating conode at port: gasser.blue:" + port);
+                NetUtils.getServerIdentiyFromAddress("tls://gasser.blue:" + port)
                     .then(server => {
                         console.dir(server);
                         conodes.push(server);

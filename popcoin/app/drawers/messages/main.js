@@ -9,7 +9,6 @@ const FileIO = require("../../shared/lib/file-io/file-io");
 const FilePaths = require("../../shared/res/files/files-path");
 const PoPMessages = require("../../shared/lib/dedjs/object/pop/Messages").get;
 const AttParty = require("../../shared/lib/dedjs/object/pop/att/AttParty").Party;
-const OmniLedger = require("@dedis/cothority").omniledger;
 const Convert = require("../../shared/lib/dedjs/Convert");
 
 const viewModel = ObservableModule.fromObject({
@@ -31,15 +30,21 @@ function onLoaded(args) {
     let files = [];
     FileIO.forEachFolderElement(FilePaths.POP_ATT_PATH, function (partyFolder) {
         console.log("loading party: " + partyFolder.name);
-        AttParty.loadFromDisk(partyFolder.name)
+        files.push(partyFolder.name);
+    });
+    return Promise.all(files.map(pf => {
+        return AttParty.loadFromDisk(pf)
             .then(party => {
+                console.log("loaded from disk");
                 myParty = party;
                 return myParty.update()
             })
             .then(() => {
+                console.log("party updated");
                 return myParty.loadFinalStatement()
             })
             .then(fs => {
+                console.log("final statement loaded");
                 let ser = fs.desc.roster.list[0];
                 let public = Convert.base64ToByteArray(ser.public);
                 let id = Convert.base64ToByteArray(ser.id);
@@ -53,13 +58,13 @@ function onLoaded(args) {
                 return Promise.resolve();
             })
             .then(() => {
-                console.log("finished loading");
+                console.log("finished loading, conode is:", conode);
             })
             .catch(error => {
                 console.dir("error:", error);
                 return Promise.resolve();
             })
-    });
+    }));
 }
 
 function onUnloaded() {
@@ -103,6 +108,7 @@ function messageTapped(args) {
 
 function updateMessages() {
     viewModel.messageList.splice(0);
+    console.dir("conode is:", conode);
     return PoPMessages.fetchListMessages(conode, 0, 10)
         .then(response => {
             viewModel.messageList.slice();

@@ -10,13 +10,11 @@ const AttParty = require("../../shared/lib/dedjs/object/pop/att/AttParty").Party
 const Convert = require("../../shared/lib/dedjs/Convert");
 const PartyStates = require("../../shared/lib/dedjs/object/pop/att/AttParty").States;
 const PoP = require("../../shared/lib/dedjs/object/pop/PoP").get;
-var platform = require("tns-core-modules/platform");
-var Directory = require("../../shared/lib/Directory/Directory");
 const POP_TOKEN_OPTION_SIGN = "Sign";
 const POP_TOKEN_OPTION_TRANSFER_COINS = "Transfer coins";
 const POP_TOKEN_OPTION_REVOKE = "Revoke";
-const repeaterModule = require("tns-core-modules/ui/repeater");
-const Buffer = require("buffer").Buffer;
+const Net = require("@dedis/cothority").net;
+const RequestPath = require("../../shared/lib/dedjs/network/RequestPath");
 
 const USER_CANCELED = "USER_CANCELED_STRING";
 
@@ -29,6 +27,23 @@ const viewModel = ObservableModule.fromObject({
 let page = undefined;
 let timerId = undefined;
 let pageObject = undefined;
+
+function listObject(data) {
+    // allows us to console.log circular objects, but prints only current level depth
+    for (var key in data) {
+        if (data.hasOwnProperty(key)) {
+            console.log(key + " -> " + data[key]);
+        }
+    }
+}
+
+function convertBinaryStringToUint8Array(bStr) {
+    var i, len = bStr.length, u8_array = new Uint8Array(len);
+    for (var i = 0; i < len; i++) {
+        u8_array[i] = bStr.charCodeAt(i);
+    }
+    return u8_array;
+}
 
 function onLoaded(args) {
     console.log("tokens: onloaded");
@@ -122,7 +137,7 @@ function partyTapped(args) {
             }
             if (party.getPopToken() === undefined) {
                 party.retrieveFinalStatementAndStatus()
-                    .then(()=> {
+                    .then(() => {
                         return PoP.addPopTokenFromFinalStatement(party.getFinalStatement(), party.getKeyPair(), true, party)
                     })
                     .then(() => {
@@ -363,12 +378,90 @@ function addMyself(infos) {
 };
 
 function addParty() {
+    let parties = []
+    let party = {}
+
     return ScanToReturn.scan()
         .then(string => {
             const infos = Convert.jsonToObject(string);
-            const newParty = new AttParty(infos.id, infos.omniledgerId, infos.address);
+            return new AttParty(infos.id, infos.omniledgerId, infos.address);
+        })
+        .catch(error => {
+            console.dir("error while scanning:", error);
+            return new AttParty("72e9c865b355726f88cd78566a3c50b44331f120abf9eada9efd2886e4183ede", RequestPath.OMNILEDGER_INSTANCE_ID, "tls://gasser.blue:7002");
 
-
+            return Dialog.prompt({
+                title: "Enter address manually",
+                message: "Couldn't scan party-id. Please enter url of server to search for party-ids:",
+                okButtonText: "Fetch parties",
+                cancelButtonText: "Quit",
+                defaultText: "gasser.blue:7002",
+                inputType: Dialog.inputType.text
+            })
+                .then(url => {
+                    // if (url == ""){
+                    //     throw new Error("no url given")
+                    // }
+                    console.dir("got", url.text, url.result);
+                    console.dir("got", url);
+                    const cothoritySocketPop = new Net.Socket(Convert.tlsToWebsocket(url.text, ""), RequestPath.POP);
+                    return cothoritySocketPop.send(RequestPath.POP_GET_FINAL_STATEMENTS, RequestPath.POP_GET_FINAL_STATEMENTS_REPLY, {})
+                })
+                .then(reply => {
+                    console.dir("Got final statements:");
+                    listObject(reply);
+                    let msg = "Enter the number of the party you want to join";
+                    for (var fsId in reply.finalstatements) {
+                        let fs = reply.finalstatements[fsId];
+                        console.log("fsId length is:" + fsId.length);
+                        listObject(fs.desc);
+                        listObject(fs.attendees);
+                        if (fs.attendees.length == 0) {
+                            parties.push({
+                                id: convertBinaryStringToUint8Array(fsId),
+                                address: fs.desc.roster.list[0].address,
+                            })
+                            msg += "\n" + parties.length + ":" + fs.desc.name + ":" + fs.desc.datetime;
+                        }
+                    }
+                    if (parties.length > 0) {
+                        return Dialog.prompt({
+                            title: "Chose party",
+                            message: msg,
+                            okButtonText: "Join Party",
+                            cancelButtonText: "Quit",
+                            defaultText: "1",
+                            inputType: Dialog.inputType.text
+                        })
+                    } else {
+                        throw new Error("no party found");
+                    }
+                })
+                .then(res => {
+                    if (res.result == false) {
+                        throw new Error("Aborted party choice");
+                    }
+                    let i = parseInt(res.text);
+                    if (i > parties.length) {
+                        throw new Error("this party does not exist")
+                    }
+                    party = parties[i - 1];
+                    console.log("party is:", i, party.id.constructor.name);
+                    listObject(party.id);
+                    const cothoritySocketPop = new Net.Socket(Convert.tlsToWebsocket(party.address, ""), RequestPath.POP);
+                    return cothoritySocketPop.send(RequestPath.POP_GET_INSTANCE_ID, RequestPath.POP_GET_INSTANCE_ID_REPLY, {
+                        partyID: party.id
+                    })
+                })
+                .then(reply=>{
+                    console.dir("reply is:", reply);
+                    console.dir("party is:", party);
+                    return new AttParty(Convert.byteArrayToHex(reply.instanceID), RequestPath.OMNILEDGER_INSTANCE_ID, party.address);
+                })
+        })
+        .then(newParty => {
+            console.log("got party:");
+            listObject(newParty);
             return newParty.save()
                 .then((st) => {
                     viewModel.partyListDescriptions.push(ObservableModule.fromObject({
@@ -391,21 +484,17 @@ function addParty() {
                     });
                 });
         })
-        .catch(error => {
-            console.dir("error while scanning:", error);
-            if (error !== ScanToReturn.SCAN_ABORTED) {
-                setTimeout(() => {
-                    Dialog.alert({
-                        title: "Error",
-                        message: "An error occured, please try again. - " + error,
-                        okButtonText: "Ok"
-                    });
-                });
-            }
-
-            return Promise.reject(error);
-        });
-
+        .catch(err => {
+            console.log("error:", err);
+            return Dialog.alert({
+                title: "Remote parties",
+                message: err,
+                okButtonText: "Continue"
+            })
+                .then(() => {
+                    throw new Error(err);
+                })
+        })
 }
 
 function update() {

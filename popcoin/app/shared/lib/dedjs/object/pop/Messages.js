@@ -7,17 +7,7 @@ const Convert = require("../../Convert");
 const RequestPath = require("../../network/RequestPath");
 const DecodeType = require("../../network/DecodeType");
 const Net = require("@dedis/cothority").net;
-const FilesPath = require("../../../../res/files/files-path");
-const FileIO = require("../../../../lib/file-io/file-io");
 const CothorityMessages = require("../../network/cothority-messages");
-const RingSig = require("../../RingSig");
-const Kyber = require("@dedis/kyber-js");
-const Suite = new Kyber.curve.edwards25519.Curve;
-const PopToken = require("./att/PopToken");
-
-const User = require("../user/User").get;
-const platform = require("tns-core-modules/platform");
-var Directory = require("../../../Directory/Directory");
 
 /**
  * This singleton is the PoP-messages component of the app.

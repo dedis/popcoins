@@ -15,6 +15,7 @@ const ImageSource = require("image-source");
 const QRGenerator = new ZXing();
 const OmniLedger = require("@dedis/cothority").omniledger;
 var text = undefined;
+const connectivityModule = require("tns-core-modules/connectivity");
 
 /**
  * We define the AttParty class which is the object representing the attendee.
@@ -95,7 +96,7 @@ class AttParty extends Party {
      * Gets the popPartyInstance
      * @returns {PopPartyInstance}
      */
-    getPopPartyInstance(){
+    getPopPartyInstance() {
         return this._popPartyOlInstance;
     }
 
@@ -214,8 +215,13 @@ class AttParty extends Party {
             partyid: this._id
         };
         let instanceIdBuffer = undefined;
+        console.dir("sending message to conode");
+        console.dir(this);
+        console.dir("done");
+
         return cothoritySocketPop.send(RequestPath.POP_GET_INSTANCE_ID, RequestPath.POP_GET_INSTANCE_ID_REPLY, message)
             .then(reply => {
+                console.log("got reply", reply);
                 instanceIdBuffer = reply.instanceid;
 
                 const cothoritySocketOl = new Net.Socket(Convert.tlsToWebsocket(this._address, ""), RequestPath.OMNILEDGER);
@@ -223,10 +229,12 @@ class AttParty extends Party {
                 return OmniLedger.OmniledgerRPC.fromKnownConfiguration(cothoritySocketOl, this._omniledgerId);
             })
             .then(ol => {
+                console.log("got omniledger");
                 this._olRPC = ol;
                 return OmniLedger.contracts.PopPartyInstance.fromInstanceId(ol, instanceIdBuffer)
             })
             .then(inst => {
+                console.log("got poppartyinstance");
                 this._popPartyOlInstance = inst;
                 return inst;
             })
@@ -269,7 +277,7 @@ class AttParty extends Party {
      * returns the coininstance stored in the attParty.
      * @return {CoinInstance}
      */
-    getCoinInstance(){
+    getCoinInstance() {
         return this._coinInstance;
     }
 
