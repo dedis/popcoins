@@ -394,14 +394,13 @@ class User {
         const statusRequestMessage = {};
 
         if (conodes.length == 0) {
-            // SIMULATING
-            for (var port = 7002; port <= 7006; port += 2) {
-                // console.log("creating conode at port: 10.0.0.1:" + port);
-                // NetUtils.getServerIdentiyFromAddress("tls://10.0.0.1:" + port)
-                console.log("creating conode at port: gasser.blue:" + port);
-                NetUtils.getServerIdentiyFromAddress("tls://gasser.blue:" + port)
+            RequestPath.DEDIS_CONODES.forEach(address => {
+                console.log("creating conode:" + address);
+                // This is wrong, because it will run concurrently with the code below. But because this is
+                // being called regularly to update the list of conodes, it works anyway...
+                NetUtils.getServerIdentiyFromAddress("tls://" + address)
                     .then(server => {
-                        console.dir(server);
+                        console.dir("found server:", server);
                         conodes.push(server);
                         this.addServer(server)
                             .catch(error => {
@@ -412,7 +411,7 @@ class User {
                         console.dir("couldn't get address");
                         return Promise.reject("couldn't get server: " + error.message);
                     })
-            }
+            })
         }
 
 

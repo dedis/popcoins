@@ -1,5 +1,6 @@
 const Dialog = require("ui/dialogs");
 const Frame = require("ui/frame");
+const RequestPath = require("../../../../shared/lib/dedjs/network/RequestPath");
 const Helper = require("../../../../shared/lib/dedjs/Helper");
 const Convert = require("../../../../shared/lib/dedjs/Convert");
 const ObjectType = require("../../../../shared/lib/dedjs/ObjectType");
@@ -75,10 +76,6 @@ function onNavigatingTo(args) {
 
 function initDate() {
     const desc = Party.getPopDesc();
-    // SIMULATING
-    // dataForm.set("name", Party.getPopDesc().name);
-    // dataForm.set("location", Party.getPopDesc().location);
-
     let todayDate = desc.datetime === "";
 
     let date = new Date(todayDate ? Date.now() : Date.parse(desc.datetime));
@@ -87,8 +84,10 @@ function initDate() {
     dataForm.set("time", date.getHours() + ":" + date.getMinutes());
 
     // SIMULATING
-    dataForm.set("name", "test");
-    dataForm.set("location", "house " + dataForm.get("time"));
+    if (RequesPath.PREFILL_PARTY) {
+        dataForm.set("name", "test " + date.getHours().padStart(2, '0') + date.getMinutes().padStart(2, '0'));
+        dataForm.set("location", "testing-land");
+    }
 }
 
 /**

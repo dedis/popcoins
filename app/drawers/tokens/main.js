@@ -388,7 +388,21 @@ function addParty() {
         })
         .catch(error => {
             console.dir("error while scanning:", error);
-            return new AttParty("b73b5efd15eb6bd808da4ae7ecd0c696f505172dddfa045aa063c8f92506df05", RequestPath.OMNILEDGER_INSTANCE_ID, "tls://gasser.blue:7002");
+            return Dialog.prompt({
+                title: "Party-ID",
+                message: "Couldn't scan party-id. Please enter party-id manually.",
+                okButtonText: "Join Party",
+                cancelButtonText: "Quit",
+                defaultText: "",
+                inputType: Dialog.inputType.text
+            })
+                .then(r => {
+                    if (r){
+                        return new AttParty(r.text, RequestPath.OMNILEDGER_INSTANCE_ID, "tls://gasser.blue:7002");
+                    } else {
+                        throw new Error("Aborted party-id");
+                    }
+            })
 
             return Dialog.prompt({
                 title: "Enter address manually",
