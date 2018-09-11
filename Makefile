@@ -21,6 +21,8 @@ apply-patches: init-npm
 
 init-npm:
 	$(npm) install
+
+link: start-dev
 	cd dedis/cothority; \
 	npm i; \
 	npm link; \
