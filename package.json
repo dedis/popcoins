@@ -1,8 +1,8 @@
 {
   "description": "An application to attend and organize PoP Parties.",
-  "license": "SEE LICENSE IN <your-license-filename>",
+  "license": "GPLv3",
   "readme": "NativeScript Application",
-  "repository": "https://github.com/dedis/student_18_xplatform",
+  "repository": "https://github.com/dedis/popcoins",
   "nativescript": {
     "id": "ch.epfl.popcoins",
     "nodeify": {
