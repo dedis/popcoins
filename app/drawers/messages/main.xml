@@ -88,7 +88,7 @@
 
                 <nsFloatingButton:fab tap="updateMessages"
                                       row="0" col="0"
-                                      icon="res://ic_add_white_48dp"
+                                      icon="res://ic_reload_white_48dp"
                                       rippleColor="#a1f1a1"
                                       class="fab-button"
                 />

@@ -354,6 +354,7 @@ function linkToConode(party) {
                     .then(result => {
                         console.log("Prompting for pin");
                         if (result.alreadyLinked !== undefined && result.alreadyLinked) {
+                            console.log("Already linked")
                             return Promise.resolve(conodes[index])
                         }
                         return Dialog.prompt({
@@ -416,7 +417,9 @@ function addParty() {
             })
         })
         .then(result => {
+            console.dir("result is:", result);
             if (result === "Configure a new party") {
+                console.log("configuring a new party");
                 Frame.topmost().navigate({
                     moduleName: "drawers/pop/org/config/config-page",
                     context: {

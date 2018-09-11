@@ -27,6 +27,7 @@ let viewModel = Observable.fromObject({
 });
 
 function onNavigatingTo(args) {
+    console.log("config-page");
     if (args.isBackNavigation) {
         return;
     }
@@ -45,7 +46,10 @@ function onNavigatingTo(args) {
 
     newParty = context.newParty;
 
+    console.log("config-page 2");
     initDate();
+
+    console.log("config-page 2.5");
 
     viewModel.descModule = Party.getPopDescModule();
     viewModel.dataForm = dataForm;
@@ -53,10 +57,13 @@ function onNavigatingTo(args) {
     pageObject = page.page;
     page.bindingContext = viewModel;
 
+    console.log("config-page 3");
+
     if (newParty && context.leader === undefined) {
         throw new Error("Leader conode should be given in the context");
     } else if (newParty) {
         // SIMULATING
+        console.log("newParty");
         User.getRoster().list.map(server => {
             Party.addPopDescConode(server)
                 .catch(error => {
@@ -80,13 +87,18 @@ function initDate() {
 
     let date = new Date(todayDate ? Date.now() : Date.parse(desc.datetime));
 
-    dataForm.set("date", date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate());
+    dataForm.set("date", date.getFullYear() + "-" + ( date.getMonth() + 1 ) + "-" + date.getDate());
     dataForm.set("time", date.getHours() + ":" + date.getMinutes());
 
     // SIMULATING
-    if (RequesPath.PREFILL_PARTY) {
-        dataForm.set("name", "test " + date.getHours().padStart(2, '0') + date.getMinutes().padStart(2, '0'));
+    console.log("id");
+    if (RequestPath.PREFILL_PARTY) {
+        console.log("id2");
+        dataForm.set("name", "test " + date.getHours() + date.getMinutes());
         dataForm.set("location", "testing-land");
+    } else {
+        dataForm.set("name", "");
+        dataForm.set("location", "");
     }
 }
 
