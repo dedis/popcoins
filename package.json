@@ -1,6 +1,6 @@
 {
   "description": "An application to attend and organize PoP Parties.",
-  "license": "GPLv3",
+  "license": "GPL-3.0",
   "readme": "NativeScript Application",
   "repository": "https://github.com/dedis/popcoins",
   "nativescript": {
@@ -21,7 +21,7 @@
     "tslint": "tslint -p tsconfig.json"
   },
   "dependencies": {
-    "@dedis/cothority": "^1.1.16",
+    "@dedis/cothority": "^1.1.17",
     "@dedis/kyber-js": "^0.0.9",
     "@stablelib/blake2xs": "^0.10.4",
     "bn.js": "^4.11.8",
@@ -39,7 +39,7 @@
     "nativescript-floatingactionbutton": "^4.1.3",
     "nativescript-iqkeyboardmanager": "^1.1.0",
     "nativescript-modal-datetimepicker": "^1.0.3",
-    "nativescript-nodeify": "0.7.0",
+    "nativescript-nodeify": "^0.8.0",
     "nativescript-theme-core": "1.0.4",
     "nativescript-ui-dataform": "^3.7.0",
     "nativescript-ui-listview": "^3.6.0",
@@ -50,7 +50,7 @@
     "pure-uuid": "^1.4.8",
     "shuffle-array": "^1.0.1",
     "ssl-utils": "^0.3.0",
-    "tns-core-modules": "^4.3.0-2018-09-07-01",
+    "tns-core-modules": "^4.2.0",
     "toml": "^2.3.3",
     "tomlify-j0.4": "^3.0.0",
     "uuid": "^3.2.1",

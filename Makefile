@@ -17,7 +17,6 @@ clean-install: clean apply-patches
 apply-patches: init-npm
 	patch -p0 < nodeify_temporary_patch.patch
 	patch -p0 < websockets_temporary_patch.patch
-	patch -p0 < nodefiy-nativescript-support.patch
 
 init-npm:
 	$(npm) install
