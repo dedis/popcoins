@@ -346,9 +346,11 @@ class AttParty extends Party {
         return Promise.all(promises)
             .then(array => {
                 let object = Convert.jsonToObject(array[0]);
-                // SIMULATING
-                party = new AttParty(id, RequestPath.OMNILEDGER_INSTANCE_ID, object.address);
-                // party = new AttParty(id, object.omniledgerId, object.address);
+                if (RequestPath.USE_DEFAULT_OLID) {
+                    party = new AttParty(id, RequestPath.OMNILEDGER_INSTANCE_ID, object.address);
+                } else {
+                    party = new AttParty(id, object.omniledgerId, object.address);
+                }
                 party._setKeyPair(array[1]);
                 return party.loadFinalStatement()
                     .then(() => {

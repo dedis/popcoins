@@ -5,10 +5,10 @@ const ObservableModule = require("data/observable");
 
 const viewModel = ObservableModule.fromObject({
   newMessage: ObservableModule.fromObject({
-      subject: "enter subject",
-      text: "multiline text",
-      balance: 1000,
-      reward: 100,
+      subject: "",
+      text: "",
+      balance: 10000,
+      reward: 1000,
   }),
   isLoading: false,
   isEmpty: true

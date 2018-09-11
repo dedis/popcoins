@@ -2,6 +2,18 @@
  * @file File containing different available paths for the Cothority.
  */
 const OMNILEDGER_INSTANCE_ID = "0d75236a47c8b61b27b47da1df6af68e793ae68fa895eed95c6e5310846d5eab";
+
+/**
+ * Making the party more userfriendly, but more dependant on dedis. Which is OK for the moment...
+ */
+const DEDIS_CONODES = ["gasser.blue:7002", "gasser.blue:7004", "gasser.blue:7006"];
+// const DEDIS_CONODES = ["conode.dedis.ch:7770", "gasser.blue:7770", "dedis.nella.org:6879"];
+// If this is set to true, loading a party from disk will ignore the omniledger-id stored.
+// This covers a bug where the omniledger-id is sometimes not correctly loaded.
+const USE_DEFAULT_OLID = true;
+// Setting this to true fills out part of the information
+const PREFILL_PARTY = true;
+
 /**
  * Services
  */
@@ -118,3 +130,6 @@ module.exports.OMNILEDGER = OMNILEDGER;
 module.exports.PERSONHOOD_SENDMESSAGE = PERSONHOOD_SENDMESSAGE;
 module.exports.PERSONHOOD_LISTMESSAGES = PERSONHOOD_LISTMESSAGES;
 module.exports.PERSONHOOD_READMESSAGE = PERSONHOOD_READMESSAGE;
+module.exports.DEDIS_CONODES = DEDIS_CONODES;
+module.exports.USE_DEFAULT_OLID = USE_DEFAULT_OLID;
+module.exports.PREFILL_PARTY = PREFILL_PARTY;
