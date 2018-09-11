@@ -180,7 +180,7 @@ function addNewMessage(arg) {
                         return Dialog.alert({
                             title: "Message sent",
                             message: "Stored the message and took " + arg.balance +
-                                "from your account.",
+                                " from your account.",
                             okButtonText: "Continue"
                         })
                     })
