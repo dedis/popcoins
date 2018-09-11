@@ -453,7 +453,7 @@ function addParty() {
                         partyID: party.id
                     })
                 })
-                .then(reply=>{
+                .then(reply => {
                     console.dir("reply is:", reply);
                     console.dir("party is:", party);
                     return new AttParty(Convert.byteArrayToHex(reply.instanceID), RequestPath.OMNILEDGER_INSTANCE_ID, party.address);
@@ -470,7 +470,9 @@ function addParty() {
                         status: newParty.getPopStatusModule()
                     }));
 
-                    update();
+                    return update();
+                })
+                .then(() => {
                     return newParty.update()
                         .then(Frame.topmost().navigate({
                             animated: false, clearHistory: true, moduleName: "drawers/tokens/main"
