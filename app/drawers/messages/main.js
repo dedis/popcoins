@@ -84,6 +84,16 @@ function messageTapped(args) {
     console.dir("reading from conode:", conode);
     return PoPMessages.readMessage(conode, msg.id, partyId, ourCoinsId)
         .then(response => {
+            return Dialog.alert({
+                title: "Got coins",
+                message: "If this is the first time you read this message, you got coins: " + msg.reward,
+                okButtonText: "Confirm"
+            })
+                .then(() => {
+                    return response;
+                })
+        })
+        .then(response => {
             console.log("got response to read message:");
             console.dir(response);
             return Dialog.alert({
@@ -96,7 +106,6 @@ function messageTapped(args) {
                 })
         })
         .then(() => {
-            console.log("finished updating messages");
         })
         .catch(error => {
             Dialog.alert({
@@ -143,7 +152,8 @@ function addNewMessage(arg) {
         Dialog.confirm({
             title: "Send message",
             message: "Subject: " + arg.subject + "\n" +
-                "Balance: " + arg.balance,
+                "Cost: " + arg.balance + "\n" +
+                "The cost will be withdrawn from your account.",
             okButtonText: "Confirm",
             cancelButtonText: "Abort",
         }).then(function (result) {
@@ -167,6 +177,14 @@ function addNewMessage(arg) {
                         return PoPMessages.sendMessage(conode, arg)
                     })
                     .then(result => {
+                        return Dialog.alert({
+                            title: "Message sent",
+                            message: "Stored the message and took " + arg.balance +
+                                "from your account.",
+                            okButtonText: "Continue"
+                        })
+                    })
+                    .then(() => {
                         // log.lvl3("Sent message - searching for new messages", result);
                         return updateMessages();
                     })
