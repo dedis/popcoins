@@ -4,7 +4,7 @@
   "readme": "NativeScript Application",
   "repository": "https://github.com/dedis/student_18_xplatform",
   "nativescript": {
-    "id": "ch.epfl.popcoins2",
+    "id": "ch.epfl.popcoins",
     "nodeify": {
       "global-dependencies": {
         "ws": "nativescript-websockets"

@@ -21,6 +21,11 @@ apply-patches: init-npm
 
 init-npm:
 	$(npm) install
+	cd dedis/cothority; \
+	npm i; \
+	npm link; \
+	npm run-script build || echo Error is normal here...
+	pwd
 	npm link @dedis/cothority
 
 clean:

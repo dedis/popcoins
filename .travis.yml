@@ -1,7 +1,3 @@
-env:
-  global:
-  - secure: wed+Mko4TxNZBXBgKzaetFsc5fsx03M9T/POOiIAsX4Ute7FVg+e2UNMxgHSg5ZKb1ftRaqq3HKq7qtbzobs0q8rlZsc8EvsmbahZAfEaIqqQUFNYW1z4tIc1Rb1bCaabXaXFscWgWytgUw8I87DXxL+slrhn7psndIGVfb0Hz3jhLmCaeDz6U2otqKSmsPqHrwvB7cjmg/UzG3y8njym9RkSj0iep6LPyU/HEZZQM1QR7ZsScty5dsaUnilF+vu53SywtTkqu2RgnAzKT1Sb/qDYVQKmivy2kiRckoxRdub/ljJS5wz3vojcrCwZh4VzfQTHr14osaB1PW5zyDI1zr6WeEfDaLY9a86pJfVzSUAxebgfuMLmd2Tk/0hLw46YfB8MOVsi+NK3eC6+I47bH/9poQL6GNFQIWrXN8y2UthV4DlNL5zTpaztV78W8chNjZNlG7745TjQkRyZZdgmd7Md7xIcg4IGEPm6P2Qq+clgjlkN8qG9qgbEUcFAPpEFdoraXo6Uf4tPCqbxkdiOYpvs65HXDZi4qLvFrDmp8e2wCvToeAldCNxeMDVIYlh+3s151cWNnyU8QoNixsiUalcGnKSwvbmDKLyyukq8UPCWK9c0ciOUxK7GpC36c25uOzukznXLzrfoHaBcK4rXydFSEqpuK8LaAN1Amw4rX8=
-
 matrix:
   include:
   - stage: Build
@@ -13,8 +9,9 @@ matrix:
     language: node_js
     node_js: '8'
     jdk: oraclejdk8
+    # LTS code name carbon => 8.x series. See https://github.com/nodejs/Release#lts_schedule
+    before_install: nvm install --lts=carbon
     script:
-    - cd popcoin
     - make
     - tns build ios
   - language: android
@@ -25,7 +22,6 @@ matrix:
     # LTS code name carbon => 8.x series. See https://github.com/nodejs/Release#lts_schedule
     before_install: nvm install --lts=carbon
     script:
-    - cd popcoin
     - make
     - tns build android --env.aot --env.uglify --env.snapshot
     # Find the previous one, remove, post the new one.
@@ -54,8 +50,7 @@ cache:
   - "$HOME/.gradle/wrapper/"
   
 install:
-# nativescript@4.0.2 because of issue #35.
-- echo no | npm install -g nativescript@4.0.2
+- echo no | npm install -g nativescript@4.2.3
 - node --version
 - tns --version
 - tns usage-reporting disable

@@ -21,9 +21,9 @@
 	<!-- briefly: increment z to indicate this is a new build number of the x.y series. -->
 	<!-- When editing this, also edit ../Android/AndroidManifest.xml. Note that Android does not allow y or z higher than 100. -->
 	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
+	<string>1.1</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.3</string>
+	<string>1.1.0</string>
 	
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
