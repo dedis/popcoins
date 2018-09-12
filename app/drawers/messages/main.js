@@ -79,6 +79,12 @@ function messageTapped(args) {
     // console.dir("reading message:", msg);
     // console.dir("myparty is:", myParty);
     let pol = myParty._popPartyOlInstance;
+    if (pol === undefined){
+        return Dialog.alert({
+            title: "please wait",
+            message: "still updating"
+        })
+    }
     let partyId = pol._instanceId;
     let ourCoinsId = pol.getAccountInstanceId(myParty._keyPair.public);
     console.dir("reading from conode:", conode);
@@ -118,6 +124,12 @@ function messageTapped(args) {
 
 function updateMessages() {
     viewModel.messageList.splice(0);
+    if (conode === undefined){
+        return Dialog.alert({
+            title: "No token",
+            message: "Either there is no token or the party has not been finalized yet."
+        })
+    }
     console.dir("conode is:", conode);
     return PoPMessages.fetchListMessages(conode, 0, 10)
         .then(response => {
@@ -144,12 +156,30 @@ function updateMessages() {
 }
 
 function addMessage() {
-    page.showModal("shared/pages/messages/newMessage", undefined, addNewMessage, true);
+    if (conode === undefined){
+        return Dialog.alert({
+            title: "No token",
+            message: "Either there is no token or the party has not been finalized yet."
+        })
+    }
+    return page.showModal("shared/pages/messages/newMessage", undefined, addNewMessage, true);
 }
 
 function addNewMessage(arg) {
     if (arg !== undefined) {
-        Dialog.confirm({
+        if (arg.reward < 0){
+            return Dialog.alert({
+                title: "Hacker",
+                message: "Nice try - but Jeff was there before you and it got fixed..."
+            })
+        }
+        if (arg.reward > arg.balance){
+            return Dialog.alert({
+                title: "Reward > Balance",
+                message: "Please enter a reward that is smaller than the balance."
+            })
+        }
+        return Dialog.confirm({
             title: "Send message",
             message: "Subject: " + arg.subject + "\n" +
                 "Cost: " + arg.balance + "\n" +
