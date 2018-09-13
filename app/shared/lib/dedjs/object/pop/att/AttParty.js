@@ -215,9 +215,6 @@ class AttParty extends Party {
             partyid: this._id
         };
         let instanceIdBuffer = undefined;
-        console.dir("sending message to conode");
-        console.dir(this);
-        console.dir("done");
 
         return cothoritySocketPop.send(RequestPath.POP_GET_INSTANCE_ID, RequestPath.POP_GET_INSTANCE_ID_REPLY, message)
             .then(reply => {
@@ -257,11 +254,15 @@ class AttParty extends Party {
         olInst
             .then(() => {
                 console.log("going to update coinInstance");
+                console.dir(this._coinInstance);
+                console.log(this._coinInstance === undefined);
                 let instId = this._popPartyOlInstance.getAccountInstanceId(this._keyPair.public);
                 return this._coinInstance === undefined ? OmniLedger.contracts.CoinsInstance.fromInstanceId(this._olRPC,
                     instId) : this._coinInstance.update();
             })
             .then(coinInst => {
+                console.log("Got new coinInstance");
+                console.dir(coinInst);
                 this._coinInstance = coinInst;
                 this._status.balance = coinInst.balance;
                 console.log("coins are: " + coinInst.balance);
