@@ -6,8 +6,8 @@ When editing this, also edit ../iOS/Info.plist.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 		  package="__PACKAGE__"
-	android:versionCode="10102"
-	android:versionName="1.1.2">
+	android:versionCode="10103"
+	android:versionName="1.1.3">
 
 	<supports-screens
 		android:smallScreens="true"

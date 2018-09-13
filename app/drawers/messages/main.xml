@@ -64,42 +64,48 @@
         -->
         <nsDrawer:RadSideDrawer.mainContent>
 
-            <GridLayout class="page-content" rows="*" columns="*,*,auto">
-                <Label text="Add a token before sending messages."
-                       textWrap="true"
-                       class="empty-list-label"
-                       colSpan="3"
-                       visibility="{{ isEmpty ? 'visible' : 'collapsed' }}"
-                />
+            <GridLayout rows="*,auto" columns="*">
+                <GridLayout class="page-content" row="0" col="0" rows="*" columns="*,*,auto">
+                    <Label text="Add a token before sending messages."
+                           textWrap="true"
+                           class="empty-list-label"
+                           colSpan="3"
+                           visibility="{{ isEmpty ? 'visible' : 'collapsed' }}"
+                    />
 
-                <nsListView:RadListView items="{{ messageList }}" itemTap="messageTapped" row="0" colSpan="3"
-                                        id="listView">
+                    <nsListView:RadListView items="{{ messageList }}" itemTap="messageTapped" row="0" colSpan="3"
+                                            id="listView">
 
-                    <nsListView:RadListView.itemTemplate>
-                        <GridLayout rows="*,*" columns="*, auto" backgroundColor="white"
-                                    class="basic-list-decorated">
-                            <Label class="list-title" text="{{ subject }}" row="0" col="0"
-                                   textWrap="true"/>
-                            <Label text="{{ balance }}" row="0" col="1" textWrap="true"/>
-                            <Label text="{{ reward }}" row="1" col="1" textWrap="true"/>
-                        </GridLayout>
-                    </nsListView:RadListView.itemTemplate>
-                </nsListView:RadListView>
+                        <nsListView:RadListView.itemTemplate>
+                            <GridLayout rows="*,*" columns="*, auto" backgroundColor="white"
+                                        class="basic-list-decorated">
+                                <Label class="list-title" text="{{ subject }}" row="0" col="0"
+                                       textWrap="true"/>
+                                <Label text="{{ balance }}" row="0" col="1" textWrap="true"/>
+                                <Label text="{{ reward }}" row="1" col="1" textWrap="true"/>
+                            </GridLayout>
+                        </nsListView:RadListView.itemTemplate>
+                    </nsListView:RadListView>
 
-                <nsFloatingButton:fab tap="updateMessages"
-                                      row="0" col="0"
-                                      icon="res://ic_reload_white_48dp"
-                                      rippleColor="#a1f1a1"
-                                      class="fab-button"
-                />
-                <nsFloatingButton:fab tap="addMessage"
-                                      row="0" col="2"
-                                      icon="res://ic_add_white_48dp"
-                                      rippleColor="#f1f1f1"
-                                      class="fab-button"
-                />
+                    <ActivityIndicator busy="{{ isLoading }}" rowSpan="1" colSpan="2"/>
+                </GridLayout>
 
-                <ActivityIndicator busy="{{ isLoading }}" rowSpan="1" colSpan="2"/>
+                <GridLayout class="page-content" rows="auto" columns="auto,*,auto" row="1" col="0">
+                    <nsFloatingButton:fab tap="updateMessages"
+                                          icon="res://ic_reload_white_48dp"
+                                          rippleColor="#a1f1a1"
+                                          class="fab-button"
+                                          row="0" col="0"
+                    />
+                    <nsFloatingButton:fab tap="addMessage"
+                                          icon="res://ic_add_white_48dp"
+                                          rippleColor="#f1f1f1"
+                                          class="fab-button"
+                                          alignSelf="flex-end"
+                                          row="0" col="2"
+                    />
+                </GridLayout>
+
             </GridLayout>
         </nsDrawer:RadSideDrawer.mainContent>
     </nsDrawer:RadSideDrawer>

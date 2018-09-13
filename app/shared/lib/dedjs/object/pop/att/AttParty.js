@@ -407,13 +407,21 @@ class AttParty extends Party {
      * @return {boolean} - returns true if the publix key is in the party
      */
     isAttendee(publicKey) {
+        if (this._finalStatement == undefined){
+            return false;
+        }
         let attendees = this._finalStatement.attendees;
+        if (attendees == undefined || attendees.length == 0){
+            return false;
+        }
         let publicKeyHexString = Convert.byteArrayToHex(publicKey);
         for (let i = 0; i < attendees.length; i++) {
-            let attendee = Convert.base64ToHex(attendees[i]);
-            console.dir("Attendee is:", i, attendees[i], attendee);
-            if (attendee === publicKeyHexString) {
-                return true;
+            if (typeof attendees[i] === 'string') {
+                let attendee = Convert.base64ToHex(attendees[i]);
+                console.dir("Attendee is:", i, attendees[i], attendee);
+                if (attendee === publicKeyHexString) {
+                    return true;
+                }
             }
         }
 
