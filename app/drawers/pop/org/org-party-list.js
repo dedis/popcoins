@@ -3,18 +3,18 @@ const Dialog = require("ui/dialogs");
 const Timer = require("timer");
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
-const Net = require("@dedis/cothority").net;
+// const Net = require("@dedis/cothority").net;
 
-// const lib = require("../../../shared/lib");
-// const dedjs = lib.dedjs;
-// const Wallet = dedjs.object.pop.Wallet;
-// const User = dedis.object.user.User.get;
-// const Convert = dedjs.Convert;
-// const Helper = dedjs.Helper;
-// const ObjectType = dedjs.ObjectType;
-// const CothorityMessages = dedjs.network.cothority_messages;
-// const RequestPath = dedjs.network.RequestPath;
-// const DecodeType = dedjs.network.DecodeType;
+const lib = require("../../../shared/lib");
+const dedjs = lib.dedjs;
+const Wallet = dedjs.object.pop.Wallet;
+const User = dedjs.object.user.get;
+const Convert = dedjs.Convert;
+const Helper = dedjs.Helper;
+const ObjectType = dedjs.ObjectType;
+const CothorityMessages = dedjs.network.cothority_messages;
+const RequestPath = dedjs.network.RequestPath;
+const DecodeType = dedjs.network.DecodeType;
 
 const CANCELED_BY_USER = "CANCELED_BY_USER_STRING";
 
@@ -32,7 +32,7 @@ function onLoaded(args) {
     page = args.object;
     page.bindingContext = viewModel;
 
-    Timer.setTimeout(() => {
+    return Timer.setTimeout(() => {
         loadParties();
     }, 10);
 }
@@ -52,7 +52,9 @@ function loadParties() {
     Wallet.loadAll()
         .then(wallets => {
             viewModel.partyListDescriptions.splice(0);
-            wallets.forEach(wallet => {
+            console.dir(wallets);
+            console.dir(wallets.length);
+            Object.values(wallets).forEach(wallet => {
                 viewModel.partyListDescriptions.push(getViewModel(wallet));
             })
 
@@ -63,6 +65,10 @@ function loadParties() {
             timerId = Timer.setInterval(() => {
                 reloadStatuses();
             }, 5000)
+        })
+        .catch(err =>{
+            console.log("error while loading party: " + err);
+            viewModel.isLoading = false;
         })
 }
 
@@ -97,16 +103,17 @@ function getViewModel(wallet) {
  */
 function reloadStatuses() {
     let newView = ObservableArray();
-    return Promise.all(
-        viewModel.partyListDescriptions.map(model => {
-                return model.party.update()
-                    .then(() => {
-                        newView.push(getViewModel(model.party));
-                    })
-            }
-        ).then(() => {
+    let updates = [];
+    for (let i =0; i < viewModel.partyListDescriptions.length; i++){
+        updates.push(model.party.update()
+            .then(() => {
+                newView.push(getViewModel(model.party));
+            }));
+    }
+    return Promise.all(updates)
+        .then(() => {
             viewModel.partyListDescriptions = newView;
-        }))
+        })
 }
 
 
@@ -299,8 +306,6 @@ function addParty() {
 
 module.exports.onLoaded = onLoaded;
 module.exports.partyTapped = partyTapped;
-module.exports.onSwipeCellStarted = onSwipeCellStarted;
-module.exports.deleteParty = deleteParty;
 module.exports.addParty = addParty;
 module.exports.onUnloaded = onUnloaded;
 module.exports.hashAndSave = hashAndSave;

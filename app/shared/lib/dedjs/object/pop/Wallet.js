@@ -246,7 +246,7 @@ class Wallet {
      */
     static loadAll() {
         // Only loading if not done yet.
-        if (List.length == 0) {
+        if (Object.keys(List).length == 0) {
             // Start with compatibility test
             return MigrateFrom.version0()
                 .then(() => {
