@@ -4,10 +4,6 @@
  * This module holds wrappers to save and load itself from disk.
  */
 
-// List of all active tokens: only loaded and once saved configurations will appear in this list.
-// The keys to this list are the hex string of the hash of the configuration stored in the token.
-let List = {};
-
 class Token {
     /**
      * Creates a new token from its basic data.
@@ -17,19 +13,16 @@ class Token {
     constructor(fs, keypair) {
         this._finalStatement = fs;
         this._keypair = keypair;
-        // We only add it to the List on the first save.
-        this._addedLoaded = false;
     }
 
     /**
-     * Saves the token to disk.
+     * Signs a message in a given context using linkable ring signatures.
+     * @param message an arbitrary buffer of data
+     * @param context a context within which an attendee will be recognized
+     * @returns {Uint8ArrayConstructor} the signature
      */
-    save() {
-        // Do saving to disk
-        if (!this._addedLoaded) {
-            this._addedLoaded = true;
-            List.push(this);
-        }
+    sign(message, context){
+        return Uint8Array;
     }
 
     /**
@@ -47,14 +40,6 @@ class Token {
      */
     static fromProto(proto) {
         return new Token();
-    }
-
-    /**
-     * Loads all Tokens from disk and does eventual conversion from older formats to new formats.
-     * @return {Promise<Token[]>}
-     */
-    static loadAll() {
-
     }
 
     // Getters for our public values.

@@ -112,8 +112,8 @@ class PopPartyInstance {
 
   /**
    * After that the party has been finalized, each attendee receive a certain
-   * amount of coin on a personnal account. This method compute the instance
-   * id of this account, depending on the public key of the attendee
+   * amount of coins in a personal account. This method computes the instance
+   * id of this account, which depends on the public key of the attendee.
    *
    * @param {Point} Pub - the public key of the attendee
    * @return {Uint8Array} - the coin instance id of the attendee

@@ -24,7 +24,7 @@ const POINTS_AGGREGATE = "q+G+7n6FXsY7hpxK3m119GuDHnchS6wqTE0sZE/fOKg=";
 const POINTS_AGGREGATE_BYTE_ARRAY = Convert.base64ToByteArray(POINTS_AGGREGATE);
 
 
-describe("Crypto", function () {
+describe.skip("Crypto", function () {
   describe("#aggregatePublicKeys", function () {
     it("should throw an error when the input is not an array", function () {
       expect(() => Crypto.aggregatePublicKeys("POINTS")).to.throw();

@@ -80,7 +80,7 @@ const PIN_REQUEST_ENCODED = Convert.base64ToByteArray("CgYxMjM0NTYSIMuCTA1q5XukT
 
 const FETCH_REQUEST_ENCODED = Convert.base64ToByteArray("ChDPqQJNDvtedr3J+AqRrmU1");
 
-describe("CothorityMessages", function () {
+describe.skip("CothorityMessages", function () {
   describe("#getModel", function () {
     it("should throw an error when name is not a string", function () {
       expect(() => CothorityMessages.getModel(42)).to.throw();

@@ -26,7 +26,7 @@ const COMPLEX_OBJECT = {
   }
 };
 
-describe("Helper", function () {
+describe.skip("Helper", function () {
   describe("#isOfType", function () {
     it("should throw an error when type is not a string", function () {
       expect(() => Helper.isOfType({}, PUBLIC_KEY_BYTE_ARRAY)).to.throw();

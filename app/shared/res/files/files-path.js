@@ -47,6 +47,14 @@ const BEERCOIN_LINKED_FINALS = POP_ATT_FINAL;
 const BEERCOIN_CHECKED_CLIENTS = "checked_clients.json";
 const BEERCOIN_ORDER_HISTORY = "order_history.json";
 
+/**
+ * Wallet files
+ */
+const WALLET_PATH = "shared/res/files/wallet";
+const WALLET_CONFIG = "config.json";
+const WALLET_FINAL = "final.json";
+const WALLET_KEYPAIR = "keypair.json";
+
 module.exports.ROSTER = ROSTER;
 module.exports.USER_NAME = USER_NAME;
 module.exports.KEY_PAIR = KEY_PAIR;
@@ -69,3 +77,7 @@ module.exports.BEERCOIN_LINKED_FINALS = BEERCOIN_LINKED_FINALS;
 module.exports.BEERCOIN_CHECKED_CLIENTS = BEERCOIN_CHECKED_CLIENTS;
 module.exports.BEERCOIN_ORDER_HISTORY = BEERCOIN_ORDER_HISTORY;
 module.exports.POP_ATT_INFOS = POP_ATT_INFOS;
+module.exports.WALLET_PATH = WALLET_PATH;
+module.exports.WALLET_CONFIG = WALLET_CONFIG;
+module.exports.WALLET_FINAL = WALLET_FINAL;
+module.exports.WALLET_KEYPAIR = WALLET_KEYPAIR;

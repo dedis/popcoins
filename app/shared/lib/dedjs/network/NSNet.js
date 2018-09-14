@@ -1,11 +1,9 @@
-"use strict";
-
 const protobuf = require("protobufjs");
 const co = require("co");
 const shuffle = require("shuffle-array");
 const WS = require("nativescript-websockets");
 const Buffer = require("buffer/").Buffer;
-const root = require("@dedis/cothority/protobuf").root;
+const root = require("@dedis/cothority").protobuf.root;
 
 function listObject(data) {
     // allows us to console.log circular objects, but prints only current level depth
@@ -41,7 +39,7 @@ function Socket(addr, service) {
     this.send = (request, response, data) => {
         return new Promise((resolve, reject) => {
             const path = this.url + "/" + request.replace(/.*\./, '');
-            console.log("net.Socket: new WebSocket(" + path + ")");
+            console.log("net.Socket: new WebSocketA(" + path + ")");
             const ws = new WS(path);
 
             const requestModel = this.protobuf.lookup(request);
@@ -90,14 +88,13 @@ function Socket(addr, service) {
 
             ws.on('close', (socket, code, reason) => {
                 console.log("closing:", code, reason);
-                if (code != 4000) {
-                    reject(new Error(event.reason));
-                }
             });
 
             ws.on('error', (socket, error) => {
                 reject(error);
             });
+
+            return ws.open();
         });
     };
 }

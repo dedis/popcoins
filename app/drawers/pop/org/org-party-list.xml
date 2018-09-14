@@ -19,16 +19,6 @@
                                 swipeActions="true"
                                 id="listView">
 
-            <nsListView:RadListView.itemSwipeTemplate>
-                <GridLayout class="basic-list-decorated" rows="*" columns="*,auto">
-                    <StackLayout orientation="horizontal" col="0">
-                    </StackLayout>
-                    <StackLayout orientation="horizontal" col="1">
-                        <Button id="button-delete" text="Delete" tap="deleteParty" backgroundColor="red"/>
-                    </StackLayout>
-                </GridLayout>
-            </nsListView:RadListView.itemSwipeTemplate>
-
             <nsListView:RadListView.itemTemplate>
                 <GridLayout rows="*,*" columns="*, auto" backgroundColor="white"
                             class="basic-list-decorated">

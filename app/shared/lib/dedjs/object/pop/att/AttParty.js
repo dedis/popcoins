@@ -257,7 +257,7 @@ class AttParty extends Party {
                 console.dir(this._coinInstance);
                 console.log(this._coinInstance === undefined);
                 let instId = this._popPartyOlInstance.getAccountInstanceId(this._keyPair.public);
-                return this._coinInstance === undefined ? OmniLedger.contracts.CoinsInstance.fromInstanceId(this._olRPC,
+                return this._coinInstance === undefined ? OmniLedger.contracts.CoinInstance.fromInstanceId(this._olRPC,
                     instId) : this._coinInstance.update();
             })
             .then(coinInst => {

@@ -6,10 +6,6 @@ const Kyber = require('@dedis/kyber-js');
  * This module holds wrappers to save and load itself from disk.
  */
 
-// List of all active final statements: only loaded and once saved configurations will appear in this list.
-// The keys to this list are the hex string of the hash of the configuration stored in the final statement.
-let List = {};
-
 class FinalStatement {
 
     /**
@@ -22,19 +18,6 @@ class FinalStatement {
         this._config = config;
         this._attendees = attendees;
         this._signature = signature;
-        // We only add it to the List on the first save.
-        this._addedLoaded = false;
-    }
-
-    /**
-     * Saves this final statement to disk.
-     */
-    save() {
-        // Do saving to disk
-        if (!this._addedLoaded) {
-            this._addedLoaded = true;
-            List.push(this);
-        }
     }
 
     /**
@@ -54,12 +37,13 @@ class FinalStatement {
         return new FinalStatement();
     }
 
-    /**
-     * Loads all final statements from disk and does eventual conversion from older formats to new formats.
-     * @return {Promise<Configuration[]>}
-     */
-    static loadAll() {
+    // Setters for the two attributes that are changeable.
+    set attendees(a){
+        this._attendees = a;
+    }
 
+    set signature(s){
+        this._signature = s;
     }
 
     // Getters for our public values.

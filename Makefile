@@ -22,11 +22,11 @@ init-npm:
 	$(npm) install
 
 link: start-dev
-	cd dedis/cothority; \
-	npm i; \
-	npm link; \
-	npm run-script build || echo Error is normal here...
-	pwd
+#	cd dedis/cothority; \
+#	npm i; \
+#	npm link; \
+#	npm run-script build || echo Error is normal here...
+#	pwd
 	npm link @dedis/cothority
 
 clean:

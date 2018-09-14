@@ -37,7 +37,7 @@ fields.server.id = Convert.base64ToByteArray(fields.server.id);
 
 const statusResponse = CothorityMessages.getModel(ObjectType.STATUS_RESPONSE).create(fields);
 
-describe("StatusExtractor", function () {
+describe.skip("StatusExtractor", function () {
   describe("#getDescription", function () {
     it("should throw an error when statusResponse is not a status response", function () {
       expect(() => StatusExtractor.getDescription("statusResponse")).to.throw();

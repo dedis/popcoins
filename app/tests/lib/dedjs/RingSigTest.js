@@ -8,7 +8,7 @@ const Kyber = require("@dedis/kyber-js");
 const suite = new Kyber.curve.edwards25519.Curve;
 const RingSig = require("../../../shared/lib/dedjs/RingSig");
 
-describe("RingSig", function () {
+describe.skip("RingSig", function () {
   it('should correctly sign and verify with only one signer', function () {
     let X = [suite.point()];
     let mine = 0;

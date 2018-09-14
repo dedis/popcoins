@@ -142,7 +142,7 @@ const CONODE_ID_REAL = "i3ZiWNQo3r8wYEOLV9qh8w==";
 const CONODE_ID_REAL_BYTE_ARRAY = Convert.base64ToByteArray(CONODE_ID_REAL);
 const SERVER_IDENTITY = Convert.toServerIdentity(CONODE_ADDRESS, CONODE_PUBLIC_KEY_BYTE_ARRAY, CONODE_DESCRIPTION, CONODE_ID_REAL_BYTE_ARRAY);
 
-describe("User", function () {
+describe.skip("User", function () {
 
   function clean() {
     const promises = Object.getOwnPropertyNames(FilesPath).map(filePath => {

@@ -101,7 +101,7 @@ const JSON_KEY_PAIR = JSON.stringify({
 });
 const KEY_PAIR = Convert.parseJsonKeyPair(JSON_KEY_PAIR);
 
-describe("Org", function () {
+describe.skip("Org", function () {
 
   function clean() {
     const promises = Object.getOwnPropertyNames(FilesPath).map(filePath => {

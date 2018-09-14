@@ -94,6 +94,34 @@ function removeFolder(folder) {
     });
 }
 
+/**
+ * Removes the directory recursively, but only files directly inside and the directory itself. If there
+ * are subdirectories, this will fail.
+ * @param dir
+ * @returns {Promise<void>}
+ */
+function rmrf(dir) {
+    let ps = Promise.resolve();
+    FileIO.forEachFolderElement(dir, function (wallet) {
+        let wp = FileIO.join(dir, wallet.name);
+        // console.dir("wallet path is:", wp);
+        FileIO.forEachFolderElement(wp, function (file) {
+            // console.dir("wallet file is:", file);
+            let f = Documents.getFile(FileIO.join(wp, file.name));
+            ps = ps.then(() => {
+                // console.dir("deleting file", f.path, f.name);
+                return f.remove()
+            });
+        });
+        let d = Documents.getFolder(wp);
+        ps = ps.then(() => {
+            // console.dir("deleting directory", d.path);
+            return d.remove()
+        });
+    });
+    return ps;
+}
+
 function folderExists(path) {
     return FileSystem.Folder.exists(this.join(Documents.path, path));
 }
@@ -109,4 +137,4 @@ module.exports.removeFolder = removeFolder;
 module.exports.join = FileSystem.path.join;
 module.exports.fileExists = fileExists;
 module.exports.folderExists = folderExists;
-
+module.exports.rmrf = rmrf;
