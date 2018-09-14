@@ -1,17 +1,20 @@
 const Frame = require("ui/frame");
 const Dialog = require("ui/dialogs");
 const Timer = require("timer");
-const Wallet = require("../../../shared/lib/dedjs/object/pop/Wallet");
-const User = require("../../../shared/lib/dedjs/object/user/User").get;
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
-const Convert = require("../../../Convert");
-const Helper = require("../../../Helper");
-const ObjectType = require("../../../ObjectType");
 const Net = require("@dedis/cothority").net;
-const CothorityMessages = require("../../../network/cothority-messages");
-const RequestPath = require("../../../network/RequestPath");
-const DecodeType = require("../../../network/DecodeType");
+
+// const lib = require("../../../shared/lib");
+// const dedjs = lib.dedjs;
+// const Wallet = dedjs.object.pop.Wallet;
+// const User = dedis.object.user.User.get;
+// const Convert = dedjs.Convert;
+// const Helper = dedjs.Helper;
+// const ObjectType = dedjs.ObjectType;
+// const CothorityMessages = dedjs.network.cothority_messages;
+// const RequestPath = dedjs.network.RequestPath;
+// const DecodeType = dedjs.network.DecodeType;
 
 const CANCELED_BY_USER = "CANCELED_BY_USER_STRING";
 
