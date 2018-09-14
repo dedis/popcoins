@@ -1,8 +1,8 @@
 'use strict';
 
+require("nativescript-nodeify");
 const DedisProtobuf = require("@dedis/cothority").protobuf;
 const Crypto = require("crypto-browserify");
-
 
 /**
  * Base class for the protobuf library that provides helpers to encode and decode

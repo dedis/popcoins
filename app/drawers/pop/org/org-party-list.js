@@ -1,9 +1,10 @@
+require("nativescript-nodeify");
 const Frame = require("ui/frame");
 const Dialog = require("ui/dialogs");
 const Timer = require("timer");
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
-// const Net = require("@dedis/cothority").net;
+const Net = require("@dedis/cothority").net;
 
 const lib = require("../../../shared/lib");
 const dedjs = lib.dedjs;
@@ -12,7 +13,7 @@ const User = dedjs.object.user.get;
 const Convert = dedjs.Convert;
 const Helper = dedjs.Helper;
 const ObjectType = dedjs.ObjectType;
-const CothorityMessages = dedjs.network.cothority_messages;
+const CothorityMessages = dedjs.network.CothorityMessages;
 const RequestPath = dedjs.network.RequestPath;
 const DecodeType = dedjs.network.DecodeType;
 
@@ -31,6 +32,9 @@ function onLoaded(args) {
     console.log("party-list loading");
     page = args.object;
     page.bindingContext = viewModel;
+
+    viewModel.partyListDescriptions.splice(0);
+    console.log("hi");
 
     return Timer.setTimeout(() => {
         loadParties();
@@ -52,8 +56,6 @@ function loadParties() {
     Wallet.loadAll()
         .then(wallets => {
             viewModel.partyListDescriptions.splice(0);
-            console.dir(wallets);
-            console.dir(wallets.length);
             Object.values(wallets).forEach(wallet => {
                 viewModel.partyListDescriptions.push(getViewModel(wallet));
             })
@@ -66,7 +68,7 @@ function loadParties() {
                 reloadStatuses();
             }, 5000)
         })
-        .catch(err =>{
+        .catch(err => {
             console.log("error while loading party: " + err);
             viewModel.isLoading = false;
         })
@@ -102,9 +104,9 @@ function getViewModel(wallet) {
  * @returns {Promise<any[]>}
  */
 function reloadStatuses() {
-    let newView = ObservableArray();
+    let newView = new ObservableArray();
     let updates = [];
-    for (let i =0; i < viewModel.partyListDescriptions.length; i++){
+    for (let i = 0; i < viewModel.partyListDescriptions.length; i++) {
         updates.push(model.party.update()
             .then(() => {
                 newView.push(getViewModel(model.party));
@@ -209,6 +211,7 @@ function verifyLinkToConode() {
     }).then(result => {
         if (result !== "Cancel") {
             index = conodesNames.indexOf(result);
+            console.log("index is:", index)
             return sendLinkRequest(conodes[index], "")
                 .then(result => {
                     console.log("Prompting for pin");
@@ -262,6 +265,8 @@ function verifyLinkToConode() {
 
 function addParty() {
     let conode = undefined;
+    console.log("configuring a new party");
+
     verifyLinkToConode()
         .then((result) => {
             conode = result;
@@ -272,19 +277,19 @@ function addParty() {
             })
         })
         .then(result => {
-            console.dir("result is:", result);
             if (result === "Configure a new party") {
                 console.log("configuring a new party");
-                Frame.topmost().navigate({
+                console.dir(newParty);
+                return Frame.topmost().navigate({
                     moduleName: "drawers/pop/org/config/config-page",
                     context: {
-                        party: newParty,
+                        // party: newParty,
                         leader: conode,
                         newParty: true
                     }
                 });
             } else if (result === "List the proposals") {
-                Frame.topmost().navigate({
+                return Frame.topmost().navigate({
                     moduleName: "drawers/pop/org/proposals/org-party-proposals",
                     context: {
                         conode: conode,
@@ -301,7 +306,6 @@ function addParty() {
         .catch(() => {
             newParty.remove();
         });
-
 }
 
 module.exports.onLoaded = onLoaded;
@@ -348,15 +352,9 @@ function sendLinkRequest(conode, pin) {
                 cothoritySocket.send(RequestPath.POP_PIN_REQUEST, RequestPath.STATUS_REQUEST, pinRequestMessage)
         })
         .then(response => {
-            console.log("set linked");
-            return this.setLinkedConode(conode, true)
-                .then(() => {
-                    const fields = {
-                        alreadyLinked: response === ALREADY_LINKED
-                    };
-                    return Promise.resolve(fields);
-                })
-
+            return {
+                alreadyLinked: response === ALREADY_LINKED
+            };
         })
         .catch(error => {
             console.log("link error: " + error.message);

@@ -28,6 +28,8 @@ let viewModel = Observable.fromObject({
 
 function onNavigatingTo(args) {
     console.log("config-page");
+    return;
+
     if (args.isBackNavigation) {
         return;
     }
