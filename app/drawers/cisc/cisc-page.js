@@ -1,6 +1,6 @@
 const FrameModule = require("ui/frame");
 const Cisc = require("../../shared/lib/dedjs/object/cisc/Cisc").Skipchain;
-const FilePaths = require("../../shared/res/files/files-path");
+const FilePaths = require("../../shared/lib/file-io/files-path");
 const FileIO = require("../../shared/lib/file-io/file-io");
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;

@@ -6,7 +6,7 @@ require("nativescript-nodeify");
 const Kyber = require("@dedis/kyber-js");
 const CURVE_ED25519 = new Kyber.curve.edwards25519.Curve;
 
-const FilesPath = require("../../../../../shared/res/files/files-path");
+const FilesPath = require("../../../../../shared/lib/file-io/files-path");
 const FileIO = require("../../../../../shared/lib/file-io/file-io");
 const Convert = require("../../../../../shared/lib/dedjs/Convert");
 const Helper = require("../../../../../shared/lib/dedjs/Helper");

@@ -2,7 +2,7 @@ const ChaiAsPromised = require("chai-as-promised");
 chai.use(ChaiAsPromised);
 chai.should();
 
-const FilesPath = require("../../../../../shared/res/files/files-path");
+const FilesPath = require("../../../../../shared/lib/file-io/files-path");
 const FileIO = require("../../../../../shared/lib/file-io/file-io");
 const Convert = require("../../../../../shared/lib/dedjs/Convert");
 const CothorityMessages = require("../../../../../shared/lib/dedjs/network/cothority-messages");

@@ -102,12 +102,12 @@ function removeFolder(folder) {
  */
 function rmrf(dir) {
     let ps = Promise.resolve();
-    FileIO.forEachFolderElement(dir, function (wallet) {
-        let wp = FileIO.join(dir, wallet.name);
+    forEachFolderElement(dir, function (wallet) {
+        let wp = join(dir, wallet.name);
         // console.dir("wallet path is:", wp);
-        FileIO.forEachFolderElement(wp, function (file) {
+        forEachFolderElement(wp, function (file) {
             // console.dir("wallet file is:", file);
-            let f = Documents.getFile(FileIO.join(wp, file.name));
+            let f = Documents.getFile(join(wp, file.name));
             ps = ps.then(() => {
                 // console.dir("deleting file", f.path, f.name);
                 return f.remove()

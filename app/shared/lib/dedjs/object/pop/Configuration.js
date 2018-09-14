@@ -1,4 +1,4 @@
-const FilePaths = require("../../../../res/files/files-path");
+const FilePaths = require("../../../file-io/files-path");
 const FileIO = require("../../../file-io/file-io");
 const Convert = require("../../Convert");
 const FileSystem = require("tns-core-modules/file-system");

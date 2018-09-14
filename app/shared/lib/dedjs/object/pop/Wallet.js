@@ -1,13 +1,14 @@
-const FilePaths = require("../../../../res/files/files-path");
-const FileIO = require("../../../file-io/file-io");
-const Convert = require("../../Convert");
+require("nativescript-nodeify");
 const FileSystem = require("tns-core-modules/file-system");
 const Documents = FileSystem.knownFolders.documents();
+const OmniLedger = require("@dedis/cothority").omniledger;
 // const Net = require("@dedis/cothority").net;
+
+const FilePaths = require("../../../file-io/files-path");
+const FileIO = require("../../../file-io/file-io");
+const Convert = require("../../Convert");
 const RequestPath = require("../../network/RequestPath");
 const Net = require("../../network/NSNet");
-const OmniLedger = require("@dedis/cothority").omniledger;
-const Crypto = require('crypto-browserify');
 const Configuration = require('./Configuration');
 const KeyPair = require('./KeyPair');
 
@@ -23,8 +24,9 @@ let List = {};
 
 const STATE_CONFIG = 1;
 const STATE_PUBLISH = 2;
-const STATE_FINALIZED = 3;
-const STATE_TOKEN = 4;
+const STATE_FINALIZING = 3;
+const STATE_FINALIZED = 4;
+const STATE_TOKEN = 5;
 
 class Wallet {
     /**
@@ -61,6 +63,14 @@ class Wallet {
             return STATE_PUBLISH;
         }
         return STATE_CONFIG;
+    }
+
+    stateStr(){
+        return ["Configurating",
+        "Published",
+        "Finalizing",
+        "Finalized",
+        "Token"][this.state()-1]
     }
 
     /**
@@ -457,5 +467,6 @@ module.exports.List = List;
 module.exports.MigrateFrom = MigrateFrom;
 module.exports.STATE_CONFIG = STATE_CONFIG;
 module.exports.STATE_PUBLISH = STATE_PUBLISH;
+module.exports.STATE_FINALIZING = STATE_FINALIZING;
 module.exports.STATE_FINALIZED = STATE_FINALIZED;
 module.exports.STATE_TOKEN = STATE_TOKEN;

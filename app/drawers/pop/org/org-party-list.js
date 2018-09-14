@@ -2,14 +2,16 @@ require("nativescript-nodeify");
 const Frame = require("ui/frame");
 const Dialog = require("ui/dialogs");
 const Timer = require("timer");
-const ObservableModule = require("data/observable");
+const Observable = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const Net = require("@dedis/cothority").net;
 
 const lib = require("../../../shared/lib");
 const dedjs = lib.dedjs;
 const Wallet = dedjs.object.pop.Wallet;
+const Configuration = dedjs.object.pop.Configuration;
 const User = dedjs.object.user.get;
+console.log("loading convert in wallet");
 const Convert = dedjs.Convert;
 const Helper = dedjs.Helper;
 const ObjectType = dedjs.ObjectType;
@@ -19,7 +21,7 @@ const DecodeType = dedjs.network.DecodeType;
 
 const CANCELED_BY_USER = "CANCELED_BY_USER_STRING";
 
-const viewModel = ObservableModule.fromObject({
+const viewModel = Observable.fromObject({
     partyListDescriptions: new ObservableArray(),
     isLoading: false,
     isEmpty: true
@@ -77,12 +79,12 @@ function loadParties() {
 /**
  * Creates a view-model for better updating.
  * @param wallet{Wallet}
- * @returns {ObservableModule}
+ * @returns {Observable}
  */
 function getViewModel(wallet) {
-    return ObservableModule.fromObject({
+    return Observable.fromObject({
         party: wallet,
-        desc: ObservableModule.fromObjectRecursive({
+        desc: Observable.fromObjectRecursive({
             name: wallet.config.name,
             datetime: wallet.config.datetime,
             location: wallet.config.location,
@@ -92,8 +94,8 @@ function getViewModel(wallet) {
                 aggregate: new Uint8Array()
             }
         }),
-        status: ObservableModule.fromObject({
-            status: wallet.state()
+        status: Observable.fromObject({
+            status: wallet.stateStr()
         })
     })
 }
@@ -105,17 +107,19 @@ function getViewModel(wallet) {
  */
 function reloadStatuses() {
     let newView = new ObservableArray();
-    let updates = [];
-    for (let i = 0; i < viewModel.partyListDescriptions.length; i++) {
-        updates.push(model.party.update()
-            .then(() => {
-                newView.push(getViewModel(model.party));
-            }));
-    }
-    return Promise.all(updates)
-        .then(() => {
-            viewModel.partyListDescriptions = newView;
+    return Promise.all(
+        viewModel.partyListDescriptions.map(model => {
+            return model.party.update()
+                .catch(err => {
+                    console.log("error while updating party: " + err);
+                })
+                .then(() => {
+                    newView.push(getViewModel(model.party));
+                })
         })
+    ).then(() => {
+        viewModel.partyListDescriptions = newView;
+    })
 }
 
 
@@ -128,7 +132,7 @@ function reloadStatuses() {
 function partyTapped(args) {
     const index = args.index;
     const party = viewModel.partyListDescriptions.getItem(index).party;
-    if (party._status() == Wallet.STATE_PUBLISH) {
+    if (party.state() == Wallet.STATE_PUBLISH) {
         return Frame.topmost().navigate({
             moduleName: "drawers/pop/org/register/register-page",
             context: {
@@ -141,7 +145,7 @@ function partyTapped(args) {
     let PUBLISH = "Publish the party";
     let DELETE = "Remove the party";
     let actions = [DELETE];
-    if (party.status() == Wallet.STATE_CONFIG) {
+    if (party.state() == Wallet.STATE_CONFIG) {
         actions = [CONFIG, PUBLISH, DELETE];
     }
     return Dialog.action({
@@ -154,7 +158,7 @@ function partyTapped(args) {
             return Frame.topmost().navigate({
                 moduleName: "drawers/pop/org/config/config-page",
                 context: {
-                    party: party
+                    wallet: party
                 }
             });
         } else if (result === PUBLISH) {
@@ -266,6 +270,14 @@ function verifyLinkToConode() {
 function addParty() {
     let conode = undefined;
     console.log("configuring a new party");
+    let date = new Date();
+    let name, location = ["", ""];
+    if (RequestPath.PREFILL_PARTY) {
+        name = "test " + date.getHours() + ":" + date.getMinutes();
+        location = "testing-land";
+    }
+    let config = new Configuration(name, date.toString(), location, User.getRoster());
+    let wallet = new Wallet(config);
 
     verifyLinkToConode()
         .then((result) => {
@@ -279,13 +291,12 @@ function addParty() {
         .then(result => {
             if (result === "Configure a new party") {
                 console.log("configuring a new party");
-                console.dir(newParty);
                 return Frame.topmost().navigate({
                     moduleName: "drawers/pop/org/config/config-page",
                     context: {
-                        // party: newParty,
+                        wallet: wallet,
                         leader: conode,
-                        newParty: true
+                        newConfig: true
                     }
                 });
             } else if (result === "List the proposals") {
@@ -303,16 +314,18 @@ function addParty() {
 
             return Promise.resolve()
         })
-        .catch(() => {
-            newParty.remove();
+        .catch(err => {
+            console.dir("error while adding a party: " + err)
         });
 }
 
-module.exports.onLoaded = onLoaded;
-module.exports.partyTapped = partyTapped;
-module.exports.addParty = addParty;
-module.exports.onUnloaded = onUnloaded;
-module.exports.hashAndSave = hashAndSave;
+module.exports = {
+    onLoaded,
+    partyTapped,
+    addParty,
+    onUnloaded,
+    hashAndSave,
+}
 
 /**
  * TO BE MOVED ELSEWHERE

@@ -106,7 +106,8 @@ function Socket(addr, service) {
  * */
 class RosterSocket {
     constructor(roster, service) {
-        this.addresses = roster.identities.map(id => id.websocketAddr);
+        return;
+        this.addresses = roster.list.map(conode => conode.address.replace("tls:", "ws:"));
         this.service = service;
         this.lastGoodServer = null;
     }
@@ -120,6 +121,7 @@ class RosterSocket {
      * @returns {Promise} holds the returned data in case of success.
      */
     send(request, response, data) {
+        return Promise.resolve();
         const that = this;
         const fn = co.wrap(function* () {
             const addresses = that.addresses;
