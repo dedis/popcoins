@@ -50,7 +50,7 @@
     "pure-uuid": "^1.4.8",
     "shuffle-array": "^1.0.1",
     "ssl-utils": "^0.3.0",
-    "tns-core-modules": "^4.2.0",
+    "tns-core-modules": "^4.2.1",
     "toml": "^2.3.3",
     "tomlify-j0.4": "^3.0.0",
     "util": "^0.11.0",
