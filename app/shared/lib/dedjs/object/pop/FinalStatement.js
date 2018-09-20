@@ -1,3 +1,4 @@
+require("nativescript-nodeify");
 const Kyber = require('@dedis/kyber-js');
 
 /**
@@ -18,6 +19,25 @@ class FinalStatement {
         this._config = config;
         this._attendees = attendees;
         this._signature = signature;
+    }
+
+    /**
+     * @param att a new attendee to add - it is explicitly allowed to
+     * add an attendee more than once, however, he will only appear once
+     * in the list.
+     */
+    registerAttendee(att){
+        if (!att instanceof Kyber.Point){
+            console.log("att is not of type Point");
+            return;
+        }
+        this._attendees.forEach(a =>{
+            if (a.equal(att)){
+                console.log("this attendee already exists");
+                return;
+            }
+        })
+        this._attendees.push(att);
     }
 
     /**
@@ -63,3 +83,5 @@ class FinalStatement {
         return null;
     }
 }
+
+module.exports = FinalStatement;

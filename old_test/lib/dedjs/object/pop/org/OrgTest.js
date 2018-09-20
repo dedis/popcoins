@@ -2,16 +2,16 @@ const ChaiAsPromised = require("chai-as-promised");
 chai.use(ChaiAsPromised);
 chai.should();
 
-const FilesPath = require("../../../../../../shared/lib/file-io/files-path");
-const FileIO = require("../../../../../../shared/lib/file-io/file-io");
-const Convert = require("../../../../../../shared/lib/dedjs/Convert");
-const Helper = require("../../../../../../shared/lib/dedjs/Helper");
-const ObjectType = require("../../../../../../shared/lib/dedjs/ObjectType");
-const CothorityMessages = require("../../../../../../shared/lib/dedjs/network/cothority-messages");
-const User = require("../../../../../../shared/lib/dedjs/object/user/User").get;
-const PoP = require("../../../../../../shared/lib/dedjs/object/pop/PoP").get;
+const FilesPath = require("../../../../../../app/shared/lib/file-io/files-path");
+const FileIO = require("../../../../../../app/shared/lib/file-io/file-io");
+const Convert = require("../../../../../../app/shared/lib/dedjs/Convert");
+const Helper = require("../../../../../../app/shared/lib/dedjs/Helper");
+const ObjectType = require("../../../../../../app/shared/lib/dedjs/ObjectType");
+const CothorityMessages = require("../../../../../../app/shared/lib/dedjs/network/cothority-messages");
+const User = require("../../../../../../app/shared/lib/dedjs/object/user/User").get;
+const PoP = require("../../../../../../app/shared/lib/dedjs/object/pop/PoP").get;
 
-const OrgParty = require("../../../../../../shared/lib/dedjs/object/pop/org/OrgParty").Party;
+const OrgParty = require("../../../../../../app/shared/lib/dedjs/object/pop/org/OrgParty").Party;
 const PARTY_FOLDER = "TEST_PARTY";
 let Org = new OrgParty(PARTY_FOLDER);
 

@@ -1,24 +1,24 @@
 require("nativescript-nodeify");
-
-const Kyber = require("@dedis/kyber-js");
-const NetUtils = require("../../network/NetUtils");
-const CURVE_ED25519 = new Kyber.curve.edwards25519.Curve;
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
+const Kyber = require("@dedis/kyber-js");
+const CurveEd25519 = new Kyber.curve.edwards25519.Curve;
+const Cothority = require("@dedis/cothority");
+const Net = require("@dedis/cothority").net;
+
+const NetUtils = require("../../network/NetUtils");
 const FileIO = require("../../../file-io/file-io");
-const FilesPath = require("../../../file-io/files-path");
+const FilePaths = require("../../../file-io/files-path");
 const Package = require("../../Package");
 const Convert = require("../../Convert");
+const Log = require("../../Log");
 const ObjectType = require("../../ObjectType");
 const Helper = require("../../Helper");
-const Net = require("@dedis/cothority").net;
 const Crypto = require("../../Crypto");
 const RequestPath = require("../../network/RequestPath");
 const DecodeType = require("../../network/DecodeType");
 const CothorityMessages = require("../../network/cothority-messages");
-
-var platform = require("tns-core-modules/platform");
-var Directory = require("../../../Directory/Directory");
+const KeyPair = require('../../KeyPair');
 
 /**
  * This singleton is the user of the app. It contains everything needed that is general, app-wide or does not belong to any precise subpart.
@@ -38,13 +38,6 @@ class User {
     constructor() {
         this._name = "";
         this._isLoaded = false;
-        this._roster = ObservableModule.fromObject({
-            isLoading: false,
-            id: new Uint8Array(),
-            list: new ObservableArray(),
-            aggregate: new Uint8Array(),
-            statusList: new ObservableArray()
-        });
     }
 
     /**
@@ -77,29 +70,11 @@ class User {
     }
 
     /**
-     * Returns wether the key pair of the user is set.
-     * @returns {boolean} - true if and only if the key pair of the user has been set
-     */
-    isKeyPairSet() {
-        return this._keyPair.isSet();
-    }
-
-    /**
      * Gets the users key pair.
      * @returns {KeyPair} - a key pair object containg the keys of the user
      */
     getKeyPair() {
         return this._keyPair;
-    }
-
-    /**
-     * Sets the new key pair given in parameters.
-     * @param {KeyPair} keyPair - the new key pair to set
-     * @param {boolean} save - if the new key pair should be saved permanently
-     * @returns {Promise} - a promise that gets resolved once the new key pair has been set and saved if the save parameter is set to true
-     */
-    setKeyPair(keyPair, save) {
-        return this._keyPair._setKeyPair(keyPair.public, keyPair.private, save);
     }
 
     /**
@@ -111,31 +86,25 @@ class User {
     }
 
     /**
-     * Returns the observable roster module.
-     * @returns {ObservableModule} - the observable roster module
+     * Gets the users roster.
+     * @returns {Roster} - a roster object containing the conodes of the user
      */
-    getRosterModule() {
+    get roster() {
+        if (this._roster === undefined) {
+            this._roster = new Cothority.Roster(CurveEd25519, []);
+        }
+        // Why would we need this?
+        if (this._roster.identities === undefined) {
+            this._roster.identities = [];
+        }
         return this._roster;
     }
 
     /**
-     * Gets the users roster.
-     * @returns {Roster} - a roster object containing the conodes of the user
+     * @returns {[any , any , any , any , any , any , any , any , any , any]}
      */
-    getRoster() {
-        const rosterModule = this.getRosterModule();
-
-        let id = undefined;
-        if (rosterModule.id.length > 0) {
-            id = rosterModule.id;
-        }
-
-        const list = [];
-        rosterModule.list.forEach(server => {
-            list.push(server);
-        });
-
-        return CothorityMessages.createRoster(id, list, rosterModule.aggregate);
+    get statusList(){
+        return this._statusList;
     }
 
     /**
@@ -152,24 +121,14 @@ class User {
             throw new Error("name must be of type string");
         }
 
-        const oldName = this.getName();
         this._name = name;
         let nameObject = {"name": this._name};
         if (save) {
             let toWrite;
             toWrite = Convert.objectToJson(nameObject);
-
-
-            return FileIO.writeStringTo(FilesPath.USER_NAME, toWrite)
+            return FileIO.writeStringTo(FilePaths.USER_NAME, toWrite)
                 .catch((error) => {
-                    console.log(error);
-                    console.dir(error);
-                    console.trace();
-
-                    return this.setName(oldName, false)
-                        .then(() => {
-                            return Promise.reject(error);
-                        });
+                    Log.rcatch(error, "error while setting name");
                 });
         }
 
@@ -183,46 +142,36 @@ class User {
      * @returns {Promise} - a promise that gets resolved once the new roster has been set and saved if the save parameter is set to true
      */
     setRoster(roster, save) {
-        if (!Helper.isOfType(roster, ObjectType.ROSTER)) {
+        Log.lvl3("setRoster", save);
+        if (!(roster instanceof Cothority.Roster)) {
+            Log.error("not a roster");
             throw new Error("roster must be an instance of Roster");
         }
         if (typeof save !== "boolean") {
+            Log.error("not a boolean");
             throw new Error("save must be of type boolean");
         }
 
-        const oldRoster = this.getRoster();
-
-        this.getRosterModule().id = new Uint8Array();
-        if (roster.id !== undefined) {
-            this.getRosterModule().id = roster.id;
-        }
-        this.emptyRosterList();
-        roster.list.forEach((server) => {
-            server.toHex = Convert.byteArrayToHex;
-            this.getRosterModule().list.push(server);
-        });
-        this.getRosterModule().aggregate = roster.aggregate;
-
-        const newRoster = this.getRoster();
+        this._roster = roster;
 
         if (save) {
             let toWrite = "";
-            if (newRoster.list.length > 0) {
-                toWrite = Convert.objectToJson(newRoster);
+            if (roster.identities.length > 0) {
+                try {
+                    toWrite = Convert.rosterToJson(roster);
+                } catch(e){
+                    Log.catch(e, "cannot convert");
+                }
             }
+            Log.llvl3("writing new roster:", toWrite);
 
-            return FileIO.writeStringTo(FilesPath.ROSTER, toWrite)
+            return FileIO.writeStringTo(FilePaths.ROSTER, toWrite)
                 .catch((error) => {
-                    console.log(error);
-                    console.dir(error);
-                    console.trace();
-
-                    return this.setRoster(oldRoster, false)
-                        .then(() => {
-                            return Promise.reject(error);
-                        });
+                    Log.rcatch(error, "error while setting roster:");
+                })
+                .then(() => {
+                    Log.lvl2("saved roster to:", FilePaths.ROSTER);
                 });
-
         } else {
             return Promise.resolve();
         }
@@ -238,15 +187,27 @@ class User {
      * @returns {Promise} - a promise that gets returned once the server has been removed from the roster and saved
      */
     substractServerByIndex(index) {
-        if (typeof index !== "number" || !(0 <= index && index < this.getRosterModule().list.length)) {
+        if (typeof index !== "number" || !(0 <= index && index < this.roster.identities.length)) {
             throw new Error("index must be of type number and be in the right range");
         }
 
-        const server = this.getRosterModule().list.getItem(index);
+        const server = this.roster.identities.getItem(index);
 
         return this.substractRoster(CothorityMessages.createRoster(undefined, [server], server.public));
     }
 
+    /**
+     * @param conode {ServerIdentity} removes this serverIdentity from the roster.
+     * @return {Promise} when the new roster is saved.
+     */
+    removeConode(conode){
+        this._roster.identities.forEach((id, i)=>{
+            if (id.public.equal(conode.public)){
+                this._roster.identities.splice(i, 1);
+            }
+        })
+        return this.setRoster(this._roster, true);
+    }
     /**
      * Substracts the roster given as parameter from the users roster.
      * @param {Roster} roster - the roster to substract
@@ -257,21 +218,21 @@ class User {
             throw new Error("roster must be an instance of Roster");
         }
 
-        if (this.getRosterModule().list.length === 0) {
+        if (this.roster.identities.length === 0) {
             return Promise.resolve();
-        } else if (roster.list.length === 0) {
+        } else if (roster.identities.length === 0) {
             return Promise.resolve();
         } else {
-            const idsToExclude = roster.list.map(server => {
+            const idsToExclude = roster.identities.map(server => {
                 return Convert.byteArrayToBase64(server.id);
             });
 
             const newList = [];
             const points = [];
-            this.getRosterModule().list.forEach(server => {
+            this.roster.identities.forEach(server => {
                 if (!idsToExclude.includes(Convert.byteArrayToBase64(server.id))) {
                     newList.push(server);
-                    let point = CURVE_ED25519.point();
+                    let point = CurveEd25519.point();
                     point.unmarshalBinary(server.public);
                     points.push(point);
                 }
@@ -306,20 +267,18 @@ class User {
             throw new Error("description must be of type string");
         }
 
-        return this.addServer(Convert.toServerIdentity(address, publicKey, description, undefined));
+        return this.addServer(Convert.toServerIdentity(address, publicKey, description));
     }
 
     /**
      * Adds a server to the roster of the user.
      * @param {ServerIdentity} server - the server to add to the roster
-     * @returns {Promise} - a promise that gets resolved once the server has been added to the roster and saved
      */
     addServer(server) {
-        if (!Helper.isOfType(server, ObjectType.SERVER_IDENTITY)) {
+        if (!(server instanceof Cothority.ServerIdentity)) {
             throw new Error("server must be of type ServerIdentity");
         }
-
-        return this.addRoster(CothorityMessages.createRoster(undefined, [server], server.public));
+        this.roster.identities.push(server);
     }
 
     /**
@@ -328,31 +287,33 @@ class User {
      * @returns {Promise} - a promise that gets resolved once the roster has been added and saved
      */
     addRoster(roster) {
+        console.trace();
+        throw new Error("Don't use this");
         if (!Helper.isOfType(roster, ObjectType.ROSTER)) {
             throw new Error("roster must be an instance of Roster");
         }
 
-        if (this.getRosterModule().list.length === 0) {
+        if (this.roster.identities.length === 0) {
             return this.setRoster(roster, true);
-        } else if (roster.list.length === 0) {
+        } else if (roster.identities.length === 0) {
             return Promise.resolve();
         } else {
             const newList = [];
             const points = [];
             const idsToExclude = [];
 
-            this.getRosterModule().list.forEach(server => {
+            this.roster.identities.forEach(server => {
                 newList.push(server);
-                let point = CURVE_ED25519.point();
+                let point = CurveEd25519.point();
                 point.unmarshalBinary(server.public);
                 points.push(point);
                 idsToExclude.push(Convert.byteArrayToBase64(server.id));
             });
 
-            roster.list.forEach(server => {
+            roster.identities.forEach(server => {
                 if (!idsToExclude.includes(Convert.byteArrayToBase64(server.id))) {
                     newList.push(server);
-                    let point = CURVE_ED25519.point();
+                    let point = CurveEd25519.point();
                     point.unmarshalBinary(server.public);
                     points.push(point);
                 }
@@ -365,81 +326,56 @@ class User {
     }
 
     /**
-     * Empties the roster status list.
-     */
-    emptyRosterStatusList() {
-        while (this.getRosterModule().statusList.length > 0) {
-            this.getRosterModule().statusList.pop();
-        }
-    }
-
-    /**
-     * Empties the roster list. This action is not stored permanently.
-     */
-    emptyRosterList() {
-        while (this.getRosterModule().list.length > 0) {
-            this.getRosterModule().list.pop();
-        }
-    }
-
-    /**
      * Gets the status of all the conodes in the users roster.
      * @returns {Promise} - a promise that gets resolved once all the statuses of the conodes were received
      */
     getRosterStatus() {
-        this.getRosterModule().isLoading = true;
-        this.emptyRosterStatusList();
+        this._statusList = [];
 
-        const conodes = Array.from(this.getRoster().list);
-        const statusRequestMessage = {};
-
-        if (conodes.length == 0) {
-            RequestPath.DEDIS_CONODES.forEach(address => {
-                console.log("creating conode:" + address);
-                // This is wrong, because it will run concurrently with the code below. But because this is
-                // being called regularly to update the list of conodes, it works anyway...
-                NetUtils.getServerIdentiyFromAddress("tls://" + address)
-                    .then(server => {
-                        console.dir("found server:", server);
-                        conodes.push(server);
-                        this.addServer(server)
+        return Promise.resolve()
+            .then(() => {
+                if (this.roster.identities === undefined || this.roster.identities.length == 0) {
+                    Log.lvl1("Creating test identities");
+                    return Promise.all(RequestPath.DEDIS_CONODES.map(address => {
+                        return NetUtils.getServerIdentiyFromAddress("tls://" + address)
+                            .then(server => {
+                                this.addServer(server);
+                            })
                             .catch(error => {
-                                return Promise.reject(error.message);
+                                Log.rcatch(error, "couldn't get address");
+                            })
+                    })).then(() => {
+                        return this.setRoster(this.roster, true)
+                            .catch(err=>{
+                                Log.catch(err, "couldn't set roster");
                             });
                     })
-                    .catch(error => {
-                        console.dir("couldn't get address");
-                        return Promise.reject("couldn't get server: " + error.message);
-                    })
+                }
             })
-        }
-
-
-        conodes.map((server) => {
-            const address = Convert.tlsToWebsocket(server, "");
-            const cothoritySocket = new Net.Socket(address, RequestPath.STATUS);
-            return cothoritySocket.send(RequestPath.STATUS_REQUEST, DecodeType.STATUS_RESPONSE, statusRequestMessage)
-                .then(statusResponse => {
-                    this.getRosterModule().statusList.push({
-                        conode: server,
-                        conodeStatus: statusResponse
-                    });
-
-                    return Promise.resolve();
-                })
-                .catch(error => {
-                    console.log(error);
-                    console.dir(error);
-                    console.trace();
-
-                    return Promise.reject(error);
-                });
-        });
-
-        return Promise.all(conodes)
             .then(() => {
-                this.getRosterModule().isLoading = false;
-            });
+                const statusRequestMessage = {};
+                return Promise.all(
+                    this.roster.identities.map((server) => {
+                        const address = server.websocketAddr;
+                        const cothoritySocket = new Net.Socket(address, RequestPath.STATUS);
+                        return cothoritySocket.send(RequestPath.STATUS_REQUEST, DecodeType.STATUS_RESPONSE, statusRequestMessage)
+                            .then(response => {
+                                response.conode = server;
+                                return response;
+                            })
+                            .catch(error => {
+                                console.log("couldn't reach server", address, error);
+                                return {
+                                    status: {Generic: {field: {Version: error}}},
+                                    conode: server
+                                }
+                            })
+                    })
+                ).then(responses => {
+                    this._statusList = responses;
+                    return this._statusList;
+                });
+            })
     }
 
     /**
@@ -460,10 +396,7 @@ class User {
                 this._isLoaded = true;
             })
             .catch(error => {
-                console.log(error);
-                console.dir(error);
-                console.trace();
-
+                console.log("error while resetting", error);
                 return Promise.reject(error);
             });
     }
@@ -474,7 +407,6 @@ class User {
      */
     load() {
         this._isLoaded = false;
-
         const promises = [this.loadKeyPair(), this.loadRoster(), this.loadName()];
 
         return Promise.all(promises)
@@ -482,11 +414,7 @@ class User {
                 this._isLoaded = true;
             })
             .catch(error => {
-                console.log(error);
-                console.dir(error);
-                console.trace();
-
-                return Promise.reject(error);
+                Log.rcatch(error, "couldn't load user");
             });
     }
 
@@ -495,14 +423,14 @@ class User {
      * @returns {Promise} - a promise that gets resolved once the key pair is loaded into memory
      */
     loadKeyPair() {
-        return new Crypto.KeyPair(FilesPath.USER_PATH).then((key) => {
+        return KeyPair.fromFile(FilePaths.KEY_PAIR).then((key) => {
             this._keyPair = key;
         }).catch(error => {
-            console.log(error);
-            console.dir(error);
-            console.trace();
-
-            return Promise.reject(error);
+            console.log("couldn't load keypair, creating a new one:", error);
+            this._keyPair = new KeyPair();
+            return this._keyPair.save(FilePaths.KEY_PAIR);
+        }).then(() => {
+            return Promise.resolve(this._keypair);
         });
     }
 
@@ -511,9 +439,7 @@ class User {
      * @returns {Promise} - a promise that gets resolved once the name is loaded into memory
      */
     loadName() {
-
-
-        return FileIO.getStringOf(FilesPath.USER_NAME)
+        return FileIO.getStringOf(FilePaths.USER_NAME)
             .then(jsonName => {
                 let name;
                 if (jsonName.length > 0) {
@@ -525,13 +451,8 @@ class User {
                 return this.setName(name, false);
             })
             .catch(error => {
-                console.log(error);
-                console.dir(error);
-                console.trace();
-
-                return Promise.reject(error);
+                Log.rcatch(error, "error while loading:");
             });
-
     }
 
     /**
@@ -539,8 +460,7 @@ class User {
      * @returns {Promise} - a promise that gets resolved once the complete roster is loaded into memory
      */
     loadRoster() {
-
-        return FileIO.getStringOf(FilesPath.ROSTER)
+        return FileIO.getStringOf(FilePaths.ROSTER)
             .then(jsonRoster => {
                 if (jsonRoster.length > 0) {
                     return Convert.parseJsonRoster(jsonRoster);
@@ -552,14 +472,8 @@ class User {
                 return this.setRoster(roster, false);
             })
             .catch(error => {
-                console.log(error);
-                console.dir(error);
-                console.trace();
-
                 return Promise.reject(error);
             });
-
-
     }
 }
 

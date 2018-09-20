@@ -1,3 +1,5 @@
+require("nativescript-nodeify");
+
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const Package = require("../../Package");

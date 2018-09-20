@@ -2,10 +2,10 @@ const ChaiAsPromised = require("chai-as-promised");
 chai.use(ChaiAsPromised);
 chai.should();
 
-const FilesPath = require("../../../../../../shared/lib/file-io/files-path");
-const FileIO = require("../../../../../../shared/lib/file-io/file-io");
+const FilesPath = require("../../../../../../app/shared/lib/file-io/files-path");
+const FileIO = require("../../../../../../app/shared/lib/file-io/file-io");
 
-const AttParty = require("../../../../../../shared/lib/dedjs/object/pop/att/AttParty").get;
+const AttParty = require("../../../../../../app/shared/lib/dedjs/object/pop/att/AttParty").get;
 
 describe("AttParty", function () {
 
@@ -43,7 +43,7 @@ describe("AttParty", function () {
   });
 
   it("should be a singleton", function () {
-    const Att2 = require("../../../../../../shared/lib/dedjs/object/pop/att/AttParty").get;
+    const Att2 = require("../../../../../../app/shared/lib/dedjs/object/pop/att/AttParty").get;
 
     (Att2 === AttParty).should.be.true;
   });

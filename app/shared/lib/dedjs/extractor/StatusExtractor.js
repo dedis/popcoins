@@ -26,12 +26,12 @@ function getAddress(statusResponse) {
 
 function getID(statusResponse) {
   throwErrorIfTypeIsWrong(statusResponse)
-  return Convert.byteArrayToHex(statusResponse.serveridentity.id);
+  return Buffer.from(statusResponse.serveridentity.id, 'base64').toString('hex');
 }
 
 function getPublicKey(statusResponse) {
-  throwErrorIfTypeIsWrong(statusResponse)
-  return Convert.byteArrayToHex(statusResponse.serveridentity.public);
+  throwErrorIfTypeIsWrong(statusResponse);
+  return Buffer.from(statusResponse.serveridentity.public, 'base64').toString('hex');
 }
 
 function getServices(statusResponse) {

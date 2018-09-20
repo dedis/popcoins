@@ -26,7 +26,7 @@ class Token {
     }
 
     /**
-     * Creates a proto-file from this configuration.
+     * Creates a proto-file from this token.
      * @returns {Buffer}
      */
     toProto() {

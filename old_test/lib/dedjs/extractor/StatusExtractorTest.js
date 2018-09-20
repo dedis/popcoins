@@ -2,11 +2,11 @@ const ChaiAsPromised = require("chai-as-promised");
 chai.use(ChaiAsPromised);
 chai.should();
 
-const CothorityMessages = require("../../../../shared/lib/dedjs/network/cothority-messages");
-const ObjectType = require("../../../../shared/lib/dedjs/ObjectType");
-const Convert = require("../../../../shared/lib/dedjs/Convert");
+const CothorityMessages = require("../../../../app/shared/lib/dedjs/network/cothority-messages");
+const ObjectType = require("../../../../app/shared/lib/dedjs/ObjectType");
+const Convert = require("../../../../app/shared/lib/dedjs/Convert");
 
-const StatusExtractor = require("../../../../shared/lib/dedjs/extractor/StatusExtractor");
+const StatusExtractor = require("../../../../app/shared/lib/dedjs/extractor/StatusExtractor");
 
 const fields = {
   "system": {

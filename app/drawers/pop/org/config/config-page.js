@@ -8,6 +8,7 @@ const lib = require("../../../../shared/lib");
 const dedjs = lib.dedjs;
 const Wallet = dedjs.object.pop.Wallet;
 const User = dedjs.object.user.get;
+const Log = dedjs.Log;
 const Convert = dedjs.Convert;
 const Helper = dedjs.Helper;
 const ObjectType = dedjs.ObjectType;
@@ -45,22 +46,12 @@ function onNavigatingTo(args) {
         throw new Error("WalEdit should be given as a Wallet in the context");
     }
     WalEdit = context.wallet;
-
     newConfig = context.newConfig;
-    let cfg = WalEdit.config;
 
-    dataForm.name = cfg.name;
-    dataForm.date = cfg.datetime;
-    dataForm.time = cfg.datetime;
-    dataForm.location = cfg.location;
-    viewModel.dataForm = dataForm;
     viewModel.readOnly = context.readOnly === true;
     console.log("readOnly is:", viewModel.readOnly);
 
-    console.dir(cfg.roster);
-    cfg.roster.list.forEach(conode => {
-        viewModel.rosterList.push(conode);
-    })
+    copyWalletToViewModel();
 
     pageObject = page.page;
     page.bindingContext = viewModel;
@@ -155,7 +146,7 @@ function addManual(manually) {
                 return pageObject.showModal("shared/pages/add-conode-manual/add-conode-manual", undefined, enterNewConode, true);
             } else {
                 // Chose from list of existing nodes.
-                const conodes = User.getRoster().list;
+                const conodes = User.getRoster().identities;
                 const conodesNames = conodes.map(serverIdentity => {
                     return serverIdentity.description;
                 });
@@ -172,7 +163,7 @@ function addManual(manually) {
 
                         console.log("adding a new conode: " + conodes[index]);
                         // TODO: adding conode to the configuration
-                        WalEdit.config.roster.list.push(conodes[index]);
+                        WalEdit.config.roster.identities.push(conodes[index]);
                     }
                 }).catch(error => {
                     console.log("error while adding a conode: " + error);
@@ -202,7 +193,7 @@ function addScan() {
             const conode = Convert.parseJsonServerIdentity(string);
 
             console.log("adding new conode: " + conode);
-            WalEdit.config.roster.list.push(conode);
+            WalEdit.config.roster.identities.push(conode);
             pageObject.getViewById("list-view-conodes").refresh();
         })
         .catch(error => {
@@ -222,7 +213,7 @@ function addScan() {
  * Parse the date from the data form and return it as date.
  * @return {Date}
  */
-function getViewModelDate() {
+function copyViewModelToWallet() {
     let date = viewModel.dataForm.date.split("-");
     let time = viewModel.dataForm.time.split(":");
 
@@ -239,7 +230,25 @@ function getViewModelDate() {
     date.map(parseInt);
     time.map(parseInt);
 
-    return new Date(date[0], date[1], date[2], time[0], time[1], 0, 0);
+    WalEdit.config.datetime = new Date(date[0], date[1], date[2], time[0], time[1], 0, 0).toString();
+    WalEdit.config.name = dataForm.name;
+    WalEdit.config.location = dataForm.location;
+}
+
+
+function copyWalletToViewModel() {
+    let cfg = WalEdit.config;
+    let date = new Date(Date.parse(cfg.datetime));
+
+    dataForm.set("date", date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate());
+    dataForm.set("time", date.getHours() + ":" + date.getMinutes());
+    dataForm.name = cfg.name;
+    dataForm.location = cfg.location;
+    console.dir(cfg.roster);
+    viewModel.rosterList.splice(0);
+    cfg.roster.identities.forEach(conode => {
+        viewModel.rosterList.push(conode);
+    })
 }
 
 /**
@@ -247,7 +256,7 @@ function getViewModelDate() {
  * @returns {Roster}
  */
 function getViewModelRoster() {
-    return User.getRoster();
+    return User.roster;
 }
 
 function goBack() {
@@ -255,11 +264,22 @@ function goBack() {
 }
 
 function save() {
-    WalEdit.config.name = viewModel.dataForm.name;
-    WalEdit.config.datetime = getViewModelDate().toString();
-    WalEdit.config.location = viewModel.dataForm.location;
+    copyViewModelToWallet();
     WalEdit.config.roster = getViewModelRoster();
-    return WalEdit.save()
+    return Promise.resolve()
+        .then(() => {
+            if (WalEdit.state() >= Wallet.STATE_PUBLISH) {
+                return WalEdit.save()
+                    .catch(err => {
+                        Log.catch("couldn't save: " + err);
+                    })
+            } else {
+                return Promise.resolve()
+                    .then(() => {
+                        WalEdit.addToList();
+                    })
+            }
+        })
         .then(() => {
             return goBack();
         })

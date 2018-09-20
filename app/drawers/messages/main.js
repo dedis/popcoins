@@ -24,6 +24,8 @@ let conode = undefined;
 let myParty = undefined;
 
 function onLoaded(args) {
+    FileIO.rmrf("shared/res/files/");
+    FileIO.lslr("shared/res/files/");
     page = args.object;
     page.bindingContext = viewModel;
 
@@ -45,7 +47,7 @@ function onLoaded(args) {
             })
             .then(fs => {
                 console.log("final statement loaded");
-                let ser = fs.desc.roster.list[0];
+                let ser = fs.desc.roster.identities[0];
                 let public = Convert.base64ToByteArray(ser.public);
                 let id = Convert.base64ToByteArray(ser.id);
 

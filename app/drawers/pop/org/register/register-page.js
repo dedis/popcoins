@@ -1,12 +1,18 @@
 const Dialog = require("ui/dialogs");
 const Frame = require("ui/frame");
-const Convert = require("../../../../shared/lib/dedjs/Convert");
-const ScanToReturn = require("../../../../shared/lib/scan-to-return/scan-to-return");
 const topmost = require("ui/frame").topmost;
-const PartyStates = require("../../../../shared/lib/dedjs/object/pop/org/OrgParty").States;
-const RequestPath = require("../../../../shared/lib/dedjs/network/RequestPath");
+const Observable = require("data/observable");
+const ObservableArray = require("data/observable-array").ObservableArray;
+const Kyber = require("@dedis/kyber-js");
+const CurveEd25519 = new Kyber.curve.edwards25519.Curve;
 
-const User = require("../../../../shared/lib/dedjs/object/user/User").get;
+const lib = require("../../../../shared/lib");
+const ScanToReturn = lib.scan_to_return;
+const dedjs = lib.dedjs;
+const Convert = dedjs.Convert;
+const Log = dedjs.Log;
+const RequestPath = dedjs.network.RequestPath;
+const Net = dedjs.network.NSNet;
 
 let viewModel = undefined;
 let Party = undefined;
@@ -24,16 +30,21 @@ function onLoaded(args) {
     }
 
     Party = context.party;
-    viewModel = Party.getRegisteredAttsModule();
+    viewModel = Observable.fromObject({
+        array: new ObservableArray()
+    });
+    return Party.fetchAttendees()
+        .then(keys => {
+            Log.print("Got keys", keys);
+            Party.attendees.forEach(a => {
+                viewModel.array.push(Convert.byteArrayToHex(a.marshalBinary()));
+            });
 
-    page.bindingContext = viewModel;
-    let finalizeLabel = page.getViewById("finalize");
-    // Without this the text is not vertically centered in is own view
-    finalizeLabel.android.setGravity(android.view.Gravity.CENTER);
+            page.bindingContext = viewModel;
+            let finalizeLabel = page.getViewById("finalize");
 
-    return Party.fetchOrganizerKeys()
-        .then(() => {
-            console.log("got keys")
+            // Without this the text is not vertically centered in is own view
+            finalizeLabel.android.setGravity(android.view.Gravity.CENTER);
         })
 }
 
@@ -48,24 +59,12 @@ function addManual() {
         message: "Please enter the public key of an attendee.",
         okButtonText: "Register",
         cancelButtonText: "Cancel",
-        neutralButtonText: "Add Myself",
         inputType: Dialog.inputType.text
     })
         .then(args => {
             if (args.result && args.text !== undefined && args.text.length > 0) {
                 // Add Key
                 return Party.registerAttendee(Convert.hexToByteArray(args.text));
-            } else if (args.result === undefined) {
-                // Add Myself
-                if (!User.isKeyPairSet()) {
-                    return Dialog.alert({
-                        title: "Key Pair Missing",
-                        message: "Please generate a key pair.",
-                        okButtonText: "Ok"
-                    });
-                }
-                addMyselfAttendee(Party);
-                // return Party.registerAttendee(User.getKeyPair().public).then(addPartyMyself( Convert.byteArrayToHex(Party.getPopDescHash()),Party.getLinkedConode().address));
             } else {
                 // Cancel
                 return Promise.resolve();
@@ -179,13 +178,6 @@ function deleteAttendee(args) {
  * @returns {Promise.<any>}
  */
 function registerKeys() {
-    if (!User.isKeyPairSet()) {
-        return Dialog.alert({
-            title: "Key Pair Missing",
-            message: "Please generate a key pair.",
-            okButtonText: "Ok"
-        });
-    }
     if (!Party.isPopDescComplete()) {
         return Dialog.alert({
             title: "No PopDesc",
@@ -301,8 +293,13 @@ function deleteParty() {
     })
         .then(del => {
             if (del) {
-                Party.remove();
-                topmost().goBack();
+                return Party.remove()
+                    .then(() => {
+                        topmost().goBack();
+                    })
+                    .catch(err => {
+                        Log.catch(err);
+                    })
             }
         })
 }

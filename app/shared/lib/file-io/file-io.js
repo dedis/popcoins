@@ -4,6 +4,7 @@
 
 const FileSystem = require("tns-core-modules/file-system");
 const Documents = FileSystem.knownFolders.documents();
+const Log = require("../dedjs/Log");
 
 /**
  * Gets the string of the file at filePath and returns a promise with the content.
@@ -17,15 +18,13 @@ function getStringOf(filePath) {
 
     return Documents.getFile(filePath)
         .readText()
-        .then(string =>{
+        .then(string => {
             // console.log("read from " + filePath + ":" + string);
             return Promise.resolve(string);
         })
         .catch((error) => {
-            console.log("READING ERROR:");
-            console.log(error);
-            console.dir(error);
-            console.trace();
+            console.log("READING ERROR:", error);
+            lslr("shared/res/files");
         });
 }
 
@@ -43,14 +42,12 @@ function writeStringTo(filePath, string) {
         throw new Error("string must be of type string");
     }
 
-    // console.log("writing: " + filePath);
+    console.log("writing to: " + filePath);
     return Documents.getFile(filePath)
         .writeText(string)
         .catch((error) => {
-            console.log("WRITING ERROR:");
-            console.log(error);
-            console.dir(error);
-            console.trace();
+            console.log("WRITING ERROR:", error);
+            lslr(filePath);
         });
 }
 
@@ -101,25 +98,48 @@ function removeFolder(folder) {
  * @returns {Promise<void>}
  */
 function rmrf(dir) {
-    let ps = Promise.resolve();
-    forEachFolderElement(dir, function (wallet) {
-        let wp = join(dir, wallet.name);
-        // console.dir("wallet path is:", wp);
-        forEachFolderElement(wp, function (file) {
-            // console.dir("wallet file is:", file);
-            let f = Documents.getFile(join(wp, file.name));
-            ps = ps.then(() => {
-                // console.dir("deleting file", f.path, f.name);
-                return f.remove()
+    Log.print(Documents.getFolder(dir));
+    return Documents.getFolder(dir).clear();
+}
+
+function lslr(dir, rec) {
+    if (rec === undefined) {
+        dir = FileSystem.path.join(Documents.path, dir);
+    }
+    let folders = [];
+    let files = [];
+    FileSystem.Folder.fromPath(dir).getEntities()
+        .then((entities) => {
+            // entities is array with the document's files and folders.
+            entities.forEach((entity) => {
+                const fullPath = entity.path;
+                // const fullPath = FileSystem.path.join(entity.path, entity.name);
+                const isFolder = FileSystem.Folder.exists(fullPath);
+                const e = {
+                    name: entity.name,
+                    path: entity.path,
+                }
+                if (isFolder) {
+                    folders.push(e);
+                } else {
+                    files.push(e);
+                }
             });
-        });
-        let d = Documents.getFolder(wp);
-        ps = ps.then(() => {
-            // console.dir("deleting directory", d.path);
-            return d.remove()
-        });
+            console.log("");
+            console.log("Directory:", dir);
+            folders.forEach(folder => {
+                console.log("d ", folder.name);
+            });
+            files.forEach(file => {
+                console.log("f ", file.name);
+            });
+            folders.forEach(folder => {
+                lslr(folder.path, true);
+            });
+        }).catch((err) => {
+        // Failed to obtain folder's contents.
+        console.log(err.stack);
     });
-    return ps;
 }
 
 function folderExists(path) {
@@ -138,3 +158,4 @@ module.exports.join = FileSystem.path.join;
 module.exports.fileExists = fileExists;
 module.exports.folderExists = folderExists;
 module.exports.rmrf = rmrf;
+module.exports.lslr = lslr;

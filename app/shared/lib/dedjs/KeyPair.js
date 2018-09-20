@@ -1,5 +1,6 @@
-const FileIO = require("../../../file-io/file-io");
-const Convert = require("../../Convert");
+require("nativescript-nodeify");
+const FileIO = require("../file-io/file-io");
+const Convert = require("./Convert");
 const Kyber = require("@dedis/kyber-js");
 const Curve25519 = new Kyber.curve.edwards25519.Curve;
 
@@ -13,44 +14,54 @@ class KeyPair {
      * @param pubKey
      */
     constructor(privKey, pubKey) {
-        this.randomize();
         try {
-            this.setKeyPair(pubKey, privKey);
-        } catch (err) {
-            if (pubKey !== undefined && privKey !== undefined) {
-                throw new Error(err);
+            if (privKey !== undefined) {
+                this.setKeyPair(privKey, pubKey);
+            } else {
+                if (pubKey !== undefined && privKey !== undefined) {
+                    console.log("wrong parameters");
+                    throw new Error(err);
+                }
+                console.log("creating random key");
+                // Ignoring error if not both arguments are given.
+                this.randomize();
             }
-            // Ignoring error if not both arguments are given.
+        } catch (err) {
+            console.log("oups - couldn't create new key", err);
+            throw new Error(err);
         }
     }
 
     get public() {
-        return this._public.slice(0);
+        return this._public;
     }
 
     get private() {
-        return this._private.slice(0);
+        return this._private;
     }
 
     /**
      * Sets the new key pair given in parameters.
      * @param {Uint8Array} privateKey - the new private key
      * @param {Uint8Array} publicKey - the new public key
-     * @returns {Promise} - a promise that gets resolved once the new key pair has been set and saved if the save parameter is set to true
      */
     setKeyPair(privateKey, publicKey) {
-        if (!privateKey instanceof Uint8Array) {
+        if (privateKey == undefined ||
+            !privateKey instanceof Uint8Array) {
             throw new Error("privateKey must be of type UInt8Array");
         }
-        if (!publicKey instanceof Uint8Array) {
+        if (publicKey == undefined ||
+            !publicKey instanceof Uint8Array) {
             throw new Error("publicKey must be of type UInt8Array");
         }
         if (publicKey.length != 32 || privateKey.length != 32) {
             throw new Error("not in ed25519 format - need 32 bytes");
         }
 
-        this._private = privateKey.slice();
-        this._public = publicKey.slice();
+        this._private = Curve25519.scalar();
+        this._private.unmarshalBinary(privateKey.slice());
+        this._public = Curve25519.point();
+        this._public.unmarshalBinary(publicKey.slice());
     }
 
     /**
@@ -59,9 +70,10 @@ class KeyPair {
      * @returns {Promise<any | never>}
      */
     save(filename) {
+        console.log("saving keypair to", filename);
         let toWrite = Convert.objectToJson({
-            public: Convert.byteArrayToHex(this._public),
-            private: Convert.byteArrayToHex(this._private),
+            public: Convert.byteArrayToHex(this._public.marshalBinary()),
+            private: Convert.byteArrayToHex(this._private.marshalBinary()),
         });
 
         return FileIO.writeStringTo(filename, toWrite)
@@ -77,8 +89,8 @@ class KeyPair {
      */
     saveBase64(filename) {
         let toWrite = Convert.objectToJson({
-            public: Convert.byteArrayToBase64(this._public),
-            private: Convert.byteArrayToBase64(this._private),
+            public: Convert.byteArrayToBase64(this._public.marshalBinary()),
+            private: Convert.byteArrayToBase64(this._private.marshalBinary()),
         });
 
         return FileIO.writeStringTo(filename, toWrite)
@@ -89,14 +101,10 @@ class KeyPair {
 
     /**
      * Randomize the key pair
-     * @returns {Promise} - a promise that get resolved once a random keypair has been generated and saved
      */
     randomize() {
-        const privateKey = Curve25519.newKey();
-        const basePoint = Curve25519.point().base();
-        const pubKey = Curve25519.point().mul(privateKey, basePoint);
-
-        return this.setKeyPair(pubKey.marshalBinary(), privateKey.marshalBinary());
+        this._private = Curve25519.newKey();
+        this._public = Curve25519.point().mul(this._private, null);
     }
 
     /**

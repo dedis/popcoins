@@ -6,15 +6,15 @@ require("nativescript-nodeify");
 const Kyber = require("@dedis/kyber-js");
 const CURVE_ED25519 = new Kyber.curve.edwards25519.Curve;
 
-const FilesPath = require("../../../../../shared/lib/file-io/files-path");
-const FileIO = require("../../../../../shared/lib/file-io/file-io");
-const Convert = require("../../../../../shared/lib/dedjs/Convert");
-const Helper = require("../../../../../shared/lib/dedjs/Helper");
-const ObjectType = require("../../../../../shared/lib/dedjs/ObjectType");
-const Crypto = require("../../../../../shared/lib/dedjs/Crypto");
-const CothorityMessages = require("../../../../../shared/lib/dedjs/network/cothority-messages");
+const FilesPath = require("../../../../../app/shared/lib/file-io/files-path");
+const FileIO = require("../../../../../app/shared/lib/file-io/file-io");
+const Convert = require("../../../../../app/shared/lib/dedjs/Convert");
+const Helper = require("../../../../../app/shared/lib/dedjs/Helper");
+const ObjectType = require("../../../../../app/shared/lib/dedjs/ObjectType");
+const Crypto = require("../../../../../app/shared/lib/dedjs/Crypto");
+const CothorityMessages = require("../../../../../app/shared/lib/dedjs/network/cothority-messages");
 
-const User = require("../../../../../shared/lib/dedjs/object/user/User").get;
+const User = require("../../../../../app/shared/lib/dedjs/object/user/User").get;
 
 const PRIVATE_KEY = "AWKlOlcTuCHEV/fKX0X1IoAoBU0n1c5iKp/SWRLj3T4=";
 const PRIVATE_KEY_BYTE_ARRAY = Convert.base64ToByteArray(PRIVATE_KEY);
@@ -178,7 +178,7 @@ describe.skip("User", function () {
   });
 
   it("should be a singleton", function () {
-    const User2 = require("../../../../../shared/lib/dedjs/object/user/User").get;
+    const User2 = require("../../../../../app/shared/lib/dedjs/object/user/User").get;
 
     (User2 === User).should.be.true;
   });

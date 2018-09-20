@@ -1,12 +1,6 @@
-const FilePaths = require("../../../file-io/files-path");
-const FileIO = require("../../../file-io/file-io");
 const Convert = require("../../Convert");
-const FileSystem = require("tns-core-modules/file-system");
-const Documents = FileSystem.knownFolders.documents();
-const Net = require("@dedis/cothority").net;
-const RequestPath = require("../../network/RequestPath");
-const OmniLedger = require("@dedis/cothority").omniledger;
 const Crypto = require('crypto-browserify');
+const HashJs = require("hash.js");
 
 /**
  * Stores all necessary data for a configuration. A configuration of a pop-party holds the data
@@ -48,6 +42,14 @@ class Configuration {
      * Hash returns the hash of the configuration, that will also be used for saving.
      */
     hash() {
+        console.dir("aggregate is:", this.roster.aggregate);
+        this._id = new Uint8Array(HashJs.sha256()
+            .update(this.name)
+            .update(this.datetime)
+            .update(this.location)
+            .update(this.roster.aggregateKey().marshalBinary())
+            .digest());
+        console.dir("calculated hash:", Convert.byteArrayToHex(this._id));
         return this._id;
     }
 
@@ -59,6 +61,34 @@ class Configuration {
     }
 
     /**
+     * @return {Object} description in a cothority-compatible way.
+     */
+    getDesc(){
+        console.dir("Roster is:", this._roster);
+        console.dir("RType:", this._roster.constructor.name);
+        let r = {
+            list: [],
+            aggregate: this._roster.aggregateKey().marshalBinary()
+        }
+        this._roster.identities.forEach(si =>{
+            console.dir("ServerIdentity is:", si);
+            console.dir("SIType is:", si.constructor.name);
+            r.list.push({
+                public: si.public.marshalBinary(),
+                id: si.id,
+                address: si.tcpAddr,
+                description: si.description
+            })
+        })
+        return {
+            name: this._name,
+            datetime: this._datetime,
+            location: this._location,
+            roster: r
+        }
+    }
+
+    /**
      * Creates a new configuration from a proto-file.
      * @param proto
      * @returns {Configuration}
@@ -67,7 +97,7 @@ class Configuration {
         return new Configuration();
     }
 
-    static fromPopPartyInstance(ppi){
+    static fromPopPartyInstance(ppi) {
         let desc = ppi.finalStatement.desc;
         return new Configuration(desc.name, desc.datetime, desc.location, desc.roster);
     }

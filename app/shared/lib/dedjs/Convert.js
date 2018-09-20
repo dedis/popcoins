@@ -1,10 +1,11 @@
 require("nativescript-nodeify");
 const Kyber = require("@dedis/kyber-js");
-const CURVE_ED25519 = new Kyber.curve.edwards25519.Curve;
+const Cothority = require("@dedis/cothority");
+const CurveEd25519 = new Kyber.curve.edwards25519.Curve;
 
 const Buffer = require("buffer/").Buffer;
 const Helper = require("./Helper");
-const ObjectType = require("./ObjectType");
+const Log = require("./Log");
 const Crypto = require("./Crypto");
 const TomlParser = require("toml");
 const Tomlify = require('tomlify-j0.4');
@@ -114,6 +115,7 @@ function base64ToHex(base64String) {
  */
 function objectToJson(object) {
     if (!(object !== undefined && typeof object === "object" && !Helper.isArray(object))) {
+        Log.error("cannot convert", object);
         throw new Error("object must be of type object (not array!) and not undefined");
     }
 
@@ -196,14 +198,20 @@ function tomlToJson(tomlString) {
  * @returns {string} - the builded websocket url
  */
 function tlsToWebsocket(serverIdentity, path) {
-    let address = "";
-    if (Helper.isOfType(serverIdentity, ObjectType.SERVER_IDENTITY)) {
-        address = serverIdentity.address
-    } else if (typeof serverIdentity === "string") {
-        address = serverIdentity;
-    } else {
-        throw new Error("serverIdentity must be of type ServerIdentity or string");
+    let address = serverIdentity;
+    if (typeof serverIdentity !== "string") {
+        if (!(serverIdentity instanceof Cothority.ServerIdentity)) {
+            throw new Error("serverIdentity needs to be string or Cothority.ServerIdentity");
+        }
+        address = serverIdentity.tcpAddr;
     }
+    // if (Helper.isOfType(serverIdentity, ObjectType.SERVER_IDENTITY)) {
+    //     address = serverIdentity.address
+    // } else if (typeof serverIdentity === "string") {
+    //     address = serverIdentity;
+    // } else {
+    //     throw new Error("serverIdentity must be of type ServerIdentity or string");
+    // }
     if (typeof path !== "string") {
         throw new Error("path must be of type string");
     }
@@ -212,6 +220,36 @@ function tlsToWebsocket(serverIdentity, path) {
     port = parseInt(port) + 1;
 
     return BASE_URL_WS + ip + URL_PORT_SPLITTER + port + path;
+}
+
+function serverIdentityToJson(serverIdentity) {
+    if (!(serverIdentity instanceof Cothority.ServerIdentity)) {
+        throw new Error("serverIdentity must be of type Cothority.ServerIdentity");
+    }
+
+    return JSON.stringify({
+        public: Buffer.from(serverIdentity.pub.marshalBinary()).toString('hex'),
+        address: serverIdentity.tcpAddr,
+        description: serverIdentity.description
+    });
+}
+
+function rosterToJson(roster) {
+    if (!(roster instanceof Cothority.Roster)) {
+        throw new Error("roster must be of type Cothority.roster");
+    }
+
+    const jRoster = {
+        id: roster.id,
+        identities: roster.identities.map(identity => {
+            return {
+                public: Buffer.from(identity.pub.marshalBinary()).toString('hex'),
+                address: identity.tcpAddr,
+                description: identity.description
+            }
+        })
+    }
+    return JSON.stringify(jRoster);
 }
 
 /**
@@ -252,8 +290,12 @@ function parseJsonPopToken(jsonString) {
 
     return new PopToken(
         object.final,
-        Uint8Array.from(Object.keys(object.private).map(function (key) { return object.private[key]; })),
-        Uint8Array.from(Object.keys(object.public).map(function (key) { return object.public[key]; })));
+        Uint8Array.from(Object.keys(object.private).map(function (key) {
+            return object.private[key];
+        })),
+        Uint8Array.from(Object.keys(object.public).map(function (key) {
+            return object.public[key];
+        })));
 }
 
 /**
@@ -358,38 +400,49 @@ function parseJsonRoster(jsonString) {
     }
 
     const roster = jsonToObject(jsonString);
-    if (roster.list === undefined || !Array.isArray(roster.list)) {
-        throw new Error("roster.list is undefined or not an array");
+    let ids = [];
+    let tob = hexToByteArray;
+    if (roster.identities !== undefined && Array.isArray(roster.identities)) {
+        ids = roster.identities;
+    } else if (roster.list !== undefined && Array.isArray(roster.list)){
+        // This comes in from the conodes - and it'll be in base64.
+        tob = base64ToByteArray;
+        ids = roster.list;
+    } else {
+        throw new Error("didn't find either roster.identities or roster.list");
     }
 
     let rosterId = roster.id;
-    if (rosterId !== undefined) {
-        rosterId = base64ToByteArray(rosterId.split(" ").join("+"));
-    }
 
     let aggregate = (roster.aggregate === undefined) ? undefined : base64ToByteArray(roster.aggregate.split(" ").join("+"));
 
     const points = [];
-    const list = roster.list.map((server) => {
+    const identities = ids.map((server) => {
+        let point = CurveEd25519.point();
+        point.unmarshalBinary(tob(server.public.split(" ").join("+")));
         if (aggregate === undefined) {
-            let point = CURVE_ED25519.point();
-            point.unmarshalBinary(base64ToByteArray(server.public.split(" ").join("+")));
             points.push(point);
         }
 
-        let serverId = server.id;
-        if (serverId !== undefined) {
-            serverId = base64ToByteArray(serverId.split(" ").join("+"));
-        }
-
-        return toServerIdentity(server.address, base64ToByteArray(server.public.split(" ").join("+")), server.description, serverId);
+        return toServerIdentity(server.address, point, server.description);
     });
 
     if (aggregate === undefined) {
         aggregate = Crypto.aggregatePublicKeys(points);
     }
+    return new Cothority.Roster(CurveEd25519, identities, rosterId);
+}
 
-    return CothorityMessages.createRoster(rosterId, list, aggregate);
+function parseJsonServerIdentity(jsonString){
+    const si = jsonToObject(jsonString);
+
+    let point = CurveEd25519.point();
+    point.unmarshalBinary(hexToByteArray(si.public.split(" ").join("+")));
+    if (aggregate === undefined) {
+        points.push(point);
+    }
+
+    return toServerIdentity(si.address, point, si.description);
 }
 
 /**
@@ -476,10 +529,11 @@ function parseJsonServerIdentity(jsonString) {
 
     const serverIdentity = jsonToObject(jsonString);
 
-    const publicKey = base64ToByteArray(serverIdentity.public);
-    const id = base64ToByteArray(serverIdentity.id);
+    const publicKeyBuf = hexToByteArray(serverIdentity.public);
+    const publicKey = CurveEd25519.point();
+    publicKey.unmarshalBinary(publicKeyBuf);
 
-    return toServerIdentity(serverIdentity.address, publicKey, serverIdentity.description, id);
+    return toServerIdentity(serverIdentity.address, publicKey, serverIdentity.description);
 }
 
 /**
@@ -507,30 +561,27 @@ function parseJsonArrayOfKeys(jsonString) {
 /**
  * Converts the arguments given as parameter into a ServerIdentity object.
  * @param {string} address - the address of the server
- * @param {Uint8Array} publicKey - the public key of the server
+ * @param {Point|Uint8Array} publicKey - the public key of the server
  * @param {string} description - the description of the server
- * @param {Uint8Array} id - the id of the server or undefined to be skipped
  * @returns {ServerIdentity} - the server identity object created from the given parameters
  */
-function toServerIdentity(address, publicKey, description, id) {
+function toServerIdentity(address, publicKey, description) {
     if (typeof address !== "string" || !Helper.isValidAddress(address)) {
         throw new Error("address must be of type string and have the right format");
     }
-    if (!(publicKey instanceof Uint8Array) || !Helper.isValidPublicKey(publicKey)) {
-        throw new Error("publicKey must be an instance of Uint8Array and have the right format");
+    if (!(publicKey instanceof Kyber.Point)) {
+        if (!(publicKey instanceof Uint8Array)) {
+            throw new Error("publicKey must be an instance of Point or Uint8array");
+        }
+        const pub = CurveEd25519.point();
+        pub.unmarshalBinary(publicKey);
+        publicKey = pub;
     }
     if (typeof description !== "string") {
         throw new Error("description must be of type string");
     }
-    if (!(id === undefined || id instanceof Uint8Array)) {
-        throw new Error("id must be an instance of Uint8Array or be undefined to be skipped");
-    }
 
-    if (id === undefined) {
-        id = publicKeyToUuid(publicKey);
-    }
-
-    return CothorityMessages.createServerIdentity(publicKey, id, address, description);
+    return new Cothority.ServerIdentity(CurveEd25519, publicKey, address, description, false);
 }
 
 /**
@@ -539,13 +590,19 @@ function toServerIdentity(address, publicKey, description, id) {
  * @returns {Uint8Array} - the uuid of the server
  */
 function publicKeyToUuid(publicKey) {
-    if (!(publicKey instanceof Uint8Array)) {
-        throw new Error("publicKey must be an instance of Uint8Array");
+    if (!(publicKey instanceof Kyber.Point)) {
+        throw new Error("publicKey must be an instance of Point");
     }
 
-    const url = BASE_URL_CONODE_ID + byteArrayToHex(publicKey);
+    const url = BASE_URL_CONODE_ID + byteArrayToHex(publicKey.marshalBinary());
 
     return new Uint8Array(new UUID(UUID_VERSION, NAME_SPACE_URL, url).export());
+}
+
+module.exports = {
+    rosterToJson,
+    serverIdentityToJson,
+    parseJsonServerIdentity
 }
 
 module.exports.byteArrayToHex = byteArrayToHex;

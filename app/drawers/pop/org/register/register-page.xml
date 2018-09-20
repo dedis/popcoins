@@ -40,7 +40,7 @@
 
             <nsListView:RadListView.itemTemplate>
                 <GridLayout class="basic-list" rows="*,*" columns="*">
-                    <Label text="{{ toHex($value) }}" fontSize="18" textAlignment="center" textWrap="true"/>
+                    <Label text="{{ $value }}" fontSize="18" textAlignment="center" textWrap="true"/>
                 </GridLayout>
             </nsListView:RadListView.itemTemplate>
 

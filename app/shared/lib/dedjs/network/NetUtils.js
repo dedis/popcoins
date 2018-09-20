@@ -5,6 +5,7 @@ const DecodeType = require("../../../lib/dedjs/network/DecodeType");
 const StatusExtractor = require("../../../lib/dedjs/extractor/StatusExtractor");
 const CothorityMessages = require("../../../lib/dedjs/network/cothority-messages");
 const Helper = require("../../../lib/dedjs/Helper");
+const Log = require("../../../lib/dedjs/Log");
 
 function getServerIdentiyFromAddress(address) {
     if (!Helper.isValidAddress(address)) {
@@ -16,6 +17,7 @@ function getServerIdentiyFromAddress(address) {
 
     return cothoritySocket.send(RequestPath.STATUS_REQUEST, DecodeType.STATUS_RESPONSE, statusRequestMessage)
         .then(statusResponse => {
+            Log.lvl2("status is:", statusResponse.serveridentity);
             const hexKey = StatusExtractor.getPublicKey(statusResponse);
             const description = StatusExtractor.getDescription(statusResponse);
             const id = StatusExtractor.getID(statusResponse);

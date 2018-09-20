@@ -6,11 +6,11 @@ require("nativescript-nodeify");
 const Kyber = require("@dedis/kyber-js");
 const CURVE_ED25519 = new Kyber.curve.edwards25519.Curve;
 
-const Convert = require("../../../shared/lib/dedjs/Convert");
-const Helper = require("../../../shared/lib/dedjs/Helper");
-const ObjectType = require("../../../shared/lib/dedjs/ObjectType");
+const Convert = require("../../../app/shared/lib/dedjs/Convert");
+const Helper = require("../../../app/shared/lib/dedjs/Helper");
+const ObjectType = require("../../../app/shared/lib/dedjs/ObjectType");
 
-const Crypto = require("../../../shared/lib/dedjs/Crypto");
+const Crypto = require("../../../app/shared/lib/dedjs/Crypto");
 
 
 let POINTS = ["HkDzpR5Imd7WNx8kl2lJcIVRVn8gfDByJnmlfrYh/zU=", "Fx6zzvJM6VzxfByLY2+uArGPtd2lHKPVmoXGMhdaFCA=", "j53MMKZNdtLlglcK9Ct1YYtkbbEOfq3R8ZoJOFIu6tE="];

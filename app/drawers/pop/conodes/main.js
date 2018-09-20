@@ -1,18 +1,22 @@
 const Frame = require("ui/frame");
-
-const Dialog = require("ui/dialogs");
-const Helper = require("../../../shared/lib/dedjs/Helper");
-const Convert = require("../../../shared/lib/dedjs/Convert");
-const ObjectType = require("../../../shared/lib/dedjs/ObjectType");
-const ScanToReturn = require("../../../shared/lib/scan-to-return/scan-to-return");
-const User = require("../../../shared/lib/dedjs/object/user/User").get;
-const ObservableModule = require("data/observable");
+const Observable = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const Timer = require("timer");
+const Dialog = require("ui/dialogs");
 
-const viewModel = ObservableModule.fromObject({
-    rosterModule: User.getRosterModule(),
-    isRosterEmpty: true
+const lib = require("../../../shared/lib");
+const dedjs = lib.dedjs;
+const Helper = dedjs.Helper;
+const Convert = dedjs.Convert;
+const ObjectType = dedjs.ObjectType;
+const ScanToReturn = lib.scan_to_return;
+const User = dedjs.object.user.get;
+
+const viewModel = Observable.fromObject({
+    isRosterEmpty: true,
+    rosterModule: Observable.fromObject({
+        list: new ObservableArray()
+    })
 });
 
 let page = undefined;
@@ -25,10 +29,7 @@ function onLoaded(args) {
     page.bindingContext = viewModel;
     pageObject = args.object.page;
 
-    console.log("pop: loading");
     // Bind isEmpty to the length of the array
-    viewModel.rosterModule = User.getRosterModule();
-    viewModel.isRosterEmpty = viewModel.rosterModule.list.length === 0;
     viewModel.rosterModule.list.on(ObservableArray.changeEvent, () => {
         viewModel.set('isRosterEmpty', viewModel.rosterModule.list.length === 0);
     });
@@ -59,21 +60,24 @@ function loadConodeList() {
         return Promise.resolve();
     }
     User.getRosterStatus()
-        .then(()=>{
+        .then(status => {
+            viewModel.rosterModule.list.splice(0);
+            viewModel.isRosterEmpty = true;
+            status.forEach(s =>{
+                viewModel.rosterModule.list.push({
+                    description: s.conode.description,
+                    address: s.conode.tcpAddr,
+                    status: s.status.Generic.field.Version,
+                });
+                viewModel.isRosterEmpty = false;
+            });
             pageObject.getViewById("listView").refresh();
         });
 }
 
 function conodeTapped(args) {
     const index = args.index;
-    const conodesId = Convert.byteArrayToBase64(User.getRoster().list[index].id);
-    let conodeAndStatusPair = undefined;
-    User._roster.statusList.slice().forEach(object => {
-        if (Convert.byteArrayToBase64(object.conode.id) === conodesId) {
-            conodeAndStatusPair = object;
-        }
-    });
-
+    let conodeAndStatusPair = User._statusList[index];
     if (conodeAndStatusPair !== undefined) {
         Frame.topmost().navigate({
             moduleName: "drawers/pop/conodes/conode-stats-page",

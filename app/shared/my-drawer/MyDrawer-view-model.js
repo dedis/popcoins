@@ -42,15 +42,15 @@ function MyDrawerViewModel(selectedPage) {
         message = "You are using IOS device";
     }
 
-    // viewModel.navigationItems.push(
-    //     {
-    //         title: "Settings",
-    //         name: "settings",
-    //         route: "drawers/settings/settings-page",
-    //         icon: "\uf013",
-    //         isSelected: selectedPage === "Settings"
-    //     }
-    // );
+    viewModel.navigationItems.push(
+        {
+            title: "Delete",
+            name: "delete",
+            route: "drawers/delete",
+            icon: "\uf013",
+            isSelected: selectedPage === "Delete"
+        }
+    );
 
     // viewModel.navigationItems.push( {
     //     title: "CISC",

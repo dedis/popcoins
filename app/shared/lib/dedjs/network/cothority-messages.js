@@ -1,47 +1,14 @@
-'use strict';
-
 require("nativescript-nodeify");
+const UUID = require("pure-uuid");
 const DedisProtobuf = require("@dedis/cothority").protobuf;
 const Crypto = require("crypto-browserify");
+const Kyber = require("@dedis/kyber-js");
+const Cothority = require("@dedis/cothority");
+const CurveEd25519 = new Kyber.curve.edwards25519.Curve;
 
-/**
- * Base class for the protobuf library that provides helpers to encode and decode
- * messages according to a given model.
- *
- * @author Gaylor Bosson (gaylor.bosson@epfl.ch)
- * @author Cedric Maire (cedric.maire@epfl.ch)
- * @author Vincent Petri (vincent.petri@epfl.ch)
- */
-class CothorityProtobuf {
-
-    /**
-     * @constructor
-     */
-    constructor() {
-        this.root = DedisProtobuf.root;
-    }
-
-    /**
-     * Returns the protobuf loaded model.
-     * @param {string} name - the name of the model
-     * @returns {ReflectionObject|?ReflectionObject|string} - the model
-     */
-    getModel(name) {
-        if (typeof name !== "string") {
-            throw new Error("name must be of type string");
-        }
-
-        const model = this.root.lookup(`${name}`);
-        if (model === undefined || model === null) {
-            throw new Error("unknown model: " + name);
-        }
-
-        return model;
-    }
-}
-
-const Helper$1 = require("../Helper");
+const Helper = require("../Helper");
 const ObjectType = require("../ObjectType");
+// const Convert = require("../Convert");
 
 /**
  * Helpers to encode and decode messages of the Cothority
@@ -50,17 +17,27 @@ const ObjectType = require("../ObjectType");
  * @author Cedric Maire (cedric.maire@epfl.ch)
  * @author Vincent Petri (vincent.petri@epfl.ch)
  */
-class CothorityMessages extends CothorityProtobuf {
+module.exports = {
+
+    READ_PIN_ERROR: 'Read PIN in server-log',
 
     /**
-     * Error return from the server when PIN is shown in the log
-     *
-     * @return {string} - the error
+     * Returns the protobuf loaded model.
+     * @param {string} name - the name of the model
+     * @returns {ReflectionObject|?ReflectionObject|string} - the model
      */
-    get READ_PIN_ERROR() {
-        return 'Read PIN in server-log';
-    }
+    getModel: function(name) {
+        if (typeof name !== "string") {
+            throw new Error("name must be of type string");
+        }
 
+        const model = DedisProtobuf.root.lookup(`${name}`);
+        if (model === undefined || model === null) {
+            throw new Error("unknown model: " + name);
+        }
+
+        return model;
+    },
 
     /**
      * Server related messages.
@@ -68,18 +45,25 @@ class CothorityMessages extends CothorityProtobuf {
 
     /**
      * Creates a ServerIdentity object from the given parameters.
-     * @param {Uint8Array} publicKey - the public key of the conode
-     * @param {Uint8Array} id - the id of the conode
+     * @param {Uint8Array|Point} publicKey - the public key of the conode
+     * @param {Uint8Array|null} id - the id of the conode
      * @param {string} address - the address of the conode
      * @param {string} desc - the description of the conode
      * @returns {ServerIdentity} - the server identity object created from the parameters
      */
-    createServerIdentity(publicKey, id, address, desc) {
-        if (!(publicKey instanceof Uint8Array)) {
-            throw new Error("publicKey must be an instance of Uint8Array");
+    createServerIdentity: function(publicKey, id, address, desc) {
+        if (!(publicKey instanceof Kyber.Point)) {
+            if (!(publicKey instanceof Uint8Array)) {
+                throw new Error("csi: publicKey must be an instance of Point or Uint8Array");
+            }
+            let pub = CurveEd25519.point();
+            pub.unmarshalBinary(publicKey);
+            publicKey = pub;
         }
         if (!(id instanceof Uint8Array)) {
-            throw new Error("id must be an instance of Uint8Array");
+            const hex = Buffer.from(publicKey.marshalBinary()).toString('hex');
+            const url = "https://dedis.epfl.ch/id/" + hex;
+            id = new UUID(5, "ns:URL", url).export();
         }
         if (typeof address !== "string") {
             throw new Error("address must be of type string");
@@ -98,33 +82,40 @@ class CothorityMessages extends CothorityProtobuf {
         };
 
         return model.create(fields);
-    }
+    },
 
     /**
      * Creates a Roster object.
      * @param {Uint8Array} id - the id of the roster
-     * @param {Array} list - array of ServerIdentity
-     * @param {Uint8Array} aggregate - the aggregate of the conodes in list
+     * @param {ServiceIdentity[]} list - array of ServerIdentity
+     * @param {Uint8Array|Point} aggregate - the aggregate of the conodes in list
      * @returns {Roster} - the roster object created form the parameters
      */
-    createRoster(id, list, aggregate) {
+    createRoster: function(id, list, aggregate) {
         if (!(id === undefined || id instanceof Uint8Array)) {
-            throw new Error("id must be an instance of Uint8Array or be undefined to skip it");
+            throw new Error("cr: id must be an instance of Uint8Array or be undefined to skip it");
         }
         if (!(list instanceof Array)) {
             throw new Error("list must be an instance of Array");
         }
-        if (list.length > 0 && !Helper$1.isOfType(list[0], ObjectType.SERVER_IDENTITY)) {
+        if (list.length > 0 && !(list[0] instanceof Cothority.ServerIdentity)) {
             throw new Error("list[i] must be an instance of ServerIdentity");
         }
-        if (!(aggregate instanceof Uint8Array)) {
-            throw new Error("aggregate must be an instance of Uint8Array");
+        if (!(aggregate instanceof Kyber.Point)) {
+            if (!(aggregate instanceof Uint8Array)) {
+                throw new Error("aggregate must be an instance of Point or Uint8Array");
+            }
+            let agg = CurveEd25519.point();
+            agg.unmarshalBinary(aggregate);
+            aggregate = agg;
         }
 
         const model = this.getModel(ObjectType.ROSTER);
 
         const fields = {
-            list: list,
+            list: list.map(l => {
+                return this.createServerIdentity(l.public, l.id, l.tcpAddr, l.description);
+            }),
             aggregate: aggregate
         };
 
@@ -133,15 +124,15 @@ class CothorityMessages extends CothorityProtobuf {
         }
 
         return model.create(fields);
-    }
+    },
 
     /**
      * Creates an message to make a StatusRequest to a cothority node.
      * @returns {*|Buffer|Uint8Array} - the status request
      */
-    createStatusRequest() {
+    createStatusRequest: function() {
         return {};
-    }
+    },
 
     /**
      * PoP related messages.
@@ -155,7 +146,7 @@ class CothorityMessages extends CothorityProtobuf {
      * @param {Roster} roster - the roster used to host the pop party
      * @returns {PopDesc} - the PopDesc object created using the given parameters
      */
-    createPopDesc(name, datetime, location, roster) {
+    createPopDesc: function(name, datetime, location, roster) {
         if (typeof name !== "string") {
             throw new Error("name must be of type string");
         }
@@ -165,7 +156,7 @@ class CothorityMessages extends CothorityProtobuf {
         if (typeof location !== "string") {
             throw new Error("location must be of type string");
         }
-        if (!Helper$1.isOfType(roster, ObjectType.ROSTER)) {
+        if (!Helper.isOfType(roster, ObjectType.ROSTER)) {
             throw new Error("roster must be an instance of Roster");
         }
 
@@ -179,7 +170,7 @@ class CothorityMessages extends CothorityProtobuf {
         };
 
         return model.create(fields);
-    }
+    },
 
     /**
      * Creates an message to store configuration information of a given PoP party on a conode.
@@ -187,8 +178,8 @@ class CothorityMessages extends CothorityProtobuf {
      * @param {Uint8Array} signature - the signature of the message
      * @returns {{desc: *, signature: Uint8Array}} - the store config request
      */
-    createStoreConfig(desc, signature) {
-        if (!Helper$1.isOfType(desc, ObjectType.POP_DESC)) {
+    createStoreConfig: function(desc, signature) {
+        if (!Helper.isOfType(desc, ObjectType.POP_DESC)) {
             throw new Error("desc must be an instance of PopDesc");
         }
         if (!(signature instanceof Uint8Array)) {
@@ -206,7 +197,7 @@ class CothorityMessages extends CothorityProtobuf {
         };
 
         return fields;
-    }
+    },
 
     /**
      * Creates a FinalStatement given the parameters.
@@ -216,8 +207,8 @@ class CothorityMessages extends CothorityProtobuf {
      * @param {boolean} merged - if the pop party has been merged
      * @returns {FinalStatement} - the final statement created given the parameters
      */
-    createFinalStatement(desc, attendees, signature, merged) {
-        if (!Helper$1.isOfType(desc, ObjectType.POP_DESC)) {
+    createFinalStatement: function(desc, attendees, signature, merged) {
+        if (!Helper.isOfType(desc, ObjectType.POP_DESC)) {
             throw new Error("desc must be an instance of PopDesc");
         }
         if (!(attendees instanceof Array)) {
@@ -243,7 +234,7 @@ class CothorityMessages extends CothorityProtobuf {
         };
 
         return model.create(fields);
-    }
+    },
 
     /**
      * Creates an message to finalize the pop party referenced by descId.
@@ -252,7 +243,7 @@ class CothorityMessages extends CothorityProtobuf {
      * @param {Uint8Array} signature - the signature of the message
      * @returns {{descId: Uint8Array, attendees: Array, signature: Uint8Array}} - the finalize request
      */
-    createFinalizeRequest(descId, attendees, signature) {
+    createFinalizeRequest: function(descId, attendees, signature) {
         if (!(descId instanceof Uint8Array)) {
             throw new Error("descId must be an instance of Uint8Array");
         }
@@ -273,7 +264,7 @@ class CothorityMessages extends CothorityProtobuf {
         };
 
         return fields;
-    }
+    },
 
     /**
      * Creates a message to check a PoP Config status
@@ -281,7 +272,7 @@ class CothorityMessages extends CothorityProtobuf {
      * @param attendees - array of attendees to the party
      * @returns {{hash: Uint8Array, attendees: Array}}
      */
-    createCheckConfigRequest(hash, attendees) {
+    createCheckConfigRequest: function(hash, attendees) {
         if (!(hash instanceof Uint8Array)) {
             throw new Error("has must be an instance of Uint8Array");
         }
@@ -298,46 +289,46 @@ class CothorityMessages extends CothorityProtobuf {
         }
 
         return fields;
-    }
+    },
 
     /**
      * Creates an message to make a PinRequest to a cothority node.
      * @param {string} pin - previously generated by the conode
-     * @param {Uint8Array} publicKey - the public key of the organizer
+     * @param {Kyber.Point} publicKey - the public key of the organizer
      * @returns {{pin: string, public: Uint8Array}} - the pin request
      */
-    createPinRequest(pin, publicKey) {
+    createPinRequest: function(pin, publicKey) {
         if (typeof pin !== "string") {
             throw new Error("pin must be of type string");
         }
-        if (!(publicKey instanceof Uint8Array)) {
-            throw new Error("publicKey must be an instance of Uint8Array");
+        if (!(publicKey instanceof Kyber.Point)) {
+            throw new Error("publicKey must be an instance of Point");
         }
 
         const fields = {
             pin: pin,
-            public: publicKey
+            public: publicKey.marshalBinary()
         };
 
         return fields;
-    }
+    },
 
     /**
      * Creates a messages to make a VerifyLink reuqest to a conode
      * @param {Uint8Array} publicKey - the public key of the user
      * @returns {{public: Uint8Array}} - the verify link request
      */
-    createVerifyLinkMessage(publicKey) {
-        if (!(publicKey instanceof Uint8Array)) {
-            throw new Error("publicKey must be an instance of Uint8Array");
+    createVerifyLinkMessage: function(publicKey) {
+        if (!(publicKey instanceof Kyber.Point)) {
+            throw new Error("publicKey must be an instance of Point");
         }
 
         const fields = {
-            public: publicKey
+            public: publicKey.marshalBinary()
         };
 
         return fields;
-    }
+    },
 
     /**
      * Creates an FetchRequest for the pop party referenced by id.
@@ -346,9 +337,9 @@ class CothorityMessages extends CothorityProtobuf {
      * should be return even if it is uncomplete
      * @returns {{id: Uint8Array, returnUncomplete: *}} - the fetch request
      */
-    createFetchRequest(id, returnUncomplete) {
+    createFetchRequest: function(id, returnUncomplete) {
         if (!(id instanceof Uint8Array)) {
-            throw new Error("id must be an instance of Uint8Array");
+            throw new Error("cfr: id must be an instance of Uint8Array");
         }
 
         if (returnUncomplete !== undefined && typeof returnUncomplete !== "boolean") {
@@ -362,7 +353,7 @@ class CothorityMessages extends CothorityProtobuf {
         };
 
         return fields;
-    }
+    },
 
     /**
      * CISC related messages.
@@ -375,7 +366,7 @@ class CothorityMessages extends CothorityProtobuf {
      * @param data
      * @returns {object} Config
      */
-    createConfig(threshold, device, data) {
+    createConfig: function(threshold, device, data) {
         const model = this.getModel("Config");
 
         const fields = {
@@ -385,20 +376,20 @@ class CothorityMessages extends CothorityProtobuf {
         };
 
         return model.create(fields);
-    }
+    },
 
     /**
      * Create a message request to get the config of a given conode.
      * @param id
      * @returns {{id: *}}
      */
-    createDataUpdate(id) {
+    createDataUpdate: function(id) {
         const fields = {
             id: id
         };
 
         return fields;
-    }
+    },
 
     /**
      * Creates a SchnorrSig object using the given parameters.
@@ -406,7 +397,7 @@ class CothorityMessages extends CothorityProtobuf {
      * @param response
      * @returns {object} SchnorrSig
      */
-    createSchnorrSig(challenge, response) {
+    createSchnorrSig: function(challenge, response) {
         const model = this.getModel("SchnorrSig");
 
         const fields = {
@@ -415,14 +406,14 @@ class CothorityMessages extends CothorityProtobuf {
         };
 
         return model.create(fields);
-    }
+    },
 
     /**
      * Create a device structure, that may be added to a config.
      * @param key
      * @returns {fields}
      */
-    createDevice(key) {
+    createDevice: function(key) {
         const model = this.getModel("Device");
 
         const fields = {
@@ -430,7 +421,7 @@ class CothorityMessages extends CothorityProtobuf {
         };
 
         return model.create(fields);
-    }
+    },
 
     /**
      * Create a message request to vote an update to a config.
@@ -440,7 +431,7 @@ class CothorityMessages extends CothorityProtobuf {
      * @param response
      * @returns {{id: *, signer: *, signature: *}}
      */
-    createProposeVote(id, signer, signature) {
+    createProposeVote: function(id, signer, signature) {
         const fields = {
             id: id,
             signer: signer,
@@ -448,7 +439,7 @@ class CothorityMessages extends CothorityProtobuf {
         };
 
         return fields;
-    }
+    },
 
     /**
      * Create a message request to propose an update to a config.
@@ -456,29 +447,29 @@ class CothorityMessages extends CothorityProtobuf {
      * @param config
      * @returns {{id: *, data: *}}
      */
-    createProposeSend(id, data) {
+    createProposeSend: function(id, data) {
         const fields = {
             id: id,
             data: data
         };
 
         return fields;
-    }
+    },
 
     /**
      * Create a message request to get the current config update propositions.
      * @param id
      * @returns {{id: *}}
      */
-    createProposeUpdate(id) {
+    createProposeUpdate: function(id) {
         const fields = {
             id: id
         };
 
         return fields;
-    }
+    },
 
-    createLinkPoP() {
+    createLinkPoP: function() {
         // LinkPoP stores a link to a pop-party to accept this configuration. It will
 // try to create an account to receive payments from clients.
 //       message LinkPoP {
@@ -486,13 +477,13 @@ class CothorityMessages extends CothorityProtobuf {
 //           required Party party = 2;
 //       }
 
-    }
+    },
 
-    createGetAccount() {
+    createGetAccount: function() {
         // required bytes popinstance = 1;
-    }
+    },
 
-    createMessage(msg){
+    createMessage: function(msg) {
         const msgProto = this.getModel(ObjectType.MESSAGE);
 
         const fields = {
@@ -506,46 +497,37 @@ class CothorityMessages extends CothorityProtobuf {
         }
 
         return msgProto.create(fields);
-    }
+    },
 
-    createSendMessage(msg) {
+    createSendMessage: function(msg) {
         const fields = {
             message: msg
         };
 
-        console.dir(fields);
-
         return fields;
-    }
+    },
 
-    createListMessages(start, number) {
+    createListMessages: function(start, number) {
         const fields = {
             start: start,
             number: number
         };
 
         return fields;
-    }
+    },
 
-    createReadMessage(id, party, reader) {
+    createReadMessage: function(id, party, reader) {
         return {
             msgid: id,
             partyiid: party,
             reader: reader,
         };
-    }
+    },
 
-    createTopupMessage(id, amount) {
+    createTopupMessage: function(id, amount) {
         return {
             msgid: id,
             amount: amount
         };
     }
-}
-
-/**
- * Singleton
- */
-var index = new CothorityMessages();
-
-module.exports = index;
+};

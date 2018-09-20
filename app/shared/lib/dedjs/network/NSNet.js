@@ -54,22 +54,20 @@ function Socket(addr, service) {
             }
 
             ws.on('open', () => {
-                console.log("opened")
+                console.log("opening");
                 const errMsg = requestModel.verify(data);
                 if (errMsg) {
+                    console.log("couldn't verify data:", errMsg);
                     reject(new Error(errMsg));
                 }
-                console.log("creating message")
                 const message = requestModel.create(data);
-                console.log("encoding message")
                 const marshal = requestModel.encode(message).finish();
-                console.log("sending message")
+                console.log("sending message");
                 ws.send(marshal);
             });
 
             ws.on('message', (socket, message) => {
                 console.log("event 2 is:");
-                listObject(socket);
                 listObject(message);
                 // const data = event.data;
                 let buffer = new Uint8Array(message);
@@ -88,9 +86,13 @@ function Socket(addr, service) {
 
             ws.on('close', (socket, code, reason) => {
                 console.log("closing:", code, reason);
+                if (code === 4000) {
+                    reject(new Error(reason));
+                }
             });
 
             ws.on('error', (socket, error) => {
+                console.log("got error:", error);
                 reject(error);
             });
 
@@ -106,8 +108,7 @@ function Socket(addr, service) {
  * */
 class RosterSocket {
     constructor(roster, service) {
-        return;
-        this.addresses = roster.list.map(conode => conode.address.replace("tls:", "ws:"));
+        this.addresses = roster.list.map(conode => tlsToWebsocket(conode.address, ""));
         this.service = service;
         this.lastGoodServer = null;
     }
@@ -121,7 +122,6 @@ class RosterSocket {
      * @returns {Promise} holds the returned data in case of success.
      */
     send(request, response, data) {
-        return Promise.resolve();
         const that = this;
         const fn = co.wrap(function* () {
             const addresses = that.addresses;
@@ -200,8 +200,39 @@ class LeaderSocket {
     }
 }
 
+/**
+ * Converts a TLS URL to a Wesocket URL and builds a complete URL with the path given as parameter.
+ * @param {ServerIdentity|string} serverIdentity - the server identity to take the url from
+ * @param {string} path - the path after the base url
+ * @returns {string} - the builded websocket url
+ */
+function tlsToWebsocket(serverIdentity, path) {
+    const URL_PORT_SPLITTER = ":";
+    const BASE_URL_WS = "ws://";
+    const BASE_URL_TLS = "tls://";
+
+    let address = "";
+    if (serverIdentity.constructor.name === "ServerIdentity") {
+        address = serverIdentity.address
+    } else if (typeof serverIdentity === "string") {
+        address = serverIdentity;
+    } else {
+        throw new Error("serverIdentity must be of type ServerIdentity or string");
+    }
+    if (typeof path !== "string") {
+        throw new Error("path must be of type string");
+    }
+
+    let [ip, port] = address.replace(BASE_URL_TLS, "").split(URL_PORT_SPLITTER);
+    port = parseInt(port) + 1;
+
+    return BASE_URL_WS + ip + URL_PORT_SPLITTER + port + path;
+}
+
+
 module.exports = {
     Socket,
     RosterSocket,
-    LeaderSocket
+    LeaderSocket,
+    tlsToWebsocket
 };

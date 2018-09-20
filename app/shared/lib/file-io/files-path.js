@@ -7,8 +7,8 @@
  */
 const ROSTER = "shared/res/files/user/roster.json";
 const USER_NAME = "shared/res/files/user/name.json";
-const KEY_PAIR = "keypair.json";
-
+const KEY_PAIR = "shared/res/files/user/keypair.json";
+const FILES_DIR = "shared/res/files";
 
 /**
  * PoP Files
@@ -81,3 +81,4 @@ module.exports.WALLET_PATH = WALLET_PATH;
 module.exports.WALLET_CONFIG = WALLET_CONFIG;
 module.exports.WALLET_FINAL = WALLET_FINAL;
 module.exports.WALLET_KEYPAIR = WALLET_KEYPAIR;
+module.exports.FILES_DIR = FILES_DIR;

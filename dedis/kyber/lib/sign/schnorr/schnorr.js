@@ -32,6 +32,7 @@ function Sign(suite, privateKey, message) {
   // generate public key
   const pub = suite.point().mul(privateKey, null);
 
+
   // generate challenge
   const challenge = hashSchnorr(suite, buffR, pub.marshalBinary(), message);
 

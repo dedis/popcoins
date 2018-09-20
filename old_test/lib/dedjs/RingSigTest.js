@@ -6,7 +6,7 @@ chai.should();
 
 const Kyber = require("@dedis/kyber-js");
 const suite = new Kyber.curve.edwards25519.Curve;
-const RingSig = require("../../../shared/lib/dedjs/RingSig");
+const RingSig = require("../../../app/shared/lib/dedjs/RingSig");
 
 describe.skip("RingSig", function () {
   it('should correctly sign and verify with only one signer', function () {

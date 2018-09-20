@@ -2,14 +2,14 @@ const ChaiAsPromised = require("chai-as-promised");
 chai.use(ChaiAsPromised);
 chai.should();
 
-const FilesPath = require("../../../../../shared/lib/file-io/files-path");
-const FileIO = require("../../../../../shared/lib/file-io/file-io");
-const Convert = require("../../../../../shared/lib/dedjs/Convert");
-const CothorityMessages = require("../../../../../shared/lib/dedjs/network/cothority-messages");
-const User = require("../../../../../shared/lib/dedjs/object/user/User").get;
-const PopToken = require("../../../../../shared/lib/dedjs/object/pop/att/PopToken");
+const FilesPath = require("../../../../../app/shared/lib/file-io/files-path");
+const FileIO = require("../../../../../app/shared/lib/file-io/file-io");
+const Convert = require("../../../../../app/shared/lib/dedjs/Convert");
+const CothorityMessages = require("../../../../../app/shared/lib/dedjs/network/cothority-messages");
+const User = require("../../../../../app/shared/lib/dedjs/object/user/User").get;
+const PopToken = require("../../../../../app/shared/lib/dedjs/object/pop/att/PopToken");
 
-const PoP = require("../../../../../shared/lib/dedjs/object/pop/PoP").get;
+const PoP = require("../../../../../app/shared/lib/dedjs/object/pop/PoP").get;
 
 const ROSTER_ID = "8yc0TaIweWRyMA==";
 const ROSTER_ID_BYTE_ARRAY = Convert.base64ToByteArray(ROSTER_ID);
@@ -129,7 +129,7 @@ describe.skip("PoP", function () {
   });
 
   it("should be a singleton", function () {
-    const PoP2 = require("../../../../../shared/lib/dedjs/object/pop/PoP").get;
+    const PoP2 = require("../../../../../app/shared/lib/dedjs/object/pop/PoP").get;
 
     (PoP2 === PoP).should.be.true;
   });

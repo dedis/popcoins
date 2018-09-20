@@ -4,39 +4,40 @@ const Dialog = require("ui/dialogs");
 const Timer = require("timer");
 const Observable = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
-const Net = require("@dedis/cothority").net;
+const Kyber = require("@dedis/kyber-js");
+const CurveEd25519 = new Kyber.curve.edwards25519.Curve;
+const Cothority = require("@dedis/cothority");
 
 const lib = require("../../../shared/lib");
 const dedjs = lib.dedjs;
 const Wallet = dedjs.object.pop.Wallet;
 const Configuration = dedjs.object.pop.Configuration;
 const User = dedjs.object.user.get;
-console.log("loading convert in wallet");
 const Convert = dedjs.Convert;
-const Helper = dedjs.Helper;
-const ObjectType = dedjs.ObjectType;
+const Log = dedjs.Log;
 const CothorityMessages = dedjs.network.CothorityMessages;
 const RequestPath = dedjs.network.RequestPath;
 const DecodeType = dedjs.network.DecodeType;
+const Net = dedjs.network.NSNet;
 
 const CANCELED_BY_USER = "CANCELED_BY_USER_STRING";
 
 const viewModel = Observable.fromObject({
     partyListDescriptions: new ObservableArray(),
     isLoading: false,
-    isEmpty: true
+    isEmpty: true,
+    loaded: false
 });
 
 let page = undefined;
 let timerId = undefined;
 
 function onLoaded(args) {
-    console.log("party-list loading");
+    Log.lvl2("party-list loading");
     page = args.object;
     page.bindingContext = viewModel;
 
     viewModel.partyListDescriptions.splice(0);
-    console.log("hi");
 
     return Timer.setTimeout(() => {
         loadParties();
@@ -44,7 +45,7 @@ function onLoaded(args) {
 }
 
 function onUnloaded() {
-    console.log("party-list unloading")
+    Log.lvl2("party-list unloading")
     // remove polling when page is leaved
     Timer.clearInterval(timerId);
 }
@@ -54,11 +55,23 @@ function onUnloaded() {
  * disk/sd-card/whatever. Else it will only return the cached list of wallets.
  */
 function loadParties() {
-    viewModel.isLoading = true;
-    Wallet.loadAll()
-        .then(wallets => {
+    return Promise.resolve()
+        .then(() => {
+            if (!viewModel.loaded) {
+                Log.lvl1("loading wallets from disk");
+                viewModel.isLoading = true;
+                viewModel.loaded = true;
+                return Wallet.loadAll()
+                    .catch(err => {
+                        Log.rcatch(err, "error while loading party: ");
+                        viewModel.isLoading = false;
+                    })
+            }
+        })
+        .then(() => {
+            Log.lvl1("getting all wallets:", Object.keys(Wallet.List));
             viewModel.partyListDescriptions.splice(0);
-            Object.values(wallets).forEach(wallet => {
+            Object.values(Wallet.List).forEach(wallet => {
                 viewModel.partyListDescriptions.push(getViewModel(wallet));
             })
 
@@ -69,10 +82,6 @@ function loadParties() {
             timerId = Timer.setInterval(() => {
                 reloadStatuses();
             }, 5000)
-        })
-        .catch(err => {
-            console.log("error while loading party: " + err);
-            viewModel.isLoading = false;
         })
 }
 
@@ -90,7 +99,7 @@ function getViewModel(wallet) {
             location: wallet.config.location,
             roster: {
                 id: wallet.config.roster.id,
-                list: new ObservableArray(wallet.config.roster.list),
+                list: new ObservableArray(wallet.config.roster.identities),
                 aggregate: new Uint8Array()
             }
         }),
@@ -109,12 +118,13 @@ function reloadStatuses() {
     let newView = new ObservableArray();
     return Promise.all(
         viewModel.partyListDescriptions.map(model => {
+            newView.push(getViewModel(model.party));
+            if (model.party.state() == Wallet.STATE_CONFIG) {
+                return
+            }
             return model.party.update()
                 .catch(err => {
-                    console.log("error while updating party: " + err);
-                })
-                .then(() => {
-                    newView.push(getViewModel(model.party));
+                    Log.catch(err, "error while updating party: ");
                 })
         })
     ).then(() => {
@@ -131,7 +141,8 @@ function reloadStatuses() {
  */
 function partyTapped(args) {
     const index = args.index;
-    const party = viewModel.partyListDescriptions.getItem(index).party;
+    const pld = viewModel.partyListDescriptions.getItem(index);
+    const party = pld.party;
     if (party.state() == Wallet.STATE_PUBLISH) {
         return Frame.topmost().navigate({
             moduleName: "drawers/pop/org/register/register-page",
@@ -143,10 +154,13 @@ function partyTapped(args) {
 
     let CONFIG = "Configure the party";
     let PUBLISH = "Publish the party";
+    let ADD_NEXT = "Add next party";
     let DELETE = "Remove the party";
     let actions = [DELETE];
     if (party.state() == Wallet.STATE_CONFIG) {
         actions = [CONFIG, PUBLISH, DELETE];
+    } else if (party.state() == Wallet.STATE_FINALIZED) {
+        actions = [ADD_NEXT, DELETE];
     }
     return Dialog.action({
         title: "Party",
@@ -154,29 +168,38 @@ function partyTapped(args) {
         cancelButtonText: "Cancel",
         actions: actions
     }).then(result => {
-        if (result === CONFIG) {
-            return Frame.topmost().navigate({
-                moduleName: "drawers/pop/org/config/config-page",
-                context: {
-                    wallet: party
-                }
-            });
-        } else if (result === PUBLISH) {
-            return party.publish();
-        } else if (result === DELETE) {
-            return Dialog.confirm({
-                title: "Removing the party",
-                message: "Are you sure to remove the party?",
-                okButtonText: "Yes, remove",
-                cancelButtonText: "No, keep",
-            }).then(res => {
-                if (res) {
-                    return party.remove()
-                        .then(() => {
-                            viewModel.partyListDescriptions.splice(index, 1);
-                        });
-                }
-            })
+        switch (result) {
+            case ADD_NEXT:
+                let newParty = new Wallet(party.config);
+            case CONFIG:
+                return Frame.topmost().navigate({
+                    moduleName: "drawers/pop/org/config/config-page",
+                    context: {
+                        wallet: party
+                    }
+                });
+            case PUBLISH:
+                Log.lvl2("public key2 is:", User.getKeyPair().public);
+                const pub = CurveEd25519.point().mul(User.getKeyPair().private, null);
+                Log.lvl2("calculated pubkey:", pub);
+                return party.publish(User.getKeyPair().private)
+                    .then(() => {
+                        pld.status.status = party.stateStr();
+                    });
+            case DELETE:
+                return Dialog.confirm({
+                    title: "Removing the party",
+                    message: "Are you sure to remove the party?",
+                    okButtonText: "Yes, remove",
+                    cancelButtonText: "No, keep",
+                }).then(res => {
+                    if (res) {
+                        return party.remove()
+                            .then(() => {
+                                viewModel.partyListDescriptions.splice(index, 1);
+                            });
+                    }
+                })
         }
     }).catch((error) => {
         Dialog.alert({
@@ -193,15 +216,7 @@ function partyTapped(args) {
  * @returns {*}
  */
 function verifyLinkToConode() {
-    if (!User.isKeyPairSet()) {
-        return Dialog.alert({
-            title: "Key Pair Missing",
-            message: "Please generate a key pair.",
-            okButtonText: "Ok"
-        });
-    }
-
-    const conodes = User.getRoster().list;
+    const conodes = User.roster.identities;
     const conodesNames = conodes.map(serverIdentity => {
         return serverIdentity.description;
     });
@@ -215,12 +230,12 @@ function verifyLinkToConode() {
     }).then(result => {
         if (result !== "Cancel") {
             index = conodesNames.indexOf(result);
-            console.log("index is:", index)
+            Log.lvl2("index is:", index);
             return sendLinkRequest(conodes[index], "")
                 .then(result => {
-                    console.log("Prompting for pin");
+                    Log.lvl2("Prompting for pin");
                     if (result.alreadyLinked !== undefined && result.alreadyLinked) {
-                        console.log("Already linked")
+                        Log.lvl2("Already linked");
                         return Promise.resolve(conodes[index])
                     }
                     return Dialog.prompt({
@@ -245,13 +260,13 @@ function verifyLinkToConode() {
                     });
 
                 }).catch(error => {
-                    console.log("couldn't get PIN: " + error);
+                    Log.lvl2("couldn't get PIN: " + error);
                 })
         } else {
             return Promise.reject(CANCELED_BY_USER);
         }
     }).catch(error => {
-        console.log("error while setting up pin: ", error);
+        Log.catch(error, "error while setting up pin");
 
         if (error !== CANCELED_BY_USER) {
             return Dialog.alert({
@@ -268,20 +283,20 @@ function verifyLinkToConode() {
 
 
 function addParty() {
-    let conode = undefined;
-    console.log("configuring a new party");
+    Log.lvl2("configuring a new party");
     let date = new Date();
-    let name, location = ["", ""];
+    let name = "";
+    let location = "";
     if (RequestPath.PREFILL_PARTY) {
         name = "test " + date.getHours() + ":" + date.getMinutes();
         location = "testing-land";
     }
-    let config = new Configuration(name, date.toString(), location, User.getRoster());
+    let config = new Configuration(name, date.toString(), location, User.roster);
     let wallet = new Wallet(config);
 
     verifyLinkToConode()
         .then((result) => {
-            conode = result;
+            wallet.linkedConode = result;
             return Dialog.action({
                 message: "You are linked to your conode ! What do you want to do ?",
                 cancelButtonText: "Cancel",
@@ -290,12 +305,12 @@ function addParty() {
         })
         .then(result => {
             if (result === "Configure a new party") {
-                console.log("configuring a new party");
+                Log.lvl2("configuring a new party");
                 return Frame.topmost().navigate({
                     moduleName: "drawers/pop/org/config/config-page",
                     context: {
                         wallet: wallet,
-                        leader: conode,
+                        leader: wallet.linkedConode,
                         newConfig: true
                     }
                 });
@@ -303,11 +318,9 @@ function addParty() {
                 return Frame.topmost().navigate({
                     moduleName: "drawers/pop/org/proposals/org-party-proposals",
                     context: {
-                        conode: conode,
+                        conode: wallet.linkedConode,
                     }
                 });
-
-                return Promise.reject("New party is not needed anymore");
             } else {
                 return Promise.reject("User canceled");
             }
@@ -324,7 +337,6 @@ module.exports = {
     partyTapped,
     addParty,
     onUnloaded,
-    hashAndSave,
 }
 
 /**
@@ -341,14 +353,11 @@ module.exports = {
  * the public key of the user were already registered (thus it won't need to ask PIN in the future)
  */
 function sendLinkRequest(conode, pin) {
-    if (!Helper.isOfType(conode, ObjectType.SERVER_IDENTITY)) {
-        throw new Error("conode must be an instance of ServerIdentity");
+    if (!(conode instanceof Cothority.ServerIdentity)) {
+        throw new Error("conode must be an instance of Cothority.ServerIdentity");
     }
     if (typeof pin !== "string") {
         throw new Error("pin must be of type string");
-    }
-    if (!User.isKeyPairSet()) {
-        throw new Error("user should generate a key pair before linking to a conode");
     }
     const ALREADY_LINKED = "ALREADY_LINKED_STRING";
     const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(conode, ""), RequestPath.POP);
@@ -356,116 +365,25 @@ function sendLinkRequest(conode, pin) {
     const verifyLinkMessage = CothorityMessages.createVerifyLinkMessage(User.getKeyPair().public);
 
     // TODO change status request return type
-    console.log("verify link");
+    Log.lvl2("verify link");
     return cothoritySocket.send(RequestPath.POP_VERIFY_LINK, DecodeType.VERIFY_LINK_REPLY, verifyLinkMessage)
         .then(alreadyLinked => {
-            console.log("sending request");
+            Log.lvl2("sending pin request");
             return alreadyLinked.exists ?
                 Promise.resolve(ALREADY_LINKED) :
                 cothoritySocket.send(RequestPath.POP_PIN_REQUEST, RequestPath.STATUS_REQUEST, pinRequestMessage)
         })
         .then(response => {
+            Log.lvl2("already linked");
             return {
                 alreadyLinked: response === ALREADY_LINKED
             };
         })
         .catch(error => {
-            console.log("link error: " + error.message);
+            Log.catch(error, "link error");
             if (error.message === CothorityMessages.READ_PIN_ERROR) {
                 return Promise.resolve(error.message)
             }
-            console.log("link error:", error);
-
             return Promise.reject(error);
         });
 }
-
-
-/**
- * TO DELETE
- */
-
-function hashAndSave(party) {
-
-    if (!User.isKeyPairSet()) {
-        return Dialog.alert({
-            title: "Key Pair Missing",
-            message: "Please generate a key pair.",
-            okButtonText: "Ok"
-        })
-            .then(() => {
-                throw new Error("Key Pair Missing");
-            });
-    }
-    if (!party.isPopDescComplete()) {
-        return Dialog.alert({
-            title: "Missing Information",
-            message: "Please provide a name, date, time, location and the list (min 3) of conodes" +
-                " of the organizers of your PoP Party.",
-            okButtonText: "Ok"
-        })
-            .then(() => {
-                throw new Error("Missing information");
-            });
-    }
-    if (!party.isLinkedConodeSet()) {
-        return Dialog.alert({
-            title: "Not Linked to Conode",
-            message: "Please link to a conode first.",
-            okButtonText: "Ok"
-        })
-            .then(() => {
-                throw new Error("Not linked to Conode");
-            });
-    }
-
-    return party.registerPopDesc()
-        .then(() => {
-            return party.loadStatus();
-        })
-        // .then(() => {
-        //     return Dialog.alert({
-        //         title: "Successfully Registered",
-        //         message: "Your party has been correctly published ! You can now register the public key of each attendee.",
-        //         okButtonText: "Ok"
-        //     });
-        // })
-        .then(() => {
-            console.log("adding myself to party");
-            return addMyselfAttendee(party);
-        })
-        .then(() => {
-            console.log("sending my public key to server");
-            console.dir(party.getRegisteredAtts());
-            let pubKey = party.getRegisteredAtts().getItem(0);
-            console.log("Pubkey is:", pubKey);
-            return party.storeOrganizer(pubKey);
-        })
-        .then(() => {
-            console.log("fetching other keys");
-            return party.fetchOrganizerKeys()
-                .catch(err => {
-                    console.log("non-fatal error while fetching keys:", err)
-                    return [];
-                });
-        })
-        .then(keys => {
-            console.log("all keys registered:", keys.length);
-        })
-        .catch(error => {
-            console.log("error while adding my key:", error);
-
-            return Dialog.alert({
-                title: "Error",
-                message: "An error occured, please try again. - " + error,
-                okButtonText: "Ok"
-            })
-                .then(() => {
-                    throw new Error("couldn't add key: " + error);
-                });
-        });
-}
-
-
-const addMyselfAttendee = require("./register/register-page").addMyselfAttendee;
-

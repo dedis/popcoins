@@ -1,3 +1,5 @@
+require("nativescript-nodeify");
+
 const uuidv4 = require("uuid/v4");
 const Helper = require("../../Helper");
 const ObjectType = require("../../ObjectType");
