@@ -20,9 +20,9 @@ application.on(application.uncaughtErrorEvent, (args) => {
     }
 });
 
-// application.start({ moduleName: "drawers/tokens/main" });
+application.start({ moduleName: "drawers/tokens/main" });
 // application.start({ moduleName: "drawers/messages/main" });
-application.start({ moduleName: "drawers/pop/pop-page" });
+// application.start({ moduleName: "drawers/pop/pop-page" });
 
 /*
 Do not place any code after the application has been started as it will not

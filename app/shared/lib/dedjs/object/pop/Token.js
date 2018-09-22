@@ -59,3 +59,5 @@ class Token {
         return null;
     }
 }
+
+module.exports = Token;

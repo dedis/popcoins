@@ -6,6 +6,8 @@
 node_modules/
 platforms/
 hooks/
+conodes/
+old.dedis/
 
 package-lock.json
 

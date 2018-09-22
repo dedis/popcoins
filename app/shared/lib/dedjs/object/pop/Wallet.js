@@ -8,7 +8,8 @@ const HashJs = require("hash.js");
 const Cothority = require("@dedis/cothority");
 const OmniledgerRPC = Cothority.omniledger.OmniledgerRPC;
 const PopPartyInstance = Cothority.omniledger.contracts.PopPartyInstance;
-const CoinInstance = Cothority.omniledger.contracts.CoinsInstance;
+// const CoinInstance = Cothority.omniledger.contracts.CoinsInstance;
+const CoinInstance = require("../../../../cothority/lib/omniledger/contracts/CoinsInstance");
 
 const FilePaths = require("../../../file-io/files-path");
 const FileIO = require("../../../file-io/file-io");
@@ -18,6 +19,7 @@ const RequestPath = require("../../network/RequestPath");
 const DecodeType = require("../../network/DecodeType");
 const Net = require("../../network/NSNet");
 const Configuration = require('./Configuration');
+const Token = require('./Token');
 const FinalStatement = require('./FinalStatement');
 const KeyPair = require('../../KeyPair');
 
@@ -168,9 +170,16 @@ class Wallet {
             case STATE_PUBLISH:
             case STATE_FINALIZING:
                 return this.getPartyInstance(true)
-                    .then(() => {
+                    .then(pi => {
+                        if (pi.finalStatement.signature &&
+                            pi.finalStatement.signature.length == 64) {
+                            this.finalStatement.signature = pi.finalStatement.signature;
+                        }
                         if (this.state() == STATE_FINALIZED) {
-                            return this.update();
+                            return this.save()
+                                .then(() => {
+                                    return this.update();
+                                })
                         }
                         return STATE_PUBLISH;
                     });
@@ -282,7 +291,7 @@ class Wallet {
 
         return cothoritySocket.send(RequestPath.POP_FINALIZE_REQUEST, DecodeType.FINALIZE_RESPONSE, finalizeRequestMessage)
             .then(finalStatement => {
-                if (finalStatement.signature && finalStatement.signature.length == 32) {
+                if (finalStatement.signature && finalStatement.signature.length == 64) {
                     // If the signature is complete, copy it to the final statement.
                     this._finalStatement.signature = finalStatement.signature;
                     return STATE_FINALIZED;
@@ -313,7 +322,7 @@ class Wallet {
 
         const cothoritySocketOl = new Net.RosterSocket(this.config.roster, RequestPath.OMNILEDGER);
         return OmniledgerRPC.fromKnownConfiguration(cothoritySocketOl, this._omniledgerID)
-            .then(olRPC =>{
+            .then(olRPC => {
                 this._omniledgerRPC = olRPC;
                 return olRPC;
             })
@@ -354,14 +363,17 @@ class Wallet {
                                 .then(olRPC => {
                                     return PopPartyInstance.fromInstanceId(olRPC, piid);
                                 })
-                                .then(ppi =>{
+                                .then(ppi => {
                                     this._partyInstance = ppi;
                                 })
                         })
                 }
             })
             .then(() => {
-                return this._partyInstance.update();
+                if (update) {
+                    return this._partyInstance.update();
+                }
+                return this._partyInstance;
             })
     }
 
@@ -371,14 +383,22 @@ class Wallet {
      * @returns {Promise<CoinInstance>}
      */
     getCoinInstance(update) {
-        if (this._coinInstance != null || update !== undefined) {
-            return Promise.resolve(this._coinInstance);
-        }
-        return this.getPartyInstance().then(pi => {
-            let coinIID = pi.getAccountInstanceId(this._keypair.public);
-            this._coinInstance = CoinInstance.fromInstanceId(this._omniledgerRPC, coinIID);
-            return this._coinInstance;
-        })
+        return Promise.resolve()
+            .then(() => {
+                if (this._coinInstance == null) {
+                    return this.getPartyInstance()
+                        .then(pi => {
+                            let coinIID = pi.getAccountInstanceId(this._keypair.public.marshalBinary());
+                            return CoinInstance.fromInstanceId(this._omniledgerRPC, coinIID)
+                        })
+                        .then(ci => {
+                            this._coinInstance = ci;
+                        });
+                }
+            })
+            .then(() => {
+                return this._coinInstance.update();
+            })
     }
 
     /**
@@ -504,6 +524,7 @@ class Wallet {
                 if (object.signature) {
                     Log.lvl2("found signature");
                     wallet._finalStatement.signature = o2u(object.signature);
+                    wallet._token = new Token(wallet._finalStatement, this._keypair);
                 }
                 if (object.omniledgerID) {
                     wallet._omniledgerID = o2u(object.omniledgerID);

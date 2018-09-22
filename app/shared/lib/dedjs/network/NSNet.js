@@ -4,15 +4,7 @@ const shuffle = require("shuffle-array");
 const WS = require("nativescript-websockets");
 const Buffer = require("buffer/").Buffer;
 const root = require("@dedis/cothority").protobuf.root;
-
-function listObject(data) {
-    // allows us to console.log circular objects, but prints only current level depth
-    for (var key in data) {
-        if (data.hasOwnProperty(key)) {
-            console.log(key + " -> " + data[key]);
-        }
-    }
-}
+const Log = require("../Log");
 
 /**
  * Socket is a WebSocket object instance through which protobuf messages are
@@ -54,7 +46,6 @@ function Socket(addr, service) {
             }
 
             ws.on('open', () => {
-                console.log("opening");
                 const errMsg = requestModel.verify(data);
                 if (errMsg) {
                     console.log("couldn't verify data:", errMsg);
@@ -62,14 +53,11 @@ function Socket(addr, service) {
                 }
                 const message = requestModel.create(data);
                 const marshal = requestModel.encode(message).finish();
-                console.log("sending message");
                 ws.send(marshal);
             });
 
             ws.on('message', (socket, message) => {
-                console.log("event 2 is:");
-                listObject(message);
-                // const data = event.data;
+                Log.lvl2("Writing message:", message);
                 let buffer = new Uint8Array(message);
                 try {
                     const unmarshal = responseModel.decode(buffer);
@@ -85,7 +73,6 @@ function Socket(addr, service) {
             });
 
             ws.on('close', (socket, code, reason) => {
-                console.log("closing:", code, reason);
                 if (code === 4000) {
                     reject(new Error(reason));
                 }
