@@ -230,7 +230,7 @@ function copyViewModelToWallet() {
     date.map(parseInt);
     time.map(parseInt);
 
-    WalEdit.config.datetime = new Date(date[0], date[1], date[2], time[0], time[1], 0, 0).toString();
+    WalEdit.config.datetime = new Date(date[0], date[1]-1, date[2], time[0], time[1], 0, 0).toString();
     WalEdit.config.name = dataForm.name;
     WalEdit.config.location = dataForm.location;
 }
@@ -240,7 +240,7 @@ function copyWalletToViewModel() {
     let cfg = WalEdit.config;
     let date = new Date(Date.parse(cfg.datetime));
 
-    dataForm.set("date", date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate());
+    dataForm.set("date", date.getFullYear() + "-" + (date.getMonth()+1) + "-" + date.getDate());
     dataForm.set("time", date.getHours() + ":" + date.getMinutes());
     dataForm.name = cfg.name;
     dataForm.location = cfg.location;

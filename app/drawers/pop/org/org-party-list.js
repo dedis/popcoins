@@ -39,6 +39,8 @@ function onLoaded(args) {
 
     viewModel.partyListDescriptions.splice(0);
 
+    Log.print("User public key is:", User.getKeyPair().public);
+
     return Timer.setTimeout(() => {
         loadParties();
     }, 10);
@@ -72,7 +74,9 @@ function loadParties() {
             Log.lvl1("getting all wallets:", Object.keys(Wallet.List));
             viewModel.partyListDescriptions.splice(0);
             Object.values(Wallet.List).forEach(wallet => {
-                viewModel.partyListDescriptions.push(getViewModel(wallet));
+                if (wallet.linkedConode) {
+                    viewModel.partyListDescriptions.push(getViewModel(wallet));
+                }
             })
 
             viewModel.isEmpty = viewModel.partyListDescriptions.length == 0;
@@ -124,7 +128,7 @@ function reloadStatuses() {
             }
             return model.party.update()
                 .catch(err => {
-                    Log.catch(err, "error while updating party: ");
+                    Log.catch(err, "error while updating party");
                 })
         })
     ).then(() => {

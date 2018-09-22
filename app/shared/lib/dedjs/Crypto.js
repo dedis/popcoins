@@ -165,7 +165,7 @@ class KeyPair {
             .then(jsonKeyPair => {
                 if (jsonKeyPair.length > 0 && Convert.jsonToObject(jsonKeyPair).public !== ""
                     && Convert.jsonToObject(jsonKeyPair).private !== "" && Convert.jsonToObject(jsonKeyPair).private !== "") {
-                    const parsed = Convert.parseJsonKeyPair(jsonKeyPair);
+                    const parsed = KeyPair.fromJson(jsonKeyPair);
                     return this.setKeyPair(parsed.public, parsed.private, false);
                 } else {
                     return this.randomize();

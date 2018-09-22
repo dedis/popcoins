@@ -11,13 +11,15 @@ const QRGenerator = new ZXing();
 // const Net = require("@dedis/cothority").net;
 
 const lib = require("../../shared/lib");
+const dedjs = lib.dedjs;
 const ScanToReturn = lib.scan_to_return;
-const AttParty = lib.dedjs.object.pop.att.AttParty.Party;
-const Convert = lib.dedjs.Convert;
-const PoP = lib.dedjs.object.pop.PoP.get;
-const Wallet = lib.dedjs.object.pop.Wallet;
-const Net = lib.dedjs.network.NSNet;
-const RequestPath = lib.dedjs.network.RequestPath;
+const AttParty = dedjs.object.pop.att.AttParty.Party;
+const Convert = dedjs.Convert;
+const Log = dedjs.Log;
+const PoP = dedjs.object.pop.PoP.get;
+const Wallet = dedjs.object.pop.Wallet;
+const Net = dedjs.network.NSNet;
+const RequestPath = dedjs.network.RequestPath;
 
 const USER_CANCELED = "Cancel";
 
@@ -61,7 +63,9 @@ function onUnloaded(args) {
  * @returns {Observable}
  */
 function getViewModel(wallet) {
-    let text = " { \"public\" :  \"" + wallet.keypair.public.marshalBinary().toString('base64') + "\"}";
+    let pubBase64 = Buffer.from(wallet.keypair.public.marshalBinary()).toString('base64');
+    let text = " { \"public\" :  \"" + pubBase64 + "\"}";
+    Log.print("QRcode is:", text);
     let sideLength = PlatformModule.screen.mainScreen.widthPixels / 4;
     const qrcode = QRGenerator.createBarcode({
         encode: text,
@@ -156,7 +160,7 @@ function partyTapped(args) {
                 return Frame.topmost().navigate({
                     moduleName: "drawers/pop/org/config/config-page",
                     context: {
-                        party: party,
+                        wallet: party,
                         readOnly: true
                     }
                 });
@@ -272,9 +276,11 @@ function addParty() {
         })
         .then(newWallet => {
             console.log("got wallet:");
-            console.dir(newWallet);
+            newWallet.attendeesAdd([newWallet.keypair.public]);
+            Log.print("Roster is:", newWallet.config.roster);
             return newWallet.save()
                 .then(() => {
+                    Log.print("saved");
                     viewModel.partyListDescriptions.push(
                         getViewModel(newWallet)
                     );
@@ -282,9 +288,7 @@ function addParty() {
                     return update();
                 })
                 .then(() => {
-                    return Wallet.update()
-                })
-                .then(() => {
+                    Log.print("updated");
                     return Frame.topmost().navigate({
                         animated: false, clearHistory: true, moduleName: "drawers/tokens/main"
                     })

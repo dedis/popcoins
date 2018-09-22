@@ -1,11 +1,14 @@
 require("nativescript-nodeify");
 const FileSystem = require("tns-core-modules/file-system");
 const Documents = FileSystem.knownFolders.documents();
-const OmniLedger = require("@dedis/cothority").omniledger;
 const Kyber = require("@dedis/kyber-js");
 const CurveEd25519 = new Kyber.curve.edwards25519.Curve;
 const Schnorr = Kyber.sign.schnorr;
+const HashJs = require("hash.js");
 const Cothority = require("@dedis/cothority");
+const OmniledgerRPC = Cothority.omniledger.OmniledgerRPC;
+const PopPartyInstance = Cothority.omniledger.contracts.PopPartyInstance;
+const CoinInstance = Cothority.omniledger.contracts.CoinsInstance;
 
 const FilePaths = require("../../../file-io/files-path");
 const FileIO = require("../../../file-io/file-io");
@@ -47,7 +50,7 @@ class Wallet {
         this._keypair = new KeyPair();
         this._finalStatement = null;
         this._token = null;
-        this._omniledgerID = null;
+        this._omniledgerID = Convert.hexToByteArray(RequestPath.OMNILEDGER_INSTANCE_ID);
         this._omniledgerRPC = null;
         this._partyInstanceId = null;
         this._partyInstance = null;
@@ -80,9 +83,11 @@ class Wallet {
         }
         if (this._finalStatement != null) {
             if (this._finalStatement.signature !== null &&
-                this._finalStatement.signature !== undefined &&
-                this._finalStatement.signature.length > 0) {
-                return STATE_FINALIZED;
+                this._finalStatement.signature !== undefined) {
+                if (this._finalStatement.signature.length > 1) {
+                    return STATE_FINALIZED;
+                }
+                return STATE_FINALIZING;
             }
             return STATE_PUBLISH;
         }
@@ -161,10 +166,10 @@ class Wallet {
                 Log.lvl2(this._finalStatement);
                 return Promise.reject("cannot update configuration from network");
             case STATE_PUBLISH:
+            case STATE_FINALIZING:
                 return this.getPartyInstance(true)
-                    .then(pi => {
-                        this._partyInstance = pi;
-                        if (this.state() != STATE_PUBLISH) {
+                    .then(() => {
+                        if (this.state() == STATE_FINALIZED) {
                             return this.update();
                         }
                         return STATE_PUBLISH;
@@ -241,30 +246,77 @@ class Wallet {
     }
 
     /**
-     * Finalize will store all the attendees in the final statement of the party.
+     * Registers the attendees to the PoP-Party stored on the linked conode, this finalizes the party.
+     * @returns {Promise<int>} - a promise that gets completed once the attendees have been registered
+     * and the party finalized. The Promise conatins the updated state of the party.
      */
-    finalize() {
-        if (this.attendees == null || this.attendees.length == 0) {
-            throw new Error("Cannot finalize a party without attendees!");
+    finalize(privKey) {
+        const descId = Uint8Array.from(this.config.hash());
+        if (descId.length === 0) {
+            throw new Error("organizer should first register the config on his conode");
         }
-        return Promise.resolve()
+
+        const attendees = this.attendees.slice();
+        if (attendees.length === 0) {
+            throw new Error("no attendee to register");
+        }
+
+        let hashToSign = HashJs.sha256();
+
+        hashToSign.update(descId);
+        attendees.forEach(attendee => {
+            hashToSign.update(attendee.marshalBinary());
+        });
+
+        hashToSign = new Uint8Array(hashToSign.digest());
+        const signature = Schnorr.sign(CurveEd25519, privKey, hashToSign);
+        const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(this.linkedConode, ""), RequestPath.POP);
+
+        const finalizeRequestMessage = {
+            descid: descId,
+            attendees: attendees.map(att => {
+                return att.marshalBinary();
+            }),
+            signature: signature
+        };
+
+        return cothoritySocket.send(RequestPath.POP_FINALIZE_REQUEST, DecodeType.FINALIZE_RESPONSE, finalizeRequestMessage)
+            .then(finalStatement => {
+                if (finalStatement.signature && finalStatement.signature.length == 32) {
+                    // If the signature is complete, copy it to the final statement.
+                    this._finalStatement.signature = finalStatement.signature;
+                    return STATE_FINALIZED;
+                }
+            })
+            .catch(error => {
+                if (error.message !== undefined && error.message.includes("Not all other conodes finalized yet")) {
+                    // Create a signature with length 1 to indicate we're finalizing.
+                    this._finalStatement.signature = [0];
+                    return STATE_FINALIZING;
+                }
+                Log.rcatch(error, "couldn't finalize");
+            });
     }
 
     /**
      * Creates an omniledgerRPC that can be used to access the party and the coin instance.
-     * @returns {OmniledgerRPC}
+     * @returns {Promise<OmniledgerRPC>}
      */
     get omniledgerRPC() {
         if (this._omniledgerRPC != null) {
-            return this.omniledgerRPC;
+            return this._omniledgerRPC;
         }
+        this._omniledgerID = Convert.hexToByteArray(RequestPath.OMNILEDGER_INSTANCE_ID);
         if (this._omniledgerID == null) {
             throw new Error("don't have omniledgerID");
         }
 
         const cothoritySocketOl = new Net.RosterSocket(this.config.roster, RequestPath.OMNILEDGER);
-        this._omniledgerRPC = OmniLedger.OmniledgerRPC.fromKnownConfiguration(cothoritySocketOl, this._omniledgerID);
-        return this._omniledgerRPC;
+        return OmniledgerRPC.fromKnownConfiguration(cothoritySocketOl, this._omniledgerID)
+            .then(olRPC =>{
+                this._omniledgerRPC = olRPC;
+                return olRPC;
+            })
     }
 
     /**
@@ -272,12 +324,12 @@ class Wallet {
      */
     getPartyInstanceId() {
         if (this._partyInstanceId != null) {
-            return Promis.resolve(this._partyInstanceId);
+            return Promise.resolve(this._partyInstanceId);
         }
         const cothoritySocketPop = new Net.RosterSocket(this.config.roster, RequestPath.POP);
-        console.dir("config-id is:", this.config.id);
         const message = {
-            partyid: this.config.id
+            partyid: this.config.hash(),
+            omniledgerID: Convert.hexToByteArray(RequestPath.OMNILEDGER_INSTANCE_ID)
         };
         return cothoritySocketPop.send(RequestPath.POP_GET_INSTANCE_ID, RequestPath.POP_GET_INSTANCE_ID_REPLY, message)
             .then(reply => {
@@ -293,13 +345,24 @@ class Wallet {
      * @returns {Promise<PartyInstance>}
      */
     getPartyInstance(update) {
-        if (this._partyInstance != null || update !== undefined) {
-            return Promise.resolve(this._partyInstance);
-        }
-        return this.getPartyInstanceId().then(piid => {
-            this._partyInstance = OmniLedger.contracts.PopPartyInstance.fromInstanceId(this.omniledgerRPC, piid);
-            return this._partyInstance;
-        })
+        return Promise.resolve()
+            .then(() => {
+                if (this._partyInstance == null) {
+                    return this.getPartyInstanceId()
+                        .then(piid => {
+                            return this.omniledgerRPC
+                                .then(olRPC => {
+                                    return PopPartyInstance.fromInstanceId(olRPC, piid);
+                                })
+                                .then(ppi =>{
+                                    this._partyInstance = ppi;
+                                })
+                        })
+                }
+            })
+            .then(() => {
+                return this._partyInstance.update();
+            })
     }
 
     /**
@@ -313,7 +376,7 @@ class Wallet {
         }
         return this.getPartyInstance().then(pi => {
             let coinIID = pi.getAccountInstanceId(this._keypair.public);
-            this._coinInstance = OmniLedger.contracts.CoinInstance.fromInstanceId(this._omniledgerRPC, coinIID);
+            this._coinInstance = CoinInstance.fromInstanceId(this._omniledgerRPC, coinIID);
             return this._coinInstance;
         })
     }
@@ -342,13 +405,10 @@ class Wallet {
     fetchAttendees() {
         // Loop over all nodes from the roster and put together all public keys.
         let pubKeys = [];
-        console.log("0");
         let roster = this.config.roster;
-        console.log("1");
         Log.lvl2("roster identities:", roster.identities);
         return Promise.all(
             roster.identities.map(server => {
-                console.log("2");
                 Log.lvl2("contacting server", server.tcpAddr);
                 const cothoritySocketPop = new Net.Socket(Convert.tlsToWebsocket(server, ""), RequestPath.POP);
                 const message = {
@@ -360,11 +420,11 @@ class Wallet {
                     });
             })
         ).then(replies => {
-            Log.lvl2("Got replies:", replies);
+            Log.lvl3("Got replies:", replies);
             replies.forEach(reply => {
                 if (reply && reply.keys) {
-                    Log.lvl2("adding other key:", reply.keys);
-                    reply.keys.forEach(key=>{
+                    Log.lvl3("adding other key:", reply.keys);
+                    reply.keys.forEach(key => {
                         let pub = CurveEd25519.point();
                         pub.unmarshalBinary(key);
                         pubKeys.push(pub);
@@ -377,6 +437,7 @@ class Wallet {
             Log.rcatch(err, "couldn't contact all servers for key-updates:");
         })
     }
+
 
     /**
      * Loads all wallets from disk and does eventual conversion from older formats to new formats.
@@ -398,17 +459,13 @@ class Wallet {
      * @returns {Promise<Wallet[]>} of all wallets stored
      */
     static loadNewVersions() {
-        Log.print("test");
         let fileNames = [];
-        Log.print("test");
         FileIO.forEachFolderElement(FilePaths.WALLET_PATH, function (partyFolder) {
-            Log.print("test");
             if (partyFolder.name.startsWith("wallet_")) {
                 Log.lvl2("found wallet-dir: ", partyFolder.name);
                 fileNames.push(FileIO.join(FilePaths.WALLET_PATH, partyFolder.name, FilePaths.WALLET_FINAL));
             }
         });
-        Log.print("test");
         return Promise.all(
             fileNames.map(fileName => {
                 Log.lvl2("reading wallet from: " + fileName);
@@ -534,7 +591,7 @@ class Wallet {
     }
 
     /**
-     * @returns {Conode}
+     * @returns {ServerIdentity}
      */
     get linkedConode() {
         return this._linkedConode;
@@ -667,15 +724,16 @@ class MigrateFrom {
                 // Log.lvl2("got reply", reply);
                 instanceIdBuffer = reply.instanceid;
                 const cothoritySocketOl = new Net.Socket(Convert.tlsToWebsocket(address, ""), RequestPath.OMNILEDGER);
-                return OmniLedger.OmniledgerRPC.fromKnownConfiguration(cothoritySocketOl, Convert.hexToByteArray(omniledgerId));
+                return OmniledgerRPC.fromKnownConfiguration(cothoritySocketOl, Convert.hexToByteArray(omniledgerId));
             })
             .then(ol => {
-                // Log.lvl2("got omniledger");
-                return OmniLedger.contracts.PopPartyInstance.fromInstanceId(ol, instanceIdBuffer)
+                Log.lvl2("got omniledger", ol);
+                return PopPartyInstance.fromInstanceId(ol, instanceIdBuffer)
             })
             .then(inst => {
                 // console.dir("got poppartyinstance", inst);
                 let config = Configuration.fromPopPartyInstance(inst);
+                Log.lvl2("Roster is:", config.roster);
                 let wallet = new Wallet(config);
                 if (inst.attendees !== undefined && inst.attendees.length > 0) {
                     let fs = new FinalStatement(config, inst.attendees, inst.signature);

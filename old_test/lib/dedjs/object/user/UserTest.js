@@ -27,7 +27,7 @@ const JSON_KEY_PAIR = JSON.stringify({
   "public": PUBLIC_KEY,
   "publicComplete": PUBLIC_COMPLETE_KEY
 });
-const KEY_PAIR = Convert.parseJsonKeyPair(JSON_KEY_PAIR);
+const KEY_PAIR = KeyPair.fromJson(JSON_KEY_PAIR);
 
 const ROSTER_ID = "8yc0TaIweWRyMA==";
 const ROSTER_ID_BYTE_ARRAY = Convert.base64ToByteArray(ROSTER_ID);

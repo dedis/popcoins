@@ -536,17 +536,17 @@ describe.skip("Convert", function () {
 
   describe("#parseJsonKeyPair", function () {
     it("should throw an error when the input is not a string", function () {
-      expect(() => Convert.parseJsonKeyPair(BYTE_ARRAY)).to.throw();
+      expect(() => KeyPair.fromJson(BYTE_ARRAY)).to.throw();
     });
 
     it("should return a KeyPair object", function () {
-      const keyPair = Convert.parseJsonKeyPair(JSON_KEY_PAIR);
+      const keyPair = KeyPair.fromJson(JSON_KEY_PAIR);
 
       keyPair.constructor.name.should.equal(ObjectType.KEY_PAIR);
     });
 
     it("should correctly parse a key pair that does not contain a complete public key", function () {
-      const keyPair = Convert.parseJsonKeyPair(JSON_KEY_PAIR_NO_COMPLETE);
+      const keyPair = KeyPair.fromJson(JSON_KEY_PAIR_NO_COMPLETE);
 
       keyPair.private.should.deep.equal(PRIVATE_KEY_BYTE_ARRAY);
       keyPair.public.should.deep.equal(PUBLIC_KEY_BYTE_ARRAY);
@@ -554,7 +554,7 @@ describe.skip("Convert", function () {
     });
 
     it("should correctly parse a key pair that does contain a complete public key", function () {
-      const keyPair = Convert.parseJsonKeyPair(JSON_KEY_PAIR);
+      const keyPair = KeyPair.fromJson(JSON_KEY_PAIR);
 
       keyPair.private.should.deep.equal(PRIVATE_KEY_BYTE_ARRAY);
       keyPair.public.should.deep.equal(PUBLIC_KEY_BYTE_ARRAY);

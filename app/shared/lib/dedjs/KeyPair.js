@@ -1,7 +1,9 @@
 require("nativescript-nodeify");
+const Kyber = require("@dedis/kyber-js");
+
+const Log = require("./Log");
 const FileIO = require("../file-io/file-io");
 const Convert = require("./Convert");
-const Kyber = require("@dedis/kyber-js");
 const Curve25519 = new Kyber.curve.edwards25519.Curve;
 
 /**
@@ -121,7 +123,9 @@ class KeyPair {
         return FileIO.getStringOf(filename)
             .then(jsonKeyPair => {
                 if (jsonKeyPair.length > 0) {
+                    Log.print();
                     const kp = Convert.jsonToObject(jsonKeyPair);
+                    Log.print();
                     if (kp.public !== "" && kp.private !== "") {
                         return new KeyPair(Convert.hexToByteArray(kp.private),
                             Convert.hexToByteArray(kp.public));
@@ -158,6 +162,26 @@ class KeyPair {
             .catch(err => {
                 throw new Error("Couldn't create a keypair: " + err);
             });
+    }
+
+    /**
+     * Parses a JSON string into a KeyPair object.
+     * @param {string} jsonString - the JSON string to parse into a KeyPair object
+     * @returns {KeyPair} - the parsed KeyPair object
+     */
+    static fromJson(jsonString) {
+        if (typeof jsonString !== "string") {
+            throw new Error("jsonString must be of type string");
+        }
+
+        const keyPair = Convert.jsonToObject(jsonString);
+
+        if (keyPair.private === undefined) {
+            keyPair.private = "";
+        }
+
+        return new KeyPair(new Uint8Array(keyPair.private),
+            new Uint8Array(keyPair.public));
     }
 }
 

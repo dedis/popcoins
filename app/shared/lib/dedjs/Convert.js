@@ -1,6 +1,6 @@
 require("nativescript-nodeify");
-const Kyber = require("@dedis/kyber-js");
 const Cothority = require("@dedis/cothority");
+const Kyber = require("@dedis/kyber-js");
 const CurveEd25519 = new Kyber.curve.edwards25519.Curve;
 
 const Buffer = require("buffer/").Buffer;
@@ -496,28 +496,6 @@ function parseTomlRoster(tomlString) {
 }
 
 /**
- * Parses a JSON string into a KeyPair object.
- * @param {string} jsonString - the JSON string to parse into a KeyPair object
- * @returns {Object} - the parsed KeyPair object
- */
-function parseJsonKeyPair(jsonString) {
-    if (typeof jsonString !== "string") {
-        throw new Error("jsonString must be of type string");
-    }
-
-    const keyPair = jsonToObject(jsonString);
-
-    if (keyPair.private === undefined) {
-        keyPair.private = "";
-    }
-
-    return {
-        public: base64ToByteArray(keyPair.public),
-        private: base64ToByteArray(keyPair.private),
-    };
-}
-
-/**
  * Parses a JSON string into a ServerIdentity object.
  * @param {string} jsonString - the JSON string to parse into a ServerIdentity object
  * @returns {ServerIdentity} - the parsed ServerIdentity object
@@ -627,7 +605,6 @@ module.exports.parseJsonPopDescHash = parseJsonPopDescHash;
 module.exports.parseJsonUserName = parseJsonUserName;
 module.exports.parseJsonRoster = parseJsonRoster;
 module.exports.parseTomlRoster = parseTomlRoster;
-module.exports.parseJsonKeyPair = parseJsonKeyPair;
 module.exports.parseJsonServerIdentity = parseJsonServerIdentity;
 module.exports.parseJsonArrayOfKeys = parseJsonArrayOfKeys;
 module.exports.toServerIdentity = toServerIdentity;

@@ -1,5 +1,7 @@
+require("nativescript-nodeify");
 const FileSystem = require("tns-core-modules/file-system");
 const Documents = FileSystem.knownFolders.documents();
+const Cothority = require("@dedis/cothority");
 
 const lib = require("../../../../shared/lib");
 const dedjs = lib.dedjs;
@@ -7,10 +9,10 @@ const FilePaths = lib.files_path;
 const FileIO = lib.file_io;
 const Log = dedjs.Log;
 const Convert = dedjs.Convert;
-const CothorityMessages = dedjs.network.CothorityMessages;
 const Configuration = dedjs.object.pop.Configuration;
 const KeyPair = dedjs.KeyPair;
 const Wallet = dedjs.object.pop.Wallet;
+const RequestPath = dedjs.network.RequestPath;
 
 const CONODE_ADDRESS = "tls://gasser.blue:7002";
 
@@ -55,15 +57,15 @@ const JSON_ROSTER_FULL = JSON.stringify({
 });
 const ROSTER = Convert.parseJsonRoster(JSON_ROSTER_FULL);
 
-fdescribe("Wallet", function () {
 
-    function clean() {
-        return FileIO.rmrf(FilePaths.WALLET_PATH)
-            .then(() => {
-                return FileIO.rmrf(FilePaths.POP_ATT_PATH);
-            })
-    }
+function clean() {
+    return FileIO.rmrf(FilePaths.WALLET_PATH)
+        .then(() => {
+            return FileIO.rmrf(FilePaths.POP_ATT_PATH);
+        })
+}
 
+describe("Wallet", function () {
     beforeEach(() => {
         return clean();
     });
@@ -90,7 +92,7 @@ fdescribe("Wallet", function () {
                 Log.print(wallet.finalStatement);
                 expect(wallet.attendees.length).toBe(1);
             })
-            .catch(err =>{
+            .catch(err => {
                 Log.rcatch(err);
             }))
             .toBeResolved();
@@ -134,3 +136,61 @@ fdescribe("Wallet", function () {
             });
     });
 });
+
+describe("Loading wallet from server", () => {
+    beforeEach(() => {
+        return clean();
+    });
+
+    afterEach(() => {
+        console.log("done");
+        return clean();
+    });
+
+    it("should load correctly and save", () => {
+        let test_party = "f927be510671f57f8930237bcbbd91264e5ae35fc445a7568dad4aef23d3988f";
+        return expectAsync(Wallet.MigrateFrom.conodeGetWallet("tls://gasser.blue:7002",
+            RequestPath.OMNILEDGER_INSTANCE_ID, test_party)
+            .then(wallet => {
+                wallet.attendeesAdd([wallet.keypair.public]);
+                Log.print("Roster is:", wallet.config.roster);
+                Log.print("tcpaddress:", wallet.config.roster.tcpAddr);
+                return wallet.save()
+            })
+            .catch(err => {
+                Log.rcatch(err);
+            })).toBeResolved();
+    })
+})
+
+fdescribe("Updating wallet from server", () => {
+    beforeEach(() => {
+        return clean();
+    });
+
+    afterEach(() => {
+        console.log("done");
+        return clean();
+    });
+
+    it("should load correctly and save", () => {
+        let test_party = "3d1f16b30cbaf1c1f3eaa7f1c008efb30cfcf8c04c1cb2a5b9922edb350d61a3";
+        let wallet = null;
+        return expectAsync(Wallet.MigrateFrom.conodeGetWallet("tls://gasser.blue:7002",
+            RequestPath.OMNILEDGER_INSTANCE_ID, test_party)
+            .then(w => {
+                wallet = w;
+                return wallet.getPartyInstance();
+            })
+            .then(pi =>{
+                Log.print("state is:", wallet.stateStr());
+                return pi.update()
+            })
+            .then(()=>{
+                Log.print("successfully updated the party instance");
+            })
+            .catch(err => {
+                Log.rcatch(err);
+            })).toBeResolved();
+    })
+})

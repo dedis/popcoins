@@ -18,7 +18,6 @@ const JSON_KEY_PAIR = JSON.stringify({
     "public": PUBLIC_KEY,
     "publicComplete": PUBLIC_COMPLETE_KEY
 });
-const KEY_PAIR = Convert.parseJsonKeyPair(JSON_KEY_PAIR);
 
 describe("KeyPair", () => {
 

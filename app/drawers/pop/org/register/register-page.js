@@ -5,19 +5,23 @@ const Observable = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const Kyber = require("@dedis/kyber-js");
 const CurveEd25519 = new Kyber.curve.edwards25519.Curve;
+const HashJs = require("hash.js");
+const Buffer = require("buffer/").Buffer;
 
 const lib = require("../../../../shared/lib");
 const ScanToReturn = lib.scan_to_return;
 const dedjs = lib.dedjs;
+const User = dedjs.object.user.get;
 const Convert = dedjs.Convert;
 const Log = dedjs.Log;
 const RequestPath = dedjs.network.RequestPath;
-const Net = dedjs.network.NSNet;
+const Wallet = dedjs.object.pop.Wallet;
 
 let viewModel = undefined;
 let Party = undefined;
 let pageObject = undefined;
 let isPressed = undefined;
+let loadedOrganizers = false;
 
 function onLoaded(args) {
     isPressed = "true";
@@ -28,17 +32,41 @@ function onLoaded(args) {
     if (context.party === undefined) {
         throw new Error("Party should be given in the context");
     }
-
     Party = context.party;
+
     viewModel = Observable.fromObject({
-        array: new ObservableArray()
+        array: new ObservableArray(),
+        size: 0,
+        hash: ""
     });
-    return Party.fetchAttendees()
-        .then(keys => {
-            Log.print("Got keys", keys);
-            Party.attendees.forEach(a => {
-                viewModel.array.push(Convert.byteArrayToHex(a.marshalBinary()));
+    return Promise.resolve()
+        .then(() => {
+            if (!loadedOrganizers) {
+                return Party.fetchAttendees()
+                    .catch(err => {
+                        Log.catch(err, "couldn't update keys");
+                    })
+                    .then(keys => {
+                        if (keys.length == Party.config.roster.identities.length) {
+                            Log.lvl1("got all organizers' keys");
+                            loadedOrganizers = true;
+                        }
+                    })
+            }
+        })
+        .then(() => {
+            let hash = HashJs.sha256();
+            let keys = Party.attendees.map(att => {
+                return Convert.byteArrayToHex(att.marshalBinary());
             });
+            keys.sort();
+
+            keys.forEach(a => {
+                viewModel.array.push(a);
+                hash.update(a);
+            });
+            viewModel.size = "Attendees: " + Party.attendees.length;
+            viewModel.hash = "Hash: " + Buffer.from(hash.digest()).toString('hex').slice(0, 16);
 
             page.bindingContext = viewModel;
             let finalizeLabel = page.getViewById("finalize");
@@ -64,11 +92,16 @@ function addManual() {
         .then(args => {
             if (args.result && args.text !== undefined && args.text.length > 0) {
                 // Add Key
-                return Party.registerAttendee(Convert.hexToByteArray(args.text));
+                let pub = CurveEd25519.point();
+                pub.unmarshalBinary(Convert.hexToByteArray(args.text));
+                return Party.attendeesAdd([pub]);
             } else {
                 // Cancel
                 return Promise.resolve();
             }
+        })
+        .then(() => {
+            return Party.save();
         })
         .catch(error => {
             console.log(error);
@@ -97,7 +130,10 @@ function addMyselfAttendee(Party) {
     return addMyself(info)
         .then((p) => {
             console.dir("adding my new public key to party");
-            return Party.registerAttendee(p.getKeyPair().public);
+            return Party.attendeesAdd([p.getKeyPair().public]);
+        })
+        .then(() => {
+            return Party.save();
         })
 }
 
@@ -105,13 +141,18 @@ function addScan() {
     let returnText = undefined;
     return ScanToReturn.scan()
         .then(keyPairJson => {
-            const keyPair = Convert.parseJsonKeyPair(keyPairJson);
-            return Party.registerAttendee(keyPair.public)
+            const keypair = JSON.parse(keyPairJson);
+            let pub = CurveEd25519.point();
+            pub.unmarshalBinary(new Uint8Array(Buffer.from(keypair.public, 'base64')));
+            return Party.attendeesAdd([pub])
         })
         .then((text) => {
             returnText = text;
             const view = pageObject.getViewById("list-view-registered-keys");
             return view.refresh();
+        })
+        .then(() => {
+            return Party.save();
         })
         .then(() => {
             return returnText;
@@ -177,40 +218,15 @@ function deleteAttendee(args) {
  * Function called when the button "finalize" is clicked. It starts the registration process with the organizers conode.
  * @returns {Promise.<any>}
  */
-function registerKeys() {
-    if (!Party.isPopDescComplete()) {
-        return Dialog.alert({
-            title: "No PopDesc",
-            message: "Please configure the PopDesc first.",
-            okButtonText: "Ok"
-        });
-    }
-    if (Party.getPopDescHash().length === 0) {
-        return Dialog.alert({
-            title: "No PopDesc Hash",
-            message: "Please register you PopDesc on your conode first.",
-            okButtonText: "Ok"
-        });
-    }
-    if (!Party.isLinkedConodeSet()) {
-        return Dialog.alert({
-            title: "Not Linked to Conode",
-            message: "Please link to a conode first.",
-            okButtonText: "Ok"
-        });
-    }
-    if (Party.getRegisteredAtts().length === 0) {
-        return Dialog.alert({
-            title: "No Attendee to Register",
-            message: "Please add some attendees first.",
-            okButtonText: "Ok"
-        });
-    }
-
-    return Party.registerAttsAndFinalizeParty()
+function finalize() {
+    Log.print("Public key is:", Buffer.from(User.getKeyPair().public.marshalBinary()).toString('hex'))
+    let pub = CurveEd25519.point();
+    pub.mul(User.getKeyPair().private, null);
+    Log.print("Recalculated public key is:", pub);
+    return Party.finalize(User.getKeyPair().private)
         .then((result) => {
 
-            if (result === PartyStates.FINALIZING) {
+            if (result === Wallet.STATE_FINALIZING) {
                 isPressed = "false";
                 return Dialog.alert({
                     title: "Finalizing",
@@ -232,17 +248,14 @@ function registerKeys() {
             topmost().navigate(navigationEntry);
         })
         .catch(error => {
-            console.log(error);
-            console.dir(error);
-            console.trace();
-
-            Dialog.alert({
+            Log.catch(error);
+            return Dialog.alert({
                 title: "Error",
                 message: "An error occured, please try again. - " + error,
                 okButtonText: "Ok"
+            }).then(() => {
+                return Promise.reject(error);
             });
-
-            return Promise.reject(error);
         });
 }
 
@@ -267,20 +280,19 @@ function addNewKey() {
 
 function shareToAttendee() {
     let info = {
-        id: Convert.byteArrayToHex(Party.getPopDescHash()),
+        id: Party.config.hashStr(),
         omniledgerId: RequestPath.OMNILEDGER_INSTANCE_ID,
-        address: Party.getLinkedConode().address
+        address: Party.linkedConode.tcpAddr
     };
     pageObject.showModal("shared/pages/qr-code/qr-code-page", {
         textToShow: Convert.objectToJson(info),
         title: "Party information"
     }, () => {
     }, true);
-
 }
 
 function goBack() {
-    topmost().goBack();
+    return topmost().goBack();
 }
 
 function deleteParty() {
@@ -305,14 +317,9 @@ function deleteParty() {
 }
 
 function keyTapped(arg) {
-    console.dir("keyTapped:", arg);
-    console.dir("keyTapped:", arg.index);
-    console.dir("keyTapped:", viewModel);
-    console.dir("keyTapped:", viewModel.array);
-    const key = viewModel.array.getItem(arg.index);
-    console.dir(key);
+    const key = Buffer.from(viewModel.array.getItem(arg.index), 'hex');
     Frame.topmost().currentPage.showModal("shared/pages/qr-code/qr-code-page", {
-        textToShow: " { \"public\" :  \"" + Convert.byteArrayToBase64(key) + "\"}",
+        textToShow: " { \"public\" :  \"" + Buffer.from(key).toString('base64') + "\"}",
         title: "Public Key",
     }, () => {
     }, true);
@@ -323,7 +330,7 @@ module.exports.deleteParty = deleteParty;
 module.exports.onLoaded = onLoaded;
 module.exports.addManual = addManual;
 module.exports.addScan = addScan;
-module.exports.registerKeys = registerKeys;
+module.exports.finalize = finalize;
 module.exports.deleteattendee = deleteAttendee;
 module.exports.onSwipeCellStarted = onSwipeCellStarted;
 module.exports.addNewKey = addNewKey;

@@ -1,9 +1,11 @@
+"use strict";
+
 const protobuf = require("protobufjs");
 const co = require("co");
 const shuffle = require("shuffle-array");
 const WS = require("nativescript-websockets");
 const Buffer = require("buffer/").Buffer;
-const root = require("@dedis/cothority").protobuf.root;
+const root = require("../protobuf/index.js").root;
 
 function listObject(data) {
     // allows us to console.log circular objects, but prints only current level depth
@@ -39,9 +41,8 @@ function Socket(addr, service) {
     this.send = (request, response, data) => {
         return new Promise((resolve, reject) => {
             const path = this.url + "/" + request.replace(/.*\./, '');
-            console.log("net.Socket: new WebSocketA(" + path + ")");
+            console.log("net.Socket: new WebSocket3(" + path + ")");
             const ws = new WS(path);
-
             const requestModel = this.protobuf.lookup(request);
             if (requestModel === undefined) {
                 reject(new Error("Model " + request + " not found"));
@@ -54,21 +55,16 @@ function Socket(addr, service) {
             }
 
             ws.on('open', () => {
-                console.log("opening");
                 const errMsg = requestModel.verify(data);
                 if (errMsg) {
-                    console.log("couldn't verify data:", errMsg);
                     reject(new Error(errMsg));
                 }
                 const message = requestModel.create(data);
                 const marshal = requestModel.encode(message).finish();
-                console.log("sending message");
                 ws.send(marshal);
             });
 
             ws.on('message', (socket, message) => {
-                console.log("event 2 is:");
-                listObject(message);
                 // const data = event.data;
                 let buffer = new Uint8Array(message);
                 try {
@@ -86,17 +82,16 @@ function Socket(addr, service) {
 
             ws.on('close', (socket, code, reason) => {
                 console.log("closing:", code, reason);
-                if (code === 4000) {
+                if (code == 4000) {
                     reject(new Error(reason));
                 }
             });
 
             ws.on('error', (socket, error) => {
-                console.log("got error:", error);
                 reject(error);
             });
 
-            return ws.open();
+            ws.open();
         });
     };
 }
@@ -108,7 +103,7 @@ function Socket(addr, service) {
  * */
 class RosterSocket {
     constructor(roster, service) {
-        this.addresses = roster.identities.map(conode => tlsToWebsocket(conode.tcpAddr, ""));
+        this.addresses = roster.identities.map(id => id.websocketAddr);
         this.service = service;
         this.lastGoodServer = null;
     }
@@ -200,39 +195,8 @@ class LeaderSocket {
     }
 }
 
-/**
- * Converts a TLS URL to a Wesocket URL and builds a complete URL with the path given as parameter.
- * @param {ServerIdentity|string} serverIdentity - the server identity to take the url from
- * @param {string} path - the path after the base url
- * @returns {string} - the builded websocket url
- */
-function tlsToWebsocket(serverIdentity, path) {
-    const URL_PORT_SPLITTER = ":";
-    const BASE_URL_WS = "ws://";
-    const BASE_URL_TLS = "tls://";
-
-    let address = "";
-    if (typeof serverIdentity === "string") {
-        address = serverIdentity;
-    } else if (serverIdentity.constructor.name === "ServerIdentity") {
-        address = serverIdentity.address
-    } else {
-        throw new Error("serverIdentity must be of type ServerIdentity or string");
-    }
-    if (typeof path !== "string") {
-        throw new Error("path must be of type string");
-    }
-
-    let [ip, port] = address.replace(BASE_URL_TLS, "").split(URL_PORT_SPLITTER);
-    port = parseInt(port) + 1;
-
-    return BASE_URL_WS + ip + URL_PORT_SPLITTER + port + path;
-}
-
-
 module.exports = {
     Socket,
     RosterSocket,
-    LeaderSocket,
-    tlsToWebsocket
+    LeaderSocket
 };

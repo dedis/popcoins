@@ -54,7 +54,7 @@ it shouldn't have any other siblings other than the <ActionBar> component.
                 Learn more about custom components and how they can be used in this documentation article:
                 http://docs.nativescript.org/ui/basics#custom-components
                 -->
-                <myDrawer:MyDrawer selectedPage="PoP"/>
+                <myDrawer:MyDrawer selectedPage="Delete"/>
             </StackLayout>
         </nsDrawer:RadSideDrawer.drawerContent>
 
