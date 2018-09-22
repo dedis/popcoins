@@ -6,8 +6,10 @@ const CurveEd25519 = new Kyber.curve.edwards25519.Curve;
 const Schnorr = Kyber.sign.schnorr;
 const HashJs = require("hash.js");
 const Cothority = require("@dedis/cothority");
-const OmniledgerRPC = Cothority.omniledger.OmniledgerRPC;
-const PopPartyInstance = Cothority.omniledger.contracts.PopPartyInstance;
+const Omniledger = Cothority.omniledger;
+const OmniledgerRPC = Omniledger.OmniledgerRPC;
+// const PopPartyInstance = Omniledger.contracts.PopPartyInstance;
+const PopPartyInstance = require("../../../../cothority/lib/omniledger/contracts/PopPartyInstance");
 // const CoinInstance = Cothority.omniledger.contracts.CoinsInstance;
 const CoinInstance = require("../../../../cothority/lib/omniledger/contracts/CoinsInstance");
 
@@ -127,7 +129,7 @@ class Wallet {
             infos.attendees = this._finalStatement.attendees.map(a => {
                 return a.marshalBinary();
             });
-            Log.lvl2("attendees to save are:", infos.attendees);
+            Log.lvl3("attendees to save are:", infos.attendees);
             infos.signature = this._finalStatement.signature;
         }
         if (this._omniledgerID != null) {
@@ -137,8 +139,11 @@ class Wallet {
             infos.partyInstanceId = this._partyInstanceId;
         }
         if (this._linkedConode != null) {
-            Log.lvl2("saving linked conode:", this._linkedConode);
+            Log.lvl3("saving linked conode:", this._linkedConode);
             infos.linkedConode = Convert.serverIdentityToJson(this._linkedConode)
+        }
+        if (this._balance != -1) {
+            infos.balance = "" + this._balance;
         }
 
         const toWrite = Convert.objectToJson(infos);
@@ -351,7 +356,7 @@ class Wallet {
      * Creates and returns a poppartyinstance that can be connected to the network. As it eventually requires to ask
      * the pop-service for the party instance ID, it might need the network.
      * @param update if defined, will update the party instance
-     * @returns {Promise<PartyInstance>}
+     * @returns {Promise<PopPartyInstance>}
      */
     getPartyInstance(update) {
         return Promise.resolve()
@@ -399,6 +404,22 @@ class Wallet {
             .then(() => {
                 return this._coinInstance.update();
             })
+            .then(ci => {
+                this._balance = this._coinInstance.balance;
+                this.save();
+                return ci;
+            })
+            .catch(err=>{
+                Log.rcatch(err, "couldn't get coin instance");
+            })
+    }
+
+    /**
+     * This returns the coin instance, if it is already created. It might be null!
+     * @returns {null|CoinsInstance}
+     */
+    get coinInstance(){
+        return this._coinInstance;
     }
 
     /**
@@ -458,6 +479,17 @@ class Wallet {
         })
     }
 
+    transferCoin(amount, dest, isPub) {
+        if (this.state() != STATE_TOKEN) {
+            throw new Error("Cannot transfer coins before it's a token");
+        }
+        let accountId = dest;
+        if (isPub) {
+            accountId = this._partyInstance.getAccountInstanceId(dest);
+        }
+        let signer = Omniledger.darc.SignerEd25519.fromByteArray(this._keypair.private.marshalBinary());
+        return this._coinInstance.transfer(amount, accountId, signer);
+    }
 
     /**
      * Loads all wallets from disk and does eventual conversion from older formats to new formats.
@@ -535,6 +567,9 @@ class Wallet {
                 if (object.linkedConode != null) {
                     Log.lvl2("loading linkedconode", object.linkedConode.address);
                     wallet._linkedConode = Convert.parseJsonServerIdentity(object.linkedConode);
+                }
+                if (object.balance) {
+                    wallet._balance = parseInt(object.balance);
                 }
                 wallet.addToList();
                 Log.lvl1("loaded wallet:", wallet.config.name);

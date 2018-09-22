@@ -5,7 +5,6 @@ const Invoke = require("../Invoke");
 const Instruction = require("../Instruction");
 const ClientTransaction = require("../ClientTransaction");
 const crypto = require("crypto-browserify");
-const Log = require("../../../../dedjs/Log");
 
 /**
  * Represents a PoP Party stored on the OmniLedger
@@ -114,6 +113,14 @@ class PopPartyInstance {
     }
 
     /**
+     * Returns the id of this party instance.
+     * @returns {Uint8Array}
+     */
+    get instanceId() {
+        return this._instanceId;
+    }
+
+    /**
      * After that the party has been finalized, each attendee receive a certain
      * amount of coin on a personnal account. This method compute the instance
      * id of this account, depending on the public key of the attendee
@@ -130,6 +137,10 @@ class PopPartyInstance {
         return new Uint8Array(b.buffer, b.byteOffset, b.byteLength / Uint8Array.BYTES_PER_ELEMENT);
     }
 
+    /**
+     * Returns the account of the service that handles messages and their distribution.
+     * @returns {Uint8Array}
+     */
     getServiceCoinInstanceId() {
         return this.getAccountInstanceId(this._service);
     }

@@ -483,17 +483,18 @@ module.exports = {
         // required bytes popinstance = 1;
     },
 
-    createMessage: function(msg) {
+    createMessage: function(msg, authorId, partyIId) {
         const msgProto = this.getModel(ObjectType.MESSAGE);
 
         const fields = {
             subject: msg.subject,
             date: 0,
             text: msg.text,
-            author: Crypto.randomBytes(32),
+            author: authorId,
             balance: msg.balance,
             reward: msg.reward,
-            id: Crypto.randomBytes(32)
+            id: Crypto.randomBytes(32),
+            partyIId: partyIId
         }
 
         return msgProto.create(fields);
@@ -507,8 +508,9 @@ module.exports = {
         return fields;
     },
 
-    createListMessages: function(start, number) {
+    createListMessages: function(readerId, start, number) {
         const fields = {
+            readerid: readerId,
             start: start,
             number: number
         };

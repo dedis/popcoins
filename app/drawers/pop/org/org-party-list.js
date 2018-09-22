@@ -24,7 +24,7 @@ const CANCELED_BY_USER = "CANCELED_BY_USER_STRING";
 
 const viewModel = Observable.fromObject({
     partyListDescriptions: new ObservableArray(),
-    isLoading: false,
+    isLoading: true,
     isEmpty: true,
     loaded: false
 });
@@ -58,18 +58,6 @@ function onUnloaded() {
  */
 function loadParties() {
     return Promise.resolve()
-        .then(() => {
-            if (!viewModel.loaded) {
-                Log.lvl1("loading wallets from disk");
-                viewModel.isLoading = true;
-                viewModel.loaded = true;
-                return Wallet.loadAll()
-                    .catch(err => {
-                        Log.rcatch(err, "error while loading party: ");
-                        viewModel.isLoading = false;
-                    })
-            }
-        })
         .then(() => {
             Log.lvl1("getting all wallets:", Object.keys(Wallet.List));
             viewModel.partyListDescriptions.splice(0);

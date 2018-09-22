@@ -5,7 +5,7 @@
         xmlns:nsDataForm="nativescript-ui-dataform">
 
     <ActionBar class="action-bar">
-        <NavigationButton text="Go Back" android:icon="res://ic_arrow_back" tap="removeAndGoBack"/>
+        <NavigationButton text="Go Back" android:icon="res://ic_arrow_back" tap="goBack"/>
         <Label class="action-bar-title" text="Configuration"/>
         <ActionItem tap="save"
                     ios.systemIcon="0" ios.position="right"

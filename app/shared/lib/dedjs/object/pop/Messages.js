@@ -1,16 +1,18 @@
-const ObservableModule = require("data/observable");
+require("nativescript-nodeify");
+const Observable = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
-const Package = require("../../Package");
-const ObjectType = require("../../ObjectType");
-const Helper = require("../../Helper");
+const Cothority = require("@dedis/cothority");
+const Net = require("../../network/NSNet");
+// const Net = require("@dedis/cothority").net;
+
+const CothorityMessages = require("../../network/cothority-messages");
 const Convert = require("../../Convert");
+const Log = require("../../Log");
 const RequestPath = require("../../network/RequestPath");
 const DecodeType = require("../../network/DecodeType");
-const Net = require("@dedis/cothority").net;
-const CothorityMessages = require("../../network/cothority-messages");
+const Wallet = require("./Wallet");
 
 /**
- * This singleton is the PoP-messages component of the app.
  * It allows the app to contact the nodes to write and read
  * messages.
  * ATTENTION: the messages module is an elaborate mock-up,
@@ -20,19 +22,40 @@ const CothorityMessages = require("../../network/cothority-messages");
  * stuff. That's normal!
  */
 
-class PoPMsg {
+class Messages {
 
     /**
      * Constructor for the PoP class.
+     * @param wallet {Wallet}
+     * @param partyInstance {PopPartyInstance}
      */
-    constructor() {
-        this._isLoaded = false;
-        this._finalStatements = ObservableModule.fromObject({
-            array: new ObservableArray()
-        });
-        this._popToken = ObservableModule.fromObject({
-            array: new ObservableArray()
-        });
+    constructor(wallet, partyInstance) {
+        this._wallet = wallet;
+        if (wallet.state() < Wallet.STATE_TOKEN){
+            Log.error("not token state");
+            throw new Error("Can only use token-wallet");
+        }
+        this._conode = wallet.config.roster.identities[0];
+        this._partyIId = partyInstance.instanceId;
+        // the id of the message-service account
+        this._serviceAccountId = partyInstance.getServiceCoinInstanceId();
+        this._attendeeAccountId = partyInstance.getAccountInstanceId(wallet.keypair.public.marshalBinary());
+    }
+
+    /**
+     * Returns the id of the service account that holds all the tokens.
+     * @returns {Uint8Array}
+     */
+    get serviceAccountId(){
+        return this._serviceAccountId;
+    }
+
+    /**
+     * Returns the id of the attendee's account.
+     * @returns {Uint8Array}
+     */
+    get attendeeAccountId(){
+        return this._attendeeAccountId;
     }
 
     /**
@@ -40,106 +63,54 @@ class PoPMsg {
      * always on the same server, because for now they don't communicate with each other to
      * exchange messages!
      *
-     * @param conode whom to contact
+     * @param conode {ServerIdentity} whom to contact
      * @param start index of first message - starts at 0
      * @param number maximum number of messages to retrieve
      * @returns {*} a list of messages, that can be empty
      */
-    fetchListMessages(conode, start, number) {
-        if (!Helper.isOfType(conode, ObjectType.SERVER_IDENTITY)) {
-            throw new Error("conode must be an instance of ServerIdentity");
-        }
-
-        const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(conode, ""), RequestPath.PERSONHOOD);
-        const requestLM = CothorityMessages.createListMessages(start, number);
+    fetchListMessages(start, number) {
+        const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(this._conode, ""), RequestPath.PERSONHOOD);
+        const requestLM = CothorityMessages.createListMessages(this._attendeeAccountId, start, number);
 
         return cothoritySocket.send(RequestPath.PERSONHOOD_LISTMESSAGES, DecodeType.LISTMESSAGES_REPLY, requestLM)
-            .then(response => {
-                return Promise.resolve(response);
-            })
             .catch(error => {
-                console.log(error);
-                console.dir(error);
-                console.trace();
-
-                return Promise.reject(error);
+                Log.rcatch(error, "couldn't get list of messages");
             });
     }
 
-    sendMessage(conode, msg){
-        if (!Helper.isOfType(conode, ObjectType.SERVER_IDENTITY)) {
-            throw new Error("conode must be an instance of ServerIdentity");
-        }
-
-        const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(conode, ""), RequestPath.PERSONHOOD);
-        const msgProto = CothorityMessages.createMessage(msg);
+    /**
+     * Sends a message to the server
+     * @param conode {ServerIdentity}
+     * @param msg {string}
+     * @returns {Promise<T | never>}
+     */
+    sendMessage(msg){
+        const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(this._conode, ""), RequestPath.PERSONHOOD);
+        const msgProto = CothorityMessages.createMessage(msg, this._attendeeAccountId);
         const sendMessage = CothorityMessages.createSendMessage(msgProto);
 
         return cothoritySocket.send(RequestPath.PERSONHOOD_SENDMESSAGE, DecodeType.STRING_REPLY, sendMessage)
-            .then(response =>{
-                return Promise.resolve(response);
-            })
             .catch(error =>{
-                console.log(error);
-                console.dir(error);
-                console.trace();
-
-                return Promise.reject(error);
+                Log.rcatch(error, "while sending message");
             })
     }
 
-    readMessage(conode, msgID, partyID, readerID){
-        if (!Helper.isOfType(conode, ObjectType.SERVER_IDENTITY)) {
-            throw new Error("conode must be an instance of ServerIdentity");
-        }
-
-        const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(conode, ""), RequestPath.PERSONHOOD);
-        const readMessage = CothorityMessages.createReadMessage(msgID, partyID, readerID);
+    /**
+     * Reads a message from the server.
+     * @param msgID
+     * @returns {Promise<Message>}
+     */
+    readMessage(msgID){
+        const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(this._conode, ""), RequestPath.PERSONHOOD);
+        const readMessage = CothorityMessages.createReadMessage(msgID, this._partyIId,
+            this._attendeeAccountId);
 
         return cothoritySocket.send(RequestPath.PERSONHOOD_READMESSAGE, DecodeType.READMESSAGE_REPLY, readMessage)
-            .then(response =>{
-                return Promise.resolve(response);
-            })
             .catch(error =>{
-                console.log(error);
-                console.dir(error);
-                console.trace();
-
-                return Promise.reject(error);
+                Log.rcatch(error, "while reading message");
             })
     }
 
 }
 
-// The symbol key reference that the singleton will use.
-const POPMSG_PACKAGE_KEY = Symbol.for(Package.POPMSG);
-
-// We create the singleton if it hasn't been instanciated yet.
-const globalSymbols = Object.getOwnPropertySymbols(global);
-const popMsgExists = (globalSymbols.indexOf(POPMSG_PACKAGE_KEY) >= 0);
-
-if (!popMsgExists) {
-    global[POPMSG_PACKAGE_KEY] = (function () {
-        const newPoPMsg = new PoPMsg();
-
-        return newPoPMsg;
-    })();
-}
-
-// Singleton API
-const POPMSG = {};
-
-Object.defineProperty(POPMSG, "get", {
-    configurable: false,
-    enumerable: false,
-    get: function () {
-        return global[POPMSG_PACKAGE_KEY];
-    },
-    set: undefined
-});
-
-// We freeze the singleton.
-Object.freeze(POPMSG);
-
-// We export only the singleton API.
-module.exports = POPMSG;
+module.exports = Messages;

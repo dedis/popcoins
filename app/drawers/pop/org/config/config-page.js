@@ -285,24 +285,10 @@ function save() {
         })
 }
 
-function removeAndGoBack() {
-    if (!newConfig) {
-        return WalEdit.remove()
-            .catch((error) => {
-                console.log("Configuration could not be deleted: " + error);
-            }).then(() => {
-                return goBack();
-            });
-    }
-
-    goBack();
-}
-
 module.exports = {
     onNavigatingTo,
     goBack,
     addConode,
-    removeAndGoBack,
     conodeTapped,
     save,
 }

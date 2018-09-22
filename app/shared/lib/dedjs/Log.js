@@ -28,6 +28,9 @@ class LogC {
                 } else if (type == "o"){
                     console.dir(a);
                 }
+                if (type == "Uint8Array"){
+                    return "{" + type + "}: " + Buffer.from(a).toString('hex');
+                }
                 return "{" + type + "}: " + util.inspect(a);
             } catch (e){
                 console.log("error while inspecting:", e);

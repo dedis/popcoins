@@ -7,7 +7,7 @@
         xmlns:nsListView="nativescript-ui-listview"
         xmlns:nsFloatingButton="nativescript-floatingactionbutton"
         xmlns="http://www.nativescript.org/tns.xsd">
-<!--navigatingTo="onNavigatingTo"-->
+    <!--navigatingTo="onNavigatingTo"-->
 
     <ActionBar class="action-bar">
         <!--
@@ -75,47 +75,26 @@
                 <nsListView:RadListView items="{{ partyListDescriptions }}" itemTap="partyTapped" row="0" colSpan="3"
                                         id="listView">
                     <nsListView:RadListView.itemTemplate>
-                        <GridLayout id="grid-layout" rows="*,*,*,*,auto" columns="*, auto" backgroundColor="white"
-                        class="basic-list-decorated">
-                            <StackLayout>
-                                <Label text="{{ desc.name }}" class="list-title" row="0" col="0" textWrap="true"
+                        <GridLayout id="grid-layout" rows="auto" columns="*, auto" backgroundColor="white"
+                                    class="basic-list-decorated">
+                            <StackLayout row="0" col="0">
+                                <Label text="{{ desc.name }}" class="list-title" textWrap="true"
                                        textTransform="capitalize"/>
-                                <Label text="{{ desc.dateTime }}" row="1" rowSpan="2" col="0" textWrap="true"
-                                       fontSize="15%"/>
-                                <Label text="{{ desc.location }}" row="2" col="0" textWrap="true" fontSize="15%"
+                                <Label text="{{ desc.datetime }}" textWrap="true"  fontSize="15%"/>
+                                <Label text="{{ desc.location }}" textWrap="true" fontSize="15%"
                                        textTransform="capitalize"/>
-                                <Label text="{{ 'Balance: ' + status.balance }}" row="3" col="0"
-                                       visibility="{{ status.status !=='poptoken' ? 'visible' : 'collapse'}}"
+                                <Label text="{{ 'Balance: ' + status.balance }}"
+                                       visibility="{{ status.status =='Token' ? 'visible' : 'collapse'}}"
                                        textWrap="true"
                                        fontSize="15%" textTransform="capitalize"/>
-                                <Label text="Organizers :" row="4" col="0" textWrap="true" fontSize="15%"
-                                       visibility="{{ status.status !=='poptoken' ? 'visible' : 'collapse'}}"/>
-                                <GridLayout visibility="{{ status.status !=='poptoken' ? 'visible' : 'collapse'}}">
-                                    <Repeater items="{{ desc.roster.list }}" id="repeater">
-                                        <Repeater.itemsLayout>
-                                            <StackLayout orientation="vertical"/>
-                                        </Repeater.itemsLayout>
-                                        <Repeater.itemTemplate>
-                                            <Label text="{{ description }}" visibility="visible"/>
-                                            <!--<Label text="{{ description }}" margin="10" visibility="visible"/>-->
-                                        </Repeater.itemTemplate>
-                                    </Repeater>
-                                </GridLayout>
                             </StackLayout>
-                            <StackLayout class="status-text" paddingTop="100%" paddingRight="20%">
+                            <StackLayout class="status-text" paddingRight="5%" row="0" col="1">
                                 <Image src="{{ (status.qrcode === undefined)? status.qrcode : status.qrcode }} "
-                                       visibility="visible" width="40%" height="40%" stretch="aspectFill"/>
-                                <Label text="{{ status.status }}"
-                                       visibility="{{ status.status !=='poptoken' ? 'visible' : 'collapse'}}" row="4"
-                                       col="0"
-                                       textWrap="true" paddingLeft="30%" paddingRight="40%" stretch="aspectFill"
-                                       textTransform="uppercase"/>
-                                <Label text="{{ status.status }}"
-                                       visibility="{{ status.status =='poptoken' ? 'visible' : 'collapse'}}" row="4"
-                                       col="0"
+                                       visibility="visible" width="60%" height="60%" stretch="aspectFill"/>
+                                <Label text="{{ status.status }}" style="text-align:center;"
                                        textWrap="true" paddingTop="10%" stretch="aspectFill" textTransform="uppercase"/>
                             </StackLayout>
-                            </GridLayout>
+                        </GridLayout>
                     </nsListView:RadListView.itemTemplate>
                 </nsListView:RadListView>
                 <nsFloatingButton:fab tap="addParty"

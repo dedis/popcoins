@@ -1,5 +1,6 @@
 require("./bundle-config");
 const application = require("application");
+const Wallet = require("./shared/lib/dedjs/object/pop/Wallet");
 
 if (application.android) {
     application.android.on(application.AndroidApplication.activityResultEvent, function (args) {
@@ -20,9 +21,12 @@ application.on(application.uncaughtErrorEvent, (args) => {
     }
 });
 
-application.start({ moduleName: "drawers/tokens/main" });
-// application.start({ moduleName: "drawers/messages/main" });
-// application.start({ moduleName: "drawers/pop/pop-page" });
+Wallet.loadAll()
+    .then(() => {
+        // application.start({moduleName: "drawers/tokens/main"});
+        application.start({moduleName: "drawers/messages/main"});
+        // application.start({ moduleName: "drawers/pop/pop-page" });
+    })
 
 /*
 Do not place any code after the application has been started as it will not

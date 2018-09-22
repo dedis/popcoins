@@ -74,6 +74,11 @@ function getViewModel(wallet) {
         width: sideLength
     });
 
+    let balance = "unknown";
+    if (wallet.state() == Wallet.STATE_TOKEN) {
+        balance = wallet.balance;
+    }
+
     return Observable.fromObject({
         party: wallet,
         desc: Observable.fromObjectRecursive({
@@ -88,7 +93,8 @@ function getViewModel(wallet) {
         }),
         status: Observable.fromObject({
             status: wallet.stateStr(),
-            qrcode: ImageSource.fromNativeSource(qrcode)
+            qrcode: ImageSource.fromNativeSource(qrcode),
+            balance: balance
         })
     })
 }
@@ -168,28 +174,24 @@ function partyTapped(args) {
                 return ScanToReturn.scan()
                     .then(signDataJson => {
                         const sigData = Convert.jsonToObject(signDataJson);
-                        const sig = PoP.signWithPopToken(party.getPopToken(), Convert.hexToByteArray(sigData.nonce), Convert.hexToByteArray(sigData.scope));
+                        const sig = PoP.signWithPopToken(party.getPopToken(),
+                            Convert.hexToByteArray(sigData.nonce), Convert.hexToByteArray(sigData.scope));
 
                         const fields = {
                             signature: Convert.byteArrayToHex(sig)
                         };
 
-                        setTimeout(() => {
-                            pageObject.showModal("shared/pages/qr-code/qr-code-page", {
-                                textToShow: Convert.objectToJson(fields),
-                                title: "Signed informations"
-                            }, () => {
-                            }, true);
-                        }, 1);
-
-                        return Promise.resolve()
+                        return pageObject.showModal("shared/pages/qr-code/qr-code-page", {
+                            textToShow: Convert.objectToJson(fields),
+                            title: "Signed informations"
+                        });
                     })
                     .catch(error => {
                         console.log("couldn't scan:", error);
 
                         if (error !== ScanToReturn.SCAN_ABORTED) {
                             setTimeout(() => {
-                                Dialog.alert({
+                                return Dialog.alert({
                                     title: "Error",
                                     message: "An error occured, please retry. - " + error,
                                     okButtonText: "Ok"
@@ -197,7 +199,7 @@ function partyTapped(args) {
                             });
                         }
 
-                    })
+                    });
             case WALLET_TRANSFER:
                 let amount = undefined;
                 const USER_WRONG_INPUT = "USER_WRONG_INPUT";
@@ -324,6 +326,9 @@ function reloadStatuses() {
         .then(() => {
             viewModel.partyListDescriptions.forEach(model => {
                 model.status.status = model.party.stateStr();
+                if (model.party.state() == Wallet.STATE_TOKEN) {
+                    model.status.balance = model.party.balance;
+                }
             });
             return pageObject.getViewById("listView").refresh();
         })

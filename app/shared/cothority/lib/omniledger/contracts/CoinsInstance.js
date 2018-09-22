@@ -40,6 +40,22 @@ class CoinsInstance {
     }
 
     /**
+     * Returns the instance ID
+     * @returns {Uint8Array}
+     */
+    get instanceId(){
+        return this._instanceId;
+    }
+
+    /**
+     * Returns the instance
+     * @returns {Instance|*}
+     */
+    get instance(){
+        return this._instance;
+    }
+
+    /**
      * Creates a new instance of CoinsInstance and contact the  omniledger to try
      * to update the data
      *

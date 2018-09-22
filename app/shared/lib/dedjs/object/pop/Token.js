@@ -21,7 +21,7 @@ class Token {
      * @param context a context within which an attendee will be recognized
      * @returns {Uint8ArrayConstructor} the signature
      */
-    sign(message, context){
+    sign(message, context) {
         return Uint8Array;
     }
 
