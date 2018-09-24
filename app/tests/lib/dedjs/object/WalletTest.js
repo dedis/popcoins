@@ -1,7 +1,4 @@
 require("nativescript-nodeify");
-const FileSystem = require("tns-core-modules/file-system");
-const Documents = FileSystem.knownFolders.documents();
-const Cothority = require("@dedis/cothority");
 
 const lib = require("../../../../shared/lib");
 const dedjs = lib.dedjs;
@@ -57,13 +54,14 @@ const JSON_ROSTER_FULL = JSON.stringify({
 });
 const ROSTER = Convert.parseJsonRoster(JSON_ROSTER_FULL);
 
-
 function clean() {
     return FileIO.rmrf(FilePaths.WALLET_PATH)
         .then(() => {
             return FileIO.rmrf(FilePaths.POP_ATT_PATH);
         })
 }
+
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 40000;
 
 describe("Wallet", function () {
     beforeEach(() => {
@@ -75,7 +73,8 @@ describe("Wallet", function () {
         return clean();
     });
 
-    fit("should correctly save and load attendees", function () {
+    it("should correctly save and load attendees", function () {
+        debugger;
         let config = new Configuration("test", "now", "here", ROSTER);
         let wallet = new Wallet(config);
         wallet.attendees = [wallet.keypair.public];
@@ -99,7 +98,6 @@ describe("Wallet", function () {
     });
 
     it("should correctly update final statements array", function () {
-        this.timeout(40000);
         const toWrite1 = Convert.objectToJson(info1);
         const toWrite2 = Convert.objectToJson(info2);
 
@@ -163,7 +161,7 @@ describe("Loading wallet from server", () => {
     })
 })
 
-fdescribe("Updating wallet from server", () => {
+describe("Updating wallet from server", () => {
     beforeEach(() => {
         return clean();
     });

@@ -8,7 +8,6 @@ const Helper = require("../../../app/shared/lib/dedjs/Helper");
 const ObjectType = require("../../../app/shared/lib/dedjs/ObjectType");
 const CothorityMessages = require("../../../app/shared/lib/dedjs/network/cothority-messages");
 const Convert = require("../../../app/shared/lib/dedjs/Convert");
-const PopToken = require("../../../app/shared/lib/dedjs/object/pop/att/PopToken");
 
 const BYTE_ARRAY = new Uint8Array([243, 39, 52, 77, 162, 48, 121, 100, 114, 48]);
 const HEX_STRING = "f327344da23079647230";
@@ -184,8 +183,6 @@ FINAL_ATTENDEES = FINAL_ATTENDEES.map(base64Key => {
 const FINAL_SIGNATURE = Convert.base64ToByteArray("q+G+7n6FXsY7hpxK3m119GuDHnchS6wqTE0sZE/fOKg=");
 const FINAL_MERGED = false;
 const FINAL_STATEMENT = CothorityMessages.createFinalStatement(FINAL_POP_DESC, FINAL_ATTENDEES, FINAL_SIGNATURE, FINAL_MERGED);
-
-const POP_TOKEN = new PopToken(FINAL_STATEMENT, PRIVATE_KEY_BYTE_ARRAY, PUBLIC_KEY_BYTE_ARRAY);
 
 const POP_DESC_HASH_JSON = Convert.objectToJson({
   hash: PRIVATE_KEY
@@ -702,25 +699,6 @@ describe.skip("Convert", function () {
     });
   });
 
-  describe("#parseJsonPopToken", function () {
-    it("should throw an error when the input is not a string", function () {
-      expect(() => Convert.parseJsonPopToken(POP_TOKEN)).to.throw();
-    });
-
-    it("should return a PopToken object", function () {
-      const popToken = Convert.parseJsonPopToken(JSON.stringify(POP_TOKEN));
-
-      Helper.isOfType(popToken, ObjectType.POP_TOKEN).should.be.true;
-    });
-
-    it("should correctly parse the JSON string into a PopToken", function () {
-      const popToken = Convert.parseJsonPopToken(JSON.stringify(POP_TOKEN));
-
-      popToken.private.should.deep.equal(POP_TOKEN.private);
-      popToken.public.should.deep.equal(POP_TOKEN.public);
-    });
-  });
-
   describe("#parseJsonFinalStatementsArray", function () {
     it("should throw an error when the input is not a string", function () {
       expect(() => Convert.parseJsonFinalStatementsArray("[FINAL_STATEMENT, FINAL_STATEMENT]")).to.throw();
@@ -743,31 +721,6 @@ describe.skip("Convert", function () {
       const finalStatements = Convert.parseJsonFinalStatementsArray(JSON.stringify(object));
 
       finalStatements.length.should.equal(3);
-    });
-  });
-
-  describe("#parseJsonPopTokenArray", function () {
-    it("should throw an error when the input is not a string", function () {
-      expect(() => Convert.parseJsonPopTokenArray("[POP_TOKEN, POP_TOKEN]")).to.throw();
-    });
-
-    it("should return an array of PopToken object", function () {
-      const object = {};
-      object.array = [POP_TOKEN, POP_TOKEN, POP_TOKEN];
-
-      const popToken = Convert.parseJsonPopTokenArray(JSON.stringify(object));
-
-      Array.isArray(popToken).should.be.true;
-      Helper.isOfType(popToken[0], ObjectType.POP_TOKEN).should.be.true;
-    });
-
-    it("should correctly parse the JSON string into an array of  PopToken", function () {
-      const object = {};
-      object.array = [POP_TOKEN, POP_TOKEN, POP_TOKEN];
-
-      const popToken = Convert.parseJsonPopTokenArray(JSON.stringify(object));
-
-      popToken.length.should.equal(3);
     });
   });
 

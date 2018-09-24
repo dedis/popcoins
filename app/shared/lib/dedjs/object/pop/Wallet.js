@@ -5,12 +5,9 @@ const Kyber = require("@dedis/kyber-js");
 const CurveEd25519 = new Kyber.curve.edwards25519.Curve;
 const Schnorr = Kyber.sign.schnorr;
 const HashJs = require("hash.js");
-const Cothority = require("@dedis/cothority");
-const Omniledger = Cothority.omniledger;
-const OmniledgerRPC = Omniledger.OmniledgerRPC;
-// const PopPartyInstance = Omniledger.contracts.PopPartyInstance;
+const OmniledgerRPC = require("../../../../cothority/lib/omniledger/OmniledgerRPC");
+const Darc = require("../../../../cothority/lib/omniledger/darc");
 const PopPartyInstance = require("../../../../cothority/lib/omniledger/contracts/PopPartyInstance");
-// const CoinInstance = Cothority.omniledger.contracts.CoinsInstance;
 const CoinInstance = require("../../../../cothority/lib/omniledger/contracts/CoinsInstance");
 
 const FilePaths = require("../../../file-io/files-path");
@@ -487,7 +484,7 @@ class Wallet {
         if (isPub) {
             accountId = this._partyInstance.getAccountInstanceId(dest);
         }
-        let signer = Omniledger.darc.SignerEd25519.fromByteArray(this._keypair.private.marshalBinary());
+        let signer = Darc.SignerEd25519.fromByteArray(this._keypair.private.marshalBinary());
         return this._coinInstance.transfer(amount, accountId, signer);
     }
 

@@ -1,6 +1,4 @@
 require("nativescript-nodeify");
-const identity = require("../identity");
-const net = require("../net");
 const Proof = require("./Proof");
 const Config = require("./Config");
 const Darc = require("./darc/Darc");

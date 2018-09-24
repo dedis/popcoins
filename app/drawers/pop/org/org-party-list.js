@@ -6,7 +6,7 @@ const Observable = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const Kyber = require("@dedis/kyber-js");
 const CurveEd25519 = new Kyber.curve.edwards25519.Curve;
-const Cothority = require("@dedis/cothority");
+const ServerIdentity = require("../../../shared/cothority/lib/identity").ServerIdentity;
 
 const lib = require("../../../shared/lib");
 const dedjs = lib.dedjs;
@@ -39,15 +39,12 @@ function onLoaded(args) {
 
     viewModel.partyListDescriptions.splice(0);
 
-    Log.print("User public key is:", User.getKeyPair().public);
-
     return Timer.setTimeout(() => {
         loadParties();
     }, 10);
 }
 
 function onUnloaded() {
-    Log.lvl2("party-list unloading")
     // remove polling when page is leaved
     Timer.clearInterval(timerId);
 }
@@ -345,8 +342,8 @@ module.exports = {
  * the public key of the user were already registered (thus it won't need to ask PIN in the future)
  */
 function sendLinkRequest(conode, pin) {
-    if (!(conode instanceof Cothority.ServerIdentity)) {
-        throw new Error("conode must be an instance of Cothority.ServerIdentity");
+    if (!(conode instanceof ServerIdentity)) {
+        throw new Error("conode must be an instance of ServerIdentity");
     }
     if (typeof pin !== "string") {
         throw new Error("pin must be of type string");

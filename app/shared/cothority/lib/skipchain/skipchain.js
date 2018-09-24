@@ -1,6 +1,8 @@
 "use strict";
 
-const net = require("../net");
+// const net = require("../net");
+const net = require("../../../../shared/lib/dedjs/network/NSNet");
+
 const protobuf = require("../protobuf");
 const misc = require("../misc");
 const identity = require("../identity.js");

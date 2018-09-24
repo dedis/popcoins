@@ -219,10 +219,8 @@ function deleteAttendee(args) {
  * @returns {Promise.<any>}
  */
 function finalize() {
-    Log.print("Public key is:", Buffer.from(User.getKeyPair().public.marshalBinary()).toString('hex'))
     let pub = CurveEd25519.point();
     pub.mul(User.getKeyPair().private, null);
-    Log.print("Recalculated public key is:", pub);
     return Party.finalize(User.getKeyPair().private)
         .then((result) => {
 

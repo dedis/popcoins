@@ -1,11 +1,11 @@
 require("nativescript-nodeify");
 const UUID = require("pure-uuid");
-const DedisProtobuf = require("@dedis/cothority").protobuf;
 const Crypto = require("crypto-browserify");
 const Kyber = require("@dedis/kyber-js");
-const Cothority = require("@dedis/cothority");
 const CurveEd25519 = new Kyber.curve.edwards25519.Curve;
 
+const ServerIdentity = require("../../../cothority/lib/identity").ServerIdentity;
+const DedisProtobuf = require("../../../cothority/lib/protobuf");
 const Helper = require("../Helper");
 const ObjectType = require("../ObjectType");
 // const Convert = require("../Convert");
@@ -98,7 +98,7 @@ module.exports = {
         if (!(list instanceof Array)) {
             throw new Error("list must be an instance of Array");
         }
-        if (list.length > 0 && !(list[0] instanceof Cothority.ServerIdentity)) {
+        if (list.length > 0 && !(list[0] instanceof ServerIdentity)) {
             throw new Error("list[i] must be an instance of ServerIdentity");
         }
         if (!(aggregate instanceof Kyber.Point)) {

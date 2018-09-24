@@ -34,16 +34,15 @@ function onLoaded(args) {
         party = wallets[0];
         conode = party.config.roster.identities[0];
         viewModel.isEmpty = false;
-        Log.print();
         return party.getCoinInstance()
             .then(() => {
-                Log.print();
                 return party.getPartyInstance();
             })
             .then(pi => {
-                Log.print("creating message service", pi);
                 msgService = new Messages(party, pi);
-                Log.print("message service created");
+                return msgService.loadMessages();
+            })
+            .then(()=>{
                 return updateMessages();
             });
     }
@@ -59,12 +58,10 @@ function messageTapped(args) {
     Log.lvl2("Tapped message is:", msg);
     party.getPartyInstance()
         .then(pi => {
-            Log.print(pi.instanceId);
             let ourCoinsId = pi.getAccountInstanceId(party._keypair.public);
             return msgService.readMessage(msg.id, pi.instanceId, ourCoinsId)
         })
         .then(response => {
-            Log.print("response is:", response);
             return Promise.resolve()
                 .then(() => {
                     if (response.rewarded) {
@@ -107,7 +104,6 @@ function updateMessages() {
     return msgService.fetchListMessages(0, 10)
         .then(response => {
             viewModel.messageList.splice(0);
-            Log.print("Messages are:", response.subjects);
             for (let i = 0; i < response.subjects.length; i++) {
                 viewModel.messageList.push(
                     ObservableModule.fromObject({
@@ -165,7 +161,6 @@ function addNewMessage(arg) {
                 cancelButtonText: "Abort",
             })
         }).then(result => {
-                Log.print("result is:", result);
                 if (result) {
                     if (party.balance < arg.balance) {
                         return Dialog.alert({
@@ -174,14 +169,15 @@ function addNewMessage(arg) {
                         })
                     }
 
-                    Log.print(msgService);
                     Log.lvl2("sending coins to message-account", msgService.serviceAccountId);
+                    viewModel.isLoading = true;
                     return party.transferCoin(arg.balance, msgService.serviceAccountId)
                         .then(() => {
                             Log.lvl2("Sending message");
                             return msgService.sendMessage(arg)
                         })
                         .then(() => {
+                            viewModel.isLoading = false;
                             return Dialog.alert({
                                 title: "Message sent",
                                 message: "Stored the message and took " + arg.balance +
@@ -212,7 +208,6 @@ function onDrawerButtonTap(args) {
 }
 
 function onNavigatingTo(args) {
-    Log.print(args);
     page = args.object.page;
 }
 

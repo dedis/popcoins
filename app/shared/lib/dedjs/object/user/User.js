@@ -1,12 +1,11 @@
 require("nativescript-nodeify");
 const ObservableModule = require("data/observable");
-const ObservableArray = require("data/observable-array").ObservableArray;
 const Kyber = require("@dedis/kyber-js");
 const CurveEd25519 = new Kyber.curve.edwards25519.Curve;
-const Cothority = require("@dedis/cothority");
-const Net = require("@dedis/cothority").net;
 
-const NetUtils = require("../../network/NetUtils");
+const Net = require("../../network/NSNet");
+const Roster = require("../../../../cothority/lib/identity").Roster;
+const ServerIdentity = require("../../../../cothority/lib/identity").ServerIdentity;
 const FileIO = require("../../../file-io/file-io");
 const FilePaths = require("../../../file-io/files-path");
 const Package = require("../../Package");
@@ -91,7 +90,7 @@ class User {
      */
     get roster() {
         if (this._roster === undefined) {
-            this._roster = new Cothority.Roster(CurveEd25519, []);
+            this._roster = new Roster(CurveEd25519, []);
         }
         // Why would we need this?
         if (this._roster.identities === undefined) {
@@ -143,7 +142,7 @@ class User {
      */
     setRoster(roster, save) {
         Log.lvl3("setRoster", save);
-        if (!(roster instanceof Cothority.Roster)) {
+        if (!(roster instanceof Roster)) {
             Log.error("not a roster");
             throw new Error("roster must be an instance of Roster");
         }
@@ -275,7 +274,7 @@ class User {
      * @param {ServerIdentity} server - the server to add to the roster
      */
     addServer(server) {
-        if (!(server instanceof Cothority.ServerIdentity)) {
+        if (!(server instanceof ServerIdentity)) {
             throw new Error("server must be of type ServerIdentity");
         }
         this.roster.identities.push(server);

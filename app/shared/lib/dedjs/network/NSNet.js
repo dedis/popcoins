@@ -3,7 +3,7 @@ const co = require("co");
 const shuffle = require("shuffle-array");
 const WS = require("nativescript-websockets");
 const Buffer = require("buffer/").Buffer;
-const root = require("@dedis/cothority").protobuf.root;
+const root = require("../../../cothority/lib/protobuf").root;
 const Log = require("../Log");
 
 /**
@@ -31,8 +31,9 @@ function Socket(addr, service) {
     this.send = (request, response, data) => {
         return new Promise((resolve, reject) => {
             const path = this.url + "/" + request.replace(/.*\./, '');
-            console.log("net.Socket: new WebSocketA(" + path + ")");
-            const ws = new WS(path);
+            Log.lvl1("net.Socket: new WebSocketA(" + path + ")");
+            const ws = new WS(path, {timeout: 6000});
+            let protoMessage = undefined;
 
             const requestModel = this.protobuf.lookup(request);
             if (requestModel === undefined) {
@@ -53,16 +54,15 @@ function Socket(addr, service) {
                 }
                 const message = requestModel.create(data);
                 const marshal = requestModel.encode(message).finish();
-                ws.send(marshal);
+                Log.print("sending message result:", ws.send(marshal.slice()));
             });
 
             ws.on('message', (socket, message) => {
-                Log.lvl2("Writing message:", message);
+                Log.lvl2("Getting message:", message);
                 let buffer = new Uint8Array(message);
                 try {
-                    const unmarshal = responseModel.decode(buffer);
+                    protoMessage = responseModel.decode(buffer);
                     ws.close();
-                    resolve(unmarshal);
                 } catch (err) {
                     console.log("got message with length", buffer.length);
                     console.dir("unmarshalling into", responseModel);
@@ -73,17 +73,20 @@ function Socket(addr, service) {
             });
 
             ws.on('close', (socket, code, reason) => {
+                Log.lvl1("Got close:", code, reason)
                 if (code === 4000) {
                     reject(new Error(reason));
                 }
+                resolve(protoMessage);
             });
 
             ws.on('error', (socket, error) => {
-                console.log("got error:", error);
+                Log.error("got error:", error);
                 reject(error);
             });
 
-            return ws.open();
+            Log.print("opening socket", ws.readyState);
+            ws.open();
         });
     };
 }
@@ -113,7 +116,7 @@ class RosterSocket {
         const fn = co.wrap(function* () {
             const addresses = that.addresses;
             const service = that.service;
-            shuffle(addresses);
+            // shuffle(addresses);
             // try first the last good server we know
             if (that.lastGoodServer) addresses.unshift(that.lastGoodServer);
 

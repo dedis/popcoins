@@ -1,23 +1,10 @@
-const FilePaths = require("../../../shared/lib/file-io/files-path");
-const FileIO = require("../../../shared/lib/file-io/file-io");
-const Convert = require("../../../shared/lib/dedjs/Convert");
-const KeyPair = require("../../../shared/lib/dedjs/KeyPair");
-const FileSystem = require("tns-core-modules/file-system");
-const Documents = FileSystem.knownFolders.documents();
+require("nativescript-nodeify");
 const Kyber = require("@dedis/kyber-js");
 const CURVE_ED25519_KYBER = new Kyber.curve.edwards25519.Curve;
 
-const PRIVATE_KEY = "AWKlOlcTuCHEV/fKX0X1IoAoBU0n1c5iKp/SWRLj3T4=";
-const PRIVATE_KEY_BYTE_ARRAY = Convert.base64ToByteArray(PRIVATE_KEY);
-const PUBLIC_KEY = "y4JMDWrle6RMV+0BKU92Xbu8+J8VkZ5kV3SvSr2ZxHw=";
-const PUBLIC_KEY_BYTE_ARRAY = Convert.base64ToByteArray(PUBLIC_KEY);
-const PUBLIC_COMPLETE_KEY = "BBmiuL/uxUuItsuFVQJT4oUv4qZrb1fYQ+GL/ZTpZ43MfMSZvUqvdFdknpEVn/i8u112TykB7VdMpHvlag1Mgss=";
-const PUBLIC_COMPLETE_KEY_BYTE_ARRAY = Convert.base64ToByteArray(PUBLIC_COMPLETE_KEY);
-const JSON_KEY_PAIR = JSON.stringify({
-    "private": PRIVATE_KEY,
-    "public": PUBLIC_KEY,
-    "publicComplete": PUBLIC_COMPLETE_KEY
-});
+const FilePaths = require("../../../shared/lib/file-io/files-path");
+const FileIO = require("../../../shared/lib/file-io/file-io");
+const KeyPair = require("../../../shared/lib/dedjs/KeyPair");
 
 describe("KeyPair", () => {
 

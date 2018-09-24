@@ -1,10 +1,10 @@
 const Dialog = require("ui/dialogs");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const topmost = require("ui/frame").topmost;
-const Net = require("@dedis/cothority").net;
 
 const lib = require("../../../../shared/lib");
 const dedjs = lib.dedjs;
+const Net = dedjs.network.NSNet;
 const Convert = dedjs.Convert;
 const User = dedjs.object.user.get;
 const Log = dedjs.Log;

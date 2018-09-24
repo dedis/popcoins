@@ -4,27 +4,21 @@ class Directory {
 
     constructor() {
         this.root = new Node();
-
-        console.log(this.root)
     }
 
     add(str){
-        var paths = str.split("/");
-
-        console.log("CONSTRUCTOR : " +this.root);
-
-        var temp = this.root;
+        let paths = str.split("/");
+        let temp = this.root;
         while(paths.length!==0){
-            console.log(paths[0]);
-            var index = -1 ;
-            for(var i =0; i< temp.children.length ; i++){
+            let index = -1 ;
+            for(let i =0; i< temp.children.length ; i++){
                 if(temp.children[i].name == paths[0]){
                     index  = i;
                     break;
                 }
             }
             if(index == -1){
-                var n = new Node ();
+                let n = new Node ();
                 n.name = paths[0];
                 n.parent = temp;
                 temp.children.push(n);
@@ -38,22 +32,19 @@ class Directory {
             paths.pop();
             paths.reverse();
         }
-        console.log(this.root);
-
-
         return Promise.resolve();
         }
     write(path, str){
         this.add(path);
 
-        var paths = path.split("/");
+        let paths = path.split("/");
 
-        var temp = this.root;
+        let temp = this.root;
 
         while(paths.length!==0){
 
-            var index;
-            for(var i =0; i< temp.children.length ; i++){
+            let index;
+            for(let i =0; i< temp.children.length ; i++){
                 if(temp.children[i].name == paths[0]){
                     index  = i;
                     break;
@@ -71,14 +62,14 @@ class Directory {
     read(path){
         this.add(path);
 
-        var paths = path.split("/");
+        let paths = path.split("/");
 
-        var temp = this.root;
+        let temp = this.root;
 
         while(paths.length!==0){
 
-            var index;
-            for(var i =0; i< temp.children.length ; i++){
+            let index;
+            for(let i =0; i< temp.children.length ; i++){
                 if(temp.children[i].name == paths[0]){
                     index  = i;
                     break;
@@ -95,14 +86,14 @@ class Directory {
     deleteFile(path){
         this.add(path);
 
-        var paths = path.split("/");
+        let paths = path.split("/");
 
-        var temp = this.root;
+        let temp = this.root;
 
         while(paths.length!==0){
 
-            var index;
-            for(var i =0; i< temp.children.length ; i++){
+            let index;
+            for(let i =0; i< temp.children.length ; i++){
                 if(temp.children[i].name == paths[0]){
                     index  = i;
                     break;
@@ -119,14 +110,14 @@ class Directory {
     }
 
     getFolders(path){
-        var paths = path.split("/");
+        let paths = path.split("/");
 
-        var temp = this.root;
+        let temp = this.root;
 
         while(paths.length!==0){
 
-            var index;
-            for(var i =0; i< temp.children.length ; i++){
+            let index;
+            for(let i =0; i< temp.children.length ; i++){
                 if(temp.children[i].name == paths[0]){
                     index  = i;
                     break;

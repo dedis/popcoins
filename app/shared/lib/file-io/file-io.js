@@ -98,7 +98,6 @@ function removeFolder(folder) {
  * @returns {Promise<void>}
  */
 function rmrf(dir) {
-    Log.print(Documents.getFolder(dir));
     return Documents.getFolder(dir).clear();
 }
 

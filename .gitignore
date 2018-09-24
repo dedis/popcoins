@@ -8,6 +8,7 @@ platforms/
 hooks/
 conodes/
 old.dedis/
+dedis/
 
 package-lock.json
 

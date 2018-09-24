@@ -11,7 +11,7 @@ start-dev: clean apply-patches
 	@echo "for tests:"
 	@echo "use \"tns test ios\" or \"tns test android\""
 
-clean-install: clean apply-patches
+clean-install: clean
 
 # This is where we apply patches needed to the modules that we depend on.
 apply-patches: init-npm

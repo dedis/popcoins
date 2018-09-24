@@ -21,15 +21,15 @@ class KeyPair {
                 this.setKeyPair(privKey, pubKey);
             } else {
                 if (pubKey !== undefined && privKey !== undefined) {
-                    console.log("wrong parameters");
+                    Log.error("wrong parameters");
                     throw new Error(err);
                 }
-                console.log("creating random key");
+                Log.lvl3("creating random key");
                 // Ignoring error if not both arguments are given.
                 this.randomize();
             }
         } catch (err) {
-            console.log("oups - couldn't create new key", err);
+            Log.error("oups - couldn't create new key", err);
             throw new Error(err);
         }
     }
@@ -72,7 +72,7 @@ class KeyPair {
      * @returns {Promise<any | never>}
      */
     save(filename) {
-        console.log("saving keypair to", filename);
+        Log.lvl3("saving keypair to", filename);
         let toWrite = Convert.objectToJson({
             public: Convert.byteArrayToHex(this._public.marshalBinary()),
             private: Convert.byteArrayToHex(this._private.marshalBinary()),
@@ -123,9 +123,7 @@ class KeyPair {
         return FileIO.getStringOf(filename)
             .then(jsonKeyPair => {
                 if (jsonKeyPair.length > 0) {
-                    Log.print();
                     const kp = Convert.jsonToObject(jsonKeyPair);
-                    Log.print();
                     if (kp.public !== "" && kp.private !== "") {
                         return new KeyPair(Convert.hexToByteArray(kp.private),
                             Convert.hexToByteArray(kp.public));

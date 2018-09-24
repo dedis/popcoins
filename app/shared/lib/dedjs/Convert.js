@@ -1,8 +1,9 @@
 require("nativescript-nodeify");
-const Cothority = require("@dedis/cothority");
 const Kyber = require("@dedis/kyber-js");
 const CurveEd25519 = new Kyber.curve.edwards25519.Curve;
 
+const ServerIdentity = require("../../cothority/lib/identity").ServerIdentity;
+const Roster = require("../../cothority/lib/identity").Roster;
 const Buffer = require("buffer/").Buffer;
 const Helper = require("./Helper");
 const Log = require("./Log");
@@ -11,7 +12,6 @@ const TomlParser = require("toml");
 const Tomlify = require('tomlify-j0.4');
 const UUID = require("pure-uuid");
 const CothorityMessages = require("./network/cothority-messages");
-const PopToken = require("./object/pop/att/PopToken");
 
 const HEX_KEYWORD = "hex";
 const BASE64_KEYWORD = "base64";
@@ -200,8 +200,8 @@ function tomlToJson(tomlString) {
 function tlsToWebsocket(serverIdentity, path) {
     let address = serverIdentity;
     if (typeof serverIdentity !== "string") {
-        if (!(serverIdentity instanceof Cothority.ServerIdentity)) {
-            throw new Error("serverIdentity needs to be string or Cothority.ServerIdentity");
+        if (!(serverIdentity instanceof ServerIdentity)) {
+            throw new Error("serverIdentity needs to be string or ServerIdentity");
         }
         address = serverIdentity.tcpAddr;
     }
@@ -223,8 +223,8 @@ function tlsToWebsocket(serverIdentity, path) {
 }
 
 function serverIdentityToJson(serverIdentity) {
-    if (!(serverIdentity instanceof Cothority.ServerIdentity)) {
-        throw new Error("serverIdentity must be of type Cothority.ServerIdentity");
+    if (!(serverIdentity instanceof ServerIdentity)) {
+        throw new Error("serverIdentity must be of type ServerIdentity");
     }
 
     return JSON.stringify({
@@ -235,8 +235,8 @@ function serverIdentityToJson(serverIdentity) {
 }
 
 function rosterToJson(roster) {
-    if (!(roster instanceof Cothority.Roster)) {
-        throw new Error("roster must be of type Cothority.roster");
+    if (!(roster instanceof Roster)) {
+        throw new Error("roster must be of type roster");
     }
 
     const jRoster = {
@@ -250,52 +250,6 @@ function rosterToJson(roster) {
         })
     }
     return JSON.stringify(jRoster);
-}
-
-/**
- * Parses a JSON string into an array of PopToken objects. The JSON string has to respresent an object with a property called "array".
- * @param {string} jsonString - the JSON string to parse into an array of PopToken objects
- * @returns {Array} - the parsed array of PopToken objects
- */
-function parseJsonPopTokenArray(jsonString) {
-    if (typeof jsonString !== "string") {
-        throw new Error("jsonString must be of type string");
-    }
-
-    const object = jsonToObject(jsonString);
-    if (object.array === undefined || !Array.isArray(object.array)) {
-        throw new Error("object.array is undefined or not an array");
-    }
-
-    object.array = object.array.map(element => {
-        return parseJsonPopToken(objectToJson(element));
-    });
-
-    return object.array;
-}
-
-/**
- * Parses a JSON string into a PopToken object.
- * @param {string} jsonString - the JSON string to parse into a PopToken object
- * @returns {PopToken} - the parsed PopToken object
- */
-function parseJsonPopToken(jsonString) {
-    if (typeof jsonString !== "string") {
-        throw new Error("jsonString must be of type string");
-    }
-
-    const object = jsonToObject(jsonString);
-
-    object.final = parseJsonFinalStatement(objectToJson(object.final));
-
-    return new PopToken(
-        object.final,
-        Uint8Array.from(Object.keys(object.private).map(function (key) {
-            return object.private[key];
-        })),
-        Uint8Array.from(Object.keys(object.public).map(function (key) {
-            return object.public[key];
-        })));
 }
 
 /**
@@ -430,7 +384,7 @@ function parseJsonRoster(jsonString) {
     if (aggregate === undefined) {
         aggregate = Crypto.aggregatePublicKeys(points);
     }
-    return new Cothority.Roster(CurveEd25519, identities, rosterId);
+    return new Roster(CurveEd25519, identities, rosterId);
 }
 
 function parseJsonServerIdentity(jsonString){
@@ -559,7 +513,7 @@ function toServerIdentity(address, publicKey, description) {
         throw new Error("description must be of type string");
     }
 
-    return new Cothority.ServerIdentity(CurveEd25519, publicKey, address, description, false);
+    return new ServerIdentity(CurveEd25519, publicKey, address, description, false);
 }
 
 /**
@@ -596,8 +550,6 @@ module.exports.tomlToObject = tomlToObject;
 module.exports.jsonToToml = jsonToToml;
 module.exports.tomlToJson = tomlToJson;
 module.exports.tlsToWebsocket = tlsToWebsocket;
-module.exports.parseJsonPopTokenArray = parseJsonPopTokenArray;
-module.exports.parseJsonPopToken = parseJsonPopToken;
 module.exports.parseJsonFinalStatementsArray = parseJsonFinalStatementsArray;
 module.exports.parseJsonFinalStatement = parseJsonFinalStatement;
 module.exports.parseJsonPopDesc = parseJsonPopDesc;

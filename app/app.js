@@ -22,6 +22,9 @@ application.on(application.uncaughtErrorEvent, (args) => {
 });
 
 Wallet.loadAll()
+    .catch(err=>{
+        console.error("couldn't load Wallets:", err);
+    })
     .then(() => {
         // application.start({moduleName: "drawers/tokens/main"});
         application.start({moduleName: "drawers/messages/main"});

@@ -8,7 +8,6 @@ const PlatformModule = require("tns-core-modules/platform");
 const ZXing = require("nativescript-zxing");
 const ImageSource = require("image-source");
 const QRGenerator = new ZXing();
-// const Net = require("@dedis/cothority").net;
 
 const lib = require("../../shared/lib");
 const dedjs = lib.dedjs;
@@ -52,9 +51,7 @@ function onLoaded(args) {
 
 function onUnloaded(args) {
     // remove polling when page is leaved
-    console.log("tokens: unloading");
     Timer.clearInterval(timerId);
-    console.log("tokens: unloading - 2");
 }
 
 /**
@@ -65,7 +62,6 @@ function onUnloaded(args) {
 function getViewModel(wallet) {
     let pubBase64 = Buffer.from(wallet.keypair.public.marshalBinary()).toString('base64');
     let text = " { \"public\" :  \"" + pubBase64 + "\"}";
-    Log.print("QRcode is:", text);
     let sideLength = PlatformModule.screen.mainScreen.widthPixels / 4;
     const qrcode = QRGenerator.createBarcode({
         encode: text,
@@ -190,12 +186,10 @@ function partyTapped(args) {
                         console.log("couldn't scan:", error);
 
                         if (error !== ScanToReturn.SCAN_ABORTED) {
-                            setTimeout(() => {
-                                return Dialog.alert({
-                                    title: "Error",
-                                    message: "An error occured, please retry. - " + error,
-                                    okButtonText: "Ok"
-                                });
+                            return Dialog.alert({
+                                title: "Error",
+                                message: "An error occured, please retry. - " + error,
+                                okButtonText: "Ok"
                             });
                         }
 
@@ -221,14 +215,17 @@ function partyTapped(args) {
                     return ScanToReturn.scan()
                 }).then(publicKeyJson => {
                     const publicKeyObject = Convert.jsonToObject(publicKeyJson);
+                    viewModel.isLoading = true;
                     return party.transferCoin(amount, Convert.base64ToByteArray(publicKeyObject.public), true);
                 }).then(() => {
+                    viewModel.isLoading = false;
                     return Dialog.alert({
                         title: "Success !",
                         message: "" + amount + " PoP-Coins have been transferred",
                         okButtonText: "Ok"
                     });
                 }).catch(err => {
+                    viewModel.isLoading = false;
                     if (err === USER_CANCELED) {
                         return Promise.resolve()
                     } else if (err === USER_WRONG_INPUT) {
@@ -277,12 +274,9 @@ function addParty() {
 
         })
         .then(newWallet => {
-            console.log("got wallet:");
             newWallet.attendeesAdd([newWallet.keypair.public]);
-            Log.print("Roster is:", newWallet.config.roster);
             return newWallet.save()
                 .then(() => {
-                    Log.print("saved");
                     viewModel.partyListDescriptions.push(
                         getViewModel(newWallet)
                     );
@@ -290,7 +284,6 @@ function addParty() {
                     return update();
                 })
                 .then(() => {
-                    Log.print("updated");
                     return Frame.topmost().navigate({
                         animated: false, clearHistory: true, moduleName: "drawers/tokens/main"
                     })

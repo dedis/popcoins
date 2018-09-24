@@ -1,4 +1,5 @@
 const util = require('util');
+const application = require("application");
 
 let defaultLvl = 2;
 
@@ -21,18 +22,18 @@ class LogC {
             try {
                 // return JSON.stringify(a, undefined, 4);
                 let type = typeof a;
-                if (a === Object(a)){
-                    if (a.constructor){
+                if (a === Object(a)) {
+                    if (a.constructor) {
                         type = a.constructor.name;
                     }
-                } else if (type == "o"){
+                } else if (type == "o") {
                     console.dir(a);
                 }
-                if (type == "Uint8Array"){
+                if (type == "Uint8Array") {
                     return "{" + type + "}: " + Buffer.from(a).toString('hex');
                 }
                 return "{" + type + "}: " + util.inspect(a);
-            } catch (e){
+            } catch (e) {
                 console.log("error while inspecting:", e);
                 return a;
             }
@@ -42,10 +43,19 @@ class LogC {
     printCaller(err, i) {
         try {
             let stack = err.stack.split('\n')
-            let method = stack[i].trim().replace(/^at */, '').split("(");
+            let method = "";
+            if (application.android) {
+                method = stack[i].trim().replace(/^at */, '').split("(");
+            } else {
+                method = stack[i - 1].trim().split("@");
+                if (method.length == 1) {
+                    method.push(method[0]);
+                    method[0] = "?";
+                }
+            }
             let file = method[1].replace(/^.*\/|\)$/g, '');
             return (method[0] + " - " + file).padEnd(40);
-        } catch (e){
+        } catch (e) {
             return this.printCaller(new Error("Couldn't get stack - " + err), i + 2);
         }
     }
@@ -106,9 +116,8 @@ class LogC {
     }
 
     catch(e, ...args) {
-        console.dir("catch-error:", e);
         let errMsg = e;
-        if (e.message){
+        if (e.message) {
             errMsg = e.message;
         }
         console.log("C : " + this.printCaller(e, 1) + " -> (" + errMsg + ") " +
@@ -117,7 +126,7 @@ class LogC {
 
     rcatch(e, ...args) {
         let errMsg = e;
-        if (e.message){
+        if (e.message) {
             errMsg = e.message;
         }
         console.log("C : " + this.printCaller(e, 1) + " -> (" + errMsg + ") " +

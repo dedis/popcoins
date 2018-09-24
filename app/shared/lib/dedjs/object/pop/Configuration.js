@@ -1,8 +1,6 @@
 require("nativescript-nodeify");
-const Cothority = require("@dedis/cothority");
-const Kyber = require("@dedis/kyber-js");
-const CurveEd25519 = new Kyber.curve.edwards25519.Curve;
 
+const Roster = require("../../../../cothority/lib/identity").Roster;
 const Convert = require("../../Convert");
 const Crypto = require('crypto-browserify');
 const HashJs = require("hash.js");
@@ -104,7 +102,7 @@ class Configuration {
 
     static fromPopPartyInstance(ppi) {
         let desc = ppi.finalStatement.desc;
-        let roster = Cothority.Roster.fromProtobuf(desc.roster, false);
+        let roster = Roster.fromProtobuf(desc.roster, false);
         return new Configuration(desc.name, desc.datetime, desc.location, roster);
     }
 

@@ -40,14 +40,11 @@ function onLoaded(args) {
     timerId = Timer.setInterval(() => {
         loadConodeList();
     }, 2000)
-    console.log("pop: loading done");
 }
 
 function onUnloaded() {
     // remove polling when page is leaved
-    console.log("pop: unloading");
     Timer.clearInterval(timerId);
-    console.log("pop: unloading end");
 }
 
 function onDrawerButtonTap(args) {
@@ -63,7 +60,7 @@ function loadConodeList() {
         .then(status => {
             viewModel.rosterModule.list.splice(0);
             viewModel.isRosterEmpty = true;
-            status.forEach(s =>{
+            status.forEach(s => {
                 viewModel.rosterModule.list.push({
                     description: s.conode.description,
                     address: s.conode.tcpAddr,
@@ -104,17 +101,13 @@ function addConode() {
                     return loadConodeList();
                 })
                 .catch(error => {
-                    console.log(error);
-                    console.dir(error);
-                    console.trace();
-
-                    Dialog.alert({
+                    return Dialog.alert({
                         title: "Error",
                         message: "An error occured, please try again. - " + error,
                         okButtonText: "Ok"
-                    });
-
-                    return Promise.reject(error);
+                    }).then(() => {
+                        Log.rcatch(error)
+                    })
                 });
         }
     }

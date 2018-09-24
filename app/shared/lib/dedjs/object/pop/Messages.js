@@ -1,14 +1,12 @@
 require("nativescript-nodeify");
-const Observable = require("data/observable");
-const ObservableArray = require("data/observable-array").ObservableArray;
-const Cothority = require("@dedis/cothority");
-const Net = require("../../network/NSNet");
-// const Net = require("@dedis/cothority").net;
 
+const Net = require("../../network/NSNet");
 const CothorityMessages = require("../../network/cothority-messages");
 const Convert = require("../../Convert");
 const Log = require("../../Log");
 const RequestPath = require("../../network/RequestPath");
+const FileIO = require("../../../file-io/file-io");
+const FilePaths = require("../../../file-io/files-path");
 const DecodeType = require("../../network/DecodeType");
 const Wallet = require("./Wallet");
 
@@ -31,7 +29,7 @@ class Messages {
      */
     constructor(wallet, partyInstance) {
         this._wallet = wallet;
-        if (wallet.state() < Wallet.STATE_TOKEN){
+        if (wallet.state() < Wallet.STATE_TOKEN) {
             Log.error("not token state");
             throw new Error("Can only use token-wallet");
         }
@@ -40,13 +38,16 @@ class Messages {
         // the id of the message-service account
         this._serviceAccountId = partyInstance.getServiceCoinInstanceId();
         this._attendeeAccountId = partyInstance.getAccountInstanceId(wallet.keypair.public.marshalBinary());
+        // Local cache of messages
+        this._sentMessages = [];
+        this._readMessages = [];
     }
 
     /**
      * Returns the id of the service account that holds all the tokens.
      * @returns {Uint8Array}
      */
-    get serviceAccountId(){
+    get serviceAccountId() {
         return this._serviceAccountId;
     }
 
@@ -54,7 +55,7 @@ class Messages {
      * Returns the id of the attendee's account.
      * @returns {Uint8Array}
      */
-    get attendeeAccountId(){
+    get attendeeAccountId() {
         return this._attendeeAccountId;
     }
 
@@ -84,13 +85,17 @@ class Messages {
      * @param msg {string}
      * @returns {Promise<T | never>}
      */
-    sendMessage(msg){
+    sendMessage(msg) {
         const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(this._conode, ""), RequestPath.PERSONHOOD);
         const msgProto = CothorityMessages.createMessage(msg, this._attendeeAccountId);
         const sendMessage = CothorityMessages.createSendMessage(msgProto);
 
         return cothoritySocket.send(RequestPath.PERSONHOOD_SENDMESSAGE, DecodeType.STRING_REPLY, sendMessage)
-            .catch(error =>{
+            .then(() => {
+                this._sentMessages.push(msg);
+                return this.save()
+            })
+            .catch(error => {
                 Log.rcatch(error, "while sending message");
             })
     }
@@ -100,17 +105,60 @@ class Messages {
      * @param msgID
      * @returns {Promise<Message>}
      */
-    readMessage(msgID){
+    readMessage(msgID) {
         const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(this._conode, ""), RequestPath.PERSONHOOD);
         const readMessage = CothorityMessages.createReadMessage(msgID, this._partyIId,
             this._attendeeAccountId);
 
         return cothoritySocket.send(RequestPath.PERSONHOOD_READMESSAGE, DecodeType.READMESSAGE_REPLY, readMessage)
-            .catch(error =>{
+            .then(msg => {
+                this._readMessages.push(msg);
+                return this.save().then(() => {
+                    return msg;
+                })
+            })
+            .catch(error => {
                 Log.rcatch(error, "while reading message");
             })
     }
 
+    get fileName() {
+        return FileIO.join(FilePaths.MESSAGES_PATH,
+            Buffer.from(this._partyIId).toString('hex') + ".json")
+    }
+
+    /**
+     * @returns {Promise}
+     */
+    loadMessages() {
+        return FileIO.getStringOf(this.fileName)
+            .then(file => {
+                let object = Convert.jsonToObject(file);
+                Log.llvl3("converting file to messages:", object);
+                this._sentMessages = object.sentMessages;
+                this._readMessages = object.readMessages;
+            })
+            .catch(err => {
+                Log.catch(err, "couldn't load file");
+            })
+    }
+
+    save() {
+        let msgs = {
+            readMessages: this._readMessages,
+            sentMessages: this._sentMessages,
+        }
+
+        const toWrite = Convert.objectToJson(msgs);
+        return FileIO.writeStringTo(this.fileName, toWrite)
+            .then(() => {
+                Log.lvl1("saved file to: " + this.fileName);
+                return this;
+            })
+            .catch(error => {
+                Log.rcatch(error, "error while saving wallet:");
+            })
+    }
 }
 
 module.exports = Messages;
