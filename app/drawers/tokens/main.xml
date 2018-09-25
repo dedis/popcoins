@@ -99,7 +99,7 @@
                 </nsListView:RadListView>
                 <nsFloatingButton:fab tap="addParty"
                                       row="1" col="3"
-                                      icon="res://ic_add_white_48dp"
+                                      icon="res://ic_add_white"
                                       rippleColor="#f1f1f1"
                                       class="fab-button"/>
                 <ActivityIndicator busy="{{ isLoading }}" rowSpan="1" colSpan="2"/>
