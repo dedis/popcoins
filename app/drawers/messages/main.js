@@ -98,26 +98,21 @@ function messageTapped(args) {
 }
 
 function updateMessages() {
-    Log.print();
     return Promise.resolve()
         .then(() => {
             if (conode === undefined) {
-                Log.print();
                 return Dialog.alert({
                     title: "No token",
                     message: "Either there is no token or the party has not been finalized yet.",
                     okButtonText: "Continue"
                 })
             }
-            Log.print();
             viewModel.isLoading = true;
             pageObject.getViewById("listView").refresh();
             return msgService.fetchListMessages(0, 10)
                 .then(response => {
-                    Log.print();
                     viewModel.messageList.splice(0);
                     for (let i = 0; i < response.subjects.length; i++) {
-                        Log.print();
                         viewModel.messageList.push(
                             ObservableModule.fromObject({
                                 subject: response.subjects[i],
@@ -129,15 +124,11 @@ function updateMessages() {
                     }
                 })
                 .catch(error => {
-                    Log.print();
                     Log.catch("error: " + error);
                 })
         }).then(() => {
-            Log.print();
             viewModel.isLoading = false;
-            Log.print();
             pageObject.getViewById("listView").refresh();
-            Log.print();
         })
 }
 

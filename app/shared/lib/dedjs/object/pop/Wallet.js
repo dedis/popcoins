@@ -406,7 +406,7 @@ class Wallet {
                 this.save();
                 return ci;
             })
-            .catch(err=>{
+            .catch(err => {
                 Log.rcatch(err, "couldn't get coin instance");
             })
     }
@@ -415,7 +415,7 @@ class Wallet {
      * This returns the coin instance, if it is already created. It might be null!
      * @returns {null|CoinsInstance}
      */
-    get coinInstance(){
+    get coinInstance() {
         return this._coinInstance;
     }
 
@@ -496,10 +496,10 @@ class Wallet {
         // Only loading if not done yet.
         if (Object.keys(List).length == 0) {
             // Start with compatibility test
-            return MigrateFrom.version0()
-                .then(() => {
-                    return this.loadNewVersions()
-                })
+            // return MigrateFrom.version0()
+            //     .then(() => {
+            return this.loadNewVersions()
+            // })
         }
         return Promise.resolve(List);
     }
