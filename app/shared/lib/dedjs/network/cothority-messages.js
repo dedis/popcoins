@@ -7,8 +7,8 @@ const CurveEd25519 = new Kyber.curve.edwards25519.Curve;
 const ServerIdentity = require("../../../cothority/lib/identity").ServerIdentity;
 const DedisProtobuf = require("../../../cothority/lib/protobuf");
 const Helper = require("../Helper");
+const Log = require("../Log");
 const ObjectType = require("../ObjectType");
-// const Convert = require("../Convert");
 
 /**
  * Helpers to encode and decode messages of the Cothority
@@ -485,7 +485,7 @@ module.exports = {
 
     createMessage: function(msg, authorId, partyIId) {
         const msgProto = this.getModel(ObjectType.MESSAGE);
-
+        Log.print("partyIId is:", partyIId);
         const fields = {
             subject: msg.subject,
             date: 0,

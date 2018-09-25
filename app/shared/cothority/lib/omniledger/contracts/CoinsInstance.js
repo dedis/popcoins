@@ -5,6 +5,7 @@ const Argument = require("../Argument");
 const Instruction = require("../Instruction");
 const ClientTransaction = require("../ClientTransaction");
 const Log = require("../../../../lib/dedjs/Log");
+const Buffer = require("buffer/").Buffer;
 
 class CoinsInstance {
     /**
@@ -80,7 +81,7 @@ class CoinsInstance {
     transfer(coins, to, signer) {
         let args = [];
         let buffer = new ArrayBuffer(8);
-        new DataView(buffer).setBigUint64(0, BigInt(coins), true);
+        new DataView(buffer).setInt32(0, coins, true);
 
         args.push(new Argument("coins", new Uint8Array(buffer)));
         args.push(new Argument("destination", to));

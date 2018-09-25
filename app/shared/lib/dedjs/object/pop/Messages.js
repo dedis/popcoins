@@ -34,10 +34,13 @@ class Messages {
             throw new Error("Can only use token-wallet");
         }
         this._conode = wallet.config.roster.identities[0];
+        Log.print("party instance is:", partyInstance);
         this._partyIId = partyInstance.instanceId;
+        Log.print("party iid is:", this._partyIId);
         // the id of the message-service account
         this._serviceAccountId = partyInstance.getServiceCoinInstanceId();
         this._attendeeAccountId = partyInstance.getAccountInstanceId(wallet.keypair.public.marshalBinary());
+        Log.print("attendee acount id is:", this._attendeeAccountId);
         // Local cache of messages
         this._sentMessages = [];
         this._readMessages = [];

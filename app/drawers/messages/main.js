@@ -2,6 +2,7 @@ const Frame = require("ui/frame");
 const Dialog = require("ui/dialogs");
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
+const Timer = require("tns-core-modules/timer");
 
 const lib = require("../../shared/lib");
 const FileIO = lib.file_io;
@@ -39,6 +40,7 @@ function onLoaded(args) {
                 return party.getPartyInstance();
             })
             .then(pi => {
+                Log.print("creating new msgService:", pi)
                 msgService = new Messages(party, pi);
                 return msgService.loadMessages();
             })
@@ -101,6 +103,7 @@ function updateMessages() {
             message: "Either there is no token or the party has not been finalized yet."
         })
     }
+    viewModel.isLoading = true;
     return msgService.fetchListMessages(0, 10)
         .then(response => {
             viewModel.messageList.splice(0);
@@ -114,6 +117,7 @@ function updateMessages() {
                     })
                 )
             }
+            viewModel.isLoading = false;
         })
         .catch(error => {
             console.log("error: " + error);
@@ -177,7 +181,6 @@ function addNewMessage(arg) {
                             return msgService.sendMessage(arg)
                         })
                         .then(() => {
-                            viewModel.isLoading = false;
                             return Dialog.alert({
                                 title: "Message sent",
                                 message: "Stored the message and took " + arg.balance +
@@ -191,6 +194,7 @@ function addNewMessage(arg) {
                         })
                         .catch(error => {
                             Log.catch(error, "while sending messages");
+                            viewModel.isLoading = false;
                             return Dialog.alert({
                                 title: "while sending",
                                 message: "couldn't send message: " + error

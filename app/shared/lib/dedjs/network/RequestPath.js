@@ -1,7 +1,7 @@
 /**
  * @file File containing different available paths for the Cothority.
  */
-const OMNILEDGER_INSTANCE_ID = "0d75236a47c8b61b27b47da1df6af68e793ae68fa895eed95c6e5310846d5eab";
+const OMNILEDGER_INSTANCE_ID = "0ec0129a820a2f6e8dd16f15660cf563f2a1bfc29dc0efd9291169696cfd7af5";
 
 /**
  * Making the party more userfriendly, but more dependant on dedis. Which is OK for the moment...
@@ -22,7 +22,7 @@ const IDENTITY = "Identity";
 const SKIPCHAIN = "Skipchain";
 const POP = "PoPServer";
 const CISC = "Cisc";
-const OMNILEDGER = "OmniLedger";
+const OMNILEDGER = "ByzCoin";
 const PERSONHOOD = "Personhood"
 
 

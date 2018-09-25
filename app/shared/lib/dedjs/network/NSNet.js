@@ -1,8 +1,10 @@
+const Timer = require("tns-core-modules/timer");
 const protobuf = require("protobufjs");
 const co = require("co");
 const shuffle = require("shuffle-array");
 const WS = require("nativescript-websockets");
 const Buffer = require("buffer/").Buffer;
+
 const root = require("../../../cothority/lib/protobuf").root;
 const Log = require("../Log");
 
@@ -34,6 +36,7 @@ function Socket(addr, service) {
             Log.lvl1("net.Socket: new WebSocketA(" + path + ")");
             const ws = new WS(path, {timeout: 6000});
             let protoMessage = undefined;
+            let retry = false;
 
             const requestModel = this.protobuf.lookup(request);
             if (requestModel === undefined) {
@@ -45,6 +48,11 @@ function Socket(addr, service) {
                 console.log("failed to find " + response);
                 reject(new Error("Model " + response + " not found"));
             }
+
+            let timerId = Timer.setTimeout(()=>{
+                retry = true;
+                ws.close();
+            }, 5000);
 
             ws.on('open', () => {
                 const errMsg = requestModel.verify(data);
@@ -74,10 +82,17 @@ function Socket(addr, service) {
 
             ws.on('close', (socket, code, reason) => {
                 Log.lvl1("Got close:", code, reason)
-                if (code === 4000) {
-                    reject(new Error(reason));
+                if (!retry) {
+                    Timer.clearInterval(timerId);
+                    if (code === 4000) {
+                        reject(new Error(reason));
+                    }
+                    resolve(protoMessage);
+                } else {
+                    Log.lvl1("Retrying");
+                    retry = false;
+                    ws.open();
                 }
-                resolve(protoMessage);
             });
 
             ws.on('error', (socket, error) => {

@@ -3,6 +3,7 @@ const ObservableModule = require("data/observable");
 const Kyber = require("@dedis/kyber-js");
 const CurveEd25519 = new Kyber.curve.edwards25519.Curve;
 
+const NetUtils = require("../../network/NetUtils");
 const Net = require("../../network/NSNet");
 const Roster = require("../../../../cothority/lib/identity").Roster;
 const ServerIdentity = require("../../../../cothority/lib/identity").ServerIdentity;

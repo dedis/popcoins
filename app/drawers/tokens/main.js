@@ -12,10 +12,8 @@ const QRGenerator = new ZXing();
 const lib = require("../../shared/lib");
 const dedjs = lib.dedjs;
 const ScanToReturn = lib.scan_to_return;
-const AttParty = dedjs.object.pop.att.AttParty.Party;
 const Convert = dedjs.Convert;
 const Log = dedjs.Log;
-const PoP = dedjs.object.pop.PoP.get;
 const Wallet = dedjs.object.pop.Wallet;
 const Net = dedjs.network.NSNet;
 const RequestPath = dedjs.network.RequestPath;
@@ -129,7 +127,8 @@ function partyTapped(args) {
 
     let actions = [WALLET_SHOW, WALLET_DELETE];
     if (party.state() == Wallet.STATE_TOKEN) {
-        actions.unshift(WALLET_TRANSFER, WALLET_SIGN)
+        actions.unshift(WALLET_TRANSFER)
+        // actions.unshift(WALLET_TRANSFER, WALLET_SIGN)
     }
     // return Frame.topmost().getViewById("listView").refresh()
     return Dialog.action({
@@ -167,6 +166,12 @@ function partyTapped(args) {
                     }
                 });
             case WALLET_SIGN:
+                return Dialog.alert({
+                        title: "Sorry",
+                        message: "This function is not available right now",
+                        okButtonText: "OK"
+                    }
+                )
                 return ScanToReturn.scan()
                     .then(signDataJson => {
                         const sigData = Convert.jsonToObject(signDataJson);
@@ -411,6 +416,6 @@ function fetchParties() {
         .then(reply => {
             console.dir("reply is:", reply);
             console.dir("party is:", party);
-            return new AttParty(Convert.byteArrayToHex(reply.instanceID), RequestPath.OMNILEDGER_INSTANCE_ID, party.address);
+            // return new AttParty(Convert.byteArrayToHex(reply.instanceID), RequestPath.OMNILEDGER_INSTANCE_ID, party.address);
         })
 }
