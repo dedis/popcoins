@@ -243,7 +243,7 @@ function finalize() {
                 moduleName: "drawers/pop/pop-page",
                 clearHistory: true
             };
-            topmost().navigate(navigationEntry);
+            return topmost().navigate(navigationEntry);
         })
         .catch(error => {
             Log.catch(error);

@@ -27,7 +27,6 @@ const viewModel = Observable.fromObject({
 });
 
 let page = undefined;
-let timerId = undefined;
 let pageObject = undefined;
 
 function convertBinaryStringToUint8Array(bStr) {
@@ -44,12 +43,13 @@ function onLoaded(args) {
 
     page.bindingContext = viewModel;
     pageObject = args.object.page;
+    viewModel.isLoading = true;
     return loadParties();
 }
 
 function onUnloaded(args) {
     // remove polling when page is leaved
-    Timer.clearInterval(timerId);
+    // Timer.clearInterval(timerId);
 }
 
 /**
@@ -105,10 +105,7 @@ function loadParties() {
             viewModel.isEmpty = viewModel.partyListDescriptions.length === 0;
             viewModel.isLoading = false;
 
-            // Poll the status every 5s
-            timerId = Timer.setInterval(() => {
-                reloadStatuses();
-            }, 5000)
+            return reloadStatuses();
         })
         .catch(err => {
             console.log("error while loading party: " + err);
@@ -318,6 +315,7 @@ function update() {
 }
 
 function reloadStatuses() {
+    viewModel.isLoading = true;
     Promise.all(viewModel.partyListDescriptions.map(model => {
         return model.party.update();
     }))
@@ -328,10 +326,18 @@ function reloadStatuses() {
                     model.status.balance = model.party.balance;
                 }
             });
+
+            // Poll the status every 5s
+            Timer.setTimeout(() => {
+                reloadStatuses();
+            }, 10000)
         })
         .catch(err => {
             console.log("reloadStat error:", err);
-        });
+        })
+        .then(()=>{
+            viewModel.isLoading = false;
+        })
 }
 
 function onDrawerButtonTap(args) {
