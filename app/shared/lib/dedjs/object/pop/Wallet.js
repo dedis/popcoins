@@ -780,13 +780,11 @@ class MigrateFrom {
                 return OmniledgerRPC.fromKnownConfiguration(cothoritySocketOl, Convert.hexToByteArray(omniledgerId));
             })
             .then(ol => {
-                Log.lvl2("got omniledger", ol);
                 return PopPartyInstance.fromInstanceId(ol, instanceIdBuffer)
             })
             .then(inst => {
                 // console.dir("got poppartyinstance", inst);
                 let config = Configuration.fromPopPartyInstance(inst);
-                Log.lvl2("Roster is:", config.roster);
                 let wallet = new Wallet(config);
                 if (inst.attendees !== undefined && inst.attendees.length > 0) {
                     let fs = new FinalStatement(config, inst.attendees, inst.signature);

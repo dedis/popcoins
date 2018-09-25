@@ -7,8 +7,8 @@ const viewModel = ObservableModule.fromObject({
   newMessage: ObservableModule.fromObject({
       subject: "",
       text: "",
-      balance: 10000,
-      reward: 1000,
+      balance: 100000,
+      reward: 20000,
   }),
   isLoading: false,
   isEmpty: true

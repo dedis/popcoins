@@ -25,10 +25,12 @@ let timerId = undefined;
 let conode = undefined;
 let party = undefined;
 let msgService = undefined;
+let pageObject = undefined;
 
 function onLoaded(args) {
     page = args.object;
     page.bindingContext = viewModel;
+    pageObject = page.page;
 
     let wallets = Object.values(Wallet.List);
     if (wallets.length > 0) {
@@ -40,11 +42,10 @@ function onLoaded(args) {
                 return party.getPartyInstance();
             })
             .then(pi => {
-                Log.print("creating new msgService:", pi)
                 msgService = new Messages(party, pi);
                 return msgService.loadMessages();
             })
-            .then(()=>{
+            .then(() => {
                 return updateMessages();
             });
     }
@@ -97,30 +98,46 @@ function messageTapped(args) {
 }
 
 function updateMessages() {
-    if (conode === undefined) {
-        return Dialog.alert({
-            title: "No token",
-            message: "Either there is no token or the party has not been finalized yet."
-        })
-    }
-    viewModel.isLoading = true;
-    return msgService.fetchListMessages(0, 10)
-        .then(response => {
-            viewModel.messageList.splice(0);
-            for (let i = 0; i < response.subjects.length; i++) {
-                viewModel.messageList.push(
-                    ObservableModule.fromObject({
-                        subject: response.subjects[i],
-                        balance: response.balances[i],
-                        reward: response.rewards[i],
-                        id: response.msgids[i],
-                    })
-                )
+    Log.print();
+    return Promise.resolve()
+        .then(() => {
+            if (conode === undefined) {
+                Log.print();
+                return Dialog.alert({
+                    title: "No token",
+                    message: "Either there is no token or the party has not been finalized yet.",
+                    okButtonText: "Continue"
+                })
             }
+            Log.print();
+            viewModel.isLoading = true;
+            pageObject.getViewById("listView").refresh();
+            return msgService.fetchListMessages(0, 10)
+                .then(response => {
+                    Log.print();
+                    viewModel.messageList.splice(0);
+                    for (let i = 0; i < response.subjects.length; i++) {
+                        Log.print();
+                        viewModel.messageList.push(
+                            ObservableModule.fromObject({
+                                subject: response.subjects[i],
+                                balance: response.balances[i],
+                                reward: response.rewards[i],
+                                id: response.msgids[i],
+                            })
+                        )
+                    }
+                })
+                .catch(error => {
+                    Log.print();
+                    Log.catch("error: " + error);
+                })
+        }).then(() => {
+            Log.print();
             viewModel.isLoading = false;
-        })
-        .catch(error => {
-            console.log("error: " + error);
+            Log.print();
+            pageObject.getViewById("listView").refresh();
+            Log.print();
         })
 }
 
@@ -128,16 +145,17 @@ function addMessage() {
     if (conode === undefined) {
         return Dialog.alert({
             title: "No token",
-            message: "Either there is no token or the party has not been finalized yet."
+            message: "Either there is no token or the party has not been finalized yet.",
+            okButtonText: "Continue"
         })
     }
-    let d = new Date();
-    return addNewMessage({
-        reward: 1000,
-        balance: 10000,
-        subject: "direct msg " + d.toString(),
-        text: "this is a long text",
-    });
+    // let d = new Date();
+    // return addNewMessage({
+    //     reward: 1000,
+    //     balance: 10000,
+    //     subject: "direct msg " + d.toString(),
+    //     text: "this is a long text",
+    // });
     return page.showModal("shared/pages/messages/newMessage", undefined, addNewMessage, true);
 }
 
@@ -175,6 +193,7 @@ function addNewMessage(arg) {
 
                     Log.lvl2("sending coins to message-account", msgService.serviceAccountId);
                     viewModel.isLoading = true;
+                    pageObject.getViewById("listView").refresh();
                     return party.transferCoin(arg.balance, msgService.serviceAccountId)
                         .then(() => {
                             Log.lvl2("Sending message");
@@ -195,6 +214,7 @@ function addNewMessage(arg) {
                         .catch(error => {
                             Log.catch(error, "while sending messages");
                             viewModel.isLoading = false;
+                            pageObject.getViewById("listView").refresh();
                             return Dialog.alert({
                                 title: "while sending",
                                 message: "couldn't send message: " + error

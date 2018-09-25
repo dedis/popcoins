@@ -494,7 +494,7 @@ module.exports = {
             balance: msg.balance,
             reward: msg.reward,
             id: Crypto.randomBytes(32),
-            partyIId: partyIId
+            partyiid: partyIId
         }
 
         return msgProto.create(fields);
