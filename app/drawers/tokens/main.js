@@ -150,7 +150,7 @@ function partyTapped(args) {
                             return party.remove()
                                 .then(() => {
                                     viewModel.partyListDescriptions.splice(index, 1);
-                                    pageObject.getViewById("listView").refresh();
+                                    return pageObject.getViewById("listView").refresh();
                                 })
                         }
                     })
@@ -221,11 +221,9 @@ function partyTapped(args) {
                 }).then(publicKeyJson => {
                     const publicKeyObject = Convert.jsonToObject(publicKeyJson);
                     viewModel.isLoading = true;
-                    return pageObject.getViewById("listView").refresh();
                     return party.transferCoin(amount, Convert.base64ToByteArray(publicKeyObject.public), true);
                 }).then(() => {
                     viewModel.isLoading = false;
-                    return pageObject.getViewById("listView").refresh();
                     return Dialog.alert({
                         title: "Success !",
                         message: "" + amount + " PoP-Coins have been transferred",
@@ -233,7 +231,6 @@ function partyTapped(args) {
                     });
                 }).catch(err => {
                     viewModel.isLoading = false;
-                    return pageObject.getViewById("listView").refresh();
                     if (err === USER_CANCELED) {
                         return Promise.resolve()
                     } else if (err === USER_WRONG_INPUT) {
@@ -330,9 +327,7 @@ function reloadStatuses() {
                 if (model.party.state() == Wallet.STATE_TOKEN) {
                     model.status.balance = model.party.balance;
                 }
-                model.slice();
             });
-            return pageObject.getViewById("listView").refresh();
         })
         .catch(err => {
             console.log("reloadStat error:", err);
