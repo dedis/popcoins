@@ -23,11 +23,11 @@ matrix:
     before_install: nvm install --lts=carbon
     script:
     - make
-	- tns prepare android --release
+    - tns prepare android --release
     - tns build android --env.aot --env.uglify --env.snapshot
     # Find the previous one, remove, post the new one.
     - last=`curl -f -s "https://dashboard.applivery.com/api/builds/app/5b4489e0b5676eb6414b0580" -H "Authorization:$APPLIVERY_API_KEY" | jq -r '.response[] | select(.versionName == "From Travis")| select(.so == "android") | ._id'`
-	- echo "The last Android build is: $last"
+    - echo "The last Android build is: $last"
     - curl -f "https://dashboard.applivery.com/api/builds/$last" -X DELETE -H "Authorization:$APPLIVERY_API_KEY" || true
     - curl -f "https://dashboard.applivery.com/api/builds" -X POST -H "Authorization:$APPLIVERY_API_KEY"
       -F app="5b4489e0b5676eb6414b0580" -F versionName="From Travis" -F os="android"
