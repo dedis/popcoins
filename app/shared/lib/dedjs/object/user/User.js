@@ -3,7 +3,6 @@ const ObservableModule = require("data/observable");
 const Kyber = require("@dedis/kyber-js");
 const CurveEd25519 = new Kyber.curve.edwards25519.Curve;
 
-const NetUtils = require("../../network/NetUtils");
 const Net = require("../../network/NSNet");
 const Roster = require("../../../../cothority/lib/identity").Roster;
 const ServerIdentity = require("../../../../cothority/lib/identity").ServerIdentity;
@@ -337,7 +336,7 @@ class User {
                 if (this.roster.identities === undefined || this.roster.identities.length == 0) {
                     Log.lvl1("Creating test identities");
                     return Promise.all(RequestPath.DEDIS_CONODES.map(address => {
-                        return NetUtils.getServerIdentiyFromAddress("tls://" + address)
+                        return Net.getServerIdentityFromAddress("tls://" + address)
                             .then(server => {
                                 this.addServer(server);
                             })

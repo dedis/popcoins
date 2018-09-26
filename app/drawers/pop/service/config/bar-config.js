@@ -11,7 +11,6 @@ const Bar = require("../../../../shared/lib/dedjs/object/beercoin/Bar").Bar;
 const BarFrequencies = require("../../../../shared/lib/dedjs/object/beercoin/Bar").Frequencies;
 const topmost = require("ui/frame").topmost;
 
-
 let pageObject = undefined;
 
 let finalStatementsMap = PoP.getFinalStatements().map((statement, index) => {

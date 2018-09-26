@@ -5,6 +5,14 @@ const shuffle = require("shuffle-array");
 const WS = require("nativescript-websockets");
 const Buffer = require("buffer/").Buffer;
 
+const Convert = require("../../../lib/dedjs/Convert");
+const RequestPath = require("../../../lib/dedjs/network/RequestPath");
+const DecodeType = require("../../../lib/dedjs/network/DecodeType");
+const Net = require("../../../lib/dedjs/network/NSNet");
+const StatusExtractor = require("../../../lib/dedjs/extractor/StatusExtractor");
+const CothorityMessages = require("../../../lib/dedjs/network/cothority-messages");
+const Helper = require("../../../lib/dedjs/Helper");
+
 const root = require("../../../cothority/lib/protobuf").root;
 const Log = require("../Log");
 
@@ -62,7 +70,7 @@ function Socket(addr, service) {
                 }
                 const message = requestModel.create(data);
                 const marshal = requestModel.encode(message).finish();
-                Log.print("sending message result:", ws.send(marshal.slice()));
+                ws.send(marshal.slice());
             });
 
             ws.on('message', (socket, message) => {
@@ -100,7 +108,6 @@ function Socket(addr, service) {
                 reject(error);
             });
 
-            Log.print("opening socket", ws.readyState);
             ws.open();
         });
     };
@@ -142,13 +149,13 @@ class RosterSocket {
                     console.log("RosterSocket: trying out " + addr + "/" + service);
                     const socketResponse = yield socket.send(request, response, data);
                     that.lastGoodServer = addr;
-                    return Promise.resolve(socketResponse);
+                    return socketResponse;
                 } catch (err) {
                     console.error("rostersocket: " + err);
                     continue;
                 }
             }
-            return Promise.reject(new Error("no conodes are available"));
+            throw new Error("no conodes are available");
         });
         return fn();
     }
@@ -234,10 +241,30 @@ function tlsToWebsocket(serverIdentity, path) {
     return BASE_URL_WS + ip + URL_PORT_SPLITTER + port + path;
 }
 
+function getServerIdentityFromAddress(address) {
+    if (!Helper.isValidAddress(address)) {
+        return Promise.reject("Invalid address.")
+    }
+
+    const statusRequestMessage = CothorityMessages.createStatusRequest();
+    const cothoritySocket = new Socket(Convert.tlsToWebsocket(address, ""), RequestPath.STATUS);
+
+    return cothoritySocket.send(RequestPath.STATUS_REQUEST, DecodeType.STATUS_RESPONSE, statusRequestMessage)
+        .then(statusResponse => {
+            const hexKey = StatusExtractor.getPublicKey(statusResponse);
+            const description = StatusExtractor.getDescription(statusResponse);
+            const id = StatusExtractor.getID(statusResponse);
+            const server = Convert.toServerIdentity(address, Convert.hexToByteArray(hexKey), description, Convert.hexToByteArray(id));
+
+            return server;
+        })
+
+}
 
 module.exports = {
     Socket,
     RosterSocket,
     LeaderSocket,
-    tlsToWebsocket
+    tlsToWebsocket,
+    getServerIdentityFromAddress
 };

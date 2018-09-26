@@ -1,3 +1,8 @@
+const Kyber = require("@dedis/kyber-js");
+const CurveEd25519 = new Kyber.curve.edwards25519.Curve;
+
+const RingSig = require("../../RingSig");
+
 /**
  * Stores a final statement together with a keypair to disk.
  *
@@ -16,13 +21,37 @@ class Token {
     }
 
     /**
-     * Signs a message in a given context using linkable ring signatures.
-     * @param message an arbitrary buffer of data
-     * @param context a context within which an attendee will be recognized
-     * @returns {Uint8ArrayConstructor} the signature
+     * Sign a message using (un)linkable ring signature
+     *
+     * @param PopToken Instance - the  pop token used to sign the message
+     * @param {Uint8Array} message -  the message to be signed
+     * @param {Uint8Array} [scope] - has to be given if linkable ring signature is used
+     * @return {Uint8Array} - the signature
      */
-    sign(message, context) {
-        return Uint8Array;
+    sign(message, scope) {
+        let attendees = this._finalStatement.attendees;
+        let anonimitySet = new Set();
+        let minePublic = CurveEd25519.point();
+        minePublic.unmarshalBinary(this._keypair.public);
+        let minePrivate = CurveEd25519.scalar();
+        minePrivate.unmarshalBinary(this._keypair.private);
+        let mine = -1;
+        for (let i = 0; i < attendees.length; i++) {
+            let attendee = attendees[i];
+
+            let point = CurveEd25519.point();
+            point.unmarshalBinary(attendee);
+            anonimitySet.add(point);
+            if (point.equal(minePublic)) {
+                mine = i;
+            }
+        }
+
+        if (mine < 0) {
+            throw "Pop Token is invalid"
+        }
+
+        return RingSig.Sign(CurveEd25519, message, [...anonimitySet], scope, mine, minePrivate)
     }
 
     /**

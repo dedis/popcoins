@@ -358,7 +358,7 @@ function parseJsonRoster(jsonString) {
     let tob = hexToByteArray;
     if (roster.identities !== undefined && Array.isArray(roster.identities)) {
         ids = roster.identities;
-    } else if (roster.list !== undefined && Array.isArray(roster.list)){
+    } else if (roster.list !== undefined && Array.isArray(roster.list)) {
         // This comes in from the conodes - and it'll be in base64.
         tob = base64ToByteArray;
         ids = roster.list;
@@ -387,7 +387,7 @@ function parseJsonRoster(jsonString) {
     return new Roster(CurveEd25519, identities, rosterId);
 }
 
-function parseJsonServerIdentity(jsonString){
+function parseJsonServerIdentity(jsonString) {
     const si = jsonToObject(jsonString);
 
     let point = CurveEd25519.point();
@@ -534,30 +534,29 @@ function publicKeyToUuid(publicKey) {
 module.exports = {
     rosterToJson,
     serverIdentityToJson,
-    parseJsonServerIdentity
+    parseJsonServerIdentity,
+    byteArrayToHex,
+    hexToByteArray,
+    byteArrayToBase64,
+    base64ToByteArray,
+    hexToBase64,
+    base64ToHex,
+    objectToJson,
+    jsonToObject,
+    objectToToml,
+    tomlToObject,
+    jsonToToml,
+    tomlToJson,
+    tlsToWebsocket,
+    parseJsonFinalStatementsArray,
+    parseJsonFinalStatement,
+    parseJsonPopDesc,
+    parseJsonPopDescHash,
+    parseJsonUserName,
+    parseJsonRoster,
+    parseTomlRoster,
+    parseJsonServerIdentity,
+    parseJsonArrayOfKeys,
+    toServerIdentity,
+    publicKeyToUuid
 }
-
-module.exports.byteArrayToHex = byteArrayToHex;
-module.exports.hexToByteArray = hexToByteArray;
-module.exports.byteArrayToBase64 = byteArrayToBase64;
-module.exports.base64ToByteArray = base64ToByteArray;
-module.exports.hexToBase64 = hexToBase64;
-module.exports.base64ToHex = base64ToHex;
-module.exports.objectToJson = objectToJson;
-module.exports.jsonToObject = jsonToObject;
-module.exports.objectToToml = objectToToml;
-module.exports.tomlToObject = tomlToObject;
-module.exports.jsonToToml = jsonToToml;
-module.exports.tomlToJson = tomlToJson;
-module.exports.tlsToWebsocket = tlsToWebsocket;
-module.exports.parseJsonFinalStatementsArray = parseJsonFinalStatementsArray;
-module.exports.parseJsonFinalStatement = parseJsonFinalStatement;
-module.exports.parseJsonPopDesc = parseJsonPopDesc;
-module.exports.parseJsonPopDescHash = parseJsonPopDescHash;
-module.exports.parseJsonUserName = parseJsonUserName;
-module.exports.parseJsonRoster = parseJsonRoster;
-module.exports.parseTomlRoster = parseTomlRoster;
-module.exports.parseJsonServerIdentity = parseJsonServerIdentity;
-module.exports.parseJsonArrayOfKeys = parseJsonArrayOfKeys;
-module.exports.toServerIdentity = toServerIdentity;
-module.exports.publicKeyToUuid = publicKeyToUuid;

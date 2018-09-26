@@ -1,6 +1,6 @@
 const Dialog = require("ui/dialogs");
 const Helper = require("../../lib/dedjs/Helper");
-const NetUtils = require("../../lib/dedjs/network/NetUtils");
+const Net = require("../../lib/dedjs/network/NSNet");
 const ObservableModule = require("data/observable");
 
 let textFieldAddress = undefined;
@@ -53,7 +53,7 @@ function addManual() {
 
       viewModel.isLoading = true;
 
-      return NetUtils.getServerIdentiyFromAddress(finalAddress)
+      return Net.getServerIdentityFromAddress(finalAddress)
         .then(server => {
           viewModel.isLoading = false;
           closeCallBackFunction(server);
