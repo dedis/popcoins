@@ -11,7 +11,7 @@ start-dev: clean apply-patches
 	@echo "for tests:"
 	@echo "use \"tns test ios\" or \"tns test android\""
 
-clean-install: clean apply-patches
+clean-install: clean
 
 # This is where we apply patches needed to the modules that we depend on.
 apply-patches: init-npm
@@ -22,11 +22,11 @@ init-npm:
 	$(npm) install
 
 link: start-dev
-	cd dedis/cothority; \
-	npm i; \
-	npm link; \
-	npm run-script build || echo Error is normal here...
-	pwd
+#	cd dedis/cothority; \
+#	npm i; \
+#	npm link; \
+#	npm run-script build || echo Error is normal here...
+#	pwd
 	npm link @dedis/cothority
 
 clean:

@@ -1,20 +1,12 @@
-"use strict";
-
+const Timer = require("tns-core-modules/timer");
 const protobuf = require("protobufjs");
 const co = require("co");
 const shuffle = require("shuffle-array");
 const WS = require("nativescript-websockets");
 const Buffer = require("buffer/").Buffer;
-const root = require("@dedis/cothority/protobuf").root;
 
-function listObject(data) {
-    // allows us to console.log circular objects, but prints only current level depth
-    for (var key in data) {
-        if (data.hasOwnProperty(key)) {
-            console.log(key + " -> " + data[key]);
-        }
-    }
-}
+const root = require("../../../cothority/lib/protobuf").root;
+const Log = require("../Log");
 
 /**
  * Socket is a WebSocket object instance through which protobuf messages are
@@ -41,8 +33,10 @@ function Socket(addr, service) {
     this.send = (request, response, data) => {
         return new Promise((resolve, reject) => {
             const path = this.url + "/" + request.replace(/.*\./, '');
-            console.log("net.Socket: new WebSocket(" + path + ")");
-            const ws = new WS(path);
+            Log.lvl1("net.Socket: new WebSocketA(" + path + ")");
+            const ws = new WS(path, {timeout: 6000});
+            let protoMessage = undefined;
+            let retry = false;
 
             const requestModel = this.protobuf.lookup(request);
             if (requestModel === undefined) {
@@ -55,30 +49,28 @@ function Socket(addr, service) {
                 reject(new Error("Model " + response + " not found"));
             }
 
+            let timerId = Timer.setTimeout(()=>{
+                retry = true;
+                ws.close();
+            }, 5000);
+
             ws.on('open', () => {
-                console.log("opened")
                 const errMsg = requestModel.verify(data);
                 if (errMsg) {
+                    console.log("couldn't verify data:", errMsg);
                     reject(new Error(errMsg));
                 }
-                console.log("creating message")
                 const message = requestModel.create(data);
-                console.log("encoding message")
                 const marshal = requestModel.encode(message).finish();
-                console.log("sending message")
-                ws.send(marshal);
+                Log.print("sending message result:", ws.send(marshal.slice()));
             });
 
             ws.on('message', (socket, message) => {
-                console.log("event 2 is:");
-                listObject(socket);
-                listObject(message);
-                // const data = event.data;
+                Log.lvl2("Getting message:", message);
                 let buffer = new Uint8Array(message);
                 try {
-                    const unmarshal = responseModel.decode(buffer);
+                    protoMessage = responseModel.decode(buffer);
                     ws.close();
-                    resolve(unmarshal);
                 } catch (err) {
                     console.log("got message with length", buffer.length);
                     console.dir("unmarshalling into", responseModel);
@@ -89,15 +81,27 @@ function Socket(addr, service) {
             });
 
             ws.on('close', (socket, code, reason) => {
-                console.log("closing:", code, reason);
-                if (code != 4000) {
-                    reject(new Error(event.reason));
+                Log.lvl1("Got close:", code, reason)
+                if (!retry) {
+                    Timer.clearInterval(timerId);
+                    if (code === 4000) {
+                        reject(new Error(reason));
+                    }
+                    resolve(protoMessage);
+                } else {
+                    Log.lvl1("Retrying");
+                    retry = false;
+                    ws.open();
                 }
             });
 
             ws.on('error', (socket, error) => {
+                Log.error("got error:", error);
                 reject(error);
             });
+
+            Log.print("opening socket", ws.readyState);
+            ws.open();
         });
     };
 }
@@ -109,7 +113,7 @@ function Socket(addr, service) {
  * */
 class RosterSocket {
     constructor(roster, service) {
-        this.addresses = roster.identities.map(id => id.websocketAddr);
+        this.addresses = roster.identities.map(conode => tlsToWebsocket(conode.tcpAddr, ""));
         this.service = service;
         this.lastGoodServer = null;
     }
@@ -127,7 +131,7 @@ class RosterSocket {
         const fn = co.wrap(function* () {
             const addresses = that.addresses;
             const service = that.service;
-            shuffle(addresses);
+            // shuffle(addresses);
             // try first the last good server we know
             if (that.lastGoodServer) addresses.unshift(that.lastGoodServer);
 
@@ -201,8 +205,39 @@ class LeaderSocket {
     }
 }
 
+/**
+ * Converts a TLS URL to a Wesocket URL and builds a complete URL with the path given as parameter.
+ * @param {ServerIdentity|string} serverIdentity - the server identity to take the url from
+ * @param {string} path - the path after the base url
+ * @returns {string} - the builded websocket url
+ */
+function tlsToWebsocket(serverIdentity, path) {
+    const URL_PORT_SPLITTER = ":";
+    const BASE_URL_WS = "ws://";
+    const BASE_URL_TLS = "tls://";
+
+    let address = "";
+    if (typeof serverIdentity === "string") {
+        address = serverIdentity;
+    } else if (serverIdentity.constructor.name === "ServerIdentity") {
+        address = serverIdentity.address
+    } else {
+        throw new Error("serverIdentity must be of type ServerIdentity or string");
+    }
+    if (typeof path !== "string") {
+        throw new Error("path must be of type string");
+    }
+
+    let [ip, port] = address.replace(BASE_URL_TLS, "").split(URL_PORT_SPLITTER);
+    port = parseInt(port) + 1;
+
+    return BASE_URL_WS + ip + URL_PORT_SPLITTER + port + path;
+}
+
+
 module.exports = {
     Socket,
     RosterSocket,
-    LeaderSocket
+    LeaderSocket,
+    tlsToWebsocket
 };

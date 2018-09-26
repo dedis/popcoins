@@ -1,13 +1,19 @@
 const Dialog = require("ui/dialogs");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const topmost = require("ui/frame").topmost;
-const Net = require("@dedis/cothority").net;
-const Convert = require("../../../../shared/lib/dedjs/Convert");
-const DecodeType = require("../../../../shared/lib/dedjs/network/DecodeType");
-const RequestPath = require("../../../../shared/lib/dedjs/network/RequestPath");
-const OrgParty = require("../../../../shared/lib/dedjs/object/pop/org/OrgParty").Party;
 
-let conodeAddress = undefined;
+const lib = require("../../../../shared/lib");
+const dedjs = lib.dedjs;
+const Net = dedjs.network.NSNet;
+const Convert = dedjs.Convert;
+const User = dedjs.object.user.get;
+const Log = dedjs.Log;
+const Configuration = dedjs.object.pop.Configuration;
+const Wallet = dedjs.object.pop.Wallet;
+const DecodeType = dedjs.network.DecodeType;
+const RequestPath = dedjs.network.RequestPath;
+
+let conode = undefined;
 
 let viewModel = {
     proposals: new ObservableArray()
@@ -23,67 +29,57 @@ function onLoaded(args) {
         throw new Error("Conode address should be given in the context");
     }
 
-    conodeAddress = context.conode;
-
-    retrieveProposals();
-
+    conode = context.conode;
+    return retrieveProposals();
 }
 
 function retrieveProposals() {
     viewModel.proposals.splice(0);
-    const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(conodeAddress, ""), RequestPath.POP);
+    const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(conode, ""), RequestPath.POP);
 
     return cothoritySocket.send(RequestPath.POP_GET_PROPOSALS, DecodeType.GET_PROPOSALS_REPLY, {})
         .then(response => {
-            viewModel.proposals.push(response.proposals);
-            return Promise.resolve();
+            response.proposals.forEach(prop => {
+                viewModel.proposals.push(prop);
+            });
         })
         .catch(error => {
-            console.log(error);
-            console.dir(error);
-            console.trace();
-
-            Dialog.alert({
+            Log.catch(error);
+            return Dialog.alert({
                 title: "Error",
                 message: "An error occured, please try again. - " + error,
                 okButtonText: "Ok"
             });
-
-
-            return Promise.reject(error);
         });
 }
-
-hashAndSave = require("../org-party-list").hashAndSave;
-// const addMyselfAttendee = require("../register/register-page").addMyselfAttendee;
 
 function proposalTapped(args) {
     const index = args.index;
 
     // create the party
-    let party = new OrgParty();
-    let promises = [
-        party.setPopDesc(viewModel.proposals.getItem(index), true),
-        party.setLinkedConode(conodeAddress, true)
-    ];
-    Promise.all(promises)
-        .then(() => {
-            hashAndSave(party);
-            // Probably not needed as it is done somewhere else already...
-            // addMyselfAttendee(party);
-            goBack();
-            return Promise.resolve();
+    let p = viewModel.proposals.getItem(index);
+    p.roster.identities = p.roster.list;
+    console.log(new Error().stack);
+    let roster = Convert.parseJsonRoster(JSON.stringify(p.roster));
+    let config = new Configuration(p.name, p.datetime, p.location, roster);
+    let wallet = new Wallet(config);
+    wallet.linkedConode = conode;
+    wallet.addToList();
+    return wallet.publish(User.getKeyPair().private)
+        .then(()=> {
+            return wallet.storeAttendees();
         })
-        .catch(error => {
-            Dialog.alert({
+        .then(()=>{
+            return goBack();
+        })
+        .catch(err=>{
+            Log.catch(err);
+            return Dialog.alert({
                 title: "Error",
                 message: "An error occured, please try again. - " + error,
                 okButtonText: "Ok"
             });
-
-            return Promise.reject(error);
-        });
-
+        })
 }
 
 function goBack() {

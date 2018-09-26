@@ -18,14 +18,8 @@ const ORG = `${POP}.org`;
 const ATT = `${POP}.att`;
 const POPMSG = `${POP}.msg`;
 
-/**
- * Cisc
- */
-const CISC = `${APP}.cisc`;
-
 module.exports.USER = USER;
 module.exports.POP = POP;
 module.exports.ORG = ORG;
 module.exports.ATT = ATT;
-module.exports.CISC = CISC;
 module.exports.POPMSG = POPMSG;

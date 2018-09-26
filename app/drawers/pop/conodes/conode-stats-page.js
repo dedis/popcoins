@@ -14,7 +14,7 @@ function onLoaded(args) {
     const page = args.object;
     pageObject = page.page;
     conode = page.bindingContext.conode;
-    conodeStatus = page.bindingContext.conodeStatus;
+    conodeStatus = page.bindingContext;
     page.bindingContext = conodeStatsViewModel;
 
     myStatsList.empty();
@@ -40,14 +40,10 @@ function goBack() {
 }
 
 function deleteConode() {
-    return User.substractRoster(CothorityMessages.createRoster(undefined, [conode], conode.public))
-        .then(() => {
-            topmost().goBack();
+    return User.removeConode(conode)
+        .then(()=>{
+            return topmost().goBack();
         })
-        .catch(error => {
-            console.dir("couldn't remove conode:", error);
-            return Promise.reject(error);
-        });
 }
 
 module.exports.onLoaded = onLoaded;

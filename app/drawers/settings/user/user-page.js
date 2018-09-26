@@ -7,9 +7,9 @@ const ObservableModule = require("data/observable");
 //const viewModel = User.getKeyPairModule();
 
 const viewModel = ObservableModule.fromObject({
-  privateKey: Convert.byteArrayToHex(User.getKeyPairModule().private),
-  publicKey: Convert.byteArrayToHex(User.getKeyPairModule().public),
-  nameModule: User.getName()
+    privateKey: Convert.byteArrayToHex(User.getKeyPairModule().private),
+    publicKey: Convert.byteArrayToHex(User.getKeyPairModule().public),
+    nameModule: User.getName()
 });
 
 let textFieldPublic = undefined;
@@ -19,15 +19,15 @@ let textFieldUserName = undefined;
 let pageObject = undefined;
 
 function onLoaded(args) {
-  const page = args.object;
-  pageObject = page.parent.page;
+    const page = args.object;
+    pageObject = page.parent.page;
 
-  loadViews(page);
-  if (textFieldPublic === undefined || textFieldPrivate === undefined) {
-    throw new Error("one of the fields is undefined, but it shouldn't");
-  }
+    loadViews(page);
+    if (textFieldPublic === undefined || textFieldPrivate === undefined) {
+        throw new Error("one of the fields is undefined, but it shouldn't");
+    }
 
-  page.bindingContext = viewModel;
+    page.bindingContext = viewModel;
 }
 
 /**
@@ -35,9 +35,9 @@ function onLoaded(args) {
  * @param page - the current page object
  */
 function loadViews(page) {
-  textFieldPublic = page.getViewById("text-field-public");
-  textFieldPrivate = page.getViewById("text-field-private");
-  textFieldUserName = page.getViewById("text-field-username");
+    textFieldPublic = page.getViewById("text-field-public");
+    textFieldPrivate = page.getViewById("text-field-private");
+    textFieldUserName = page.getViewById("text-field-username");
 }
 
 /**
@@ -45,50 +45,20 @@ function loadViews(page) {
  * @returns {Promise.<any>}
  */
 function generateKeyPair() {
-  function setNewKeyPair() {
-    return User.randomizeKeyPair()
-      .then(() => {
-        return Dialog.alert({
-          title: "New Key Pair",
-          message: "The new key pair has been stored in your settings." +
-            "\n\nPublic:\n" + Convert.byteArrayToHex(User.getKeyPair().public) +
-            "\n\nPrivate:\n" + Convert.byteArrayToHex(User.getKeyPair().private),
-          okButtonText: "Ok"
-        });
-      })
-      .catch(error => {
-        console.log(error);
-        console.dir(error);
-        console.trace();
-
-        return Dialog.alert({
-          title: "Key Pair Generation Error",
-          message: "An unexpected error occurred. Please try again. - " + error,
-          okButtonText: "Ok"
-        });
-
-        return Promise.reject(error);
-      });
-  }
-
-  if (!User.isKeyPairSet()) {
-    return setNewKeyPair();
-  } else {
     return Dialog.confirm({
-      title: "Old Key Pair Overwriting",
-      message: "There is already a key pair stored in your settings. Do you" +
-        " want to overwrite it and generate a new key pair?",
-      okButtonText: "Yes",
-      cancelButtonText: "Cancel"
+        title: "Old Key Pair Overwriting",
+        message: "There is already a key pair stored in your settings. Do you" +
+            " want to overwrite it and generate a new key pair?",
+        okButtonText: "Yes",
+        cancelButtonText: "Cancel"
     })
-      .then(result => {
-        if (result) {
-          return setNewKeyPair();
-        }
+        .then(result => {
+            if (result) {
+                return setNewKeyPair();
+            }
 
-        return Promise.resolve();
-      });
-  }
+            return Promise.resolve();
+        });
 }
 
 /**
@@ -96,99 +66,92 @@ function generateKeyPair() {
  * @returns {Promise.<any>}
  */
 function displayQrOfPublicKey() {
-  if (User.isKeyPairSet()) {
     const keyPair = User.getKeyPair();
     delete keyPair.private;
 
     pageObject.showModal("shared/pages/qr-code/qr-code-page", {
-      textToShow: Convert.objectToJson(keyPair),
-      title: "Public Key"
-    }, () => { }, true);
-  } else {
-    return Dialog.alert({
-      title: "Please Generate a Key Pair",
-      message: "You have to generate a key pair first.",
-      okButtonText: "Ok"
-    });
-  }
+        textToShow: Convert.objectToJson(keyPair),
+        title: "Public Key"
+    }, () => {
+    }, true);
 }
 
 function changeUserName() {
-  const oldUsername = User.getName();
-  const username = textFieldUserName.text;
-  console.log(oldUsername);
-  console.log(username);
-  if((oldUsername !== username)) {
-    return Dialog.confirm({
-      title: "Alert",
-      message: "You are about to change your username from " + oldUsername + " to " + username + " please confirm",
-      okButtonText: "Change name",
-      cancelButtonText: "Cancel"
-    })
-    .then(result => {
-      if (result) {
-        return User.setName(username, true)
-        .then(() => {
-          return Dialog.alert({
-                title: "Information",
-                message: "Name has been changed to " + User.getName(),
-                okButtonText: "Ok"
-              });
-        });
-      }
+    const oldUsername = User.getName();
+    const username = textFieldUserName.text;
+    console.log(oldUsername);
+    console.log(username);
+    if ((oldUsername !== username)) {
+        return Dialog.confirm({
+            title: "Alert",
+            message: "You are about to change your username from " + oldUsername + " to " + username + " please confirm",
+            okButtonText: "Change name",
+            cancelButtonText: "Cancel"
+        })
+            .then(result => {
+                if (result) {
+                    return User.setName(username, true)
+                        .then(() => {
+                            return Dialog.alert({
+                                title: "Information",
+                                message: "Name has been changed to " + User.getName(),
+                                okButtonText: "Ok"
+                            });
+                        });
+                }
 
-      return Promise.resolve();
-    })
-    .catch(error => {
-      console.log(error);
-        console.dir(error);
-        console.trace();
+                return Promise.resolve();
+            })
+            .catch(error => {
+                console.log(error);
+                console.dir(error);
+                console.trace();
 
-        return Dialog.alert({
-          title: "Error",
-          message: "An unexpected error occurred. Please try again. - " + error,
-          okButtonText: "Ok"
-        });
+                return Dialog.alert({
+                    title: "Error",
+                    message: "An unexpected error occurred. Please try again. - " + error,
+                    okButtonText: "Ok"
+                });
 
-        return Promise.reject(error);
-    })
-  }
+                return Promise.reject(error);
+            })
+    }
 }
 
 function resetUser() {
-  return Dialog.confirm({
-    title: "ALERT",
-    message: "You are about to completely reset the user, this action can NOT be undone! Please confirm.",
-    okButtonText: "Reset",
-    cancelButtonText: "Cancel"
-  })
-    .then(result => {
-      if (result) {
-        return User.reset()
-          .then(() => {
-            return Dialog.alert({
-              title: "User Has Been Reset",
-              message: "Everything belonging to the user has been completely reset.",
-              okButtonText: "Ok"
-            });
-          });
-      }
-
-      return Promise.resolve();
+    return Dialog.confirm({
+        title: "ALERT",
+        message: "You are about to completely reset the user, this action can NOT be undone! Please confirm.",
+        okButtonText: "Reset",
+        cancelButtonText: "Cancel"
     })
-    .catch(error => {
-      console.log(error);
-      console.dir(error);
-      console.trace();
+        .then(result => {
+            if (result) {
+                return User.reset()
+                    .then(() => {
+                        return Dialog.alert({
+                            title: "User Has Been Reset",
+                            message: "Everything belonging to the user has been completely reset.",
+                            okButtonText: "Ok"
+                        });
+                    });
+            }
 
-      return Dialog.alert({
-        title: "Error",
-        message: "An unexpected error occurred. Please try again. - " + error,
-        okButtonText: "Ok"
-      });
+            return Promise.resolve();
+        })
+        .catch(error => {
+            console.log(error);
+            console.dir(error);
+            console.trace();
 
-      return Promise.reject(error);
-    });
+            return Dialog.alert({
+                title: "Error",
+                message: "An unexpected error occurred. Please try again. - " + error,
+                okButtonText: "Ok"
+            });
+
+            return Promise.reject(error);
+        });
 }
 
 module.exports.onLoaded = onLoaded;
