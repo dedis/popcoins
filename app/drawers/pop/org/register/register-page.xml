@@ -20,12 +20,17 @@
                     text="Delete" android.position="actionBar"/>
     </ActionBar>
 
-    <GridLayout class="page-content" rows="auto,*,auto" columns="*">
+    <GridLayout class="page-content" rows="auto,*,auto" columns="auto,*">
+        <Label text="{{ size }}" fontSize="18" textAlignment="right" row="0" col="0"
+               style="margin: 10em"/>
+        <Label text="{{ hash }}" fontSize="18" textAlignment="right" row="0" col="1"
+               style="margin: 10em"/>
 
         <nsListView:RadListView items="{{ array }}" id="list-view-registered-keys"
                                 itemSwipeProgressStarted="onSwipeCellStarted"
                                 swipeActions="true"
                                 row="1"
+                                colSpan="2"
                                 itemTap="keyTapped">
 
             <nsListView:RadListView.itemSwipeTemplate>
@@ -40,13 +45,13 @@
 
             <nsListView:RadListView.itemTemplate>
                 <GridLayout class="basic-list" rows="*,*" columns="*">
-                    <Label text="{{ toHex($value) }}" fontSize="18" textAlignment="center" textWrap="true"/>
+                    <Label text="{{ $value }}" fontSize="18" textAlignment="center" textWrap="true"/>
                 </GridLayout>
             </nsListView:RadListView.itemTemplate>
 
         </nsListView:RadListView>
 
-        <Label id="finalize" text="FINALIZE" tap="registerKeys" row="2" col="1"  />
+        <Label id="finalize" text="FINALIZE" tap="finalize" row="2" colSpan="2"/>
     </GridLayout>
 
 </Page>

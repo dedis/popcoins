@@ -7,8 +7,7 @@ const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
 
 const FileIO = require("../../../shared/lib/file-io/file-io");
-const FilePaths = require("../../../shared/res/files/files-path");
-const PoP = require("../../../shared/lib/dedjs/object/pop/PoP").get;
+const FilePaths = require("../../../shared/lib/file-io/files-path");
 const Bar = require("../../../shared/lib/dedjs/object/beercoin/Bar").Bar;
 
 const viewModel = ObservableModule.fromObject({
@@ -175,16 +174,15 @@ function deleteBar(args) {
 }
 
 function addBar() {
-    if (PoP.getFinalStatements().length === 0) {
-        return Dialog.alert({
-            title: "No group available",
-            message: "You didn't participate to any party. Please do so to have a group to which you can get items !",
-            okButtonText: "Ok"
-        });
-
-    }
-    Frame.topmost().navigate({
-        moduleName: "drawers/pop/service/config/bar-config",
+    return Dialog.alert({
+        title: "Sorry",
+        message: "This version killed the bar, sorry",
+        okButtonText: "Ok"
+    });
+    return Dialog.alert({
+        title: "No group available",
+        message: "You didn't participate to any party. Please do so to have a group to which you can get items !",
+        okButtonText: "Ok"
     });
 }
 

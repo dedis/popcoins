@@ -1,17 +1,22 @@
 const Dialog = require("ui/dialogs");
 const Frame = require("ui/frame");
-const RequestPath = require("../../../../shared/lib/dedjs/network/RequestPath");
-const Helper = require("../../../../shared/lib/dedjs/Helper");
-const Convert = require("../../../../shared/lib/dedjs/Convert");
-const ObjectType = require("../../../../shared/lib/dedjs/ObjectType");
-const ScanToReturn = require("../../../../shared/lib/scan-to-return/scan-to-return");
+const topmost = Frame.topmost;
 const Observable = require("tns-core-modules/data/observable");
-const User = require("../../../../shared/lib/dedjs/object/user/User").get;
-const topmost = require("ui/frame").topmost;
-const PartyClass = require("../../../../shared/lib/dedjs/object/pop/Party");
-let Party = undefined;
-let newParty = undefined;
+const ObservableArray = require("data/observable-array").ObservableArray;
 
+const lib = require("../../../../shared/lib");
+const dedjs = lib.dedjs;
+const Wallet = dedjs.object.pop.Wallet;
+const User = dedjs.object.user.get;
+const Log = dedjs.Log;
+const Convert = dedjs.Convert;
+const Helper = dedjs.Helper;
+const ObjectType = dedjs.ObjectType;
+const ScanToReturn = lib.scan_to_return;
+
+
+let WalEdit = undefined;
+let newConfig = undefined;
 let pageObject = undefined;
 
 let dataForm = Observable.fromObject({
@@ -23,11 +28,13 @@ let dataForm = Observable.fromObject({
 
 let viewModel = Observable.fromObject({
     dataForm: dataForm,
+    rosterList: new ObservableArray(),
     readOnly: true
 });
 
 function onNavigatingTo(args) {
     console.log("config-page");
+
     if (args.isBackNavigation) {
         return;
     }
@@ -35,78 +42,81 @@ function onNavigatingTo(args) {
     const page = args.object;
     const context = page.navigationContext;
 
-    if (context.party === undefined) {
-        throw new Error("Party should be given in the context");
+    if (context.wallet === undefined || !WalEdit instanceof Wallet) {
+        throw new Error("WalEdit should be given as a Wallet in the context");
     }
+    WalEdit = context.wallet;
+    newConfig = context.newConfig;
 
-    Party = context.party;
-    if (!Party instanceof PartyClass) {
-        throw new Error("Party should be an instance of a Party");
-    }
-
-    newParty = context.newParty;
-
-    console.log("config-page 2");
-    initDate();
-
-    console.log("config-page 2.5");
-
-    viewModel.descModule = Party.getPopDescModule();
-    viewModel.dataForm = dataForm;
     viewModel.readOnly = context.readOnly === true;
+    console.log("readOnly is:", viewModel.readOnly);
+
+    copyWalletToViewModel();
+
     pageObject = page.page;
     page.bindingContext = viewModel;
 
-    console.log("config-page 3");
-
-    if (newParty && context.leader === undefined) {
+    if (newConfig && context.leader === undefined) {
         throw new Error("Leader conode should be given in the context");
-    } else if (newParty) {
-        // SIMULATING
-        console.log("newParty");
-        User.getRoster().list.map(server => {
-            Party.addPopDescConode(server)
-                .catch(error => {
-                    console.log(error);
-                    console.dir(error);
-                    console.trace();
-
-                    Dialog.alert({
-                        title: "Error",
-                        message: "An error occured, please try again. - " + error,
-                        okButtonText: "Ok"
-                    });
-                });
-        })
     }
+    return pageObject.getViewById("list-view-conodes").refresh();
 }
 
-function initDate() {
-    const desc = Party.getPopDesc();
-    let todayDate = desc.datetime === "";
+function addConode() {
+    let actions = ["Scan QR", "Enter manually", "Chose from list"];
+    let cancel = "Cancel";
+    return Dialog.action({
+        message: "How would you like to add the new organizer ?",
+        cancelButtonText: cancel,
+        actions: actions
+    }).then(result => {
+        console.log("Dialog result: " + result);
+        switch (result) {
+            case cancel:
+                return;
+            case actions[0]:
+                return addScan();
+            default:
+                return addManual(result === actions[1]);
+        }
+    });
+}
 
-    let date = new Date(todayDate ? Date.now() : Date.parse(desc.datetime));
+function conodeTapped(args) {
+    console.log("conode tapped:", args)
+    const index = args.index;
+    const remove = "Remove this conode";
+    return Dialog.action({
+        message: "What do you want to do ?",
+        cancelButtonText: "Cancel",
+        actions: [remove]
+    }).then(result => {
+        if (result === remove) {
+            if (index === 0) {
+                return Dialog.alert({
+                    title: "Error",
+                    message: "You cannot remove the leader conode",
+                    okButtonText: "Ok"
+                });
+            }
+            console.log("removing conode: " + index);
+            delete WalEdit.config.roster.list[index];
+        }
+    }).catch((error) => {
+        Dialog.alert({
+            title: "Error",
+            message: "An error occured, please try again. - " + error,
+            okButtonText: "Ok"
+        });
+    });
 
-    dataForm.set("date", date.getFullYear() + "-" + ( date.getMonth() + 1 ) + "-" + date.getDate());
-    dataForm.set("time", date.getHours() + ":" + date.getMinutes());
-
-    // SIMULATING
-    console.log("id");
-    if (RequestPath.PREFILL_PARTY) {
-        console.log("id2");
-        dataForm.set("name", "test " + date.getHours() + date.getMinutes());
-        dataForm.set("location", "testing-land");
-    } else {
-        dataForm.set("name", "");
-        dataForm.set("location", "");
-    }
 }
 
 /**
  * Changes the frame to be able to add a conode manually.
  */
-function addManual() {
-    function addManualCallBack(server) {
+function addManual(manually) {
+    function enterNewConode(server) {
         if (server !== undefined && !Helper.isOfType(server, ObjectType.SERVER_IDENTITY)) {
             throw new Error("server must be an instance of ServerIdentity or undefined to be skipped");
         }
@@ -129,21 +139,14 @@ function addManual() {
         }
     }
 
-    return Dialog.confirm({
-        title: "Conode",
-        message: "What conode do you want to add?",
-        okButtonText: "Another",
-        cancelButtonText: "Cancel",
-        neutralButtonText: "My Own"
-    })
-        .then(result => {
-            if (result) {
-                // Another
-                pageObject.showModal("shared/pages/add-conode-manual/add-conode-manual", undefined, addManualCallBack, true);
-                return Promise.resolve();
-            } else if (result === undefined) {
-                // My own
-                const conodes = User.getRoster().list;
+    return Promise.resolve()
+        .then(() => {
+            if (manually) {
+                // Enter the node manually
+                return pageObject.showModal("shared/pages/add-conode-manual/add-conode-manual", undefined, enterNewConode, true);
+            } else {
+                // Chose from list of existing nodes.
+                const conodes = User.getRoster().identities;
                 const conodesNames = conodes.map(serverIdentity => {
                     return serverIdentity.description;
                 });
@@ -154,38 +157,28 @@ function addManual() {
                     message: "Choose a Conode",
                     cancelButtonText: "Cancel",
                     actions: conodesNames
-                })
-                    .then(result => {
-                        if (result !== "Cancel") {
-                            index = conodesNames.indexOf(result);
+                }).then(result => {
+                    if (result !== "Cancel") {
+                        index = conodesNames.indexOf(result);
 
-                            return Party.addPopDescConode(conodes[index])
-                        } else {
-                            return Promise.resolve();
-                        }
-                    })
-                    .catch(error => {
-                        console.log(error);
-                        console.dir(error);
-                        console.trace();
-
-                    });
-
+                        console.log("adding a new conode: " + conodes[index]);
+                        // TODO: adding conode to the configuration
+                        WalEdit.config.roster.identities.push(conodes[index]);
+                    }
+                }).catch(error => {
+                    console.log("error while adding a conode: " + error);
+                });
             }
+        }).catch(error => {
+            console.log("error while adding a conode: " + error);
 
-        })
-        .catch(error => {
-            console.log(error);
-            console.dir(error);
-            console.trace();
-
-            Dialog.alert({
+            return Dialog.alert({
                 title: "Error",
                 message: "An error occured, please try again. - " + error,
                 okButtonText: "Ok"
-            });
-
-            return Promise.reject(error);
+            }).then(() => {
+                throw new Error(error);
+            })
         });
 }
 
@@ -199,213 +192,103 @@ function addScan() {
         .then(string => {
             const conode = Convert.parseJsonServerIdentity(string);
 
-            return Party.addPopDescConode(conode)
-                .then(() => {
-                        pageObject.getViewById("list-view-conodes").refresh();
-                    }
-                );
+            console.log("adding new conode: " + conode);
+            WalEdit.config.roster.identities.push(conode);
+            pageObject.getViewById("list-view-conodes").refresh();
         })
         .catch(error => {
-            console.log(error);
-            console.dir(error);
-            console.trace();
+            console.log("error while scanning conode: " + error);
 
             if (error !== ScanToReturn.SCAN_ABORTED) {
-                setTimeout(() => {
-                    Dialog.alert({
-                        title: "Error",
-                        message: "An error occured, please try again. - " + error,
-                        okButtonText: "Ok"
-                    });
+                return Dialog.alert({
+                    title: "Error",
+                    message: "An error occured, please try again. - " + error,
+                    okButtonText: "Ok"
                 });
             }
-
-            return Promise.reject(error);
         });
 }
 
-
 /**
- * Parse the date from the data form and save it into the Party
+ * Parse the date from the data form and return it as date.
+ * @return {Date}
  */
-function setDate() {
+function copyViewModelToWallet() {
     let date = viewModel.dataForm.date.split("-");
     let time = viewModel.dataForm.time.split(":");
 
     if (date.length !== 3 || time.length !== 2) {
-        Dialog.alert({
+        return Dialog.alert({
             title: "Internal error",
             message: "Cannot parse date or time.",
             okButtonText: "Ok"
+        }).then(() => {
+            throw new Error("Cannot parse date or time");
         });
-
-        return Promise.reject("Cannot parse date or time");
     }
 
     date.map(parseInt);
     time.map(parseInt);
 
-    let dateString = new Date(date[0], date[1], date[2], time[0], time[1], 0, 0).toString();
-
-    console.log("dateString = " + dateString + "| and is a " + typeof dateString);
-    console.dir(dateString);
-    console.log("DATAFORM date = " + viewModel.dataForm.date);
-    console.log("DATAFORM time = " + viewModel.dataForm.time);
+    WalEdit.config.datetime = new Date(date[0], date[1]-1, date[2], time[0], time[1], 0, 0).toString();
+    WalEdit.config.name = dataForm.name;
+    WalEdit.config.location = dataForm.location;
+}
 
 
-    return Party.setPopDescDateTime(dateString);
+function copyWalletToViewModel() {
+    let cfg = WalEdit.config;
+    let date = new Date(Date.parse(cfg.datetime));
+
+    dataForm.set("date", date.getFullYear() + "-" + (date.getMonth()+1) + "-" + date.getDate());
+    dataForm.set("time", date.getHours() + ":" + date.getMinutes());
+    dataForm.name = cfg.name;
+    dataForm.location = cfg.location;
+    console.dir(cfg.roster);
+    viewModel.rosterList.splice(0);
+    cfg.roster.identities.forEach(conode => {
+        viewModel.rosterList.push(conode);
+    })
 }
 
 /**
- * Save the config back to the file
+ * TODO: return the actual roster of the party.
+ * @returns {Roster}
  */
-function save() {
-    let promises = [
-        Party.setPopDescLocation(viewModel.dataForm.location),
-        Party.setPopDescName(viewModel.dataForm.name),
-        setDate()
-    ];
-
-    Promise.all(promises).then(() => {
-        return Party.updatePopHash();
-    }).then(goBack)
-}
-
-/**
- * Hashes and saves the config/description entered by the organizer of the PoP party.
- * @returns {Promise.<*[]>}
- */
-function hashAndSave() {
-
-    if (!User.isKeyPairSet()) {
-        Dialog.alert({
-            title: "Key Pair Missing",
-            message: "Please generate a key pair.",
-            okButtonText: "Ok"
-        });
-
-        return Promise.reject("Key Pair Missing");
-    }
-    if (!Party.isPopDescComplete()) {
-        Dialog.alert({
-            title: "Missing Information",
-            message: "Please provide a name, date, time, location and the list (min 3) of conodes" +
-                " of the organizers of your PoP Party.",
-            okButtonText: "Ok"
-        });
-
-        return Promise.reject("Missing Information");
-    }
-    if (!Party.isLinkedConodeSet()) {
-        Dialog.alert({
-            title: "Not Linked to Conode",
-            message: "Please link to a conode first.",
-            okButtonText: "Ok"
-        });
-
-        return Promise.reject("Not Linked to Conode");
-    }
-
-    function registerPopDesc() {
-        return Party.registerPopDesc()
-            .then(descHash => {
-                return Dialog.alert({
-                    title: "Successfully Hashed",
-                    message: "The hash of you description is accessible in the organizers tab.\n\nHash:\n" + Convert.byteArrayToHex(descHash),
-                    okButtonText: "Ok"
-                });
-            })
-            .catch(error => {
-                console.log(error);
-                console.dir(error);
-                console.trace();
-
-                Dialog.alert({
-                    title: "Error",
-                    message: "An error occured, please try again. - " + error,
-                    okButtonText: "Ok"
-                });
-
-                return Promise.reject(error);
-            });
-    }
-
-    return registerPopDesc();
+function getViewModelRoster() {
+    return User.roster;
 }
 
 function goBack() {
-    topmost().goBack();
+    return topmost().goBack();
 }
 
-function removeAndGoBack() {
-    if (newParty) {
-        Party.remove().then(() => {
-            topmost().goBack();
-        }).catch((error) => {
-            console.log("Party could not be deleted");
-            console.log(error);
-            console.trace();
-            topmost().goBack();
-        });
-        return;
-    }
-
-    goBack();
-}
-
-function addOrganizer() {
-    Dialog.action({
-        message: "How would you like to add the new organizer ?",
-        cancelButtonText: "Cancel",
-        actions: ["Scan QR", "Enter manually"]
-    }).then(function (result) {
-        console.log("Dialog result: " + result);
-        if (result === "Scan QR") {
-            addScan();
-        } else if (result === "Enter manually") {
-            addManual();
-        }
-    });
-}
-
-function conodeTapped(args) {
-    const index = args.index;
-    Dialog
-        .action({
-            message: "What do you want to do ?",
-            cancelButtonText: "Cancel",
-            actions: ["Remove this organizer"]
-        })
-        .then(result => {
-            if (result === "Remove this organizer") {
-                if (index === 0) {
-                    Dialog.alert({
-                        title: "Error",
-                        message: "You cannot remove the leader conode",
-                        okButtonText: "Ok"
-                    });
-
-                    return Promise.resolve();
-                }
-                return Party.removePopDescConodeByIndex(index);
+function save() {
+    copyViewModelToWallet();
+    WalEdit.config.roster = getViewModelRoster();
+    return Promise.resolve()
+        .then(() => {
+            if (WalEdit.state() >= Wallet.STATE_PUBLISH) {
+                return WalEdit.save()
+                    .catch(err => {
+                        Log.catch("couldn't save: " + err);
+                    })
+            } else {
+                return Promise.resolve()
+                    .then(() => {
+                        WalEdit.addToList();
+                    })
             }
         })
-        .catch((error) => {
-            Dialog.alert({
-                title: "Error",
-                message: "An error occured, please try again. - " + error,
-                okButtonText: "Ok"
-            });
-        });
-
+        .then(() => {
+            return goBack();
+        })
 }
 
-module.exports.onNavigatingTo = onNavigatingTo;
-module.exports.hashAndSave = hashAndSave;
-module.exports.addManual = addManual;
-module.exports.addScan = addScan;
-module.exports.goBack = goBack;
-module.exports.addOrganizer = addOrganizer;
-module.exports.removeAndGoBack = removeAndGoBack;
-module.exports.save = save;
-module.exports.conodeTapped = conodeTapped;
+module.exports = {
+    onNavigatingTo,
+    goBack,
+    addConode,
+    conodeTapped,
+    save,
+}

@@ -1,340 +1,211 @@
+require("nativescript-nodeify");
 const Frame = require("ui/frame");
 const Dialog = require("ui/dialogs");
 const Timer = require("timer");
-const ObservableModule = require("data/observable");
+const Observable = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
-const FileIO = require("../../../shared/lib/file-io/file-io");
-const FilePaths = require("../../../shared/res/files/files-path");
-const OrgParty = require("../../../shared/lib/dedjs/object/pop/org/OrgParty").Party;
-const User = require("../../../shared/lib/dedjs/object/user/User").get;
-const Convert = require("../../../shared/lib/dedjs/Convert");
-const PartyStates = require("../../../shared/lib/dedjs/object/pop/org/OrgParty").States;
+const Kyber = require("@dedis/kyber-js");
+const CurveEd25519 = new Kyber.curve.edwards25519.Curve;
+const ServerIdentity = require("../../../shared/cothority/lib/identity").ServerIdentity;
+
+const lib = require("../../../shared/lib");
+const dedjs = lib.dedjs;
+const Wallet = dedjs.object.pop.Wallet;
+const Configuration = dedjs.object.pop.Configuration;
+const User = dedjs.object.user.get;
+const Convert = dedjs.Convert;
+const Log = dedjs.Log;
+const CothorityMessages = dedjs.network.CothorityMessages;
+const RequestPath = dedjs.network.RequestPath;
+const DecodeType = dedjs.network.DecodeType;
+const Net = dedjs.network.NSNet;
 
 const CANCELED_BY_USER = "CANCELED_BY_USER_STRING";
 
-const viewModel = ObservableModule.fromObject({
+const viewModel = Observable.fromObject({
     partyListDescriptions: new ObservableArray(),
-    isLoading: false,
-    isEmpty: true
+    isLoading: true,
+    isEmpty: true,
+    loaded: false
 });
 
 let page = undefined;
 let timerId = undefined;
 
 function onLoaded(args) {
-    console.log("party-list loading");
+    Log.lvl2("party-list loading");
     page = args.object;
-
     page.bindingContext = viewModel;
 
-    loadParties();
+    viewModel.partyListDescriptions.splice(0);
 
-    // Poll the status every 5s
-    timerId = Timer.setInterval(() => {
-        reloadStatuses();
-    }, 5000)
-
+    return Timer.setTimeout(() => {
+        loadParties();
+    }, 10);
 }
 
 function onUnloaded() {
-    console.log("party-list unloading")
     // remove polling when page is leaved
     Timer.clearInterval(timerId);
 }
 
+/**
+ * Gets all the parties from the Wallet. If it's the first time, the wallet will load them from
+ * disk/sd-card/whatever. Else it will only return the cached list of wallets.
+ */
 function loadParties() {
-    viewModel.isLoading = true;
-    let party = undefined;
-    viewModel.partyListDescriptions.splice(0);
-
-    FileIO.forEachFolderElement(FilePaths.POP_ORG_PATH, function (partyFolder) {
-        party = new OrgParty(partyFolder.name);
-        // Observables have to be nested to reflect changes
-        viewModel.partyListDescriptions.push(ObservableModule.fromObject({
-            party: party,
-            desc: party.getPopDescModule(),
-            status: party.getPopStatusModule()
-        }));
-    });
-
-    viewModel.isEmpty = viewModel.partyListDescriptions.length == 0;
-    viewModel.isLoading = false;
-}
-
-function hashAndSave(party) {
-
-    if (!User.isKeyPairSet()) {
-        return Dialog.alert({
-            title: "Key Pair Missing",
-            message: "Please generate a key pair.",
-            okButtonText: "Ok"
-        })
-            .then(() => {
-                throw new Error("Key Pair Missing");
-            });
-    }
-    if (!party.isPopDescComplete()) {
-        return Dialog.alert({
-            title: "Missing Information",
-            message: "Please provide a name, date, time, location and the list (min 3) of conodes" +
-                " of the organizers of your PoP Party.",
-            okButtonText: "Ok"
-        })
-            .then(() => {
-                throw new Error("Missing information");
-            });
-    }
-    if (!party.isLinkedConodeSet()) {
-        return Dialog.alert({
-            title: "Not Linked to Conode",
-            message: "Please link to a conode first.",
-            okButtonText: "Ok"
-        })
-            .then(() => {
-                throw new Error("Not linked to Conode");
-            });
-    }
-
-    return party.registerPopDesc()
+    return Promise.resolve()
         .then(() => {
-            return party.loadStatus();
-        })
-        // .then(() => {
-        //     return Dialog.alert({
-        //         title: "Successfully Registered",
-        //         message: "Your party has been correctly published ! You can now register the public key of each attendee.",
-        //         okButtonText: "Ok"
-        //     });
-        // })
-        .then(() => {
-            console.log("adding myself to party");
-            return addMyselfAttendee(party);
-        })
-        .then(() => {
-            console.log("sending my public key to server");
-            console.dir(party.getRegisteredAtts());
-            let pubKey = party.getRegisteredAtts().getItem(0);
-            console.log("Pubkey is:", pubKey);
-            return party.storeOrganizer(pubKey);
-        })
-        .then(() => {
-            console.log("fetching other keys");
-            return party.fetchOrganizerKeys()
-                .catch(err=>{
-                    console.log("non-fatal error while fetching keys:", err)
-                    return [];
-                });
-        })
-        .then(keys => {
-            console.log("all keys registered:", keys.length);
-        })
-        .catch(error => {
-            console.log("error while adding my key:", error);
-
-            return Dialog.alert({
-                title: "Error",
-                message: "An error occured, please try again. - " + error,
-                okButtonText: "Ok"
+            Log.lvl1("getting all wallets:", Object.keys(Wallet.List));
+            viewModel.partyListDescriptions.splice(0);
+            Object.values(Wallet.List).forEach(wallet => {
+                if (wallet.linkedConode) {
+                    viewModel.partyListDescriptions.push(getViewModel(wallet));
+                }
             })
-                .then(() => {
-                    throw new Error("couldn't add key: " + error);
-                });
-        });
+
+            viewModel.isEmpty = viewModel.partyListDescriptions.length == 0;
+            viewModel.isLoading = false;
+
+            // Poll the status every 5s
+            timerId = Timer.setInterval(() => {
+                reloadStatuses();
+            }, 5000)
+        })
 }
 
-const addMyselfAttendee = require("./register/register-page").addMyselfAttendee;
+/**
+ * Creates a view-model for better updating.
+ * @param wallet{Wallet}
+ * @returns {Observable}
+ */
+function getViewModel(wallet) {
+    return Observable.fromObject({
+        party: wallet,
+        desc: Observable.fromObjectRecursive({
+            name: wallet.config.name,
+            datetime: wallet.config.datetime,
+            location: wallet.config.location,
+            roster: {
+                id: wallet.config.roster.id,
+                list: new ObservableArray(wallet.config.roster.identities),
+                aggregate: new Uint8Array()
+            }
+        }),
+        status: Observable.fromObject({
+            status: wallet.stateStr()
+        })
+    })
+}
 
+
+/**
+ * Asks all models to update their status and recreates the view.
+ * @returns {Promise<any[]>}
+ */
+function reloadStatuses() {
+    let newView = new ObservableArray();
+    return Promise.all(
+        viewModel.partyListDescriptions.map(model => {
+            newView.push(getViewModel(model.party));
+            if (model.party.state() == Wallet.STATE_CONFIG) {
+                return
+            }
+            return model.party.update()
+                .catch(err => {
+                    Log.catch(err, "error while updating party");
+                })
+        })
+    ).then(() => {
+        viewModel.partyListDescriptions = newView;
+    })
+}
+
+
+/**
+ * If the party is in published status, then we show the register-page. Else we present different
+ * options depending on the state of the party.
+ * @param args
+ * @returns {*}
+ */
 function partyTapped(args) {
-
     const index = args.index;
-    const status = viewModel.partyListDescriptions.getItem(index).status.status;
-    const party = viewModel.partyListDescriptions.getItem(index).party;
-    switch (status) {
-        case PartyStates.CONFIGURATION:
-
-            Dialog
-                .action({
-                    message: "What do you want to do ?",
-                    cancelButtonText: "Cancel",
-                    actions: ["Configure the party", "Publish the party", "Remove the party"]
-                })
-                .then(result => {
-                    if (result === "Configure the party") {
-                        Frame.topmost().navigate({
-                            moduleName: "drawers/pop/org/config/config-page",
-                            context: {
-                                party: party
-                            }
-                        });
-                    } else if (result === "Publish the party") {
-                        hashAndSave(party);
-                    } else if (result === "Remove the party") {
-                        return Dialog.confirm({
-                            title: "Removing the party",
-                            message: "Are you sure to remove the party?",
-                            okButtonText: "Yes, remove",
-                            cancelButtonText: "No, keep",
-                        })
-                            .then(res => {
-                                if (res) {
-                                    return party.remove()
-                                        .then(() => {
-                                            viewModel.partyListDescriptions.splice(index, 1);
-                                        });
-                                }
-                            })
-                    }
-                })
-                .catch((error) => {
-                    Dialog.alert({
-                        title: "Error",
-                        message: "An error occured, please try again. - " + error,
-                        okButtonText: "Ok"
-                    });
-                });
-
-            break;
-        case PartyStates.PUBLISHED:
-            Frame.topmost().navigate({
-                moduleName: "drawers/pop/org/register/register-page",
-                context: {
-                    party: party
-                }
-            });
-            break;
-        case PartyStates.ERROR:
-            Dialog.alert({
-                title: "Error",
-                message: "The linked conode is offline, please turn it on to retrieve the party infos",
-                okButtonText: "Ok"
-            });
-            break;
-        case PartyStates.FINALIZING:
-            /* Dialog.alert({
-               title: "Finalizing",
-               message: "You have to wait until all the other organizers have finalized the party.",
-               okButtonText: "Ok"
-             });*/
-
-            Frame.topmost().navigate({
-                moduleName: "drawers/pop/org/register/register-page",
-                context: {
-                    party: party
-
-                }
-            });
-            break;
-        case PartyStates.FINALIZED:
-            Dialog
-                .action({
-                    message: "This party has been finalized by all the organizers. Do you want to delete it?",
-                    cancelButtonText: "Cancel",
-                    actions: ["Remove the party"]
-                }).then(result => {
-                    if (result === "Remove the party") {
-                        return Dialog.confirm({
-                            title: "Removing the party",
-                            message: "Are you sure to remove the party?",
-                            okButtonText: "Yes, remove",
-                            cancelButtonText: "No, keep",
-                        })
-                            .then(res => {
-                                if (res) {
-                                    return party.remove()
-                                        .then(() => {
-                                            viewModel.partyListDescriptions.splice(index, 1);
-                                        });
-                                }
-                            })
-                    }
-                }
-            );
-            break;
-        default:
-            Dialog.alert({
-                title: "Not implemented",
-                okButtonText: "Ok"
-            })
+    const pld = viewModel.partyListDescriptions.getItem(index);
+    const party = pld.party;
+    if (party.state() == Wallet.STATE_PUBLISH) {
+        return Frame.topmost().navigate({
+            moduleName: "drawers/pop/org/register/register-page",
+            context: {
+                party: party
+            }
+        });
     }
 
-}
-
-function deleteExported(party) {
-    console.log("START")
-    party.remove()
-        .then(() => {
-            console.log("END")
-
-            viewModel.partyListDescriptions.splice(viewModel.partyListDescriptions.indexOf(party), 1);
-            const listView = Frame.topmost().currentPage.getViewById("listView");
-            page.getViewById("listView").refresh();
-            return Promise.resolve();
-        })
-        .catch((error) => {
-            console.log(error);
-            console.dir(error);
-            console.trace();
-
-            Dialog.alert({
-                title: "Error",
-                message: "An error occured, please try again. - " + error,
-                okButtonText: "Ok"
-            });
-
-            return Promise.reject(error);
-
-        });
-}
-
-
-function deleteParty(args) {
-    const party = args.object.bindingContext;
-    console.dir(party);
-    party.remove()
-        .then(() => {
-            const listView = Frame.topmost().currentPage.getViewById("listView");
-            listView.notifySwipeToExecuteFinished();
-
-            return Promise.resolve();
-        })
-        .catch((error) => {
-            console.log(error);
-            console.dir(error);
-            console.trace();
-
-            Dialog.alert({
-                title: "Error",
-                message: "An error occured, please try again. - " + error,
-                okButtonText: "Ok"
-            });
-
-            return Promise.reject(error);
-
-        });
-}
-
-function onSwipeCellStarted(args) {
-    const swipeLimits = args.data.swipeLimits;
-    const swipeView = args.object;
-
-    const deleteButton = swipeView.getViewById("button-delete");
-
-    const width = deleteButton.getMeasuredWidth();
-
-    swipeLimits.right = width;
-    swipeLimits.threshold = width / 2;
-}
-
-function linkToConode(party) {
-    if (!User.isKeyPairSet()) {
-        return Dialog.alert({
-            title: "Key Pair Missing",
-            message: "Please generate a key pair.",
+    let CONFIG = "Configure the party";
+    let PUBLISH = "Publish the party";
+    let ADD_NEXT = "Add next party";
+    let DELETE = "Remove the party";
+    let actions = [DELETE];
+    if (party.state() == Wallet.STATE_CONFIG) {
+        actions = [CONFIG, PUBLISH, DELETE];
+    } else if (party.state() == Wallet.STATE_FINALIZED) {
+        actions = [ADD_NEXT, DELETE];
+    }
+    return Dialog.action({
+        title: "Party",
+        message: "What do you want to do ?",
+        cancelButtonText: "Cancel",
+        actions: actions
+    }).then(result => {
+        switch (result) {
+            case ADD_NEXT:
+                let newParty = new Wallet(party.config);
+            case CONFIG:
+                return Frame.topmost().navigate({
+                    moduleName: "drawers/pop/org/config/config-page",
+                    context: {
+                        wallet: party
+                    }
+                });
+            case PUBLISH:
+                Log.lvl2("public key2 is:", User.getKeyPair().public);
+                const pub = CurveEd25519.point().mul(User.getKeyPair().private, null);
+                Log.lvl2("calculated pubkey:", pub);
+                return party.publish(User.getKeyPair().private)
+                    .then(() => {
+                        pld.status.status = party.stateStr();
+                    });
+            case DELETE:
+                return Dialog.confirm({
+                    title: "Removing the party",
+                    message: "Are you sure to remove the party?",
+                    okButtonText: "Yes, remove",
+                    cancelButtonText: "No, keep",
+                }).then(res => {
+                    if (res) {
+                        return party.remove()
+                            .then(() => {
+                                viewModel.partyListDescriptions.splice(index, 1);
+                            });
+                    }
+                })
+        }
+    }).catch((error) => {
+        Dialog.alert({
+            title: "Error",
+            message: "An error occured, please try again. - " + error,
             okButtonText: "Ok"
         });
-    }
+    });
+}
 
-    const conodes = User.getRoster().list;
+/**
+ * Creates a link to a conode by sending a public key protected by a pin-code.
+ * @param party
+ * @returns {*}
+ */
+function verifyLinkToConode() {
+    const conodes = User.roster.identities;
     const conodesNames = conodes.map(serverIdentity => {
         return serverIdentity.description;
     });
@@ -345,71 +216,76 @@ function linkToConode(party) {
         message: "Choose a Conode",
         cancelButtonText: "Cancel",
         actions: conodesNames
-    })
-        .then(result => {
-            if (result !== "Cancel") {
-                index = conodesNames.indexOf(result);
-
-                return party.linkToConode(conodes[index], "")
-                    .then(result => {
-                        console.log("Prompting for pin");
-                        if (result.alreadyLinked !== undefined && result.alreadyLinked) {
-                            console.log("Already linked")
-                            return Promise.resolve(conodes[index])
+    }).then(result => {
+        if (result !== "Cancel") {
+            index = conodesNames.indexOf(result);
+            Log.lvl2("index is:", index);
+            return sendLinkRequest(conodes[index], "")
+                .then(result => {
+                    Log.lvl2("Prompting for pin");
+                    if (result.alreadyLinked !== undefined && result.alreadyLinked) {
+                        Log.lvl2("Already linked");
+                        return Promise.resolve(conodes[index])
+                    }
+                    return Dialog.prompt({
+                        title: "Requested PIN",
+                        message: result,
+                        okButtonText: "Link",
+                        cancelButtonText: "Cancel",
+                        defaultText: "",
+                        inputType: Dialog.inputType.text
+                    }).then(result => {
+                        if (result.result) {
+                            if (result.text === "") {
+                                return Promise.reject("PIN should not be empty");
+                            }
+                            return sendLinkRequest(conodes[index], result.text)
+                                .then(() => {
+                                    return Promise.resolve(conodes[index]);
+                                });
+                        } else {
+                            return Promise.reject(CANCELED_BY_USER);
                         }
-                        return Dialog.prompt({
-                            title: "Requested PIN",
-                            message: result,
-                            okButtonText: "Link",
-                            cancelButtonText: "Cancel",
-                            defaultText: "",
-                            inputType: Dialog.inputType.text
-                        })
-                            .then(result => {
-                                if (result.result) {
-                                    if (result.text === "") {
-                                        return Promise.reject("PIN should not be empty");
-                                    }
-                                    return party.linkToConode(conodes[index], result.text)
-                                        .then(() => {
-                                            return Promise.resolve(conodes[index]);
-                                        });
-                                } else {
-                                    return Promise.reject(CANCELED_BY_USER);
-                                }
-                            });
+                    });
 
-                    })
-                    .catch(error => {
-                        console.log("couldn't get PIN: " + error);
-                    })
-            } else {
-                return Promise.reject(CANCELED_BY_USER);
-            }
-        })
-        .catch(error => {
-            console.log(error);
-            console.dir(error);
-            console.trace();
+                }).catch(error => {
+                    Log.lvl2("couldn't get PIN: " + error);
+                })
+        } else {
+            return Promise.reject(CANCELED_BY_USER);
+        }
+    }).catch(error => {
+        Log.catch(error, "error while setting up pin");
 
-            if (error !== CANCELED_BY_USER) {
-                Dialog.alert({
-                    title: "Error",
-                    message: "An unexpected error occurred. Please try again. - " + error,
-                    okButtonText: "Ok"
-                });
-            }
-            return Promise.reject(error);
-        });
+        if (error !== CANCELED_BY_USER) {
+            return Dialog.alert({
+                title: "Error",
+                message: "An unexpected error occurred. Please try again. - " + error,
+                okButtonText: "Ok"
+            }).then(() => {
+                throw new Error("Couldn't setup pin: " + error);
+            });
+        }
+        return Promise.reject(error);
+    });
 }
 
 
 function addParty() {
-    const newParty = new OrgParty();
-    let conode = undefined;
-    linkToConode(newParty)
+    Log.lvl2("configuring a new party");
+    let date = new Date();
+    let name = "";
+    let location = "";
+    if (RequestPath.PREFILL_PARTY) {
+        name = "test " + date.getHours() + ":" + date.getMinutes();
+        location = "testing-land";
+    }
+    let config = new Configuration(name, date.toString(), location, User.roster);
+    let wallet = new Wallet(config);
+
+    verifyLinkToConode()
         .then((result) => {
-            conode = result;
+            wallet.linkedConode = result;
             return Dialog.action({
                 message: "You are linked to your conode ! What do you want to do ?",
                 cancelButtonText: "Cancel",
@@ -417,48 +293,86 @@ function addParty() {
             })
         })
         .then(result => {
-            console.dir("result is:", result);
             if (result === "Configure a new party") {
-                console.log("configuring a new party");
-                Frame.topmost().navigate({
+                Log.lvl2("configuring a new party");
+                return Frame.topmost().navigate({
                     moduleName: "drawers/pop/org/config/config-page",
                     context: {
-                        party: newParty,
-                        leader: conode,
-                        newParty: true
+                        wallet: wallet,
+                        leader: wallet.linkedConode,
+                        newConfig: true
                     }
                 });
             } else if (result === "List the proposals") {
-                Frame.topmost().navigate({
+                return Frame.topmost().navigate({
                     moduleName: "drawers/pop/org/proposals/org-party-proposals",
                     context: {
-                        conode: conode,
+                        conode: wallet.linkedConode,
                     }
                 });
-
-                return Promise.reject("New party is not needed anymore");
             } else {
                 return Promise.reject("User canceled");
             }
 
             return Promise.resolve()
         })
-        .catch(() => {
-            newParty.remove();
+        .catch(err => {
+            console.dir("error while adding a party: " + err)
         });
-
 }
 
-function reloadStatuses() {
-    viewModel.partyListDescriptions.forEach(model => {
-        model.party.loadStatus();
-    })
+module.exports = {
+    onLoaded,
+    partyTapped,
+    addParty,
+    onUnloaded,
 }
 
-module.exports.onLoaded = onLoaded;
-module.exports.partyTapped = partyTapped;
-module.exports.onSwipeCellStarted = onSwipeCellStarted;
-module.exports.deleteParty = deleteParty;
-module.exports.addParty = addParty;
-module.exports.onUnloaded = onUnloaded;
-module.exports.hashAndSave = hashAndSave;
+/**
+ * TO BE MOVED ELSEWHERE
+ */
+
+/**
+ * Sends a link request to the conode given as parameter. If the pin is not empty and the link request succeeds
+ * or if the public key of the user is already registered, the conode will be stored as the linked conode.
+ * @param {ServerIdentity} conode - the conode to which send the link request
+ * @param {string} pin - the pin received from the conode
+ * @returns {Promise} - a promise that gets completed once the link request has been sent and a response received
+ * @property {boolean} alreadyLinked -  a property of the object returned by the promise that tells if
+ * the public key of the user were already registered (thus it won't need to ask PIN in the future)
+ */
+function sendLinkRequest(conode, pin) {
+    if (!(conode instanceof ServerIdentity)) {
+        throw new Error("conode must be an instance of ServerIdentity");
+    }
+    if (typeof pin !== "string") {
+        throw new Error("pin must be of type string");
+    }
+    const ALREADY_LINKED = "ALREADY_LINKED_STRING";
+    const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(conode, ""), RequestPath.POP);
+    const pinRequestMessage = CothorityMessages.createPinRequest(pin, User.getKeyPair().public);
+    const verifyLinkMessage = CothorityMessages.createVerifyLinkMessage(User.getKeyPair().public);
+
+    // TODO change status request return type
+    Log.lvl2("verify link");
+    return cothoritySocket.send(RequestPath.POP_VERIFY_LINK, DecodeType.VERIFY_LINK_REPLY, verifyLinkMessage)
+        .then(alreadyLinked => {
+            Log.lvl2("sending pin request");
+            return alreadyLinked.exists ?
+                Promise.resolve(ALREADY_LINKED) :
+                cothoritySocket.send(RequestPath.POP_PIN_REQUEST, RequestPath.STATUS_REQUEST, pinRequestMessage)
+        })
+        .then(response => {
+            Log.lvl2("already linked");
+            return {
+                alreadyLinked: response === ALREADY_LINKED
+            };
+        })
+        .catch(error => {
+            Log.catch(error, "link error");
+            if (error.message === CothorityMessages.READ_PIN_ERROR) {
+                return Promise.resolve(error.message)
+            }
+            return Promise.reject(error);
+        });
+}

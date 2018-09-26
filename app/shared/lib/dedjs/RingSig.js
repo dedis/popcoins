@@ -1,5 +1,6 @@
 "use strict";
 
+require("nativescript-nodeify");
 const Kyber = require("@dedis/kyber-js");
 const Blake = require("@stablelib/blake2xs").BLAKE2Xs;
 const cloneDeep = require("lodash.clonedeep");

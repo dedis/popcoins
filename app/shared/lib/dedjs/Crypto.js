@@ -5,7 +5,7 @@ const CothorityMessages = require("./network/cothority-messages");
 const Kyber = require("@dedis/kyber-js");
 const ObservableModule = require("data/observable");
 const FileIO = require("../file-io/file-io");
-const FilesPath = require("../../res/files/files-path");
+const FilesPath = require("../file-io/files-path");
 
 const CURVE_ED25519_KYBER = new Kyber.curve.edwards25519.Curve;
 
@@ -165,7 +165,7 @@ class KeyPair {
             .then(jsonKeyPair => {
                 if (jsonKeyPair.length > 0 && Convert.jsonToObject(jsonKeyPair).public !== ""
                     && Convert.jsonToObject(jsonKeyPair).private !== "" && Convert.jsonToObject(jsonKeyPair).private !== "") {
-                    const parsed = Convert.parseJsonKeyPair(jsonKeyPair);
+                    const parsed = KeyPair.fromJson(jsonKeyPair);
                     return this.setKeyPair(parsed.public, parsed.private, false);
                 } else {
                     return this.randomize();

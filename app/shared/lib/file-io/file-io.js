@@ -4,6 +4,7 @@
 
 const FileSystem = require("tns-core-modules/file-system");
 const Documents = FileSystem.knownFolders.documents();
+const Log = require("../dedjs/Log");
 
 /**
  * Gets the string of the file at filePath and returns a promise with the content.
@@ -17,15 +18,13 @@ function getStringOf(filePath) {
 
     return Documents.getFile(filePath)
         .readText()
-        .then(string =>{
+        .then(string => {
             // console.log("read from " + filePath + ":" + string);
             return Promise.resolve(string);
         })
         .catch((error) => {
-            console.log("READING ERROR:");
-            console.log(error);
-            console.dir(error);
-            console.trace();
+            console.log("READING ERROR:", error);
+            lslr("shared/res/files");
         });
 }
 
@@ -43,14 +42,12 @@ function writeStringTo(filePath, string) {
         throw new Error("string must be of type string");
     }
 
-    // console.log("writing: " + filePath);
+    console.log("writing to: " + filePath);
     return Documents.getFile(filePath)
         .writeText(string)
         .catch((error) => {
-            console.log("WRITING ERROR:");
-            console.log(error);
-            console.dir(error);
-            console.trace();
+            console.log("WRITING ERROR:", error);
+            lslr(filePath);
         });
 }
 
@@ -94,6 +91,56 @@ function removeFolder(folder) {
     });
 }
 
+/**
+ * Removes the directory recursively, but only files directly inside and the directory itself. If there
+ * are subdirectories, this will fail.
+ * @param dir
+ * @returns {Promise<void>}
+ */
+function rmrf(dir) {
+    return Documents.getFolder(dir).clear();
+}
+
+function lslr(dir, rec) {
+    if (rec === undefined) {
+        dir = FileSystem.path.join(Documents.path, dir);
+    }
+    let folders = [];
+    let files = [];
+    FileSystem.Folder.fromPath(dir).getEntities()
+        .then((entities) => {
+            // entities is array with the document's files and folders.
+            entities.forEach((entity) => {
+                const fullPath = entity.path;
+                // const fullPath = FileSystem.path.join(entity.path, entity.name);
+                const isFolder = FileSystem.Folder.exists(fullPath);
+                const e = {
+                    name: entity.name,
+                    path: entity.path,
+                }
+                if (isFolder) {
+                    folders.push(e);
+                } else {
+                    files.push(e);
+                }
+            });
+            console.log("");
+            console.log("Directory:", dir);
+            folders.forEach(folder => {
+                console.log("d ", folder.name);
+            });
+            files.forEach(file => {
+                console.log("f ", file.name);
+            });
+            folders.forEach(folder => {
+                lslr(folder.path, true);
+            });
+        }).catch((err) => {
+        // Failed to obtain folder's contents.
+        console.log(err.stack);
+    });
+}
+
 function folderExists(path) {
     return FileSystem.Folder.exists(this.join(Documents.path, path));
 }
@@ -109,4 +156,5 @@ module.exports.removeFolder = removeFolder;
 module.exports.join = FileSystem.path.join;
 module.exports.fileExists = fileExists;
 module.exports.folderExists = folderExists;
-
+module.exports.rmrf = rmrf;
+module.exports.lslr = lslr;

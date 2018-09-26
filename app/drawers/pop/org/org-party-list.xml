@@ -15,19 +15,7 @@
         />
 
         <nsListView:RadListView items="{{ partyListDescriptions }}" itemTap="partyTapped" row="0" colSpan="3"
-                                itemSwipeProgressStarted="onSwipeCellStarted"
-                                swipeActions="true"
                                 id="listView">
-
-            <nsListView:RadListView.itemSwipeTemplate>
-                <GridLayout class="basic-list-decorated" rows="*" columns="*,auto">
-                    <StackLayout orientation="horizontal" col="0">
-                    </StackLayout>
-                    <StackLayout orientation="horizontal" col="1">
-                        <Button id="button-delete" text="Delete" tap="deleteParty" backgroundColor="red"/>
-                    </StackLayout>
-                </GridLayout>
-            </nsListView:RadListView.itemSwipeTemplate>
 
             <nsListView:RadListView.itemTemplate>
                 <GridLayout rows="*,*" columns="*, auto" backgroundColor="white"
@@ -35,16 +23,16 @@
                     <Label class="list-title" text="{{ desc.name }}" row="0" col="0"
                            textWrap="true"/>
                     <Label text="{{ desc.location }}" row="1" col="0" textWrap="true"/>
-                    <Label class="status-text" text="{{ status.status }}" col="1" rowSpan="2" textWrap="true" />
+                    <Label class="status-text" text="{{ status.status }}" col="1" rowSpan="2" textWrap="true"/>
                 </GridLayout>
             </nsListView:RadListView.itemTemplate>
         </nsListView:RadListView>
         <nsFloatingButton:fab tap="addParty"
                               row="0" col="3"
-                              icon="res://ic_add_white_48dp"
+                              icon="res://ic_add_white"
                               rippleColor="#f1f1f1"
                               class="fab-button"
-                             />
+        />
 
         <ActivityIndicator busy="{{ isLoading }}" rowSpan="1" colSpan="2"/>
     </GridLayout>

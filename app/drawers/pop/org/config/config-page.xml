@@ -5,7 +5,7 @@
         xmlns:nsDataForm="nativescript-ui-dataform">
 
     <ActionBar class="action-bar">
-        <NavigationButton text="Go Back" android:icon="res://ic_arrow_back" tap="removeAndGoBack"/>
+        <NavigationButton text="Go Back" android:icon="res://ic_arrow_back" tap="goBack"/>
         <Label class="action-bar-title" text="Configuration"/>
         <ActionItem tap="save"
                     ios.systemIcon="0" ios.position="right"
@@ -44,12 +44,12 @@
             <Label class="label-title" text="Organizers" row="0" col="0" colSpan="2"/>
             <Label class="label-title" id="addOrg"
                    text="+"
-                   tap="addOrganizer"
+                   tap="addConode"
                    row="0" col="1"
                    visibility="{{ readOnly ? 'collapse' : 'visible' }}"/>
         </GridLayout>
 
-        <nsListView:RadListView items="{{ descModule.roster.list }}" id="list-view-conodes"
+        <nsListView:RadListView items="{{ rosterList }}" id="list-view-conodes"
                                 itemTap="{{ readOnly ? '' : 'conodeTapped' }}"
                                 swipeActions="true"
                                 row="3"
