@@ -6,7 +6,7 @@
 node_modules/
 platforms/
 hooks/
-conodes/
+/conodes/
 old.dedis/
 dedis/
 

@@ -4,7 +4,7 @@
         xmlns="http://schemas.nativescript.org/tns.xsd">
 
     <ActionBar class="action-bar">
-        <Label class="action-bar-title" text="Browse"></Label>
+        <Label class="action-bar-title" text="Badges"></Label>
     </ActionBar>
 
     <ListView items="{{ items }}" itemTap="onItemTap" class="list-group">

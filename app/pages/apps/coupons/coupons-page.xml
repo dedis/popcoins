@@ -9,7 +9,7 @@ Feel free to customize layouts and components to change how the tab view looks.
 
     <ActionBar class="action-bar">
         <NavigationButton text="Go Back" android.systemIcon="ic_menu_back" tap="onBack"/>
-        <Label class="action-bar-title" text="Search"></Label>
+        <Label class="action-bar-title" text="Coupons"></Label>
     </ActionBar>
 
     <GridLayout rows="*, *" columns="*, *" margin="2%" backgroundColor="#eeeeee">

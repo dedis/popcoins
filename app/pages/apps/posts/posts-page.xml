@@ -16,10 +16,11 @@ Feel free to customize layouts and components to change how the tab view looks.
 
     <GridLayout rows="*,auto" columns="*">
         <GridLayout class="page-content" row="0" col="0" rows="*" columns="*,*,auto">
-            <Label text="Add a token before sending messages."
+            <Label text="Add a badge before sending messages."
                    textWrap="true"
                    class="empty-list-label"
                    colSpan="3"
+                   margin="5%"
                    visibility="{{ isEmpty ? 'visible' : 'collapsed' }}"
             />
 

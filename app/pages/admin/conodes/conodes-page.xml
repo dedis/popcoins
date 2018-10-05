@@ -1,0 +1,34 @@
+<Page
+        actionBarHidden="true"
+        class="page"
+        loaded="onLoaded"
+        xmlns:nsFloatingButton="nativescript-floatingactionbutton"
+        xmlns:nsListView="nativescript-ui-listview"
+        xmlns="http://www.nativescript.org/tns.xsd">
+
+    <GridLayout class="page-content" rows="*" columns="*" margin="2%">
+        <Label text="You don't have any conode. Feel free to add one !"
+               textWrap="true"
+               class="empty-list-label"
+               visibility="{{ isRosterEmpty ? 'visible' : 'collapsed' }}"
+        />
+
+        <nsListView:RadListView items="{{ rosterModule.list }}" itemTap="conodeTapped"
+                                id="listView">
+            <nsListView:RadListView.itemTemplate>
+                <GridLayout class="basic-list-decorated" id="grid-layout-conode-stats" rows="*,*" columns="*,auto">
+                    <Label class="list-title" text="{{ description }}" row="0" colSpan="2" textWrap="true"/>
+                    <Label text="{{ address }}" row="1" col="0" textWrap="true"/>
+                    <Label text="{{ status }}" row="1" col="1" textWrap="true"/>
+                </GridLayout>
+            </nsListView:RadListView.itemTemplate>
+        </nsListView:RadListView>
+
+        <ActivityIndicator busy="{{ rosterModule.isLoading }}"/>
+        <nsFloatingButton:fab tap="addConode"
+                              row="0" col="3"
+                              icon="res://ic_add_white"
+                              rippleColor="#f1f1f1"
+                              class="fab-button"/>
+    </GridLayout>
+</Page>

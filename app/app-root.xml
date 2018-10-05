@@ -17,7 +17,7 @@ http://docs.nativescript.org/cookbook/ui/tab-view
         <Frame defaultPage="pages/apps/apps-page"></Frame>
     </TabViewItem>
 
-    <TabViewItem title="Admin" ios:iconSource="res://tabIcons/search" android:iconSource="res://search">
+    <TabViewItem title="Admin" ios:iconSource="res://tabIcons/admin" android:iconSource="res://admin">
         <Frame defaultPage="pages/admin/admin-page"></Frame>
     </TabViewItem>
 </TabView>
