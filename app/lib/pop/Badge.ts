@@ -7,38 +7,56 @@ const Schnorr = Kyber.sign.schnorr;
 const HashJs = require("hash.js");
 const OmniledgerRPC = require("../cothority/omniledger/OmniledgerRPC");
 const Darc = require("../cothority/omniledger/darc");
-const PopPartyInstance = require("../cothority/omniledger/contracts/PopPartyInstance");
-const CoinInstance = require("../cothority/omniledger/contracts/CoinsInstance");
+import * as Identity from "./../cothority/identity";
+// let ServerIdentity = Identity.ServerIdentity;
+
+import CoinInstance = require("../cothority/omniledger/contracts/CoinsInstance");
+import PopPartyInstance = require("../cothority/omniledger/contracts/PopPartyInstance");
 
 const FilePaths = require("../FilePaths");
 const FileIO = require("../FileIO");
 const Convert = require("../Convert");
-const Log = require("../Log");
 const RequestPath = require("../network/RequestPath");
 const DecodeType = require("../network/DecodeType");
 const Net = require("../network/NSNet");
-const Configuration = require('./Configuration');
 const Token = require('./Token');
 const FinalStatement = require('./FinalStatement');
 const KeyPair = require('../crypto/KeyPair');
 
+import Configuration from './Configuration';
+import Log from "../Log";
+
 /**
- * Wallet holds one or more configurations, final statements, and keypairs and lets the user and the organizer
+ * Badge holds one or more configurations, final statements, and keypairs and lets the user and the organizer
  * use them.
  *
  * TODO: add more than one configuration.
  */
 
 // List is all the Wallets that have been loaded from disk.
-let List = {};
+let List: object = {};
+let Upcoming: object = {};
 
-const STATE_CONFIG = 1;
-const STATE_PUBLISH = 2;
-const STATE_FINALIZING = 3;
-const STATE_FINALIZED = 4;
-const STATE_TOKEN = 5;
+export const STATE_CONFIG = 1;
+export const STATE_PUBLISH = 2;
+export const STATE_FINALIZING = 3;
+export const STATE_FINALIZED = 4;
+export const STATE_TOKEN = 5;
 
-class Wallet {
+export class Badge {
+    _config: Configuration;
+    _keypair: any;
+    _finalStatement: any;
+    _token: any;
+    _omniledgerID: any;
+    _omniledgerRPC: any;
+    _partyInstanceId: any;
+    _partyInstance: any;
+    _coinInstance: any;
+    _balance: any;
+    _previous: any;
+    _linkedConode: any;
+
     /**
      * The constructor creates the basic wallet element given a configuration. It will create a random keypair and
      * is ready to be promoted to a published, then finalized and tokenized wallet.
@@ -58,7 +76,7 @@ class Wallet {
         this._coinInstance = null;
         this._balance = -1;
         // If previous is not null, then it points to the id of the previous party
-        // that must be finalized. This will mean that this party will use the same
+        // that must be finalized. this will mean that this party will use the same
         // public key as the previous party and only be shown once in the token
         // list.
         this._previous = null;
@@ -121,6 +139,11 @@ class Wallet {
             pubKey: this._keypair.public.marshalBinary(),
             privKey: this._keypair.private.marshalBinary(),
             balance: this._balance,
+            attendees: [],
+            signature: null,
+            omniledgerID: null,
+            partyInstanceId: null,
+            linkedConode: null
         };
         if (this._finalStatement != null) {
             infos.attendees = this._finalStatement.attendees.map(a => {
@@ -195,7 +218,7 @@ class Wallet {
                         return STATE_TOKEN;
                     });
             default:
-                throw new Error("Wallet is in unknown state");
+                throw new Error("Badge is in unknown state");
         }
     }
 
@@ -353,9 +376,9 @@ class Wallet {
      * Creates and returns a poppartyinstance that can be connected to the network. As it eventually requires to ask
      * the pop-service for the party instance ID, it might need the network.
      * @param update if defined, will update the party instance
-     * @returns {Promise<PopPartyInstance>}
+     * @returns {PopPartyInstance}
      */
-    getPartyInstance(update) {
+    getPartyInstance(update: boolean = false): PopPartyInstance {
         return Promise.resolve()
             .then(() => {
                 if (this._partyInstance == null) {
@@ -384,7 +407,7 @@ class Wallet {
      * @param update if defined, will update the party instance
      * @returns {Promise<CoinInstance>}
      */
-    getCoinInstance(update) {
+    getCoinInstance(update: boolean): CoinInstance {
         return Promise.resolve()
             .then(() => {
                 if (this._coinInstance == null) {
@@ -459,7 +482,7 @@ class Wallet {
             })
         ).then(replies => {
             Log.lvl3("Got replies:", replies);
-            replies.forEach(reply => {
+            replies.forEach((reply: any) => {
                 if (reply && reply.keys) {
                     Log.lvl3("adding other key:", reply.keys);
                     reply.keys.forEach(key => {
@@ -490,24 +513,51 @@ class Wallet {
 
     /**
      * Loads all wallets from disk and does eventual conversion from older formats to new formats.
-     * @return {Promise<{}>}
+     * @return {Promise<Wallet[]>}
      */
-    static loadAll() {
-        // Only loading if not done yet.
-        if (Object.keys(List).length == 0) {
-            // Start with compatibility test
-            // return MigrateFrom.version0()
-            //     .then(() => {
-            return this.loadNewVersions()
-            // })
+    static loadAll(): Promise<Badge[]> {
+        // Only load from disk if not done yet.
+        return Promise.resolve()
+            .then(() => {
+                if (Object.keys(List).length == 0) {
+                    return this.loadNewVersions()
+                }
+                return Promise.resolve(Object.values(List));
+            })
+    }
+
+    /**
+     * Fetches upcoming parties from the network.
+     *
+     * @param wallets {Badge[]} eventually existing wallets.
+     * @return {Promise<Configuration[]>} the possible new Configurations
+     */
+    static fetchUpcoming(wallets: Badge[]): Promise<Configuration[]> {
+        let list: Identity.ServerIdentity[];
+        if (wallets.length > 0) {
+            list = wallets[wallets.length - 1].config.roster.list;
+        } else {
+            Log.print("taking standard list");
+            list = new Convert.parseTomlRoster(
+                "[[servers]]\n" +
+                "  Address = \"tls://gasser.blue:7770\"\n" +
+                "  Public = \"HkDzpR5Imd7WNx8kl2lJcIVRVn8gfDByJnmlfrYh/zU=\"\n" +
+                "  Description = \"Linus' conode\"\n" +
+                "[[servers]]\n" +
+                "  Address = \"tls://conode.dedis.ch:6879\"\n" +
+                "  Public = \"HkDzpR5Imd7WNx8kl2lJcIVRVn8gfDByJnmlfrYh/zU=\"\n" +
+                "  Description = \"DEDIS' conode\"\n").identities;
         }
-        return Promise.resolve(List);
+        list.forEach((conode: Identity.ServerIdentity) => {
+            Log.print("Asking conode for new party:", conode.websocketAddr);
+        })
+        return Promise.resolve([]);
     }
 
     /**
      * @returns {Promise<Wallet[]>} of all wallets stored
      */
-    static loadNewVersions() {
+    static loadNewVersions(): Promise<Badge[]> {
         let fileNames = [];
         FileIO.forEachFolderElement(FilePaths.WALLET_PATH, function (partyFolder) {
             if (partyFolder.name.startsWith("wallet_")) {
@@ -521,7 +571,7 @@ class Wallet {
                 return this.loadFromFile(fileName);
             })
         ).then(() => {
-            return List;
+            return Object.values(List);
         })
     }
 
@@ -536,7 +586,7 @@ class Wallet {
                 Log.lvl3("converting file to wallet:", file);
                 let r = Convert.parseJsonRoster(object.roster);
                 let config = new Configuration(object.name, object.datetime, object.location, r);
-                let wallet = new Wallet(config);
+                let wallet = new Badge(config);
                 wallet._keypair = new KeyPair(o2u(object.privKey), o2u(object.pubKey));
                 if (object.balance) {
                     wallet._balance = parseInt(object.balance);
@@ -553,7 +603,7 @@ class Wallet {
                 if (object.signature) {
                     Log.lvl2("found signature");
                     wallet._finalStatement.signature = o2u(object.signature);
-                    wallet._token = new Token(wallet._finalStatement, this._keypair);
+                    wallet._token = new Token(wallet._finalStatement, wallet.keypair());
                 }
                 if (object.omniledgerID) {
                     wallet._omniledgerID = o2u(object.omniledgerID);
@@ -690,10 +740,10 @@ class Wallet {
  * How to migrate from version 0 of the wallets, which were only configuration
  *
  */
-class MigrateFrom {
+export class MigrateFrom {
     /**
      * Loads all old configs, converts them to wallets, and deletes them.
-     * @returns {Promise<Wallet[] | never>}
+     * @returns {Promise<Badge[] | never>}
      */
     static version0() {
         // Get all filenames for the old structures and the keypairs
@@ -762,7 +812,7 @@ class MigrateFrom {
      * @param address
      * @param omniledgerId
      * @param partyId
-     * @returns {Promise<Wallet>}
+     * @returns {Promise<Badge>}
      */
     static conodeGetWallet(address, omniledgerId, partyId) {
         const cothoritySocketPop = new Net.Socket(Convert.tlsToWebsocket(address, ""), RequestPath.POP);
@@ -785,7 +835,7 @@ class MigrateFrom {
             .then(inst => {
                 // console.dir("got poppartyinstance", inst);
                 let config = Configuration.fromPopPartyInstance(inst);
-                let wallet = new Wallet(config);
+                let wallet = new Badge(config);
                 if (inst.attendees !== undefined && inst.attendees.length > 0) {
                     let fs = new FinalStatement(config, inst.attendees, inst.signature);
                     wallet._finalStatement = fs;
@@ -794,12 +844,3 @@ class MigrateFrom {
             })
     }
 }
-
-module.exports = Wallet;
-module.exports.List = List;
-module.exports.MigrateFrom = MigrateFrom;
-module.exports.STATE_CONFIG = STATE_CONFIG;
-module.exports.STATE_PUBLISH = STATE_PUBLISH;
-module.exports.STATE_FINALIZING = STATE_FINALIZING;
-module.exports.STATE_FINALIZED = STATE_FINALIZED;
-module.exports.STATE_TOKEN = STATE_TOKEN;

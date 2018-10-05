@@ -1,44 +1,38 @@
 import {View} from "ui/core/view";
 import {ItemEventData} from "ui/list-view";
 import {NavigatedData, Page} from "ui/page";
-import * as dialogs from "tns-core-modules/ui/dialogs";
+import {topmost} from "tns-core-modules/ui/frame";
 
 import {PartiesViewModel} from "./parties-view-model";
 import {Item} from "./shared/item";
 
-import {pop} from "../../lib/pop";
-import {log} from "../../lib/Log";
+import {Badge} from "../../lib/pop/Badge";
+import Log from "../../lib/Log";
 
 let page;
 
 export function onNavigatingTo(args: NavigatedData) {
+    Log.print("party");
     page = <Page>args.object;
     page.bindingContext = new PartiesViewModel();
     return loadParties();
-}
-
-export function onItemTap(args: ItemEventData) {
-    const view = <View>args.view;
-    const page = <Page>view.page;
-    const tappedItem = <Item>view.bindingContext;
-
-    page.frame.navigate({
-        moduleName: "home/home-item-detail/home-item-detail-page",
-        context: tappedItem,
-        animated: true,
-        transition: {
-            name: "slide",
-            duration: 200,
-            curve: "ease"
-        }
-    });
+        // .then(()=>{
+        //     Log.print("Going to badges");
+        //     return topmost().navigate({
+        //         moduleName: "pages/badges/badges-page",
+        //     })
+        // });
 }
 
 function loadParties() {
-    return pop.Wallet.loadAll()
+    Log.print("test");
+    return Badge.loadAll()
         .then(wallets => {
-            Object.values(wallets).forEach(wallet => {
-                log.print(wallet);
+            return Badge.fetchUpcoming(wallets)
+        })
+        .then(upcoming =>{
+            Object.values(upcoming).forEach(config => {
+                Log.print(config);
                 // viewModel.partyListDescriptions.push(getViewModel(wallet));
             });
             //
@@ -48,6 +42,6 @@ function loadParties() {
             // return reloadStatuses();
         })
         .catch(err => {
-            log.catch(err);
+            Log.catch(err);
         });
 }

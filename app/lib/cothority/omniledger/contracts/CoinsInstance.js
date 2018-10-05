@@ -4,7 +4,7 @@ const root = require("../../protobuf").root;
 const Argument = require("../Argument");
 const Instruction = require("../Instruction");
 const ClientTransaction = require("../ClientTransaction");
-const Log = require("../../../../lib/dedjs/Log");
+const Log = require("../../../Log");
 const Buffer = require("buffer/").Buffer;
 
 class CoinsInstance {

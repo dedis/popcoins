@@ -1,6 +1,6 @@
 "use strict";
 
-const net = require("../network/NSNet");
+const net = require("../../network/NSNet");
 
 const misc = require("../misc");
 const identity = require("../identity.js");

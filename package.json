@@ -16,18 +16,26 @@
   },
   "dependencies": {
     "@dedis/kyber-js": "0.0.10",
+    "@stablelib/blake2xs": "^0.10.4",
     "buffer": "^5.2.1",
     "co": "^4.6.0",
+    "crypto-browserify": "^3.12.0",
+    "lodash.clonedeep": "^4.5.0",
+    "nativescript-barcodescanner": "^2.7.8",
+    "nativescript-floatingactionbutton": "^4.1.4",
     "nativescript-nodeify": "^0.8.0",
     "nativescript-theme-core": "~1.0.4",
+    "nativescript-ui-listview": "^3.7.1",
     "nativescript-websockets": "^1.5.2",
     "nativescript-zxing": "^1.5.7",
     "protobufjs": "^6.8.8",
     "pure-uuid": "^1.5.4",
+    "shuffle-array": "^1.0.1",
     "tns-core-modules": "^4.2.1",
     "toml": "^2.3.3",
     "tomlify-j0.4": "^3.0.0",
-    "topl": "^0.3.1"
+    "topl": "^0.3.1",
+    "uuid": "^3.3.2"
   },
   "devDependencies": {
     "nativescript-dev-sass": "~1.6.0",

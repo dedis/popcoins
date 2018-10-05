@@ -1,7 +1,7 @@
 require("nativescript-nodeify");
 const Kyber = require("@dedis/kyber-js");
 
-const Log = require("./Log");
+const Log = require("../Log").default;
 const FileIO = require("../FileIO");
 const Convert = require("../Convert");
 const Curve25519 = new Kyber.curve.edwards25519.Curve;

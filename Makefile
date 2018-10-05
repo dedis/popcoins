@@ -20,6 +20,7 @@ apply-patches: init-npm
 
 init-npm:
 	$(npm) install
+	rm -rf node_modules/nativescript-zxing/platforms/android/
 
 link: start-dev
 #	cd dedis/cothority; \

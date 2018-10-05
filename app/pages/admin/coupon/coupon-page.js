@@ -1,0 +1,191 @@
+const Frame = require("ui/frame");
+
+const Dialog = require("ui/dialogs");
+const ObservableModule = require("data/observable");
+const ObservableArray = require("data/observable-array").ObservableArray;
+
+const lib = require("../../../lib");
+const Convert = lib.Convert;
+const Scan = lib.Scan;
+const FileIO = lib.FileIO;
+const FilePaths = lib.FilePaths;
+const Coupon = lib.Coupon;
+const Log = lib.Log.default;
+
+const viewModel = ObservableModule.fromObject({
+    barListDescriptions: new ObservableArray(),
+    isLoading: false,
+    isEmpty: true
+});
+
+let page = undefined;
+let pageObject = undefined;
+
+function onLoaded(args) {
+    Log.print("Loaded coupons");
+    page = args.object;
+    page.bindingContext = viewModel;
+    loadBars();
+}
+
+function loadBars() {
+    viewModel.isLoading = true;
+
+    // Bind isEmpty to the length of the array
+    viewModel.barListDescriptions.on(ObservableArray.changeEvent, () => {
+        viewModel.set('isEmpty', viewModel.barListDescriptions.length === 0);
+    });
+
+    let bar = undefined;
+    viewModel.barListDescriptions.splice(0);
+    FileIO.forEachFolderElement(FilePaths.BEERCOIN_PATH, function (barFolder) {
+        bar = new Coupon(barFolder.name);
+        // Observables have to be nested to reflect changes
+        viewModel.barListDescriptions.push(ObservableModule.fromObject({
+            bar: bar,
+            desc: bar.getConfigModule(),
+        }));
+    });
+    viewModel.isLoading = false;
+}
+
+function barTapped(args) {
+    const index = args.index;
+    const bar = viewModel.barListDescriptions.getItem(index).bar;
+    const signData = bar.getSigningData();
+    const USER_CANCELED = "USER_CANCELED_STRING";
+    Dialog
+        .action({
+            message: "What do you want to do ?",
+            cancelButtonText: "Cancel",
+            actions: ["Show service info to user", "Show orders history", "Delete Service"]
+        })
+        .then(result => {
+            if (result === "Show service info to user") {
+                pageObject.showModal("shared/pages/qr-code/qr-code-page", {
+                    textToShow: Convert.objectToJson(signData),
+                    title: "Service information"
+                }, () => {
+                    Dialog.confirm({
+                        title: "Client confirmation",
+                        message: "Do you want to also scan the client confirmation ?",
+                        okButtonText: "Yes",
+                        cancelButtonText: "No"
+                    }).then(function (result) {
+                        if (!result) {
+                            return Promise.reject(USER_CANCELED);
+                        }
+                        return Scan.scan();
+                    }).then(signatureJson => {
+                        console.log(signatureJson);
+                        const sig = Convert.hexToByteArray(Convert.jsonToObject(signatureJson).signature);
+                        console.dir(sig);
+                        return bar.registerClient(sig, signData)
+                    }).then(() => {
+                        return bar.addOrderToHistory(new Date(Date.now()));
+                    })
+                        .then(() => {
+                            // Alert is shown in the modal page if not enclosed in setTimeout
+                            setTimeout(() => {
+                                Dialog.alert({
+                                    title: "Success !",
+                                    message: "The item is delivered !",
+                                    okButtonText: "Great"
+                                })
+                            });
+                        }).catch(error => {
+                        if (error === USER_CANCELED) {
+                            return Promise.resolve();
+                        }
+                        console.log(error);
+                        console.dir(error);
+                        console.trace();
+
+                        // Alert is shown in the modal page if not enclosed in setTimeout
+                        setTimeout(() => {
+                            Dialog.alert({
+                                title: "Error",
+                                message: error,
+                                okButtonText: "Ok"
+                            });
+                        });
+
+                        return Promise.reject(error);
+                    });
+
+                }, true);
+            } else if (result === "Show orders history") {
+                Frame.topmost().navigate({
+                    moduleName: "drawers/pop/service/order-history/bar-history-list",
+                    context: {
+                        bar: bar,
+                    }
+                });
+
+            } else if (result === "Delete Service") {
+                bar.remove()
+                    .then(() => {
+                        const listView = Frame.topmost().currentPage.getViewById("listView2");
+                        listView.notifySwipeToExecuteFinished();
+
+                        return loadBars();
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                        console.dir(error);
+                        console.trace();
+
+                        Dialog.alert({
+                            title: "Error",
+                            message: "An error occured, please try again. - " + error,
+                            okButtonText: "Ok"
+                        });
+                        return Promise.reject(error);
+                    });
+            }
+        })
+}
+
+function deleteBar(args) {
+    console.dir(args.object.bindingContext);
+    const bar = args.object.bindingContext.bar;
+    bar.remove()
+        .then(() => {
+            const listView = Frame.topmost().currentPage.getViewById("listView2");
+            listView.notifySwipeToExecuteFinished();
+
+            return loadBars();
+        })
+        .catch((error) => {
+            console.log(error);
+            console.dir(error);
+            console.trace();
+
+            Dialog.alert({
+                title: "Error",
+                message: "An error occured, please try again. - " + error,
+                okButtonText: "Ok"
+            });
+
+            return Promise.reject(error);
+
+        });
+}
+
+function addBar() {
+    return Dialog.alert({
+        title: "Sorry",
+        message: "This version killed the bar, sorry",
+        okButtonText: "Ok"
+    });
+    return Dialog.alert({
+        title: "No group available",
+        message: "You didn't participate to any party. Please do so to have a group to which you can get items !",
+        okButtonText: "Ok"
+    });
+}
+
+module.exports.onLoaded = onLoaded;
+module.exports.barTapped = barTapped;
+module.exports.deleteBar = deleteBar;
+module.exports.addBar = addBar;

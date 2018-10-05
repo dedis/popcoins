@@ -3,21 +3,20 @@ const ObservableModule = require("data/observable");
 const Kyber = require("@dedis/kyber-js");
 const CurveEd25519 = new Kyber.curve.edwards25519.Curve;
 
-const Net = require("../network/NSNet");
-const Roster = require("../cothority/identity").Roster;
-const ServerIdentity = require("../cothority/identity").ServerIdentity;
-const FileIO = require("../FileIO");
-const FilePaths = require("../FilePaths");
-const Package = require("../../Package");
-const Convert = require("../Convert");
-const Log = require("../../Log");
-const ObjectType = require("../../ObjectType");
-const Helper = require("../../Helper");
-const Crypto = require("../../crypto/Crypto");
-const RequestPath = require("../network/RequestPath");
-const DecodeType = require("../network/DecodeType");
-const CothorityMessages = require("../network/cothority-messages");
-const KeyPair = require('../crypto/KeyPair');
+const Net = require("./network/NSNet");
+const Roster = require("./cothority/identity").Roster;
+const ServerIdentity = require("./cothority/identity").ServerIdentity;
+const FileIO = require("./FileIO");
+const FilePaths = require("./FilePaths");
+const Convert = require("./Convert");
+const Log = require("./Log");
+const ObjectType = require("./ObjectType");
+const Helper = require("./Helper");
+const Crypto = require("./crypto/Crypto");
+const RequestPath = require("./network/RequestPath");
+const DecodeType = require("./network/DecodeType");
+const CothorityMessages = require("./network/cothority-messages");
+const KeyPair = require('./crypto/KeyPair');
 
 /**
  * This singleton is the user of the app. It contains everything needed that is general, app-wide or does not belong to any precise subpart.
@@ -480,36 +479,4 @@ class User {
  * Now we create a singleton object for the User.
  */
 
-// The symbol key reference that the singleton will use.
-const USER_PACKAGE_KEY = Symbol.for(Package.USER);
-
-// We create the singleton if it hasn't been instanciated yet.
-const globalSymbols = Object.getOwnPropertySymbols(global);
-const userExists = (globalSymbols.indexOf(USER_PACKAGE_KEY) >= 0);
-
-if (!userExists) {
-    global[USER_PACKAGE_KEY] = (function () {
-        const newUser = new User();
-        newUser.load();
-
-        return newUser;
-    })();
-}
-
-// Singleton API
-const USER = {};
-
-Object.defineProperty(USER, "get", {
-    configurable: false,
-    enumerable: false,
-    get: function () {
-        return global[USER_PACKAGE_KEY];
-    },
-    set: undefined
-});
-
-// We freeze the singleton.
-Object.freeze(USER);
-
-// We export only the singleton API.
-module.exports = USER;
+module.exports = new User();

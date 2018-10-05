@@ -5,7 +5,6 @@ let ZXing = require('nativescript-zxing');
 let zx = new ZXing();
 let ImageSource = require('image-source');
 
-
 export class PartiesViewModel extends Observable {
     items: Array<Item>;
 

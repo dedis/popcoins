@@ -1,14 +1,28 @@
 <Page
-    class="page"
-    navigatingTo="onNavigatingTo"  
-    xmlns="http://schemas.nativescript.org/tns.xsd">
+        class="page"
+        navigatingTo="onNavigatingTo"
+        xmlns="http://schemas.nativescript.org/tns.xsd">
 
     <ActionBar class="action-bar">
         <Label class="action-bar-title" text="Browse"></Label>
     </ActionBar>
 
-    <GridLayout class="page-content">
-        <Label class="page-icon fa" text="&#xf1ea;"></Label>
-        <Label class="page-placeholder" text="<!-- Browse page content goes here -->"></Label>
-    </GridLayout>
+    <ListView items="{{ items }}" itemTap="onItemTap" class="list-group">
+        <ListView.itemTemplate>
+            <StackLayout orientation="horizontal">
+
+                <StackLayout padding="10%">
+                    <Label text="Badge #1" class="h3"
+                           textWrap="true" stretch="aspectFill" textTransform="uppercase"/>
+                </StackLayout>
+                <StackLayout padding="10%">
+                    <Label text="{{ name }}" class="h3" textWrap="true"
+                           textTransform="uppercase"/>
+                    <Label text="{{ datetime }}" textWrap="true" fontSize="15%"/>
+                    <Label text="{{ location }}" textWrap="true" fontSize="15%"
+                           textTransform="capitalize"/>
+                </StackLayout>
+            </StackLayout>
+        </ListView.itemTemplate>
+    </ListView>
 </Page>

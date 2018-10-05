@@ -1,0 +1,40 @@
+<!--
+This is the page that is presented in the 'Search' tab.
+Feel free to customize layouts and components to change how the tab view looks.
+-->
+<Page
+        class="page"
+        navigatingTo="onNavigatingTo"
+        xmlns="http://schemas.nativescript.org/tns.xsd">
+
+    <ActionBar class="action-bar">
+        <NavigationButton text="Go Back" android.systemIcon="ic_menu_back" tap="onBack"/>
+        <Label class="action-bar-title" text="PopCoins"></Label>
+    </ActionBar>
+
+    <StackLayout>
+        <GridLayout id="grid-layout" rows="auto,auto,auto" columns="*, *"
+                    backgroundColor="white"
+                    class="basic-list-decorated">
+            <Button text="Send" tap="sendCoins" row="0" col="0"/>
+            <Button text="Receive" tap="receiveCoins" row="0" col="1"/>
+
+            <StackLayout row="1" col="0" padding="10%">
+                <Label text="PopCoins" class="h3" textWrap="true"
+                       textTransform="uppercase"/>
+                <Label text="Balance:" textWrap="true" fontSize="15%"/>
+            </StackLayout>
+            <StackLayout row="2" col="0">
+                <Label text="Get your QRCode scanned to receive coins to your account."
+                       style="text-align:center;" class="h4"
+                       textWrap="true" paddingTop="10%" stretch="aspectFill"/>
+            </StackLayout>
+
+            <StackLayout class="status-text" row="1" rowSpan="2" col="1">
+                <Image src="{{ qrcode }}"
+                       visibility="visible" stretch="aspectFill"/>
+                <!--visibility="visible" width="60%" height="60%" stretch="aspectFill"/>-->
+            </StackLayout>
+        </GridLayout>
+    </StackLayout>
+</Page>

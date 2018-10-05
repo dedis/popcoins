@@ -49,7 +49,7 @@ module.exports = {
     BEERCOIN_ORDER_HISTORY: "order_history.json",
 
     /**
-     * Wallet files
+     * Badge files
      */
     WALLET_PATH: "shared/res/files/wallet",
     WALLET_CONFIG: "config.json",

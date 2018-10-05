@@ -12,7 +12,7 @@ const CothorityMessages = require("../network/cothority-messages");
 const Helper = require("../Helper");
 
 const root = require("../cothority/protobuf").root;
-const Log = require("../Log");
+const Log = require("../Log").default;
 
 /**
  * Socket is a WebSocket object instance through which protobuf messages are
@@ -260,10 +260,57 @@ function getServerIdentityFromAddress(address) {
 
 }
 
+/**
+ * Sends a link request to the conode given as parameter. If the pin is not empty and the link request succeeds
+ * or if the public key of the user is already registered, the conode will be stored as the linked conode.
+ * @param {ServerIdentity} conode - the conode to which send the link request
+ * @param {string} pin - the pin received from the conode
+ * @returns {Promise} - a promise that gets completed once the link request has been sent and a response received
+ * @property {boolean} alreadyLinked -  a property of the object returned by the promise that tells if
+ * the public key of the user were already registered (thus it won't need to ask PIN in the future)
+ */
+function sendLinkRequest(conode, pin) {
+    if (!(conode instanceof ServerIdentity)) {
+        throw new Error("conode must be an instance of ServerIdentity");
+    }
+    if (typeof pin !== "string") {
+        throw new Error("pin must be of type string");
+    }
+    const ALREADY_LINKED = "ALREADY_LINKED_STRING";
+    const cothoritySocket = new Net.Socket(Convert.tlsToWebsocket(conode, ""), RequestPath.POP);
+    const pinRequestMessage = CothorityMessages.createPinRequest(pin, User.getKeyPair().public);
+    const verifyLinkMessage = CothorityMessages.createVerifyLinkMessage(User.getKeyPair().public);
+
+    // TODO change status request return type
+    Log.lvl2("verify link");
+    return cothoritySocket.send(RequestPath.POP_VERIFY_LINK, DecodeType.VERIFY_LINK_REPLY, verifyLinkMessage)
+        .then(alreadyLinked => {
+            Log.lvl2("sending pin request");
+            return alreadyLinked.exists ?
+                Promise.resolve(ALREADY_LINKED) :
+                cothoritySocket.send(RequestPath.POP_PIN_REQUEST, RequestPath.STATUS_REQUEST, pinRequestMessage)
+        })
+        .then(response => {
+            Log.lvl2("already linked");
+            return {
+                alreadyLinked: response === ALREADY_LINKED
+            };
+        })
+        .catch(error => {
+            Log.catch(error, "link error");
+            if (error.message === CothorityMessages.READ_PIN_ERROR) {
+                return Promise.resolve(error.message)
+            }
+            return Promise.reject(error);
+        });
+}
+
+
 module.exports = {
     Socket,
     RosterSocket,
     LeaderSocket,
     tlsToWebsocket,
-    getServerIdentityFromAddress
+    getServerIdentityFromAddress,
+    sendLinkRequest
 };

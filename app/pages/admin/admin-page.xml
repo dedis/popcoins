@@ -3,15 +3,32 @@ This is the page that is presented in the 'Search' tab.
 Feel free to customize layouts and components to change how the tab view looks.
 -->
 <Page
-    class="page"
-    navigatingTo="onNavigatingTo"  
-    xmlns="http://schemas.nativescript.org/tns.xsd">
+        class="page"
+        navigatingTo="onNavigatingTo"
+        xmlns="http://schemas.nativescript.org/tns.xsd">
 
-    <ActionBar class="action-bar">
-        <Label class="action-bar-title" text="Search"></Label>
+    <ActionBar class="action-bar" actionBarHidden="true">
+        <NavigationButton text="Go Back" android.systemIcon="ic_menu_back" tap="onBack"/>
+        <Label class="action-bar-title" text="PopCoins2"></Label>
     </ActionBar>
-    <GridLayout class="page-content">
-        <Label class="page-icon fa" text="&#xf002;"></Label>
-        <Label class="page-placeholder" text="<!-- Search page content goes here -->"></Label>
-    </GridLayout>
+
+    <TabView class="page-content" selectedIndex="1" androidOffscreenTabLimit="0">
+        <TabView.items>
+            <TabViewItem title="New Parties">
+                <TabViewItem.view>
+                    <Frame defaultPage="pages/admin/list/list-page"/>
+                </TabViewItem.view>
+            </TabViewItem>
+            <TabViewItem title="Coupons">
+                <TabViewItem.view>
+                    <Frame defaultPage="pages/admin/coupon/coupon-page"/>
+                </TabViewItem.view>
+            </TabViewItem>
+            <TabViewItem title="Conodes">
+                <TabViewItem.view>
+                    <Frame defaultPage="pages/admin/conodes/conodes-page"/>
+                </TabViewItem.view>
+            </TabViewItem>
+        </TabView.items>
+    </TabView>
 </Page>

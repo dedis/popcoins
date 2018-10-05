@@ -1,11 +1,14 @@
 const util = require('util');
 const application = require("application");
+const Buffer = require("buffer/");
 
 let defaultLvl = 2;
 
 let lvlStr = ["E ", "W ", "I ", "!4", "!3", "!2", "!1", "P ", " 1", " 2", " 3", " 4"]
 
-class LogC {
+export class LogC {
+    _lvl: number;
+
     constructor(lvl) {
         if (lvl !== undefined) {
             this._lvl = lvl;
@@ -21,7 +24,7 @@ class LogC {
             }
             try {
                 // return JSON.stringify(a, undefined, 4);
-                let type = typeof a;
+                let type:string = typeof a;
                 if (a === Object(a)) {
                     if (a.constructor) {
                         type = a.constructor.name;
@@ -43,7 +46,7 @@ class LogC {
     printCaller(err, i) {
         try {
             let stack = err.stack.split('\n')
-            let method = "";
+            let method = [];
             if (application.android) {
                 method = stack[i].trim().replace(/^at */, '').split("(");
             } else {
@@ -141,8 +144,10 @@ class LogC {
     get lvl() {
         return this._lvl;
     }
-}
+};
 
-module.exports = new LogC(2);
-module.exports.C = LogC;
-module.exports.defaultLvl = defaultLvl;
+let Log = new LogC(2);
+export default Log;
+// module.exports = new LogC(2);
+// module.exports.C = LogC;
+// module.exports.defaultLvl = defaultLvl;

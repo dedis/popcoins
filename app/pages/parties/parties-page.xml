@@ -8,7 +8,7 @@ Feel free to customize layouts and components to change how the tab view looks.
     xmlns="http://schemas.nativescript.org/tns.xsd">
 
     <ActionBar class="action-bar">
-        <Label class="action-bar-title" text="Parties"></Label>
+        <Label class="action-bar-title" text="Upcoming Parties"></Label>
     </ActionBar>
 
     <ListView items="{{ items }}" itemTap="onItemTap" class="list-group">

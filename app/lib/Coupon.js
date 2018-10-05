@@ -1,14 +1,14 @@
 require("nativescript-nodeify");
 
 const uuidv4 = require("uuid/v4");
-const Helper = require("../../Helper");
-const ObjectType = require("../../ObjectType");
-const FileIO = require("../FileIO");
-const FilesPath = require("../FilePaths");
-const Convert = require("../Convert");
+const Helper = require("./Helper");
+const ObjectType = require("./ObjectType");
+const FileIO = require("./FileIO");
+const FilesPath = require("./FilePaths");
+const Convert = require("./Convert");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const Observable = require("data/observable");
-const RingSig = require("../crypto/RingSig");
+const RingSig = require("./crypto/RingSig");
 const Kyber = require("@dedis/kyber-js");
 const Suite = new Kyber.curve.edwards25519.Curve;
 const Crypto = require("crypto-browserify");

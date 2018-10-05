@@ -1,9 +1,10 @@
 require("nativescript-nodeify");
 
 const Roster = require("../cothority/identity").Roster;
-const Convert = require("../Convert");
 const Crypto = require('crypto-browserify');
-const HashJs = require("hash.js");
+import Convert = require("../Convert");
+import HashJs = require("hash.js");
+import Buffer = require("buffer/");
 
 /**
  * Stores all necessary data for a configuration. A configuration of a pop-party holds the data
@@ -12,7 +13,14 @@ const HashJs = require("hash.js");
  * This module holds wrappers to save and load itself from disk.
  */
 
-class Configuration {
+export default class Configuration {
+    _name: string;
+    _datetime: string;
+    _location: string;
+    _roster: any;
+    _id: Uint8Array;
+    _addedLoaded: boolean;
+    _finalStatement: any;
 
     /**
      * Creates a new configuration from its basic data.
@@ -38,7 +46,8 @@ class Configuration {
      * @returns {Buffer}
      */
     toProto() {
-        return Buffer();
+        return "not yet implemented";
+        // return Buffer();
     }
 
     /**
@@ -97,7 +106,8 @@ class Configuration {
      * @returns {Configuration}
      */
     static fromProto(proto) {
-        return new Configuration();
+        return "not yet implemented";
+        // return new Configuration();
     }
 
     static fromPopPartyInstance(ppi) {
@@ -152,5 +162,3 @@ class Configuration {
         this._roster = r;
     }
 }
-
-module.exports = Configuration;
