@@ -1,37 +1,14 @@
-require("./bundle-config");
-const application = require("application");
-const Wallet = require("./shared/lib/dedjs/object/pop/Wallet");
-
-if (application.android) {
-    application.android.on(application.AndroidApplication.activityResultEvent, function (args) {
-        console.log("Event: " + args.eventName + ", Activity: " + args.activity +
-            ", requestCode: " + args.requestCode + ", resultCode: " + args.resultCode + ", Intent: " + args.intent);
-    });
-}
-
-application.on(application.uncaughtErrorEvent, (args) => {
-    if (application.android) {
-        // For Android applications, args.android is an NativeScriptError.
-        console.log(" *** NativeScriptError *** : " + args.android);
-        console.log(" *** StackTrace *** : " + args.android.stackTrace);
-        console.log(" *** nativeException *** : " + args.android.nativeException);
-    } else if (application.ios) {
-        // For iOS applications, args.ios is NativeScriptError.
-        console.log(" ||||| NativeScriptError in iOS ||||| " + args.ios);
-    }
-});
-
-Wallet.loadAll()
-    .catch(err=>{
-        console.error("couldn't load Wallets:", err);
-    })
-    .then(() => {
-        // application.start({moduleName: "drawers/tokens/main"});
-        application.start({moduleName: "drawers/messages/main"});
-        // application.start({ moduleName: "drawers/pop/pop-page" });
-    })
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+/*
+In NativeScript, the app.ts file is the entry point to your application.
+You can use this file to perform app-level initialization, but the primary
+purpose of the file is to pass control to the app’s first module.
+*/
+const app = require("application");
+app.run({ moduleName: "app-root" });
 /*
 Do not place any code after the application has been started as it will not
 be executed on iOS.
 */
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYXBwLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiYXBwLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7O0FBQUE7Ozs7RUFJRTtBQUNGLG1DQUFtQztBQUVuQyxHQUFHLENBQUMsR0FBRyxDQUFDLEVBQUUsVUFBVSxFQUFFLFVBQVUsRUFBRSxDQUFDLENBQUM7QUFFcEM7OztFQUdFIiwic291cmNlc0NvbnRlbnQiOlsiLypcbkluIE5hdGl2ZVNjcmlwdCwgdGhlIGFwcC50cyBmaWxlIGlzIHRoZSBlbnRyeSBwb2ludCB0byB5b3VyIGFwcGxpY2F0aW9uLlxuWW91IGNhbiB1c2UgdGhpcyBmaWxlIHRvIHBlcmZvcm0gYXBwLWxldmVsIGluaXRpYWxpemF0aW9uLCBidXQgdGhlIHByaW1hcnlcbnB1cnBvc2Ugb2YgdGhlIGZpbGUgaXMgdG8gcGFzcyBjb250cm9sIHRvIHRoZSBhcHDigJlzIGZpcnN0IG1vZHVsZS5cbiovXG5pbXBvcnQgKiBhcyBhcHAgZnJvbSBcImFwcGxpY2F0aW9uXCI7XG5cbmFwcC5ydW4oeyBtb2R1bGVOYW1lOiBcImFwcC1yb290XCIgfSk7XG5cbi8qXG5EbyBub3QgcGxhY2UgYW55IGNvZGUgYWZ0ZXIgdGhlIGFwcGxpY2F0aW9uIGhhcyBiZWVuIHN0YXJ0ZWQgYXMgaXQgd2lsbCBub3RcbmJlIGV4ZWN1dGVkIG9uIGlPUy5cbiovXG4iXX0=
