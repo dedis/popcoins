@@ -19,7 +19,7 @@ Feel free to customize layouts and components to change how the tab view looks.
             <Label text="Total Coupons" textWrap="true" fontSize="15%"/>
         </StackLayout>
 
-        <Label backgroundColor="#ffffff" row="1" colSpan="2"/>
+        <Label backgroundColor="#ffffff" row="1" colSpan="2" height="3%"/>
 
         <Label text="&#xff0e0;" fontSize="100%" class="fa" row="2" col="0" style="vertical-align: center;" tap="goPosts"/>
         <StackLayout padding="10%" row="2" col="2" style="vertical-align: center;" tap="goPosts">
@@ -28,7 +28,7 @@ Feel free to customize layouts and components to change how the tab view looks.
             <Label text="Unread Posts" textWrap="true" fontSize="15%"/>
         </StackLayout>
 
-        <Label backgroundColor="#ffffff" row="3" colSpan="2"/>
+        <Label backgroundColor="#ffffff" row="3" colSpan="2" height="3%"/>
 
         <Label text="&#xff158;" fontSize="100%" class="h1 fa" row="4" col="0" style="vertical-align: center;" tap="goCoins"/>
         <StackLayout padding="10%" row="4" col="1" style="vertical-align: center;" tap="goCoins">

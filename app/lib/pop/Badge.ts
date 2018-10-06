@@ -34,8 +34,8 @@ import Log from "../Log";
  */
 
 // List is all the Wallets that have been loaded from disk.
-let List: object = {};
-let Upcoming: object = {};
+export let List: object = {};
+export let Upcoming: object = {};
 
 export const STATE_CONFIG = 1;
 export const STATE_PUBLISH = 2;

@@ -4,6 +4,7 @@ tapping on some of the tabs or by swiping between the views.
 Learn more about the TabView component in this documentation article:
 http://docs.nativescript.org/cookbook/ui/tab-view
 -->
+
 <TabView androidTabsPosition="bottom" selectedIndex="3">
     <TabViewItem title="Parties" ios:iconSource="res://tabIcons/home" android:iconSource="res://home">
         <Frame defaultPage="pages/parties/parties-page"></Frame>

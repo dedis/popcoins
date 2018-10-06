@@ -6,15 +6,17 @@
         xmlns:nsListView="nativescript-ui-listview"
         xmlns="http://www.nativescript.org/tns.xsd">
 
-    <GridLayout class="page-content" rows="*" columns="*" margin="2%">
+    <GridLayout class="page-content" rows="*,*" margin="2%">
         <Label text="You don't have any conode. Feel free to add one !"
                textWrap="true"
                class="empty-list-label"
+               row="0"
+               width="80%"
                visibility="{{ isRosterEmpty ? 'visible' : 'collapsed' }}"
         />
 
         <nsListView:RadListView items="{{ rosterModule.list }}" itemTap="conodeTapped"
-                                id="listView">
+                                id="listView" row="1">
             <nsListView:RadListView.itemTemplate>
                 <GridLayout class="basic-list-decorated" id="grid-layout-conode-stats" rows="*,*" columns="*,auto">
                     <Label class="list-title" text="{{ description }}" row="0" colSpan="2" textWrap="true"/>
@@ -24,11 +26,12 @@
             </nsListView:RadListView.itemTemplate>
         </nsListView:RadListView>
 
-        <ActivityIndicator busy="{{ rosterModule.isLoading }}"/>
         <nsFloatingButton:fab tap="addConode"
-                              row="0" col="3"
+                              row="1"
                               icon="res://ic_add_white"
                               rippleColor="#f1f1f1"
                               class="fab-button"/>
+
+        <ActivityIndicator busy="{{ rosterModule.isLoading }}" colSpan="2" rowSpan="2"/>
     </GridLayout>
 </Page>

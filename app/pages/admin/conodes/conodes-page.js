@@ -35,12 +35,13 @@ function onLoaded(args) {
         viewModel.set('isRosterEmpty', viewModel.rosterModule.list.length === 0);
     });
 
-    loadConodeList();
-
-    // Poll the statuses every 2s
-    timerId = Timer.setInterval(() => {
-        loadConodeList();
-    }, 2000)
+    return loadConodeList();
+        // .then(() => {
+        //     // Poll the statuses every 2s
+        //     timerId = Timer.setInterval(() => {
+        //         loadConodeList();
+        //     }, 2000)
+        // })
 }
 
 function onUnloaded() {
@@ -54,10 +55,7 @@ function onDrawerButtonTap(args) {
 }
 
 function loadConodeList() {
-    if (viewModel.rosterModule.isLoading) {
-        return Promise.resolve();
-    }
-    User.getRosterStatus()
+    return User.getRosterStatus()
         .then(status => {
             viewModel.rosterModule.list.splice(0);
             viewModel.isRosterEmpty = true;

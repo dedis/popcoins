@@ -25,7 +25,7 @@ const viewModel = Observable.fromObject({
     partyListDescriptions: new ObservableArray(),
     isLoading: true,
     isEmpty: true,
-    loaded: false
+    loaded: false,
 });
 
 let page = undefined;
@@ -38,9 +38,7 @@ function onLoaded(args) {
 
     viewModel.partyListDescriptions.splice(0);
 
-    return Timer.setTimeout(() => {
-        loadParties();
-    }, 10);
+    return loadParties();
 }
 
 function onUnloaded() {
@@ -211,62 +209,74 @@ function verifyLinkToConode() {
 
     let index = undefined;
 
-    return Dialog.action({
-        message: "Choose a Conode",
-        cancelButtonText: "Cancel",
-        actions: conodesNames
-    }).then(result => {
-        if (result !== "Cancel") {
-            index = conodesNames.indexOf(result);
-            Log.lvl2("index is:", index);
-            return Net.sendLinkRequest(conodes[index], "")
-                .then(result => {
-                    Log.lvl2("Prompting for pin");
-                    if (result.alreadyLinked !== undefined && result.alreadyLinked) {
-                        Log.lvl2("Already linked");
-                        return Promise.resolve(conodes[index])
-                    }
-                    return Dialog.prompt({
-                        title: "Requested PIN",
-                        message: result,
-                        okButtonText: "Link",
-                        cancelButtonText: "Cancel",
-                        defaultText: "",
-                        inputType: Dialog.inputType.text
-                    }).then(result => {
-                        if (result.result) {
-                            if (result.text === "") {
-                                return Promise.reject("PIN should not be empty");
-                            }
-                            return Net.sendLinkRequest(conodes[index], result.text)
-                                .then(() => {
-                                    return Promise.resolve(conodes[index]);
-                                });
-                        } else {
-                            return Promise.reject(CANCELED_BY_USER);
-                        }
-                    });
-
-                }).catch(error => {
-                    Log.lvl2("couldn't get PIN: " + error);
+    return Promise.resolve()
+        .then(() => {
+            if (conodesNames.length == 0) {
+                return Dialog.alert({
+                    message: "Please add a conode",
+                    okButtonText: "OK"
+                }).then(() => {
+                    throw new Error("No conodes available")
                 })
-        } else {
-            return Promise.reject(CANCELED_BY_USER);
-        }
-    }).catch(error => {
-        Log.catch(error, "error while setting up pin");
+            }
+        }).then(() => {
+            Dialog.action({
+                message: "Choose a Conode",
+                cancelButtonText: "Cancel",
+                actions: conodesNames
+            }).then(result => {
+                if (result !== "Cancel") {
+                    index = conodesNames.indexOf(result);
+                    Log.lvl2("index is:", index);
+                    return Net.sendLinkRequest(conodes[index], "")
+                        .then(result => {
+                            Log.lvl2("Prompting for pin");
+                            if (result.alreadyLinked !== undefined && result.alreadyLinked) {
+                                Log.lvl2("Already linked");
+                                return Promise.resolve(conodes[index])
+                            }
+                            return Dialog.prompt({
+                                title: "Requested PIN",
+                                message: result,
+                                okButtonText: "Link",
+                                cancelButtonText: "Cancel",
+                                defaultText: "",
+                                inputType: Dialog.inputType.text
+                            }).then(result => {
+                                if (result.result) {
+                                    if (result.text === "") {
+                                        return Promise.reject("PIN should not be empty");
+                                    }
+                                    return Net.sendLinkRequest(conodes[index], result.text)
+                                        .then(() => {
+                                            return Promise.resolve(conodes[index]);
+                                        });
+                                } else {
+                                    return Promise.reject(CANCELED_BY_USER);
+                                }
+                            });
 
-        if (error !== CANCELED_BY_USER) {
-            return Dialog.alert({
-                title: "Error",
-                message: "An unexpected error occurred. Please try again. - " + error,
-                okButtonText: "Ok"
-            }).then(() => {
-                throw new Error("Couldn't setup pin: " + error);
+                        }).catch(error => {
+                            Log.lvl2("couldn't get PIN: " + error);
+                        })
+                } else {
+                    return Promise.reject(CANCELED_BY_USER);
+                }
+            }).catch(error => {
+                Log.catch(error, "error while setting up pin");
+
+                if (error !== CANCELED_BY_USER) {
+                    return Dialog.alert({
+                        title: "Error",
+                        message: "An unexpected error occurred. Please try again. - " + error,
+                        okButtonText: "Ok"
+                    }).then(() => {
+                        throw new Error("Couldn't setup pin: " + error);
+                    });
+                }
+                return Promise.reject(error);
             });
-        }
-        return Promise.reject(error);
-    });
+        })
 }
 
 
