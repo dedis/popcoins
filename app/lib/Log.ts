@@ -134,7 +134,7 @@ export class LogC {
         }
         console.log("C : " + this.printCaller(e, 1) + " -> (" + errMsg + ") " +
             this.joinArgs(args));
-        throw new Error(e.message.replace(/Error: /, ''));
+        throw new Error(errMsg.replace(/Error: /, ''));
     }
 
     set lvl(l) {
@@ -148,6 +148,3 @@ export class LogC {
 
 let Log = new LogC(2);
 export default Log;
-// module.exports = new LogC(2);
-// module.exports.C = LogC;
-// module.exports.defaultLvl = defaultLvl;

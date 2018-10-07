@@ -16,7 +16,7 @@
                visibility="{{ isEmpty ? 'visible' : 'collapsed' }}"
         />
 
-        <nsListView:RadListView items="{{ barListDescriptions }}" itemTap="barTapped"
+        <nsListView:RadListView items="{{ barListDescriptions }}" itemTap="couponTapped"
                                 row="1" id="listView">
             <nsListView:RadListView.itemTemplate>
                 <GridLayout rows="*,*" columns="*, auto" backgroundColor="white"
@@ -28,7 +28,7 @@
             </nsListView:RadListView.itemTemplate>
         </nsListView:RadListView>
 
-        <nsFloatingButton:fab tap="addBar"
+        <nsFloatingButton:fab tap="addCoupon"
                               row="1"
                               icon="res://ic_add_white"
                               rippleColor="#f1f1f1"

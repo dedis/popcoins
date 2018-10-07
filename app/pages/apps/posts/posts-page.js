@@ -158,7 +158,7 @@ function addMessage() {
     //     text: "this is a long text",
     // });
     return page.showModal(
-        "shared/pages/messages/newMessage",
+        "pages/apps/posts/rw/newMessage",
         undefined,
         addNewMessage,
         true
@@ -251,7 +251,6 @@ module.exports.onBack = function () {
     Frame.topmost().goBack();
 };
 
-module.exports.onDrawerButtonTap = onDrawerButtonTap;
 module.exports.onLoaded = onLoaded;
 module.exports.messageTapped = messageTapped;
 module.exports.onUnloaded = onUnloaded;

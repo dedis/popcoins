@@ -10,7 +10,7 @@
     </ActionBar>
 
     <GridLayout class="page-content" rows="auto,*">
-        <Label text="To add a token, you must join a party."
+        <Label text="To get badges, you must visit a party."
                textWrap="true"
                class="empty-list-label"
                row="0"

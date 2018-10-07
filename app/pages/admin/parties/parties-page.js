@@ -215,63 +215,63 @@ function verifyLinkToConode() {
                 })
             }
         }).then(() => {
-            return Dialog.action({
-                message: "Choose a Conode",
-                cancelButtonText: "Cancel",
-                actions: conodesNames
-            }).then(result => {
-                if (result !== "Cancel") {
-                    index = conodesNames.indexOf(result);
-                    Log.lvl2("index is:", index);
-                    return User.sendLinkRequest(conodes[index], "")
-                        .then(result => {
-                            Log.lvl2("Prompting for pin");
-                            if (result.alreadyLinked !== undefined && result.alreadyLinked) {
-                                Log.lvl2("Already linked");
-                                return Promise.resolve(conodes[index])
+                return Dialog.action({
+                    message: "Choose a Conode",
+                    cancelButtonText: "Cancel",
+                    actions: conodesNames
+                }).then(result => {
+                    if (result !== "Cancel") {
+                        index = conodesNames.indexOf(result);
+                        Log.lvl2("index is:", index);
+                        return User.sendLinkRequest(conodes[index], "")
+                    }
+                }).catch(error => {
+                    Log.rcatch(error);
+                }).then(result => {
+                    Log.lvl2("Prompting for pin");
+                    if (result.alreadyLinked !== undefined && result.alreadyLinked) {
+                        Log.lvl2("Already linked");
+                        return Promise.resolve(conodes[index])
+                    }
+                    return Dialog.prompt({
+                        title: "Requested PIN",
+                        message: "Please look up the PIN in the server log",
+                        okButtonText: "Link",
+                        cancelButtonText: "Cancel",
+                        defaultText: "",
+                        inputType: Dialog.inputType.text
+                    }).then(result => {
+                        Log.print("result is:", result);
+                        if (result.result) {
+                            if (result.text === "") {
+                                return Promise.reject("PIN should not be empty");
                             }
-                            return Dialog.prompt({
-                                title: "Requested PIN",
-                                message: result,
-                                okButtonText: "Link",
-                                cancelButtonText: "Cancel",
-                                defaultText: "",
-                                inputType: Dialog.inputType.text
-                            }).then(result => {
-                                if (result.result) {
-                                    if (result.text === "") {
-                                        return Promise.reject("PIN should not be empty");
-                                    }
-                                    return User.sendLinkRequest(conodes[index], result.text)
-                                        .then(() => {
-                                            return Promise.resolve(conodes[index]);
-                                        });
-                                } else {
-                                    return Promise.reject(CANCELED_BY_USER);
-                                }
-                            });
-
-                        }).catch(error => {
-                            Log.lvl2("couldn't get PIN: " + error);
-                        })
-                } else {
-                    return Promise.reject(CANCELED_BY_USER);
-                }
-            }).catch(error => {
-                Log.catch(error, "error while setting up pin");
-
-                if (error !== CANCELED_BY_USER) {
-                    return Dialog.alert({
-                        title: "Error",
-                        message: "An unexpected error occurred. Please try again. - " + error,
-                        okButtonText: "Ok"
-                    }).then(() => {
-                        throw new Error("Couldn't setup pin: " + error);
+                            return User.sendLinkRequest(conodes[index], result.text)
+                                .then(() => {
+                                    return Promise.resolve(conodes[index]);
+                                });
+                        } else {
+                            return Promise.reject(CANCELED_BY_USER);
+                        }
                     });
-                }
-                return Promise.reject(error);
-            });
-        })
+                }).catch(error => {
+                    Log.catch(error, "error while setting up pin");
+                    Log.print(error);
+                    Log.print(CANCELED_BY_USER);
+
+                    if (error !== CANCELED_BY_USER) {
+                        return Dialog.alert({
+                            title: "Error",
+                            message: "An unexpected error occurred. Please try again. - " + error,
+                            okButtonText: "Ok"
+                        }).then(() => {
+                            throw new Error("Couldn't setup pin: " + error);
+                        });
+                    }
+                    return Promise.reject(error);
+                });
+            }
+        )
 }
 
 
@@ -322,7 +322,7 @@ function addParty() {
             return Promise.resolve()
         })
         .catch(err => {
-            console.dir("error while adding a party: " + err)
+            Log.catch("error while adding a party: " + err)
         });
 }
 

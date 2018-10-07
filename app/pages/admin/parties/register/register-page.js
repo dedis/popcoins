@@ -254,7 +254,7 @@ function shareToAttendee() {
         omniledgerId: RequestPath.OMNILEDGER_INSTANCE_ID,
         address: Party.linkedConode.tcpAddr
     };
-    pageObject.showModal("shared/pages/qr-code/qr-code-page", {
+    pageObject.showModal("pages/common/qr-code/qr-code-page", {
         textToShow: Convert.objectToJson(info),
         title: "Party information"
     }, () => {
@@ -288,7 +288,7 @@ function deleteParty() {
 
 function keyTapped(arg) {
     const key = Buffer.from(viewModel.array.getItem(arg.index), 'hex');
-    Frame.topmost().currentPage.showModal("shared/pages/qr-code/qr-code-page", {
+    Frame.topmost().currentPage.showModal("pages/common/qr-code/qr-code-page", {
         textToShow: " { \"public\" :  \"" + Buffer.from(key).toString('base64') + "\"}",
         title: "Public Key",
     }, () => {

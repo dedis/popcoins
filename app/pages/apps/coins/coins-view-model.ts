@@ -1,24 +1,9 @@
-import { Observable } from "data/observable";
+import {fromObjectRecursive, Observable} from "data/observable";
+import {ObservableArray} from "tns-core-modules/data/observable-array";
 
-let ZXing = require('nativescript-zxing');
-let zx = new ZXing();
-let ImageSource = require('image-source');
-
-export class CoinsViewModel extends Observable {
-    balance: number;
-    qrcode: any;
-
-    constructor() {
-        super();
-
-        const qrcodeZX = zx.createBarcode({
-            encode: "test",
-            format: ZXing.QR_CODE,
-            height: 128,
-            width: 128
-        });
-
-        this.balance = 100000;
-        this.qrcode = ImageSource.fromNativeSource(qrcodeZX);
+export let CoinsViewModel: Observable = fromObjectRecursive({
+        balance: 0,
+        qrcode: undefined,
+        isLoading: false
     }
-}
+)

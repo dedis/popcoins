@@ -84,8 +84,6 @@ function save() {
 
             return Promise.reject(error);
         });
-
-
 }
 
 function goBack() {

@@ -8,6 +8,10 @@ const HashJs = require("hash.js");
 const OmniledgerRPC = require("../cothority/omniledger/OmniledgerRPC");
 const Darc = require("../cothority/omniledger/darc");
 import * as Identity from "./../cothority/identity";
+import {Buffer} from "buffer/";
+const PlatformModule = require("tns-core-modules/platform");
+const ZXing = require("nativescript-zxing");
+const QRGenerator = new ZXing();
 // let ServerIdentity = Identity.ServerIdentity;
 
 import CoinInstance = require("../cothority/omniledger/contracts/CoinsInstance");
@@ -25,6 +29,7 @@ const KeyPair = require('../crypto/KeyPair');
 
 import Configuration from './Configuration';
 import Log from "../Log";
+import {ImageSource, fromNativeSource} from "tns-core-modules/image-source";
 
 /**
  * Badge holds one or more configurations, final statements, and keypairs and lets the user and the organizer
@@ -511,6 +516,19 @@ export class Badge {
         return this._coinInstance.transfer(amount, accountId, signer);
     }
 
+    qrcodePublic(){
+        let pubBase64 = Buffer.from(this.keypair.public.marshalBinary()).toString('base64');
+        let text = " { \"public\" :  \"" + pubBase64 + "\"}";
+        let sideLength = PlatformModule.screen.mainScreen.widthPixels / 4;
+        const qrcode = QRGenerator.createBarcode({
+            encode: text,
+            format: ZXing.QR_CODE,
+            height: sideLength,
+            width: sideLength
+        });
+        return fromNativeSource(qrcode);
+    }
+
     /**
      * Loads all wallets from disk and does eventual conversion from older formats to new formats.
      * @return {Promise<Wallet[]>}
@@ -599,7 +617,7 @@ export class Badge {
         return FileIO.getStringOf(fileName)
             .then(file => {
                 let object = Convert.jsonToObject(file);
-                Log.lvl1("converting file to wallet:", file);
+                Log.lvl3("converting file to wallet:", file);
                 let r = Convert.parseJsonRoster(object.roster);
                 let config = new Configuration(object.name, object.datetime, object.location, r);
                 let wallet = new Badge(config);

@@ -17,14 +17,17 @@
   "dependencies": {
     "@dedis/kyber-js": "0.0.10",
     "@stablelib/blake2xs": "^0.10.4",
+    "@types/node": "^10.11.4",
     "buffer": "^5.2.1",
     "co": "^4.6.0",
     "crypto-browserify": "^3.12.0",
     "lodash.clonedeep": "^4.5.0",
     "nativescript-barcodescanner": "^2.7.8",
+    "nativescript-clipboard": "^1.1.7",
     "nativescript-floatingactionbutton": "^4.1.4",
     "nativescript-modal-datetimepicker": "^1.1.7",
     "nativescript-nodeify": "^0.8.0",
+    "nativescript-pulltorefresh": "^2.1.1",
     "nativescript-theme-core": "~1.0.4",
     "nativescript-ui-dataform": "^3.7.3",
     "nativescript-ui-listview": "^3.7.1",
@@ -37,6 +40,7 @@
     "toml": "^2.3.3",
     "tomlify-j0.4": "^3.0.0",
     "topl": "^0.3.1",
+    "util": "^0.11.0",
     "uuid": "^3.3.2"
   },
   "devDependencies": {

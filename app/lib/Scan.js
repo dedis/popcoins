@@ -2,6 +2,7 @@
  * @file Library to scan a QR code and return the content as a string.
  */
 
+const Log = require("./Log").default;
 const BCScanner = require("nativescript-barcodescanner").BarcodeScanner;
 
 const BarCodeScanner = new BCScanner();

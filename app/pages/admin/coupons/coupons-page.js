@@ -11,6 +11,7 @@ const FileIO = lib.FileIO;
 const FilePaths = lib.FilePaths;
 const Coupon = lib.Coupon;
 const Log = lib.Log.default;
+const User = lib.pop.User;
 
 const viewModel = ObservableModule.fromObject({
     barListDescriptions: new ObservableArray(),
@@ -25,10 +26,10 @@ function onLoaded(args) {
     Log.print("Loaded coupons");
     page = args.object;
     page.bindingContext = viewModel;
-    loadBars();
+    loadCoupons();
 }
 
-function loadBars() {
+function loadCoupons() {
     viewModel.isLoading = true;
 
     // Bind isEmpty to the length of the array
@@ -49,143 +50,129 @@ function loadBars() {
     viewModel.isLoading = false;
 }
 
-function barTapped(args) {
+function couponTapped(args) {
     const index = args.index;
     const bar = viewModel.barListDescriptions.getItem(index).bar;
     const signData = bar.getSigningData();
     const USER_CANCELED = "USER_CANCELED_STRING";
-    Dialog
-        .action({
-            message: "What do you want to do ?",
-            cancelButtonText: "Cancel",
-            actions: ["Show service info to user", "Show orders history", "Delete Service"]
-        })
-        .then(result => {
-            if (result === "Show service info to user") {
-                pageObject.showModal("shared/pages/qr-code/qr-code-page", {
-                    textToShow: Convert.objectToJson(signData),
-                    title: "Service information"
-                }, () => {
-                    Dialog.confirm({
-                        title: "Client confirmation",
-                        message: "Do you want to also scan the client confirmation ?",
-                        okButtonText: "Yes",
-                        cancelButtonText: "No"
-                    }).then(function (result) {
-                        if (!result) {
-                            return Promise.reject(USER_CANCELED);
-                        }
-                        return Scan.scan();
-                    }).then(signatureJson => {
-                        console.log(signatureJson);
-                        const sig = Convert.hexToByteArray(Convert.jsonToObject(signatureJson).signature);
-                        console.dir(sig);
-                        return bar.registerClient(sig, signData)
-                    }).then(() => {
-                        return bar.addOrderToHistory(new Date(Date.now()));
-                    })
-                        .then(() => {
-                            // Alert is shown in the modal page if not enclosed in setTimeout
-                            setTimeout(() => {
-                                Dialog.alert({
-                                    title: "Success !",
-                                    message: "The item is delivered !",
-                                    okButtonText: "Great"
-                                })
-                            });
-                        }).catch(error => {
-                        if (error === USER_CANCELED) {
-                            return Promise.resolve();
-                        }
-                        console.log(error);
-                        console.dir(error);
-                        console.trace();
-
-                        // Alert is shown in the modal page if not enclosed in setTimeout
-                        setTimeout(() => {
-                            Dialog.alert({
-                                title: "Error",
-                                message: error,
-                                okButtonText: "Ok"
-                            });
-                        });
-
-                        return Promise.reject(error);
-                    });
-
-                }, true);
-            } else if (result === "Show orders history") {
-                Frame.topmost().navigate({
-                    moduleName: "pages/admin/coupons/order-history/order-history-page",
-                    context: {
-                        bar: bar,
+    return Dialog.action({
+        message: "What do you want to do ?",
+        cancelButtonText: "Cancel",
+        actions: ["Show service info to user", "Show orders history", "Delete Service"]
+    }).then(result => {
+        if (result === "Show service info to user") {
+            return pageObject.showModal("pages/common/qr-code/qr-code-page", {
+                textToShow: Convert.objectToJson(signData),
+                title: "Service information"
+            }, () => {
+                return Dialog.confirm({
+                    title: "Client confirmation",
+                    message: "Do you want to also scan the client confirmation ?",
+                    okButtonText: "Yes",
+                    cancelButtonText: "No"
+                }).then(function (result) {
+                    if (!result) {
+                        return Promise.reject(USER_CANCELED);
                     }
-                });
+                    return Scan.scan();
+                }).then(signatureJson => {
+                    Log.lvl1(signatureJson);
+                    const sig = Convert.hexToByteArray(Convert.jsonToObject(signatureJson).signature);
+                    Log.print(sig);
+                    return bar.registerClient(sig, signData)
+                }).then(() => {
+                    return bar.addOrderToHistory(new Date(Date.now()));
+                }).then(() => {
+                    // Alert is shown in the modal page if not enclosed in setTimeout
+                    return Dialog.alert({
+                        title: "Success !",
+                        message: "The item is delivered !",
+                        okButtonText: "Great"
+                    });
+                }).catch(error => {
+                    if (error === USER_CANCELED) {
+                        return Promise.resolve();
+                    }
+                    Log.catch(error);
 
-            } else if (result === "Delete Service") {
-                bar.remove()
-                    .then(() => {
-                        const listView = Frame.topmost().currentPage.getViewById("listView2");
-                        listView.notifySwipeToExecuteFinished();
-
-                        return loadBars();
-                    })
-                    .catch((error) => {
-                        console.log(error);
-                        console.dir(error);
-                        console.trace();
-
-                        Dialog.alert({
-                            title: "Error",
-                            message: "An error occured, please try again. - " + error,
-                            okButtonText: "Ok"
-                        });
+                    // Alert is shown in the modal page if not enclosed in setTimeout
+                    return Dialog.alert({
+                        title: "Error",
+                        message: error,
+                        okButtonText: "Ok"
+                    }).then(() => {
                         return Promise.reject(error);
                     });
-            }
-        })
+                });
+            }, true);
+        } else if (result === "Show orders history") {
+            return Frame.topmost().navigate({
+                moduleName: "pages/admin/coupons/order-history/order-history-page",
+                context: {
+                    bar: bar,
+                }
+            });
+        } else if (result === "Delete Service") {
+            return bar.remove()
+                .then(() => {
+                    const listView = Frame.topmost().currentPage.getViewById("listView2");
+                    listView.notifySwipeToExecuteFinished();
+
+                    return loadCoupons();
+                })
+                .catch((error) => {
+                    Log.catch(error);
+
+                    return Dialog.alert({
+                        title: "Error",
+                        message: "An error occured, please try again. - " + error,
+                        okButtonText: "Ok"
+                    }).then(() => {
+                        return Promise.reject(error);
+                    })
+                });
+        }
+    })
 }
 
-function deleteBar(args) {
+function deleteCoupon(args) {
     console.dir(args.object.bindingContext);
     const bar = args.object.bindingContext.bar;
-    bar.remove()
+    return bar.remove()
         .then(() => {
             const listView = Frame.topmost().currentPage.getViewById("listView2");
-            listView.notifySwipeToExecuteFinished();
-
-            return loadBars();
+            return listView.notifySwipeToExecuteFinished();
+        })
+        .then(()=>{
+            return loadCoupons();
         })
         .catch((error) => {
-            console.log(error);
-            console.dir(error);
-            console.trace();
+            Log.catch(error);
 
-            Dialog.alert({
+            return Dialog.alert({
                 title: "Error",
                 message: "An error occured, please try again. - " + error,
                 okButtonText: "Ok"
-            });
-
-            return Promise.reject(error);
-
+            }).then(() => {
+                return Promise.reject(error);
+            })
         });
 }
 
-function addBar() {
-    return Dialog.alert({
-        title: "Sorry",
-        message: "This version killed the bar, sorry",
-        okButtonText: "Ok"
-    });
-    return Dialog.alert({
-        title: "No group available",
-        message: "You didn't participate to any party. Please do so to have a group to which you can get items !",
-        okButtonText: "Ok"
-    });
+function addCoupon() {
+    let badges = Object.values(User.List);
+    if (badges.length == 0) {
+        return Dialog.alert({
+            title: "No group available",
+            message: "You didn't participate to any party. Please do so to have a group to which you can get items !",
+            okButtonText: "Ok"
+        });
+    } else {
+
+    }
 }
 
 module.exports.onLoaded = onLoaded;
-module.exports.barTapped = barTapped;
-module.exports.deleteBar = deleteBar;
-module.exports.addBar = addBar;
+module.exports.couponTapped = couponTapped;
+module.exports.deleteCoupon = deleteCoupon;
+module.exports.addCoupon = addCoupon;

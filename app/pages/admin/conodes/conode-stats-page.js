@@ -26,7 +26,7 @@ function onLoaded(args) {
  * Changes the frame to the QR displaying of the conodes.
  */
 function displayQrOfConode() {
-    pageObject.showModal("shared/pages/qr-code/qr-code-page", {
+    pageObject.showModal("pages/common/qr-code/qr-code-page", {
         textToShow: Convert.objectToJson(conode),
         title: "Conode informations"
     }, () => {

@@ -3,5 +3,5 @@ export interface Item {
     datetime: string;
     location: string;
     status: string;
-    qrcode: string;
+    qrcode: any;
 }

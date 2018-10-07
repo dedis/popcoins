@@ -508,7 +508,7 @@ class User {
                     cothoritySocket.send(RequestPath.POP_PIN_REQUEST, RequestPath.STATUS_REQUEST, pinRequestMessage)
             })
             .then(response => {
-                Log.lvl2("already linked");
+                Log.lvl2("already linked:", response === ALREADY_LINKED);
                 return {
                     alreadyLinked: response === ALREADY_LINKED
                 };

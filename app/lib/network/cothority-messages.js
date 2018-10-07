@@ -7,7 +7,7 @@ const CurveEd25519 = new Kyber.curve.edwards25519.Curve;
 const ServerIdentity = require("../cothority/identity").ServerIdentity;
 const DedisProtobuf = require("../cothority/protobuf");
 const Helper = require("../Helper");
-const Log = require("../Log");
+const Log = require("../Log").default;
 const ObjectType = require("../ObjectType");
 
 /**
