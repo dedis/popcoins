@@ -4,22 +4,17 @@ const Observable = require("tns-core-modules/data/observable");
 const topmost = require("ui/frame").topmost;
 
 const lib = require("../../../../lib");
-const Convert = lib.Convert;
-const Scan = lib.Scan;
-const FileIO = lib.FileIO;
-const FilePaths = lib.FilePaths;
-const Coupon = lib.Coupon;
-const Helper = lib.Helper;
-const ObjectType = lib.ObjectType;
-const User = lib.User;
-// const PoP = require("../../../lib/dedjs/object/pop/PoP").get;
+const Log = lib.Log.default;
+const Badge = lib.pop.Badge;
 const Coupon = lib.Coupon.Coupon;
 const Intervals = lib.Coupon.Frequencies;
 
 let pageObject = undefined;
 
-let finalStatementsMap = PoP.getFinalStatements().map((statement, index) => {
-    return {key: index, label: statement.desc.name};
+let partyArray = Object.values(Badge.List);
+
+let partyNames = partyArray.map(b =>{
+    return b.config.name;
 });
 
 let dataForm = Observable.fromObject({
@@ -30,7 +25,7 @@ let dataForm = Observable.fromObject({
 
 let viewModel = Observable.fromObject({
     dataForm: dataForm,
-    finalStatements: finalStatementsMap,
+    finalStatements: partyNames,
     frequencies: [
         {key: Intervals.DAILY, label: "Daily"},
         {key: Intervals.WEEKLY, label: "Weekly"},
@@ -66,23 +61,21 @@ function onSwipeCellStarted(args) {
  * Save the config back to the file
  */
 function save() {
-    Coupon.createWithConfig(dataForm.name, dataForm.frequency, PoP.getFinalStatements().getItem(dataForm.final_statement))
+    Coupon.createWithConfig(dataForm.name, dataForm.frequency, partyArray[dataForm.final_statement].config)
         .then(() => {
             goBack();
             return Promise.resolve()
         })
         .catch(error => {
-            console.log(error);
-            console.dir(error);
-            console.trace();
+            Log.catch(error);
 
-            Dialog.alert({
+            return Dialog.alert({
                 title: "Error",
                 message: error,
                 okButtonText: "Ok"
+            }).then(() => {
+                return Promise.reject(error);
             });
-
-            return Promise.reject(error);
         });
 }
 

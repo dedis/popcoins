@@ -5,7 +5,7 @@ Learn more about the TabView component in this documentation article:
 http://docs.nativescript.org/cookbook/ui/tab-view
 -->
 
-<TabView androidTabsPosition="bottom" selectedIndex="2">
+<TabView androidTabsPosition="bottom" selectedIndex="3">
     <TabViewItem title="Parties" ios:iconSource="res://tabIcons/home" android:iconSource="res://home">
         <Frame defaultPage="pages/parties/parties-page"></Frame>
     </TabViewItem>

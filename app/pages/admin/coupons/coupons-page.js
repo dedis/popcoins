@@ -11,7 +11,7 @@ const FileIO = lib.FileIO;
 const FilePaths = lib.FilePaths;
 const Coupon = lib.Coupon;
 const Log = lib.Log.default;
-const User = lib.pop.User;
+const Badge = lib.pop.Badge;
 
 const viewModel = ObservableModule.fromObject({
     barListDescriptions: new ObservableArray(),
@@ -143,7 +143,7 @@ function deleteCoupon(args) {
             const listView = Frame.topmost().currentPage.getViewById("listView2");
             return listView.notifySwipeToExecuteFinished();
         })
-        .then(()=>{
+        .then(() => {
             return loadCoupons();
         })
         .catch((error) => {
@@ -160,7 +160,7 @@ function deleteCoupon(args) {
 }
 
 function addCoupon() {
-    let badges = Object.values(User.List);
+    let badges = Object.values(Badge.List);
     if (badges.length == 0) {
         return Dialog.alert({
             title: "No group available",
@@ -168,7 +168,9 @@ function addCoupon() {
             okButtonText: "Ok"
         });
     } else {
-
+        Frame.topmost().navigate({
+            moduleName: "pages/admin/coupons/config/config-page",
+        });
     }
 }
 

@@ -16,19 +16,19 @@ Feel free to customize layouts and components to change how the tab view looks.
     <StackLayout>
         <SegmentedBar loaded="sbLoaded" class="m-5" selectedIndex="0">
             <SegmentedBar.items>
-                <SegmentedBarItem title="New Parties"/>
                 <SegmentedBarItem title="Coupons"/>
+                <SegmentedBarItem title="New Parties"/>
                 <SegmentedBarItem title="Conodes"/>
             </SegmentedBar.items>
         </SegmentedBar>
 
         <StackLayout>
-            <Frame defaultPage="pages/admin/parties/parties-page"
+            <Frame defaultPage="pages/admin/coupons/coupons-page"
                    visibility="{{ (prop == 0) ? 'visible' : 'collapsed' }}"/>
         </StackLayout>
 
         <StackLayout>
-            <Frame defaultPage="pages/admin/coupons/coupons-page"
+            <Frame defaultPage="pages/admin/parties/parties-page"
                    visibility="{{ (prop == 1) ? 'visible' : 'collapsed' }}"/>
         </StackLayout>
 
