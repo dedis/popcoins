@@ -253,7 +253,7 @@ export class Badge {
             signature: signature
         }
 
-        Log.lvl3("Signature length = " + signature.length);
+        Log.lvl2("Signature length = " + signature.length);
 
         return cothoritySocket.send(RequestPath.POP_STORE_CONFIG, DecodeType.STORE_CONFIG_REPLY, storeConfigMessage)
             .catch(err => {
@@ -407,7 +407,7 @@ export class Badge {
      * @param update if defined, will update the party instance
      * @returns {Promise<CoinInstance>}
      */
-    getCoinInstance(update: boolean): CoinInstance {
+    getCoinInstance(update: boolean = false): CoinInstance {
         return Promise.resolve()
             .then(() => {
                 if (this._coinInstance == null) {
@@ -554,7 +554,6 @@ export class Badge {
         if (wallets.length > 0) {
             list = wallets[wallets.length - 1].config.roster.identities;
         } else {
-            Log.print("taking standard list");
             list = new Convert.parseTomlRoster(
                 "[[servers]]\n" +
                 "  Address = \"tls://gasser.blue:7770\"\n" +
@@ -600,7 +599,7 @@ export class Badge {
         return FileIO.getStringOf(fileName)
             .then(file => {
                 let object = Convert.jsonToObject(file);
-                Log.lvl3("converting file to wallet:", file);
+                Log.lvl1("converting file to wallet:", file);
                 let r = Convert.parseJsonRoster(object.roster);
                 let config = new Configuration(object.name, object.datetime, object.location, r);
                 let wallet = new Badge(config);
@@ -620,7 +619,7 @@ export class Badge {
                 if (object.signature) {
                     Log.lvl2("found signature");
                     wallet._finalStatement.signature = o2u(object.signature);
-                    wallet._token = new Token(wallet._finalStatement, wallet.keypair());
+                    wallet._token = new Token(wallet._finalStatement, wallet.keypair);
                 }
                 if (object.omniledgerID) {
                     wallet._omniledgerID = o2u(object.omniledgerID);
@@ -640,7 +639,7 @@ export class Badge {
                 return wallet;
             })
             .catch(err => {
-                Log.catch(err, "couldn't load file");
+                Log.catch(err, "couldn't load file", fileName);
             })
     }
 

@@ -4,6 +4,7 @@ Feel free to customize layouts and components to change how the tab view looks.
 -->
 <Page
         class="page"
+        loaded="onLoaded"
         navigatingTo="onNavigatingTo"
         xmlns="http://schemas.nativescript.org/tns.xsd"
         xmlns:nsListView="nativescript-ui-listview"

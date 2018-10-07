@@ -1,15 +1,9 @@
-import {Observable} from "data/observable";
-import {Item} from "./shared/item";
-import * as Badge from "~/lib/pop/Badge";
+import {fromObjectRecursive, Observable} from "data/observable";
+import {ObservableArray} from "tns-core-modules/data/observable-array";
 
-export class BadgesViewModel extends Observable {
-    items: Array<Item>;
-    isEmpty: boolean = true;
-    party: Badge.Badge;
-
-    constructor() {
-        super();
-
-        this.items = new Array<Item>();
+export let BadgesViewModel: Observable = fromObjectRecursive({
+        items: new ObservableArray(0),
+        isEmpty: true,
+        party: undefined
     }
-}
+)

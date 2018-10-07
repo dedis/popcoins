@@ -3,7 +3,7 @@ require("nativescript-nodeify");
 const Net = require("../network/NSNet");
 const CothorityMessages = require("../network/cothority-messages");
 const Convert = require("../Convert");
-const Log = require("../Log");
+const Log = require("../Log").default;
 const RequestPath = require("../network/RequestPath");
 const FileIO = require("../FileIO");
 const FilePaths = require("../FilePaths");

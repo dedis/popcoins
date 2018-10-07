@@ -58,8 +58,9 @@ function proposalTapped(args) {
     // create the party
     let p = viewModel.proposals.getItem(index);
     p.roster.identities = p.roster.list;
-    console.log(new Error().stack);
     let roster = Convert.parseJsonRoster(JSON.stringify(p.roster));
+    Log.print("proposal is: ", p);
+    Log.print("p.name... is:", p.name, p.datetime, p.location);
     let config = new Configuration(p.name, p.datetime, p.location, roster);
     let wallet = new Badge.Badge(config);
     wallet.linkedConode = conode;
