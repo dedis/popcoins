@@ -116,7 +116,7 @@ function barTapped(args) {
                 }, true);
             } else if (result === "Show orders history") {
                 Frame.topmost().navigate({
-                    moduleName: "drawers/pop/service/order-history/bar-history-list",
+                    moduleName: "pages/admin/coupons/order-history/order-history-page",
                     context: {
                         bar: bar,
                     }

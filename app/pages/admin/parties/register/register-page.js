@@ -13,18 +13,9 @@ const Buffer = require("buffer/").Buffer;
 const lib = require("../../../../lib");
 const Convert = lib.Convert;
 const Scan = lib.Scan;
-const FileIO = lib.FileIO;
-const FilePaths = lib.FilePaths;
-const Coupon = lib.Coupon;
-const Helper = lib.Helper;
-const ObjectType = lib.ObjectType;
 const User = lib.User;
-const Badge = lib.pop.Badge;
-const Net = lib.network.NSNet;
 const Log = lib.Log.default;
-const Configuration = lib.pop.Configuration;
 const Badge = lib.pop.Badge;
-const DecodeType = lib.network.DecodeType;
 const RequestPath = lib.network.RequestPath;
 
 let viewModel = undefined;
@@ -86,11 +77,6 @@ function onLoaded(args) {
         })
 }
 
-/**
- * Function that gets called when the user wants to register a public key manually.
- */
-const addMyself = require("../../../tokens/main").addMyself;
-
 function addManual() {
     return Dialog.prompt({
         title: "Public Key",
@@ -125,26 +111,6 @@ function addManual() {
 
             return Promise.reject(error);
         });
-}
-
-/*This method creates a new attendee and adds its key to the list of keys
- */
-function addMyselfAttendee(Party) {
-    let info = {
-        id: Convert.byteArrayToHex(Party.getPopDescHash()),
-        omniledgerId: RequestPath.OMNILEDGER_INSTANCE_ID,
-        address: Party.getLinkedConode().address
-    };
-
-    //var newParty = new AttParty(info.id, info.address);
-    return addMyself(info)
-        .then((p) => {
-            console.dir("adding my new public key to party");
-            return Party.attendeesAdd([p.getKeyPair().public]);
-        })
-        .then(() => {
-            return Party.save();
-        })
 }
 
 function addScan() {
@@ -249,11 +215,7 @@ function finalize() {
             });
         })
         .then(() => {
-            const navigationEntry = {
-                moduleName: "drawers/pop/pop-page",
-                clearHistory: true
-            };
-            return topmost().navigate(navigationEntry);
+            return topmost().goBack();
         })
         .catch(error => {
             Log.catch(error);
@@ -344,4 +306,3 @@ module.exports.onSwipeCellStarted = onSwipeCellStarted;
 module.exports.addNewKey = addNewKey;
 module.exports.goBack = goBack;
 module.exports.shareToAttendee = shareToAttendee;
-module.exports.addMyselfAttendee = addMyselfAttendee;

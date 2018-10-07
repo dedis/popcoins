@@ -14,6 +14,7 @@ module.exports = {
     FilePaths: require("./FilePaths"),
     Helper: require("./Helper"),
     Log: require("./Log"),
+    ObjectType: require("./ObjectType"),
     Scan: require("./Scan"),
     User: require("./User")
 };

@@ -13,6 +13,7 @@ const Coupon = lib.Coupon;
 const Helper = lib.Helper;
 const ObjectType = lib.ObjectType;
 const User = lib.User;
+const Log = lib.Log.default;
 const Badge = lib.pop.Badge;
 
 let WalEdit = undefined;
@@ -33,7 +34,7 @@ let viewModel = Observable.fromObject({
 });
 
 function onNavigatingTo(args) {
-    console.log("config-page");
+    Log.lvl1("starting config-page");
 
     if (args.isBackNavigation) {
         return;
@@ -42,14 +43,14 @@ function onNavigatingTo(args) {
     const page = args.object;
     const context = page.navigationContext;
 
-    if (context.wallet === undefined || !WalEdit instanceof Badge) {
+    WalEdit = context.wallet;
+    if (WalEdit === undefined || !(WalEdit instanceof Badge.Badge)) {
         throw new Error("WalEdit should be given as a Badge in the context");
     }
-    WalEdit = context.wallet;
     newConfig = context.newConfig;
 
     viewModel.readOnly = context.readOnly === true;
-    console.log("readOnly is:", viewModel.readOnly);
+    Log.lvl2("readOnly is:", viewModel.readOnly);
 
     copyWalletToViewModel();
 
@@ -59,6 +60,7 @@ function onNavigatingTo(args) {
     if (newConfig && context.leader === undefined) {
         throw new Error("Leader conode should be given in the context");
     }
+    Log.print("refresh");
     return pageObject.getViewById("list-view-conodes").refresh();
 }
 
@@ -70,7 +72,7 @@ function addConode() {
         cancelButtonText: cancel,
         actions: actions
     }).then(result => {
-        console.log("Dialog result: " + result);
+        Log.lvl2("Dialog result: " + result);
         switch (result) {
             case cancel:
                 return;
@@ -83,7 +85,7 @@ function addConode() {
 }
 
 function conodeTapped(args) {
-    console.log("conode tapped:", args)
+    Log.lvl2("conode tapped:", args)
     const index = args.index;
     const remove = "Remove this conode";
     return Dialog.action({
@@ -99,10 +101,11 @@ function conodeTapped(args) {
                     okButtonText: "Ok"
                 });
             }
-            console.log("removing conode: " + index);
+            Log.lvl2("removing conode: " + index);
             delete WalEdit.config.roster.list[index];
         }
     }).catch((error) => {
+        Log.catch(error);
         Dialog.alert({
             title: "Error",
             message: "An error occured, please try again. - " + error,
@@ -124,9 +127,7 @@ function addManual(manually) {
         if (server !== undefined) {
             return Party.addPopDescConode(server)
                 .catch(error => {
-                    console.log(error);
-                    console.dir(error);
-                    console.trace();
+                    Log.catch(error);
 
                     Dialog.alert({
                         title: "Error",
@@ -161,16 +162,16 @@ function addManual(manually) {
                     if (result !== "Cancel") {
                         index = conodesNames.indexOf(result);
 
-                        console.log("adding a new conode: " + conodes[index]);
+                        Log.lvl2("adding a new conode: " + conodes[index]);
                         // TODO: adding conode to the configuration
                         WalEdit.config.roster.identities.push(conodes[index]);
                     }
                 }).catch(error => {
-                    console.log("error while adding a conode: " + error);
+                    Log.catch(error, "error while adding a conode: ");
                 });
             }
         }).catch(error => {
-            console.log("error while adding a conode: " + error);
+            Log.catch(error, "error while adding a conode: ");
 
             return Dialog.alert({
                 title: "Error",
@@ -192,12 +193,12 @@ function addScan() {
         .then(string => {
             const conode = Convert.parseJsonServerIdentity(string);
 
-            console.log("adding new conode: " + conode);
+            Log.lvl2("adding new conode: " + conode);
             WalEdit.config.roster.identities.push(conode);
             pageObject.getViewById("list-view-conodes").refresh();
         })
         .catch(error => {
-            console.log("error while scanning conode: " + error);
+            Log.catch(error, "error while scanning conode: ");
 
             if (error !== Scan.SCAN_ABORTED) {
                 return Dialog.alert({
@@ -271,7 +272,7 @@ function save() {
             if (WalEdit.state() >= Badge.STATE_PUBLISH) {
                 return WalEdit.save()
                     .catch(err => {
-                        Log.catch("couldn't save: " + err);
+                        Log.catch(err, "couldn't save: ");
                     })
             } else {
                 return Promise.resolve()

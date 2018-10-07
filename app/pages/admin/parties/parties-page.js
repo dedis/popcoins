@@ -8,16 +8,11 @@ const Kyber = require("@dedis/kyber-js");
 const CurveEd25519 = new Kyber.curve.edwards25519.Curve;
 
 const lib = require("../../../lib");
-const ServerIdentity = lib.cothority.ServerIdentity;
 const Badge = lib.pop.Badge;
 const Configuration = lib.pop.Configuration.default;
 const User = lib.User;
-const Convert = lib.Convert;
 const Log = lib.Log.default;
-const CothorityMessages = lib.network.CothorityMessages;
 const RequestPath = lib.network.RequestPath;
-const DecodeType = lib.network.DecodeType;
-const Net = lib.network.NSNet;
 
 const CANCELED_BY_USER = "CANCELED_BY_USER_STRING";
 
@@ -131,7 +126,7 @@ function partyTapped(args) {
     const party = pld.party;
     if (party.state() == Badge.STATE_PUBLISH) {
         return Frame.topmost().navigate({
-            moduleName: "drawers/pop/org/register/register-page",
+            moduleName: "pages/admin/parties/register/register-page",
             context: {
                 party: party
             }
@@ -159,7 +154,7 @@ function partyTapped(args) {
                 let newParty = new Badge(party.config);
             case CONFIG:
                 return Frame.topmost().navigate({
-                    moduleName: "drawers/pop/org/config/config-page",
+                    moduleName: "pages/admin/parties/config/config-page",
                     context: {
                         wallet: party
                     }
@@ -220,7 +215,7 @@ function verifyLinkToConode() {
                 })
             }
         }).then(() => {
-            Dialog.action({
+            return Dialog.action({
                 message: "Choose a Conode",
                 cancelButtonText: "Cancel",
                 actions: conodesNames
@@ -228,7 +223,7 @@ function verifyLinkToConode() {
                 if (result !== "Cancel") {
                     index = conodesNames.indexOf(result);
                     Log.lvl2("index is:", index);
-                    return Net.sendLinkRequest(conodes[index], "")
+                    return User.sendLinkRequest(conodes[index], "")
                         .then(result => {
                             Log.lvl2("Prompting for pin");
                             if (result.alreadyLinked !== undefined && result.alreadyLinked) {
@@ -247,7 +242,7 @@ function verifyLinkToConode() {
                                     if (result.text === "") {
                                         return Promise.reject("PIN should not be empty");
                                     }
-                                    return Net.sendLinkRequest(conodes[index], result.text)
+                                    return User.sendLinkRequest(conodes[index], result.text)
                                         .then(() => {
                                             return Promise.resolve(conodes[index]);
                                         });
@@ -303,9 +298,9 @@ function addParty() {
         })
         .then(result => {
             if (result === "Configure a new party") {
-                Log.lvl2("configuring a new party");
+                Log.lvl2("configuring a new party", wallet);
                 return Frame.topmost().navigate({
-                    moduleName: "drawers/pop/org/config/config-page",
+                    moduleName: "pages/admin/parties/config/config-page",
                     context: {
                         wallet: wallet,
                         leader: wallet.linkedConode,
@@ -313,8 +308,9 @@ function addParty() {
                     }
                 });
             } else if (result === "List the proposals") {
+                Log.lvl2("listing proposals");
                 return Frame.topmost().navigate({
-                    moduleName: "drawers/pop/org/proposals/org-party-proposals",
+                    moduleName: "pages/admin/parties/proposals/proposals-page",
                     context: {
                         conode: wallet.linkedConode,
                     }

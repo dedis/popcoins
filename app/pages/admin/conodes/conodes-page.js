@@ -24,7 +24,6 @@ let timerId = undefined;
 let pageObject = undefined;
 
 function onLoaded(args) {
-    Log.print("Loaded conodes");
     page = args.object;
 
     page.bindingContext = viewModel;
@@ -36,12 +35,12 @@ function onLoaded(args) {
     });
 
     return loadConodeList();
-        // .then(() => {
-        //     // Poll the statuses every 2s
-        //     timerId = Timer.setInterval(() => {
-        //         loadConodeList();
-        //     }, 2000)
-        // })
+    // .then(() => {
+    //     // Poll the statuses every 2s
+    //     timerId = Timer.setInterval(() => {
+    //         loadConodeList();
+    //     }, 2000)
+    // })
 }
 
 function onUnloaded() {
@@ -76,7 +75,7 @@ function conodeTapped(args) {
     let conodeAndStatusPair = User._statusList[index];
     if (conodeAndStatusPair !== undefined) {
         Frame.topmost().navigate({
-            moduleName: "drawers/pop/conodes/conode-stats-page",
+            moduleName: "pages/admin/conodes/conode-stats-page",
             bindingContext: conodeAndStatusPair
         });
     } else {
@@ -95,10 +94,8 @@ function addConode() {
         }
 
         if (server !== undefined) {
-            return User.addServer(server)
-                .then(() => {
-                    return loadConodeList();
-                })
+            User.addServer(server)
+            return loadConodeList()
                 .catch(error => {
                     return Dialog.alert({
                         title: "Error",

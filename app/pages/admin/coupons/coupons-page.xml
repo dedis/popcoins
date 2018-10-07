@@ -6,38 +6,34 @@
         xmlns:nsFloatingButton="nativescript-floatingactionbutton"
         xmlns="http://www.nativescript.org/tns.xsd">
 
-    <GridLayout class="page-content" rows="*, *" margin="2%">
-        <Label text="You don't have any party. Start by creating one !"
+    <GridLayout class="page-content" rows="*,*" margin="2%">
+        <Label text="You don't have any services. Feel free to open one !"
                textWrap="true"
                class="empty-list-label"
                row="0"
                width="80%"
+               height="30%"
                visibility="{{ isEmpty ? 'visible' : 'collapsed' }}"
         />
 
-        <nsListView:RadListView items="{{ partyListDescriptions }}" itemTap="partyTapped"
-                                row="1"
-                                id="listView">
-
+        <nsListView:RadListView items="{{ barListDescriptions }}" itemTap="barTapped"
+                                row="1" id="listView">
             <nsListView:RadListView.itemTemplate>
                 <GridLayout rows="*,*" columns="*, auto" backgroundColor="white"
                             class="basic-list-decorated">
                     <Label class="list-title" text="{{ desc.name }}" row="0" col="0"
                            textWrap="true"/>
-                    <Label text="{{ desc.location }}" row="1" col="0" textWrap="true"/>
-                    <Label class="status-text" text="{{ status.status }}"
-                           col="1" rowSpan="2" textWrap="true"/>
+                    <Label text="{{ desc.frequency }}" row="1" col="0" textWrap="true" textTransform="capitalize"/>
                 </GridLayout>
             </nsListView:RadListView.itemTemplate>
         </nsListView:RadListView>
 
-        <nsFloatingButton:fab tap="addParty"
+        <nsFloatingButton:fab tap="addBar"
                               row="1"
                               icon="res://ic_add_white"
                               rippleColor="#f1f1f1"
                               class="fab-button"/>
 
         <ActivityIndicator busy="{{ isLoading }}" rowSpan="2" colSpan="2"/>
-
     </GridLayout>
 </Page>

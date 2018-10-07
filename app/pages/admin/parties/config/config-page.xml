@@ -26,14 +26,14 @@
             <nsDataForm:RadaForm.properties>
                 <nsDataForm:EntityProperty name="name" index="0"/>
                 <nsDataForm:EntityProperty name="date" index="1">
-                    <nsDataForm:PropertyEditor.editor>
-                        <nsDataForm:PropertyEditor type="DatePicker"/>
-                    </nsDataForm:PropertyEditor.editor>
+                    <!--<nsDataForm:PropertyEditor.editor>-->
+                        <!--<nsDataForm:PropertyEditor type="DatePicker"/>-->
+                    <!--</nsDataForm:PropertyEditor.editor>-->
                 </nsDataForm:EntityProperty>
                 <nsDataForm:EntityProperty name="time" index="2">
-                    <nsDataForm:PropertyEditor.editor>
-                        <nsDataForm:PropertyEditor type="TimePicker"/>
-                    </nsDataForm:PropertyEditor.editor>
+                    <!--<nsDataForm:PropertyEditor.editor>-->
+                        <!--<nsDataForm:PropertyEditor type="TimePicker"/>-->
+                    <!--</nsDataForm:PropertyEditor.editor>-->
                 </nsDataForm:EntityProperty>
                 <nsDataForm:EntityProperty name="location" index="3"/>
                 <nsDataForm:EntityProperty name="_observers" hidden="true"/>

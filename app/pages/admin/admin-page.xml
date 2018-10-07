@@ -14,7 +14,7 @@ Feel free to customize layouts and components to change how the tab view looks.
     </ActionBar>
 
     <StackLayout>
-        <SegmentedBar loaded="sbLoaded" class="m-5" selectedIndex="2">
+        <SegmentedBar loaded="sbLoaded" class="m-5" selectedIndex="0">
             <SegmentedBar.items>
                 <SegmentedBarItem title="New Parties"/>
                 <SegmentedBarItem title="Coupons"/>
@@ -23,12 +23,12 @@ Feel free to customize layouts and components to change how the tab view looks.
         </SegmentedBar>
 
         <StackLayout>
-            <Frame defaultPage="pages/admin/list/list-page"
+            <Frame defaultPage="pages/admin/parties/parties-page"
                    visibility="{{ (prop == 0) ? 'visible' : 'collapsed' }}"/>
         </StackLayout>
 
         <StackLayout>
-            <Frame defaultPage="pages/admin/coupon/coupon-page"
+            <Frame defaultPage="pages/admin/coupons/coupons-page"
                    visibility="{{ (prop == 1) ? 'visible' : 'collapsed' }}"/>
         </StackLayout>
 

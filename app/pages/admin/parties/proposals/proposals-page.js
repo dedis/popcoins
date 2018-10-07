@@ -4,17 +4,10 @@ const topmost = require("ui/frame").topmost;
 
 const lib = require("../../../../lib");
 const Convert = lib.Convert;
-const Scan = lib.Scan;
-const FileIO = lib.FileIO;
-const FilePaths = lib.FilePaths;
-const Coupon = lib.Coupon;
-const Helper = lib.Helper;
-const ObjectType = lib.ObjectType;
 const User = lib.User;
-const Badge = lib.pop.Badge;
 const Net = lib.network.NSNet;
 const Log = lib.Log.default;
-const Configuration = lib.pop.Configuration;
+const Configuration = lib.pop.Configuration.default;
 const Badge = lib.pop.Badge;
 const DecodeType = lib.network.DecodeType;
 const RequestPath = lib.network.RequestPath;
@@ -68,7 +61,7 @@ function proposalTapped(args) {
     console.log(new Error().stack);
     let roster = Convert.parseJsonRoster(JSON.stringify(p.roster));
     let config = new Configuration(p.name, p.datetime, p.location, roster);
-    let wallet = new Badge(config);
+    let wallet = new Badge.Badge(config);
     wallet.linkedConode = conode;
     wallet.addToList();
     return wallet.publish(User.getKeyPair().private)

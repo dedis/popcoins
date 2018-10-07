@@ -6,12 +6,13 @@
         xmlns:nsListView="nativescript-ui-listview"
         xmlns="http://www.nativescript.org/tns.xsd">
 
-    <GridLayout class="page-content" rows="*,*" margin="2%">
+    <GridLayout class="page-content" rows="auto,*" margin="2%">
         <Label text="You don't have any conode. Feel free to add one !"
                textWrap="true"
                class="empty-list-label"
                row="0"
                width="80%"
+               height="30%"
                visibility="{{ isRosterEmpty ? 'visible' : 'collapsed' }}"
         />
 

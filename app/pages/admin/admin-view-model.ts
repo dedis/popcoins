@@ -9,6 +9,6 @@ export class AdminViewModel extends Observable {
 
     constructor() {
         super();
-        this.prop = 2;
+        this.prop = 0;
     }
 }

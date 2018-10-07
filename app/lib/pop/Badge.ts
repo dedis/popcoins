@@ -522,8 +522,25 @@ export class Badge {
                 if (Object.keys(List).length == 0) {
                     return this.loadNewVersions()
                 }
-                return Promise.resolve(Object.values(List));
+                return Object.values(List);
             })
+    }
+
+    /**
+     * updateAll calls 'update' on all Badges stored in 'List'.
+     * @return {Promise<Badge[]>}
+     */
+    static updateAll(): Promise<Badge[]> {
+        return Promise.all(
+            Object.values(List).map(badge=>{
+                return badge.update()
+                    .catch(err=>{
+                        Log.catch(err, "while updating badge: " + badge.config.name);
+                    })
+            })
+        ).then(()=>{
+            return Object.values(List);
+        })
     }
 
     /**
@@ -535,7 +552,7 @@ export class Badge {
     static fetchUpcoming(wallets: Badge[]): Promise<Configuration[]> {
         let list: Identity.ServerIdentity[];
         if (wallets.length > 0) {
-            list = wallets[wallets.length - 1].config.roster.list;
+            list = wallets[wallets.length - 1].config.roster.identities;
         } else {
             Log.print("taking standard list");
             list = new Convert.parseTomlRoster(
@@ -844,3 +861,5 @@ export class MigrateFrom {
             })
     }
 }
+
+Badge.loadAll()
