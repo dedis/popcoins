@@ -3,7 +3,7 @@ import {BadgesViewModel} from "./badges-view-model";
 import * as Dialog from "tns-core-modules/ui/dialogs";
 import {topmost} from "tns-core-modules/ui/frame";
 
-let lib = require("../../lib");
+let lib = require("~/lib");
 let Badge = lib.pop.Badge;
 let Log = lib.Log.default;
 

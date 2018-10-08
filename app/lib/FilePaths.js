@@ -42,11 +42,11 @@ module.exports = {
     /**
      * BEERCOIN Files
      */
-    BEERCOIN_PATH: "shared/res/files/beercoin",
-    BEERCOIN_BAR_CONFIG: "bar_config.json",
-    BEERCOIN_LINKED_FINALS: "final_statements.json",
-    BEERCOIN_CHECKED_CLIENTS: "checked_clients.json",
-    BEERCOIN_ORDER_HISTORY: "order_history.json",
+    COUPON_PATH: "shared/res/files/beercoin",
+    COUPON_BAR_CONFIG: "bar_config.json",
+    COUPON_LINKED_FINALS: "final_statements.json",
+    COUPON_CHECKED_CLIENTS: "checked_clients.json",
+    COUPON_ORDER_HISTORY: "order_history.json",
 
     /**
      * Badge files

@@ -6,7 +6,7 @@
         xmlns:nsFloatingButton="nativescript-floatingactionbutton"
         xmlns="http://www.nativescript.org/tns.xsd">
 
-    <GridLayout class="page-content" rows="*,*" margin="2%">
+    <GridLayout class="page-content" rows="auto,*" margin="2%">
         <Label text="You don't have any services. Feel free to open one !"
                textWrap="true"
                class="empty-list-label"

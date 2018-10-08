@@ -4,7 +4,7 @@ const Dialog = require("ui/dialogs");
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
 
-const lib = require("../../../lib");
+const lib = require("~/lib");
 const Convert = lib.Convert;
 const Scan = lib.Scan;
 const FileIO = lib.FileIO;
@@ -23,8 +23,9 @@ let page = undefined;
 let pageObject = undefined;
 
 function onLoaded(args) {
-    Log.print("Loaded coupons");
+    Log.print("Loaded coupons page");
     page = args.object;
+    pageObject = args.object.page;
     page.bindingContext = viewModel;
     loadCoupons();
 }
@@ -39,8 +40,10 @@ function loadCoupons() {
 
     let bar = undefined;
     viewModel.barListDescriptions.splice(0);
-    FileIO.forEachFolderElement(FilePaths.BEERCOIN_PATH, function (barFolder) {
+    FileIO.forEachFolderElement(FilePaths.COUPON_PATH, function (barFolder) {
+        Log.print("creating coupon", barFolder.name);
         bar = new Coupon(barFolder.name);
+        Log.print("creating observables");
         // Observables have to be nested to reflect changes
         viewModel.barListDescriptions.push(ObservableModule.fromObject({
             bar: bar,
@@ -61,9 +64,10 @@ function couponTapped(args) {
         actions: ["Show service info to user", "Show orders history", "Delete Service"]
     }).then(result => {
         if (result === "Show service info to user") {
+            Log.print("going to show service info now", signData);
             return pageObject.showModal("pages/common/qr-code/qr-code-page", {
                 textToShow: Convert.objectToJson(signData),
-                title: "Service information"
+                title: "Service information",
             }, () => {
                 return Dialog.confirm({
                     title: "Client confirmation",
@@ -88,6 +92,10 @@ function couponTapped(args) {
                         title: "Success !",
                         message: "The item is delivered !",
                         okButtonText: "Great"
+                    });
+                }).then(()=>{
+                    return Frame.topmost().navigate({
+                        moduleName: "pages/admin/admin-page"
                     });
                 }).catch(error => {
                     if (error === USER_CANCELED) {

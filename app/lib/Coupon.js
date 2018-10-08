@@ -1,27 +1,23 @@
-import Configuration from "./pop/Configuration";
-
 require("nativescript-nodeify");
-
 const uuidv4 = require("uuid/v4");
-const Helper = require("./Helper");
-const ObjectType = require("./ObjectType");
-const FileIO = require("./FileIO");
-const FilesPath = require("./FilePaths");
-const Convert = require("./Convert");
-const Log = require("./Log").default;
 const ObservableArray = require("data/observable-array").ObservableArray;
 const Observable = require("data/observable");
-const RingSig = require("./crypto/RingSig");
 const Kyber = require("@dedis/kyber-js");
 const Suite = new Kyber.curve.edwards25519.Curve;
 const Crypto = require("crypto-browserify");
+
+const Badge = require("~/lib/pop/Badge").Badge;
+const FileIO = require("~/lib/FileIO");
+const FilesPath = require("~/lib/FilePaths");
+const Convert = require("~/lib/Convert");
+const Log = require("~/lib/Log").default;
+const RingSig = require("~/lib/crypto/RingSig");
 
 /**
  * @param {string} [dirname] - directory of the bar data (directory is created if non existent).
  *  If no directory is specified, a unique random directory name is generated
  **/
 class Coupon {
-
     constructor(dirname) {
         if (typeof dirname !== "string") {
             throw new Error("dirname should be of type string or undefined");
@@ -37,7 +33,7 @@ class Coupon {
         this._anonymitySet = new Set();
         this._orderHistory = new ObservableArray();
 
-        return this.load()
+        this.load();
     }
 
     /**
@@ -84,7 +80,8 @@ class Coupon {
      * @return {Promise<void>} - a promise that gets resolved once the configuration is loaded
      */
     loadConfig() {
-        return FileIO.getStringOf(FileIO.join(FilesPath.BEERCOIN_PATH, this._dirname, FilesPath.BEERCOIN_BAR_CONFIG))
+        Log.print("loading config");
+        return FileIO.getStringOf(FileIO.join(FilesPath.COUPON_PATH, this._dirname, FilesPath.COUPON_BAR_CONFIG))
             .then(configJson => {
                 const config = Convert.jsonToObject(configJson);
                 const configModule = this.getConfigModule();
@@ -135,7 +132,8 @@ class Coupon {
      * @return {Promise<void>} - a promise that gets resolved once the clients are loaded
      */
     loadCheckedClients() {
-        return FileIO.getStringOf(FileIO.join(FilesPath.BEERCOIN_PATH, this._dirname, FilesPath.BEERCOIN_CHECKED_CLIENTS))
+        Log.print("loading checked clients");
+        return FileIO.getStringOf(FileIO.join(FilesPath.COUPON_PATH, this._dirname, FilesPath.COUPON_CHECKED_CLIENTS))
             .then(checkedClientsJson => {
                 if (checkedClientsJson.length === 0) {
                     return Promise.resolve();
@@ -157,14 +155,17 @@ class Coupon {
      * @return {Promise<void>} - a promise that gets resolved once the final statements are loaded
      */
     loadFinalStatements() {
-        return FileIO.getStringOf(FileIO.join(FilesPath.BEERCOIN_PATH, this._dirname, FilesPath.BEERCOIN_LINKED_FINALS))
+        Log.print("loading final statement");
+        return FileIO.getStringOf(FileIO.join(FilesPath.COUPON_PATH, this._dirname, FilesPath.COUPON_LINKED_FINALS))
             .then(finalStatementJson => {
+                Log.print();
 
                 this._finalStatement = Convert.jsonToObject(finalStatementJson);
+                Log.print();
 
                 this._finalStatement.attendees.forEach(attendee => {
                     let publicKey = Suite.point();
-                    publicKey.unmarshalBinary(Convert.base64ToByteArray(attendee));
+                    publicKey.unmarshalBinary(new Uint8Array(Object.values(attendee)));
                     this._anonymitySet.add(publicKey)
                 });
 
@@ -177,7 +178,7 @@ class Coupon {
      * @return {Promise} - a promise that gets resolved once the history is loaded
      */
     loadOrderHistory() {
-        return FileIO.getStringOf(FileIO.join(FilesPath.BEERCOIN_PATH, this._dirname, FilesPath.BEERCOIN_ORDER_HISTORY))
+        return FileIO.getStringOf(FileIO.join(FilesPath.COUPON_PATH, this._dirname, FilesPath.COUPON_ORDER_HISTORY))
             .then(orderHistoryJson => {
                 if (orderHistoryJson.length === 0) {
                     return Promise.resolve()
@@ -207,7 +208,7 @@ class Coupon {
 
         const objectString = Convert.objectToJson(fields);
 
-        return FileIO.writeStringTo(FileIO.join(FilesPath.BEERCOIN_PATH, this._dirname, FilesPath.BEERCOIN_CHECKED_CLIENTS), objectString)
+        return FileIO.writeStringTo(FileIO.join(FilesPath.COUPON_PATH, this._dirname, FilesPath.COUPON_CHECKED_CLIENTS), objectString)
             .catch(error => {
                 Log.catch(error);
 
@@ -231,7 +232,7 @@ class Coupon {
 
         const configString = Convert.objectToJson(config);
 
-        return FileIO.writeStringTo(FileIO.join(FilesPath.BEERCOIN_PATH, this._dirname, FilesPath.BEERCOIN_BAR_CONFIG), configString)
+        return FileIO.writeStringTo(FileIO.join(FilesPath.COUPON_PATH, this._dirname, FilesPath.COUPON_BAR_CONFIG), configString)
     }
 
     /**
@@ -252,7 +253,7 @@ class Coupon {
 
         let historyString = Convert.objectToJson(fields);
 
-        return FileIO.writeStringTo(FileIO.join(FilesPath.BEERCOIN_PATH, this._dirname, FilesPath.BEERCOIN_ORDER_HISTORY), historyString)
+        return FileIO.writeStringTo(FileIO.join(FilesPath.COUPON_PATH, this._dirname, FilesPath.COUPON_ORDER_HISTORY), historyString)
 
     }
 
@@ -394,10 +395,10 @@ class Coupon {
      *
      * @param {String} name - the name of the bar
      * @param {String} frequency - the frequency at which clients can have a beer. Should be a member of Frequencies enum
-     * @param {Configuration} config - the linked final statement to get the allowed clients
+     * @param {Badge} b - the linked final statement to get the allowed clients
      * @return {Promise<Coupon>} - a promise that gets solved when the bar is correctly saved on the disk
      */
-    static createWithConfig(name, frequency, config) {
+    static createWithConfig(name, frequency, b) {
         if (typeof name !== "string") {
             throw new Error("name must be of type string");
         }
@@ -406,8 +407,8 @@ class Coupon {
             throw new Error("frequency must be part of the Frequencies enumeration");
         }
 
-        if (!(config instanceof Configuration)) {
-            throw new Error("config must be of type Configuration");
+        if (!(b instanceof Badge)) {
+            throw new Error("b must be of type Badge");
         }
 
         const couponCfg = {
@@ -416,20 +417,30 @@ class Coupon {
             date: Date.now().toString(),
         };
 
-        const configString = Convert.objectToJson(couponCfg);
-        const finalStatementString = Convert.objectToJson(config);
+        const couponString = Convert.objectToJson(couponCfg);
+        let config = b.config;
+        const configObject = {
+            name: config.name,
+            datetime: config.datetime,
+            location: config.location,
+            roster: Convert.rosterToJson(config.roster),
+            attendees: b.finalStatement.attendees.map(a => {
+                return a.marshalBinary();
+            })
+        }
+        const configString = Convert.objectToJson(configObject);
         const dirname = uuidv4();
 
-        return FileIO.writeStringTo(FileIO.join(FilesPath.BEERCOIN_PATH, dirname, FilesPath.BEERCOIN_LINKED_FINALS), finalStatementString)
+        return FileIO.writeStringTo(FileIO.join(FilesPath.COUPON_PATH, dirname, FilesPath.COUPON_LINKED_FINALS), configString)
             .then(() => {
-                return FileIO.writeStringTo(FileIO.join(FilesPath.BEERCOIN_PATH, dirname, FilesPath.BEERCOIN_BAR_CONFIG), configString)
+                return FileIO.writeStringTo(FileIO.join(FilesPath.COUPON_PATH, dirname, FilesPath.COUPON_BAR_CONFIG), couponString)
             })
             .then(() => {
                 return new Coupon(dirname);
             })
             .catch(error => {
                 Log.catch(error);
-                FileIO.removeFolder(FileIO.join(FilesPath.BEERCOIN_PATH, dirname));
+                FileIO.removeFolder(FileIO.join(FilesPath.COUPON_PATH, dirname));
 
                 return Promise.reject(error)
             })
@@ -441,7 +452,7 @@ class Coupon {
      * @returns {Promise} a promise that gets resolved once the bar is deleted
      */
     remove() {
-        return FileIO.removeFolder(FileIO.join(FilesPath.BEERCOIN_PATH, this._dirname));
+        return FileIO.removeFolder(FileIO.join(FilesPath.COUPON_PATH, this._dirname));
     }
 
 }
@@ -459,5 +470,5 @@ const Frequencies = Object.freeze({
     MONTHLY: "monthly",
 });
 
-module.exports.Coupon = Coupon;
+module.exports = Coupon;
 module.exports.Frequencies = Frequencies;

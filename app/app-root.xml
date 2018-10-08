@@ -5,8 +5,8 @@ Learn more about the TabView component in this documentation article:
 http://docs.nativescript.org/cookbook/ui/tab-view
 -->
 
-<TabView androidTabsPosition="bottom" selectedIndex="3">
-    <TabViewItem title="Parties" ios:iconSource="res://tabIcons/home" android:iconSource="res://home">
+<TabView androidTabsPosition="bottom" selectedIndex="2">
+    <TabViewItem title="Parties" ios:iconSource="res://tabIcons/search" android:iconSource="res://search">
         <Frame defaultPage="pages/parties/parties-page"></Frame>
     </TabViewItem>
 
@@ -14,10 +14,11 @@ http://docs.nativescript.org/cookbook/ui/tab-view
         <Frame defaultPage="pages/badges/badges-page"></Frame>
     </TabViewItem>
 
-    <TabViewItem title="Apps" ios:iconSource="res://tabIcons/search" android:iconSource="res://search">
-        <Frame defaultPage="pages/apps/apps-page"></Frame>
+    <TabViewItem title="Apps" ios:iconSource="res://tabIcons/home" android:iconSource="res://home">
+        <!--<Frame defaultPage="pages/apps/apps-page"></Frame>-->
         <!--<Frame defaultPage="pages/apps/posts/posts-page"></Frame>-->
         <!--<Frame defaultPage="pages/apps/coins/coins-page"></Frame>-->
+        <Frame defaultPage="pages/apps/coupons/coupons-page"></Frame>
     </TabViewItem>
 
     <TabViewItem title="Admin" ios:iconSource="res://tabIcons/admin" android:iconSource="res://admin">

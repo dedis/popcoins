@@ -1,7 +1,7 @@
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
-const StatusExtractor = require("../../../shared/lib/dedjs/extractor/StatusExtractor");
-const Helper = require("../../../shared/lib/dedjs/Helper");
+const StatusExtractor = require("~/lib/network/StatusExtractor");
+const Helper = require("~/lib/Helper");
 
 const viewModel = ObservableModule.fromObject({
   statsList: new ObservableArray()

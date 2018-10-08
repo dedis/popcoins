@@ -1,18 +1,16 @@
 const Dialog = require("ui/dialogs");
-const Frame = require("ui/frame");
 const Observable = require("tns-core-modules/data/observable");
 const topmost = require("ui/frame").topmost;
 
-const lib = require("../../../../lib");
+const lib = require("~/lib");
 const Log = lib.Log.default;
 const Badge = lib.pop.Badge;
-const Coupon = lib.Coupon.Coupon;
+const Coupon = lib.Coupon;
 const Intervals = lib.Coupon.Frequencies;
 
 let pageObject = undefined;
 
 let partyArray = Object.values(Badge.List);
-
 let partyNames = partyArray.map(b =>{
     return b.config.name;
 });
@@ -42,26 +40,22 @@ function onNavigatingTo(args) {
 
     pageObject = page.page;
     page.bindingContext = viewModel;
-
-}
-
-function onSwipeCellStarted(args) {
-    const swipeLimits = args.data.swipeLimits;
-    const swipeView = args.object;
-
-    const deleteButton = swipeView.getViewById("button-delete");
-
-    const width = deleteButton.getMeasuredWidth();
-
-    swipeLimits.right = width;
-    swipeLimits.threshold = width / 2;
 }
 
 /**
  * Save the config back to the file
  */
 function save() {
-    Coupon.createWithConfig(dataForm.name, dataForm.frequency, partyArray[dataForm.final_statement].config)
+    Log.print(partyArray);
+    Log.print(dataForm.final_statement);
+    let party = partyArray.find(p =>{
+        return p.config.name == dataForm.final_statement;
+    })
+    if (party == undefined){
+        Log.error("didn't find chosen party!");
+        party = partyArray[dataForm.final_statement];
+    }
+    Coupon.createWithConfig(dataForm.name, dataForm.frequency, party)
         .then(() => {
             goBack();
             return Promise.resolve()
@@ -84,6 +78,5 @@ function goBack() {
 }
 
 module.exports.onNavigatingTo = onNavigatingTo;
-module.exports.onSwipeCellStarted = onSwipeCellStarted;
 module.exports.goBack = goBack;
 module.exports.save = save;

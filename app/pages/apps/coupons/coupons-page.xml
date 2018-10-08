@@ -10,17 +10,29 @@ Feel free to customize layouts and components to change how the tab view looks.
     <ActionBar class="action-bar">
         <NavigationButton text="Go Back" android.systemIcon="ic_menu_back" tap="onBack"/>
         <Label class="action-bar-title" text="Coupons"></Label>
+        <ActionItem tap="addCoupon"
+                    ios.systemIcon="4" ios.position="right"
+                    android.position="actionBar" android:icon="res://ic_add_white">
+        </ActionItem>
     </ActionBar>
 
-    <GridLayout rows="*, *" columns="*, *" margin="2%" backgroundColor="#eeeeee">
+    <GridLayout class="page-content" rows="auto,*">
+        <Label text="You don't have any coupons yet - scan one from a provider or create one yourself."
+               textWrap="true"
+               class="empty-list-label"
+               row="0"
+               margin="20%"
+               visibility="{{ isEmpty ? 'visible' : 'collapse' }}"
+        />
 
-        <Label text="&#xff2bb;" fontSize="100%" class="fa" row="0" col="0" style="vertical-align: center;" margin="5%"/>
-
-        <Label text="&#xff2bb;" fontSize="100%" class="fa" row="0" col="1" style="vertical-align: center;" margin="5%"/>
-
-        <Label text="&#xff2bb;" fontSize="100%" class="fa" row="1" col="0" style="vertical-align: center;" margin="5%"/>
-
-        <Label text="&#xff2bb;" fontSize="100%" class="fa" row="1" col="1" style="vertical-align: center;" margin="5%"/>
-
+        <ListView items="{{ items }}" itemTap="couponTapped" class="list-group" row="1">
+            <ListView.itemTemplate>
+                <StackLayout orientation="horizontal" class="basic-list-decorated">
+                    <Label text="{{ name }}" class="h3" textWrap="true"
+                           textTransform="uppercase"/>
+                    <Label text="&#xff2bb;" fontSize="100%" class="fa" row="1" col="1" style="vertical-align: center;" margin="5%"/>
+                </StackLayout>
+            </ListView.itemTemplate>
+        </ListView>
     </GridLayout>
 </Page>

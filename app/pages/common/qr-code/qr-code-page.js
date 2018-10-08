@@ -3,19 +3,17 @@ const ZXing = require("nativescript-zxing");
 const ImageSource = require("image-source");
 const Clipboard = require("nativescript-clipboard");
 const Dialog = require("ui/dialogs");
-
 const QRGenerator = new ZXing();
+const topmost = require("ui/frame").topmost;
+
+const Log = require("~/lib/Log").default;
+
 
 let qrImage = undefined;
-
 let textToShow = undefined;
-
 let title = undefined;
-
 let closeCallBackFunction = undefined;
-
 let scanMeLabel = undefined;
-
 let titleLabel = undefined;
 
 function onShownModally(args) {
@@ -37,9 +35,10 @@ function onLoaded(args) {
     const page = args.object;
     loadViews(page);
 
-    if (PlatformModule.isAndroid)
-    // Without this the text is not vertically centered in is own view
+    if (PlatformModule.isAndroid) {
+        // Without this the text is not vertically centered in is own view
         scanMeLabel.android.setGravity(android.view.Gravity.CENTER);
+    }
 
     if (qrImage === undefined) {
         throw new Error("a field is undefined, but is should not");
@@ -87,32 +86,31 @@ function loadFields() {
 function copyToClipboard() {
     return Clipboard.setText(textToShow)
         .then(() => {
-        return Dialog.alert({
-            title: "Copied to Clipboard",
-            message: "The text has been copied to the clipboard.",
-            okButtonText: "Ok"
+            return Dialog.alert({
+                title: "Copied to Clipboard",
+                message: "The text has been copied to the clipboard.",
+                okButtonText: "Ok"
+            });
+        })
+        .catch(error => {
+            Log.catch(error);
+
+            Dialog.alert({
+                title: "Clipboard Error",
+                message: "We encountered an error trying to copy the text to the clipboard. Please try again.",
+                okButtonText: "Ok"
+            });
+
+            return Promise.reject(error);
         });
-})
-.catch(() => {
-        console.log(error);
-    console.dir(error);
-    console.trace();
-
-    Dialog.alert({
-        title: "Clipboard Error",
-        message: "We encountered an error trying to copy the text to the clipboard. Please try again.",
-        okButtonText: "Ok"
-    });
-
-    return Promise.reject(error);
-});
 }
 
 /**
  * Function called when the user wants to leave the QR code page.
  */
 function onDone() {
-    closeCallBackFunction();
+    Log.print("leaving");
+    return closeCallBackFunction();
 }
 
 module.exports.onShownModally = onShownModally;

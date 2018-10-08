@@ -5,5 +5,6 @@ module.exports = {
     CothorityMessages: require("./cothority-messages"),
     DecodeType: require("./DecodeType"),
     NSNet: require("./NSNet"),
-    RequestPath: require("./RequestPath")
+    RequestPath: require("./RequestPath"),
+    StatusExtractor: require("./StatusExtractor")
 };
