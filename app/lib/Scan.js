@@ -30,17 +30,14 @@ function scan() {
                 resultDisplayDuration: 1000,
                 openSettingsIfPermissionWasPreviouslyDenied: true,
                 beepOnScan: true,
-                closeCallback: () => {
-                }
             });
         })
         .then(scanResult => {
-            console.dir("scanned the following text:", scanResult);
+            Log.lvl1("scanned the following text:", scanResult);
             return scanResult.text;
         })
         .catch(error => {
-            console.dir("some error occured:", error);
-            return Promise.reject(error);
+            Log.rcatch("some error occured:", error);
         });
 }
 

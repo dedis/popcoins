@@ -23,12 +23,12 @@ Feel free to customize layouts and components to change how the tab view looks.
         </SegmentedBar>
 
         <StackLayout>
-            <Frame defaultPage="pages/admin/coupons/coupons-page"
+            <Frame defaultPage="pages/admin/coupons/admin-coupons-page"
                    visibility="{{ (prop == 0) ? 'visible' : 'collapsed' }}"/>
         </StackLayout>
 
         <StackLayout>
-            <Frame defaultPage="pages/admin/parties/parties-page"
+            <Frame defaultPage="pages/admin/parties/admin-parties-page"
                    visibility="{{ (prop == 1) ? 'visible' : 'collapsed' }}"/>
         </StackLayout>
 

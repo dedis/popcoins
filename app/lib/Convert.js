@@ -1,16 +1,16 @@
 require("nativescript-nodeify");
 const Kyber = require("@dedis/kyber-js");
 const CurveEd25519 = new Kyber.curve.edwards25519.Curve;
-
-const ServerIdentity = require("./cothority/identity").ServerIdentity;
-const Roster = require("./cothority/identity").Roster;
 const Buffer = require("buffer/").Buffer;
-const Helper = require("./Helper");
-const Log = require("./Log");
-const Crypto = require("./crypto/Crypto");
 const TomlParser = require("toml");
 const Tomlify = require('tomlify-j0.4');
 const UUID = require("pure-uuid");
+
+const ServerIdentity = require("./cothority/identity").ServerIdentity;
+const Roster = require("./cothority/identity").Roster;
+const Helper = require("./Helper");
+const Log = require("./Log");
+const Crypto = require("./crypto/Crypto");
 const CothorityMessages = require("./network/cothority-messages");
 
 const HEX_KEYWORD = "hex";

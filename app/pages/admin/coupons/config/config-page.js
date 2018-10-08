@@ -46,16 +46,16 @@ function onNavigatingTo(args) {
  * Save the config back to the file
  */
 function save() {
-    Log.print(partyArray);
+    Log.print(partyArray.length);
     Log.print(dataForm.final_statement);
     let party = partyArray.find(p =>{
         return p.config.name == dataForm.final_statement;
     })
     if (party == undefined){
-        Log.error("didn't find chosen party!");
+        Log.error("didn't find chosen party - hoping the final_statement has the correct one");
         party = partyArray[dataForm.final_statement];
     }
-    Coupon.createWithConfig(dataForm.name, dataForm.frequency, party)
+    Coupon.createWithConfig(dataForm.name, dataForm.frequency, new Date(Date.now()), party)
         .then(() => {
             goBack();
             return Promise.resolve()

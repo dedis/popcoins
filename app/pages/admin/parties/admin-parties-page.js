@@ -7,7 +7,7 @@ const ObservableArray = require("data/observable-array").ObservableArray;
 const Kyber = require("@dedis/kyber-js");
 const CurveEd25519 = new Kyber.curve.edwards25519.Curve;
 
-const lib = require("../../../lib");
+const lib = require("~/lib");
 const Badge = lib.pop.Badge;
 const Configuration = lib.pop.Configuration.default;
 const User = lib.User;
@@ -59,10 +59,11 @@ function loadParties() {
             viewModel.isEmpty = viewModel.partyListDescriptions.length == 0;
             viewModel.isLoading = false;
 
+            // DEBUG
             // Poll the status every 5s
-            timerId = Timer.setInterval(() => {
-                reloadStatuses();
-            }, 5000)
+            // timerId = Timer.setInterval(() => {
+            //     return reloadStatuses();
+            // }, 5000)
         })
 }
 

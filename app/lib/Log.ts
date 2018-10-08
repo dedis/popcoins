@@ -1,6 +1,6 @@
 const util = require('util');
 const application = require("application");
-const Buffer = require("buffer/");
+import {Buffer} from "buffer/";
 
 let defaultLvl = 2;
 

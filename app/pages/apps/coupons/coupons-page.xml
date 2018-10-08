@@ -28,7 +28,7 @@ Feel free to customize layouts and components to change how the tab view looks.
         <ListView items="{{ items }}" itemTap="couponTapped" class="list-group" row="1">
             <ListView.itemTemplate>
                 <StackLayout orientation="horizontal" class="basic-list-decorated">
-                    <Label text="{{ name }}" class="h3" textWrap="true"
+                    <Label text="{{ desc.name }}" class="h3" textWrap="true"
                            textTransform="uppercase"/>
                     <Label text="&#xff2bb;" fontSize="100%" class="fa" row="1" col="1" style="vertical-align: center;" margin="5%"/>
                 </StackLayout>

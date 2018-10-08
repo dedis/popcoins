@@ -48,7 +48,7 @@ class Coupon {
         }
 
         const history = this.getOrderHistoryModule();
-        history.push(date.toString());
+        history.push(date);
 
         return this.saveHistory()
     }
@@ -80,7 +80,6 @@ class Coupon {
      * @return {Promise<void>} - a promise that gets resolved once the configuration is loaded
      */
     loadConfig() {
-        Log.print("loading config");
         return FileIO.getStringOf(FileIO.join(FilesPath.COUPON_PATH, this._dirname, FilesPath.COUPON_BAR_CONFIG))
             .then(configJson => {
                 const config = Convert.jsonToObject(configJson);
@@ -89,13 +88,13 @@ class Coupon {
 
                 configModule.name = config.name;
                 configModule.frequency = config.frequency;
-                configModule.date = new Date(+config.date); // + permforms the conversion to Int
+                configModule.date = new Date(parseInt(config.date)); // + permforms the conversion to Int
 
 
-                Log.lvl1("val 1 = " + Date.now());
-                Log.lvl1("valval 2 = " + configModule.date);
-                Log.lvl1("json = " + configJson);
-                Log.lvl1(config);
+                Log.lvl3("val 1 = " + Date.now());
+                Log.lvl3("val 2 = " + configModule.date);
+                Log.lvl3("json = " + configJson);
+                Log.lvl3(config);
 
                 let numberOfDay = Math.floor((Date.now() - configModule.date.getTime()) / ONE_DAY);
                 let maxDays;
@@ -132,19 +131,16 @@ class Coupon {
      * @return {Promise<void>} - a promise that gets resolved once the clients are loaded
      */
     loadCheckedClients() {
-        Log.print("loading checked clients");
         return FileIO.getStringOf(FileIO.join(FilesPath.COUPON_PATH, this._dirname, FilesPath.COUPON_CHECKED_CLIENTS))
             .then(checkedClientsJson => {
                 if (checkedClientsJson.length === 0) {
                     return Promise.resolve();
                 }
                 const checkedClients = Convert.jsonToObject(checkedClientsJson);
-                const checkedClientsModule = this.getCheckedClientsModule();
 
                 checkedClients.clients.forEach(client => {
-                    checkedClientsModule.push(client)
+                    this._checkedClients.push(new Uint8Array(Object.values(client)));
                 });
-
                 return Promise.resolve();
             })
 
@@ -155,14 +151,10 @@ class Coupon {
      * @return {Promise<void>} - a promise that gets resolved once the final statements are loaded
      */
     loadFinalStatements() {
-        Log.print("loading final statement");
         return FileIO.getStringOf(FileIO.join(FilesPath.COUPON_PATH, this._dirname, FilesPath.COUPON_LINKED_FINALS))
             .then(finalStatementJson => {
-                Log.print();
 
                 this._finalStatement = Convert.jsonToObject(finalStatementJson);
-                Log.print();
-
                 this._finalStatement.attendees.forEach(attendee => {
                     let publicKey = Suite.point();
                     publicKey.unmarshalBinary(new Uint8Array(Object.values(attendee)));
@@ -187,7 +179,7 @@ class Coupon {
                 const orderHistory = Convert.jsonToObject(orderHistoryJson);
                 const orderHistoryModule = this.getOrderHistoryModule();
                 orderHistory.dates.forEach(date => {
-                    orderHistoryModule.push(new Date(date))
+                    orderHistoryModule.push(new Date(parseInt(date)));
                 })
             })
     }
@@ -197,22 +189,16 @@ class Coupon {
      * @return {Promise} - a promise that gets solved once the it is saved
      */
     saveCheckedClients() {
-        let clients = [];
-        this.getCheckedClientsModule().forEach(client => {
-            clients.push(client);
-        });
-
         const fields = {
-            clients: clients
+            clients: this._checkedClients.map(client => {
+                return client;
+            })
         };
 
         const objectString = Convert.objectToJson(fields);
-
         return FileIO.writeStringTo(FileIO.join(FilesPath.COUPON_PATH, this._dirname, FilesPath.COUPON_CHECKED_CLIENTS), objectString)
             .catch(error => {
-                Log.catch(error);
-
-                return Promise.reject(error)
+                Log.rcatch(error);
             })
     }
 
@@ -222,17 +208,35 @@ class Coupon {
      * @return {Promise} - a promise that gets solved once the config is saved on the disk
      */
     saveConfig() {
+        return FileIO.writeStringTo(FileIO.join(FilesPath.COUPON_PATH, this._dirname, FilesPath.COUPON_BAR_CONFIG),
+            this.getConfigString())
+    }
+
+    /**
+     * Returns the configuration as a string
+     *
+     * @return {String} json-configuration
+     */
+    getConfigString() {
         let currentConfig = this.getConfigModule();
+        return Coupon.getConfigStringJson(currentConfig.name,
+            currentConfig.frequency,
+            currentConfig.date);
+    }
 
-        const config = {
-            name: currentConfig.name,
-            frequency: currentConfig.frequency,
-            date: currentConfig.date.toString(),
-        };
-
-        const configString = Convert.objectToJson(config);
-
-        return FileIO.writeStringTo(FileIO.join(FilesPath.COUPON_PATH, this._dirname, FilesPath.COUPON_BAR_CONFIG), configString)
+    /**
+     * Convert the relevant data of a configuration to a string
+     * @param name {String}
+     * @param frequency {String}
+     * @param date {Date}
+     * @returns {string}
+     */
+    static getConfigStringJson(name, frequency, date) {
+        return Convert.objectToJson({
+            name: name,
+            frequency: frequency,
+            date: date.getTime()
+        })
     }
 
     /**
@@ -240,27 +244,21 @@ class Coupon {
      * @return {Promise} - a promise that gets solved once the datas are on the disk
      */
     saveHistory() {
-        let dates = [];
         let history = this.getOrderHistoryModule();
-
-        history.forEach(date => {
-            dates.push(date.toString())
-        });
-
         const fields = {
-            dates: dates
+            dates: history.map(date => {
+                return date.getTime();
+            })
+
         };
-
         let historyString = Convert.objectToJson(fields);
-
         return FileIO.writeStringTo(FileIO.join(FilesPath.COUPON_PATH, this._dirname, FilesPath.COUPON_ORDER_HISTORY), historyString)
-
     }
 
     /**
      * Check if a specific tag has already been registered to this bar
      *
-     * @param tag - the tag to be checked
+     * @param tag {Uint8Array} - the tag to be checked
      * @return {boolean} - true if this client already came here
      */
     isAlreadyChecked(tag) {
@@ -268,8 +266,9 @@ class Coupon {
             throw "tag must be an Uint8Array";
         }
 
-        const hexString = Convert.byteArrayToHex(tag);
-        return this.getCheckedClientsModule().indexOf(hexString) >= 0;
+        return this._checkedClients.findIndex(cl =>{
+            return Buffer.compare(Buffer.from(cl), Buffer.from(tag)) == 0;
+        }) >= 0;
     }
 
     /**
@@ -281,11 +280,8 @@ class Coupon {
         const configModule = this.getConfigModule();
         configModule.date = new Date(Date.now());
 
-        const checkedClients = this.getCheckedClientsModule();
-        checkedClients.splice(0);
-
+        this._checkedClients.splice(0);
         const promises = [this.saveCheckedClients(), this.saveConfig()];
-
         return Promise.all(promises)
             .catch(error => {
                 Log.catch(error);
@@ -318,21 +314,17 @@ class Coupon {
             throw "signature must be an Uint8Array";
         }
 
+        let nonce = signingData.nonce;
+        let scope = signingData.scope;
 
-        let nonce = Convert.hexToByteArray(signingData.nonce);
-        let scope = Convert.hexToByteArray(signingData.scope);
-
-
-        const verifInfo = RingSig.Verify(Suite, nonce, [...this._anonymitySet], scope, signature);
-        if (!verifInfo.valid) {
+        const verifyInfo = RingSig.Verify(Suite, nonce, [...this._anonymitySet], scope, signature);
+        if (!verifyInfo.valid) {
             return Promise.reject("You are not part of the right group !")
-        } else if (this.isAlreadyChecked(verifInfo.tag)) {
-            return Promise.reject("You already participated in this service ! Please come back later")
+        } else if (this.isAlreadyChecked(verifyInfo.tag)) {
+            return Promise.reject("You already redeemed this coupon! Please come back later")
         }
 
-        const hexString = Convert.byteArrayToHex(verifInfo.tag);
-        this.getCheckedClientsModule().push(hexString);
-
+        this._checkedClients.push(verifyInfo.tag);
         return this.saveCheckedClients();
     }
 
@@ -355,8 +347,8 @@ class Coupon {
         const scope = new Uint8Array(Buffer.from(scopeString));
 
         return {
-            nonce: Convert.byteArrayToHex(nonce),
-            scope: Convert.byteArrayToHex(scope)
+            nonce: nonce,
+            scope: scope
         }
     }
 
@@ -377,13 +369,6 @@ class Coupon {
     }
 
     /**
-     * @return {ObservableArray} - the observable array of the checked clients
-     */
-    getCheckedClientsModule() {
-        return this._checkedClients;
-    }
-
-    /**
      * @return {ObservableArray} - the observable array of the final statements
      */
     getFinalStatement() {
@@ -395,10 +380,11 @@ class Coupon {
      *
      * @param {String} name - the name of the bar
      * @param {String} frequency - the frequency at which clients can have a beer. Should be a member of Frequencies enum
+     * @param {Date} date - when the frequencies align
      * @param {Badge} b - the linked final statement to get the allowed clients
      * @return {Promise<Coupon>} - a promise that gets solved when the bar is correctly saved on the disk
      */
-    static createWithConfig(name, frequency, b) {
+    static createWithConfig(name, frequency, date, b) {
         if (typeof name !== "string") {
             throw new Error("name must be of type string");
         }
@@ -411,13 +397,6 @@ class Coupon {
             throw new Error("b must be of type Badge");
         }
 
-        const couponCfg = {
-            name: name,
-            frequency: frequency,
-            date: Date.now().toString(),
-        };
-
-        const couponString = Convert.objectToJson(couponCfg);
         let config = b.config;
         const configObject = {
             name: config.name,
@@ -431,9 +410,11 @@ class Coupon {
         const configString = Convert.objectToJson(configObject);
         const dirname = uuidv4();
 
-        return FileIO.writeStringTo(FileIO.join(FilesPath.COUPON_PATH, dirname, FilesPath.COUPON_LINKED_FINALS), configString)
+        return FileIO.writeStringTo(FileIO.join(FilesPath.COUPON_PATH, dirname, FilesPath.COUPON_LINKED_FINALS),
+            configString)
             .then(() => {
-                return FileIO.writeStringTo(FileIO.join(FilesPath.COUPON_PATH, dirname, FilesPath.COUPON_BAR_CONFIG), couponString)
+                return FileIO.writeStringTo(FileIO.join(FilesPath.COUPON_PATH, dirname, FilesPath.COUPON_BAR_CONFIG),
+                    this.getConfigStringJson(name, frequency, date));
             })
             .then(() => {
                 return new Coupon(dirname);

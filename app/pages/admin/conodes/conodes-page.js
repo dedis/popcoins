@@ -34,7 +34,8 @@ function onLoaded(args) {
         viewModel.set('isRosterEmpty', viewModel.rosterModule.list.length === 0);
     });
 
-    return loadConodeList();
+    // DEBUG
+    // return loadConodeList();
     // .then(() => {
     //     // Poll the statuses every 2s
     //     timerId = Timer.setInterval(() => {

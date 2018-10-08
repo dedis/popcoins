@@ -23,7 +23,7 @@
             </nsListView:RadListView.itemTemplate>
         </nsListView:RadListView>
 
-        <Label id="count" text="{{ dates.length, 'Total : ' + dates.length + ' beer(s)' }}" tap="registerKeys" row="1"
+        <Label id="count" text="{{ dates.length, 'Total : ' + dates.length + ' coupon(s)' }}" tap="registerKeys" row="1"
                col="1"/>
 
     </GridLayout>
