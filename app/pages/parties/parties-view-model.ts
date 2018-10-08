@@ -34,5 +34,4 @@ export function showParty(party: Badge) {
         qrcode: party.qrcodePublic()
     }));
     model.set("party", party);
-    Log.print("all set for party");
 }

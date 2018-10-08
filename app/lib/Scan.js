@@ -33,7 +33,6 @@ function scan() {
             });
         })
         .then(scanResult => {
-            Log.lvl1("scanned the following text:", scanResult);
             return scanResult.text;
         })
         .catch(error => {

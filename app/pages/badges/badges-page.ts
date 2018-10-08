@@ -11,10 +11,8 @@ let page: Page = undefined;
 let pageObject = undefined;
 
 export function onNavigatingTo(args: NavigatedData) {
-    Log.print("getting to badges");
     page = <Page>args.object;
     page.bindingContext = BadgesViewModel;
-    Log.print("isempty:", page.bindingContext.isEmpty);
     return loadParties();
 }
 
@@ -28,7 +26,6 @@ function loadParties() {
         .then(badges => {
             page.bindingContext.isEmpty = true;
             Object.values(badges).forEach((badge:any, index:number) => {
-                Log.print("Found badge with state:", badge.state());
                 if (badge.state() == Badge.STATE_TOKEN) {
                     page.bindingContext.items.push({
                         party: badge,
@@ -37,11 +34,9 @@ function loadParties() {
                         location: badge.config.location,
                         index: index + 1
                     })
-                    Log.print("setting isEmpty to false")
                     page.bindingContext.isEmpty = false;
                 }
             });
-            Log.print("isempty:", page.bindingContext.isEmpty);
         })
         .catch(err => {
             Log.catch(err);

@@ -77,7 +77,6 @@ function couponTapped(args) {
                 case actionRequest:
                     return Scan.scan()
                         .then(signatureJson => {
-                            Log.lvl1(signatureJson);
                             const signature = Convert.jsonToObject(signatureJson);
                             const sig = Convert.hexToByteArray(signature.signature);
                             let message = bar.getSigningData();

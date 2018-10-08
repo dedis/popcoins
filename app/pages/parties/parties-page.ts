@@ -28,9 +28,7 @@ function loadParties() {
     // })
         .then(upcoming => {
             Object.values(upcoming).forEach(party => {
-                Log.print("found party with state", party.state());
                 if (party.state() == Badge.STATE_PUBLISH) {
-                    Log.print("found published party", party.config.name);
                     page.bindingContext.party = party;
                     page.bindingContext.qrcode = party.qrcodePublic();
                 }
@@ -49,7 +47,6 @@ export function addParty() {
                 infos.omniledgerId, infos.id);
         })
         .catch(error => {
-            Log.print(error, "error while scanning");
             return Dialog.prompt({
                 // This is for the iOS simulator that doesn't have a
                 // camera - in the simulator it's easy to copy/paste the
@@ -98,5 +95,4 @@ export function addParty() {
 }
 
 export function onReload() {
-    Log.print("reloading with party", page.bindingContext.party );
 }

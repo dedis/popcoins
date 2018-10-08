@@ -46,8 +46,6 @@ function onNavigatingTo(args) {
  * Save the config back to the file
  */
 function save() {
-    Log.print(partyArray.length);
-    Log.print(dataForm.final_statement);
     let party = partyArray.find(p =>{
         return p.config.name == dataForm.final_statement;
     })

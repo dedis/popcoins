@@ -485,7 +485,6 @@ module.exports = {
 
     createMessage: function(msg, authorId, partyIId) {
         const msgProto = this.getModel(ObjectType.MESSAGE);
-        Log.print("partyIId is:", partyIId);
         const fields = {
             subject: msg.subject,
             date: 0,

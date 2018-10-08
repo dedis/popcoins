@@ -582,9 +582,6 @@ export class Badge {
                 "  Public = \"HkDzpR5Imd7WNx8kl2lJcIVRVn8gfDByJnmlfrYh/zU=\"\n" +
                 "  Description = \"DEDIS' conode\"\n").identities;
         }
-        list.forEach((conode: Identity.ServerIdentity) => {
-            Log.print("Asking conode for new party:", conode.websocketAddr);
-        })
         return Promise.resolve([]);
     }
 

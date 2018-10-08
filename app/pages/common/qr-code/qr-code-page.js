@@ -109,7 +109,6 @@ function copyToClipboard() {
  * Function called when the user wants to leave the QR code page.
  */
 function onDone() {
-    Log.print("leaving");
     return closeCallBackFunction();
 }
 

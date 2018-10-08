@@ -21,32 +21,25 @@ let msgService = undefined;
 let pageObject = undefined;
 
 function onLoaded(args) {
-    Log.print("loading posts");
     page = args.object;
     page.bindingContext = viewModel;
     pageObject = page.page;
 
     let wallets = Object.values(Wallet.List);
-    Log.print("loading posts");
     if (wallets.length > 0) {
         party = wallets[0];
         conode = party.config.roster.identities[0];
         viewModel.isEmpty = false;
-        Log.print("loading posts", conode);
         return party
             .getCoinInstance()
             .then(() => {
-                Log.print("loading posts");
                 return party.getPartyInstance();
             })
             .then(pi => {
-                Log.print("loading posts");
                 msgService = new Messages(party, pi);
-                Log.print("loading posts");
                 return msgService.loadMessages();
             })
             .then(() => {
-                Log.print("loading posts");
                 return updateMessages();
             });
     }
@@ -100,7 +93,6 @@ function messageTapped(args) {
 }
 
 function updateMessages() {
-    Log.print();
 
     return Promise.resolve()
         .then(() => {
@@ -114,7 +106,6 @@ function updateMessages() {
             }
             viewModel.isLoading = true;
             pageObject.getViewById("listView").refresh();
-            Log.print();
 
             return msgService
                 .fetchListMessages(0, 10)

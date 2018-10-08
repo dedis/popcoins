@@ -123,6 +123,5 @@ export function onBack() {
 }
 
 export function onReload(){
-    Log.print("reloading");
     return updateCoins();
 }

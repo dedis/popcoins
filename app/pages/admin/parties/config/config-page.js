@@ -60,7 +60,6 @@ function onNavigatingTo(args) {
     if (newConfig && context.leader === undefined) {
         throw new Error("Leader conode should be given in the context");
     }
-    Log.print("refresh");
     return pageObject.getViewById("list-view-conodes").refresh();
 }
 

@@ -27,7 +27,6 @@ let page = undefined;
 let timerId = undefined;
 
 function onLoaded(args) {
-    Log.print("Loading party-list");
     page = args.object;
     page.bindingContext = viewModel;
 
@@ -242,7 +241,6 @@ function verifyLinkToConode() {
                         defaultText: "",
                         inputType: Dialog.inputType.text
                     }).then(result => {
-                        Log.print("result is:", result);
                         if (result.result) {
                             if (result.text === "") {
                                 return Promise.reject("PIN should not be empty");
@@ -257,8 +255,6 @@ function verifyLinkToConode() {
                     });
                 }).catch(error => {
                     Log.catch(error, "error while setting up pin");
-                    Log.print(error);
-                    Log.print(CANCELED_BY_USER);
 
                     if (error !== CANCELED_BY_USER) {
                         return Dialog.alert({
