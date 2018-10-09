@@ -58,11 +58,10 @@ function loadParties() {
             viewModel.isEmpty = viewModel.partyListDescriptions.length == 0;
             viewModel.isLoading = false;
 
-            // DEBUG
             // Poll the status every 5s
-            // timerId = Timer.setInterval(() => {
-            //     return reloadStatuses();
-            // }, 5000)
+            timerId = Timer.setInterval(() => {
+                return reloadStatuses();
+            }, 5000)
         })
 }
 

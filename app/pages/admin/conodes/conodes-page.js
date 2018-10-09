@@ -34,14 +34,13 @@ function onLoaded(args) {
         viewModel.set('isRosterEmpty', viewModel.rosterModule.list.length === 0);
     });
 
-    // DEBUG
-    // return loadConodeList();
-    // .then(() => {
-    //     // Poll the statuses every 2s
-    //     timerId = Timer.setInterval(() => {
-    //         loadConodeList();
-    //     }, 2000)
-    // })
+    return loadConodeList()
+        .then(() => {
+            // Poll the statuses every 2s
+            timerId = Timer.setInterval(() => {
+                loadConodeList();
+            }, 2000)
+        })
 }
 
 function onUnloaded() {
