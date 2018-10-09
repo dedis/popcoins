@@ -99,7 +99,7 @@ function updateMessages() {
 
     return Promise.resolve()
         .then(() => {
-            if (conode === undefined) {
+            if (conode === undefined || msgService === undefined ) {
                 return Dialog.alert({
                     title: "No token",
                     message:
@@ -110,8 +110,7 @@ function updateMessages() {
             viewModel.isLoading = true;
             pageObject.getViewById("listView").refresh();
 
-            return msgService
-                .fetchListMessages(0, 10)
+            return msgService.fetchListMessages(0, 10)
                 .then(response => {
                     viewModel.messageList.splice(0);
                     for (let i = 0; i < response.subjects.length; i++) {
@@ -126,13 +125,16 @@ function updateMessages() {
                     }
                 })
                 .catch(error => {
-                    Log.catch("error: " + error);
+                    Log.catch(error, "error");
                     viewModel.isLoading = false;
                 });
         })
         .then(() => {
             viewModel.isLoading = false;
             pageObject.getViewById("listView").refresh();
+        })
+        .catch(error => {
+            Log.catch(error);
         });
 }
 
