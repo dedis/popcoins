@@ -1,6 +1,6 @@
 {
   "nativescript": {
-    "id": "org.nativescript.mytabts",
+    "id": "ch.epfl.popcoins",
     "tns-android": {
       "version": "4.2.0"
     },

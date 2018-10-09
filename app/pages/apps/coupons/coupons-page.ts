@@ -99,9 +99,6 @@ export function couponTapped(args: ItemEventData) {
                     textToShow: c.getConfigString(),
                     title: "Coupon information",
                 }, () => {
-                    // return topmost().navigate({
-                    //     moduleName: "pages/admin/admin-page"
-                    // });
                 }, true);
             case actionDelete:
                 return c.remove()
