@@ -11,6 +11,7 @@
     <!--<GridLayout class="page-content" rows="auto,*,*"-->
     <!--columns="*,*,*">-->
     <StackLayout class="page">
+        <Label height="10%"/>
         <Label class="label-title" text="Create new message"/>
 
         <nsDataForm:RadDataForm
