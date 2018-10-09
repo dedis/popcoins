@@ -34,7 +34,7 @@ Feel free to customize layouts and components to change how the tab view looks.
                         <Label text="{{ 'Frequency: ' + desc.frequency }}"/>
                     </StackLayout>
 
-                    <Label text="&#xff2bb;" fontSize="100%" class="fa" row="1" col="1" style="vertical-align: center; horizontal-align: right;"
+                    <Label text="&#xf3ff;" fontSize="100%" class="fas" row="1" col="1" style="vertical-align: center; horizontal-align: right;"
                            margin="5%"/>
                 </StackLayout>
             </ListView.itemTemplate>

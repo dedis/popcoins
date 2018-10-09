@@ -2,6 +2,7 @@ const Frame = require("ui/frame");
 const Dialog = require("ui/dialogs");
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
+const Timer = require("tns-core-modules/timer");
 
 const lib = require("../../../lib");
 const Log = lib.Log.default;
@@ -25,24 +26,26 @@ function onLoaded(args) {
     page.bindingContext = viewModel;
     pageObject = page.page;
 
-    let wallets = Object.values(Wallet.List);
-    if (wallets.length > 0) {
-        party = wallets[0];
-        conode = party.config.roster.identities[0];
-        viewModel.isEmpty = false;
-        return party
-            .getCoinInstance()
-            .then(() => {
-                return party.getPartyInstance();
-            })
-            .then(pi => {
-                msgService = new Messages(party, pi);
-                return msgService.loadMessages();
-            })
-            .then(() => {
-                return updateMessages();
-            });
-    }
+    Timer.setTimeout(() => {
+        let wallets = Object.values(Wallet.List);
+        if (wallets.length > 0) {
+            party = wallets[0];
+            conode = party.config.roster.identities[0];
+            viewModel.isEmpty = false;
+            return party
+                .getCoinInstance()
+                .then(() => {
+                    return party.getPartyInstance();
+                })
+                .then(pi => {
+                    msgService = new Messages(party, pi);
+                    return msgService.loadMessages();
+                })
+                .then(() => {
+                    return updateMessages();
+                });
+        }
+    }, 100)
 }
 
 function onUnloaded() {
@@ -124,6 +127,7 @@ function updateMessages() {
                 })
                 .catch(error => {
                     Log.catch("error: " + error);
+                    viewModel.isLoading = false;
                 });
         })
         .then(() => {

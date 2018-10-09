@@ -36,14 +36,16 @@ function onNavigatingTo(args) {
     viewModel.partyListDescriptions.splice(0);
 
     if (page) {
-        return loadParties()
-            .then(() => {
-                // Poll the status every 5s
-                timerId = Timer.setInterval(() => {
-                    Log.print("Reloading statuses in admin-parties");
-                    return reloadStatuses();
-                }, 5000)
-            })
+        Timer.setTimeout(() => {
+            return loadParties()
+                .then(() => {
+                    // Poll the status every 5s
+                    timerId = Timer.setInterval(() => {
+                        Log.print("Reloading statuses in admin-parties");
+                        return reloadStatuses();
+                    }, 5000)
+                })
+        }, 100);
     }
 }
 

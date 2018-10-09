@@ -38,14 +38,16 @@ function onNavigatingTo(args) {
     });
 
     if (page) {
-        return loadConodeList()
-            .then(() => {
-                // Poll the statuses every 2s
-                timerId = Timer.setInterval(() => {
-                    Log.print("Reloading conodes list");
-                    loadConodeList();
-                }, 2000)
-            })
+        Timer.setTimeout(() => {
+            return loadConodeList()
+                .then(() => {
+                    // Poll the statuses every 2s
+                    timerId = Timer.setInterval(() => {
+                        Log.print("Reloading conodes list");
+                        loadConodeList();
+                    }, 2000)
+                })
+        }, 100);
     }
 }
 

@@ -4,6 +4,7 @@ import * as Dialog from "tns-core-modules/ui/dialogs";
 import {topmost} from "tns-core-modules/ui/frame";
 
 import {Buffer} from "buffer/";
+
 const PlatformModule = require("tns-core-modules/platform");
 const ZXing = require("nativescript-zxing");
 const ImageSource = require("image-source");
@@ -13,6 +14,8 @@ let lib = require("../../../lib");
 let Scan = lib.Scan;
 import Log from "~/lib/Log";
 import * as Badge from "~/lib/pop/Badge";
+import Timer = NodeJS.Timer;
+
 let Convert = lib.Convert;
 
 let page: Page = undefined;
@@ -23,7 +26,9 @@ export function onNavigatingTo(args: NavigatedData) {
     Log.lvl1("getting to badges");
     page = <Page>args.object;
     page.bindingContext = CoinsViewModel;
-    return loadParties();
+    Timer.setTimeout(() => {
+        return loadParties();
+    }, 100);
 }
 
 function loadParties() {
@@ -58,7 +63,7 @@ function loadParties() {
         });
 }
 
-export function sendCoins(args){
+export function sendCoins(args) {
     let amount = undefined;
     const USER_WRONG_INPUT = "USER_WRONG_INPUT";
 
@@ -88,8 +93,8 @@ export function sendCoins(args){
             message: "" + amount + " PoP-Coins have been transferred",
             okButtonText: "Ok"
         });
-    }).then(()=>{
-      return updateCoins();
+    }).then(() => {
+        return updateCoins();
     }).catch(err => {
         page.bindingContext.isLoading = false;
         if (err === "Cancelled") {
@@ -108,10 +113,10 @@ export function sendCoins(args){
     })
 }
 
-function updateCoins(){
-    if (party){
+function updateCoins() {
+    if (party) {
         return party.getCoinInstance(true)
-            .then(ci=>{
+            .then(ci => {
                 page.bindingContext.balance = ci.balance;
             });
     }
@@ -122,6 +127,6 @@ export function onBack() {
     topmost().goBack();
 }
 
-export function onReload(){
+export function onReload() {
     return updateCoins();
 }

@@ -1,19 +1,20 @@
 matrix:
   include:
-    - stage: Build
-      os: osx
-      env:
-        - BuildiOS="11"
-        - Xcode="9.2"
-      osx_image: xcode9.2
-      language: node_js
-      node_js: '8'
-      jdk: oraclejdk8
-      # LTS code name carbon => 8.x series. See https://github.com/nodejs/Release#lts_schedule
-      before_install: nvm install --lts=carbon
-      script:
-        - make
-        - tns build ios
+# iOS build does not work - and it won't sign anyway...
+#    - stage: Build
+#      os: osx
+#      env:
+#        - BuildiOS="11"
+#        - Xcode="9.2"
+#      osx_image: xcode9.2
+#      language: node_js
+#      node_js: '8'
+#      jdk: oraclejdk8
+#      # LTS code name carbon => 8.x series. See https://github.com/nodejs/Release#lts_schedule
+#      before_install: nvm install --lts=carbon
+#      script:
+#        - make
+#        - tns build ios
     - language: android
       env:
         - BuildAndroid="27"
