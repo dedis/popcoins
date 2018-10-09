@@ -23,27 +23,34 @@ let page = undefined;
 let timerId = undefined;
 let pageObject = undefined;
 
-function onLoaded(args) {
-    page = args.object;
+function onNavigatingTo(args) {
+    Log.print("conodes: navigatingTo");
+    if (args) {
+        page = args.object;
 
-    page.bindingContext = viewModel;
-    pageObject = args.object.page;
+        page.bindingContext = viewModel;
+        pageObject = args.object.page;
+    }
 
     // Bind isEmpty to the length of the array
     viewModel.rosterModule.list.on(ObservableArray.changeEvent, () => {
         viewModel.set('isRosterEmpty', viewModel.rosterModule.list.length === 0);
     });
 
-    return loadConodeList()
-        .then(() => {
-            // Poll the statuses every 2s
-            timerId = Timer.setInterval(() => {
-                loadConodeList();
-            }, 2000)
-        })
+    if (page) {
+        return loadConodeList()
+            .then(() => {
+                // Poll the statuses every 2s
+                timerId = Timer.setInterval(() => {
+                    Log.print("Reloading conodes list");
+                    loadConodeList();
+                }, 2000)
+            })
+    }
 }
 
-function onUnloaded() {
+function onNavigatedFrom() {
+    Log.print("conodes: navigatedFrom");
     // remove polling when page is leaved
     Timer.clearInterval(timerId);
 }
@@ -166,13 +173,10 @@ function addConode() {
         });
 }
 
-function onDrawerButtonTap(args) {
-    const sideDrawer = Frame.topmost().getViewById("sideDrawer");
-    sideDrawer.showDrawer();
+module.exports = {
+    loadConodeList: loadConodeList,
+    conodeTapped: conodeTapped,
+    addConode: addConode,
+    onNavigatingTo: onNavigatingTo,
+    onNavigatedFrom: onNavigatedFrom
 }
-
-module.exports.onDrawerButtonTap = onDrawerButtonTap;
-module.exports.loadConodeList = loadConodeList;
-module.exports.conodeTapped = conodeTapped;
-module.exports.addConode = addConode;
-module.exports.onLoaded = onLoaded;

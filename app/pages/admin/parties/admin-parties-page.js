@@ -26,16 +26,29 @@ const viewModel = Observable.fromObject({
 let page = undefined;
 let timerId = undefined;
 
-function onLoaded(args) {
-    page = args.object;
-    page.bindingContext = viewModel;
+function onNavigatingTo(args) {
+    Log.print("navigatingto");
+    if (args) {
+        page = args.object;
+        page.bindingContext = viewModel;
+    }
 
     viewModel.partyListDescriptions.splice(0);
 
-    return loadParties();
+    if (page) {
+        return loadParties()
+            .then(() => {
+                // Poll the status every 5s
+                timerId = Timer.setInterval(() => {
+                    Log.print("Reloading statuses in admin-parties");
+                    return reloadStatuses();
+                }, 5000)
+            })
+    }
 }
 
-function onUnloaded() {
+function onNavigatedFrom() {
+    Log.print("navigatedFrom");
     // remove polling when page is leaved
     Timer.clearInterval(timerId);
 }
@@ -57,11 +70,6 @@ function loadParties() {
 
             viewModel.isEmpty = viewModel.partyListDescriptions.length == 0;
             viewModel.isLoading = false;
-
-            // Poll the status every 5s
-            timerId = Timer.setInterval(() => {
-                return reloadStatuses();
-            }, 5000)
         })
 }
 
@@ -323,7 +331,8 @@ function addParty() {
 }
 
 module.exports = {
-    onLoaded: onLoaded,
+    onNavigatingTo: onNavigatingTo,
+    onNavigatedFrom: onNavigatedFrom,
     partyTapped,
     addParty,
 }
