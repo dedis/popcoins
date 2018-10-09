@@ -1,6 +1,6 @@
-import {EventData, Observable, topmost, View} from "ui/frame";
-import { NavigatedData, Page } from "ui/page";
-import { CouponsViewModel } from "./coupons-view-model";
+import {EventData, Frame, Observable, topmost, View} from "ui/frame";
+import {NavigatedData, Page} from "ui/page";
+import {CouponsViewModel} from "./coupons-view-model";
 import {ObservableArray} from "tns-core-modules/data/observable-array";
 import {fromObject} from "tns-core-modules/data/observable";
 import * as dialogs from "tns-core-modules/ui/dialogs";
@@ -16,7 +16,7 @@ let FilePaths = lib.FilePaths;
 import Log from "~/lib/Log";
 import {ItemEventData} from "tns-core-modules/ui/list-view";
 
-let view:View = undefined;
+let view: View = undefined;
 let coupons: any[] = undefined;
 
 export function onNavigatingTo(args: NavigatedData) {
@@ -28,11 +28,11 @@ export function onNavigatingTo(args: NavigatedData) {
     return updateCoupons();
 }
 
-export function onBack(){
+export function onBack() {
     topmost().goBack();
 }
 
-function updateCoupons(){
+function updateCoupons() {
     view.bindingContext.items.splice(0);
     coupons = [];
     return FileIO.forEachFolderElement(FilePaths.COUPON_PATH, function (barFolder) {
@@ -48,7 +48,7 @@ function updateCoupons(){
 
 export function addCoupon(args: EventData) {
     const parties = Object.values(Badge.List);
-    if (parties.length == 0){
+    if (parties.length == 0) {
         return dialogs.alert("Please get a badge first.");
     }
     return Scan.scan()
@@ -56,27 +56,28 @@ export function addCoupon(args: EventData) {
             const conf = Convert.jsonToObject(resultJSON);
             return Coupon.createWithConfig(conf.name, conf.frequency, new Date(+conf.date), parties[0])
         })
-        .then(()=>{
+        .then(() => {
             updateCoupons();
         })
-        .catch(err =>{
+        .catch(err => {
             Log.catch(err);
         })
 }
 
-export function couponTapped(args: ItemEventData){
+export function couponTapped(args: ItemEventData) {
     let c = coupons[args.index];
     const actionRequest = "Request the good";
+    const actionShare = "Share the coupon";
     const actionDelete = "Delete the coupon";
     return dialogs.action({
         message: "How to use your coupon?",
         cancelButtonText: "Cancel",
-        actions: [actionRequest, actionDelete]
-    }).then(result =>{
-        switch(result){
+        actions: [actionRequest, actionShare, actionDelete]
+    }).then(result => {
+        switch (result) {
             case actionRequest:
                 const parties = Object.values(Badge.List);
-                if (parties.length == 0){
+                if (parties.length == 0) {
                     return dialogs.alert("Please get a badge first.");
                 }
                 // const sigData = Convert.jsonToObject(resultJSON);
@@ -91,16 +92,25 @@ export function couponTapped(args: ItemEventData){
                 return view.page.showModal("pages/common/qr-code/qr-code-page", {
                     textToShow: Convert.objectToJson(fields),
                     title: "Signed informations"
-                }, ()=>{}, true);
+                }, () => {
+                }, true);
+            case actionShare:
+                return view.showModal("pages/common/qr-code/qr-code-page", {
+                    textToShow: c.getConfigString(),
+                    title: "Coupon information",
+                }, () => {
+                    // return topmost().navigate({
+                    //     moduleName: "pages/admin/admin-page"
+                    // });
+                }, true);
             case actionDelete:
                 return c.remove()
-                    .then(()=>{
+                    .then(() => {
                         updateCoupons();
                     });
         }
+    }).catch(err => {
+        Log.catch(err);
+        return dialogs.alert("Something went wrong: " + err);
     })
-        .catch(err=>{
-            Log.catch(err);
-            return dialogs.alert("Something went wrong: " + err);
-        })
 }

@@ -6,7 +6,8 @@ $box-border-radius : 40;
 $text-box-height : 10%;
 
 .nav-buttons {
-    font-family: Font Awesome 5 Free, fa-solid-900;
+    font-family: "FontAwesome";
+    //font-family: Font Awesome 5 Free, fa-solid-900;
     font-weight: 900;
     font-size: 25;
 }
@@ -16,7 +17,7 @@ $text-box-height : 10%;
 }
 
 Label {
-    color: "white"
+    color: #ffffff;
 }
 
 GridLayout {

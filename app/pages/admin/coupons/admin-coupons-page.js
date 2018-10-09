@@ -54,20 +54,20 @@ function couponTapped(args) {
     const index = args.index;
     const bar = viewModel.barListDescriptions.getItem(index).bar;
     const USER_CANCELED = "USER_CANCELED_STRING";
-    const actionShow = "Show service info to user";
+    const actionShare = "Share coupon";
     const actionRequest = "Scan request";
     const actionOrders = "Show orders history"
     const actionDelete = "Delete coupon";
     return Dialog.action({
         message: "What do you want to do ?",
         cancelButtonText: "Cancel",
-        actions: [actionShow, actionRequest, actionOrders, actionDelete]
+        actions: [actionShare, actionRequest, actionOrders, actionDelete]
     }).then(result => {
             switch (result) {
-                case actionShow:
+                case actionShare:
                     return pageObject.showModal("pages/common/qr-code/qr-code-page", {
                         textToShow: bar.getConfigString(),
-                        title: "Service information",
+                        title: "Coupon information",
                     }, () => {
                         return Frame.topmost().navigate({
                             moduleName: "pages/admin/admin-page"
