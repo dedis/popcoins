@@ -14,7 +14,6 @@ let lib = require("../../../lib");
 let Scan = lib.Scan;
 import Log from "~/lib/Log";
 import * as Badge from "~/lib/pop/Badge";
-import Timer = NodeJS.Timer;
 
 let Convert = lib.Convert;
 
@@ -26,7 +25,7 @@ export function onNavigatingTo(args: NavigatedData) {
     Log.lvl1("getting to badges");
     page = <Page>args.object;
     page.bindingContext = CoinsViewModel;
-    Timer.setTimeout(() => {
+    setTimeout(() => {
         return loadParties();
     }, 100);
 }
