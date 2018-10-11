@@ -13,6 +13,7 @@
                row="0"
                width="80%"
                height="30%"
+               margin="30%"
                visibility="{{ isEmpty ? 'visible' : 'collapsed' }}"
         />
 

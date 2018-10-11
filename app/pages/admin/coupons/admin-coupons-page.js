@@ -164,7 +164,7 @@ function deleteCoupon(args) {
 }
 
 function addCoupon() {
-    let badges = Object.values(Badge.List);
+    let badges = Badge.List;
     if (badges.length == 0) {
         return Dialog.alert({
             title: "No group available",

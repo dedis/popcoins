@@ -7,10 +7,15 @@ import {SegmentedBar} from "tns-core-modules/ui/segmented-bar";
 import {onNavigatingTo as partiesTo, onNavigatedFrom as partiesFrom} from "~/pages/admin/parties/admin-parties-page";
 import {onNavigatingTo as conodesTo, onNavigatedFrom as conodesFrom} from "~/pages/admin/conodes/conodes-page";
 
+let page: Page = undefined;
+let segBar: SegmentedBar = undefined;
+
 export function onNavigatingTo(args: NavigatedData) {
     Log.print("admin: navigationTo");
-    const page = <Page>args.object;
+    page = <Page>args.object;
     page.bindingContext = new AdminViewModel();
+    Log.print("segBar is:", segBar.selectedIndex);
+    page.bindingContext.set("prop", segBar.selectedIndex);
     partiesTo();
     conodesTo();
 }
@@ -25,10 +30,11 @@ export function onBack() {
     topmost().goBack();
 }
 
-export function sbLoaded(args) {
+export function sbLoaded(args:NavigatedData) {
     // handle selected index change
-    const segmentedBarComponent: SegmentedBar = <SegmentedBar>args.object;
-    segmentedBarComponent.on("selectedIndexChange", selectedIndexChange);
+    segBar = <SegmentedBar>args.object;
+    Log.print("sb: ", segBar.selectedIndex);
+    segBar.on("selectedIndexChange", selectedIndexChange);
 }
 
 export function selectedIndexChange(sbargs: SelectedIndexChangedEventData) {

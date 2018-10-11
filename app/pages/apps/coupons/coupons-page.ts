@@ -6,7 +6,7 @@ import {fromObject} from "tns-core-modules/data/observable";
 import * as dialogs from "tns-core-modules/ui/dialogs";
 
 let lib = require("~/lib");
-let Badge = lib.pop.Badge;
+import * as Badge from "~/lib/pop/Badge";
 let Scan = lib.Scan;
 let Convert = lib.Convert;
 let RingSig = lib.crypto.RingSig;
@@ -47,7 +47,7 @@ function updateCoupons() {
 }
 
 export function addCoupon(args: EventData) {
-    const parties = Object.values(Badge.List);
+    const parties = Badge.List;
     if (parties.length == 0) {
         return dialogs.alert("Please get a badge first.");
     }
@@ -76,7 +76,7 @@ export function couponTapped(args: ItemEventData) {
     }).then(result => {
         switch (result) {
             case actionRequest:
-                const parties = Object.values(Badge.List);
+                const parties = Badge.List;
                 if (parties.length == 0) {
                     return dialogs.alert("Please get a badge first.");
                 }

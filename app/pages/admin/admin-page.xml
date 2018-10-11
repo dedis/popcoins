@@ -15,7 +15,7 @@ Feel free to customize layouts and components to change how the tab view looks.
     </ActionBar>
 
     <StackLayout>
-        <SegmentedBar loaded="sbLoaded" class="m-5" selectedIndex="0">
+        <SegmentedBar loaded="sbLoaded" class="m-5" selectedIndex="0" id="segment-admin">
             <SegmentedBar.items>
                 <SegmentedBarItem title="Coupons"/>
                 <SegmentedBarItem title="New Parties"/>

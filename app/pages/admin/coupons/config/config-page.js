@@ -10,20 +10,17 @@ const Intervals = lib.Coupon.Frequencies;
 
 let pageObject = undefined;
 
-let partyArray = Object.values(Badge.List);
-let partyNames = partyArray.map(b =>{
-    return b.config.name;
-});
-
+let partyArray = [];
+let partyNames = [];
 let dataForm = Observable.fromObject({
     name: "",
     frequency: Intervals.DAILY,
-    final_statement: 0
+    final_statement: ""
 });
 
 let viewModel = Observable.fromObject({
     dataForm: dataForm,
-    finalStatements: partyNames,
+    finalStatements: [],
     frequencies: [
         {key: Intervals.DAILY, label: "Daily"},
         {key: Intervals.WEEKLY, label: "Weekly"},
@@ -40,6 +37,25 @@ function onNavigatingTo(args) {
 
     pageObject = page.page;
     page.bindingContext = viewModel;
+
+    partyArray = [];
+    Badge.List.forEach(b =>{
+        if (b.state() === Badge.STATE_TOKEN){
+            partyArray.push(b);
+        }
+    });
+    if (partyArray.length == 0){
+        return Dialog.alert("No finalized badge available")
+            .then(()=>{
+                goBack();
+            });
+    }
+    partyNames = partyArray.map(b =>{
+        return b.config.name;
+    });
+    dataForm.name = "";
+    dataForm.final_statement = partyNames[0];
+    viewModel.finalStatements = partyNames;
 }
 
 /**

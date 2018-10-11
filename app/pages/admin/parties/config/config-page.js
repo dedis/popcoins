@@ -50,7 +50,6 @@ function onNavigatingTo(args) {
     newConfig = context.newConfig;
 
     viewModel.readOnly = context.readOnly === true;
-    Log.lvl2("readOnly is:", viewModel.readOnly);
 
     copyWalletToViewModel();
 
@@ -84,7 +83,6 @@ function addConode() {
 }
 
 function conodeTapped(args) {
-    Log.lvl2("conode tapped:", args)
     const index = args.index;
     const remove = "Remove this conode";
     return Dialog.action({
@@ -161,7 +159,6 @@ function addManual(manually) {
                     if (result !== "Cancel") {
                         index = conodesNames.indexOf(result);
 
-                        Log.lvl2("adding a new conode: " + conodes[index]);
                         // TODO: adding conode to the configuration
                         WalEdit.config.roster.identities.push(conodes[index]);
                     }
@@ -192,7 +189,6 @@ function addScan() {
         .then(string => {
             const conode = Convert.parseJsonServerIdentity(string);
 
-            Log.lvl2("adding new conode: " + conode);
             WalEdit.config.roster.identities.push(conode);
             pageObject.getViewById("list-view-conodes").refresh();
         })
@@ -244,7 +240,6 @@ function copyWalletToViewModel() {
     dataForm.set("time", date.getHours() + ":" + date.getMinutes());
     dataForm.name = cfg.name;
     dataForm.location = cfg.location;
-    console.dir(cfg.roster);
     viewModel.rosterList.splice(0);
     cfg.roster.identities.forEach(conode => {
         viewModel.rosterList.push(conode);
