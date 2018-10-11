@@ -6,9 +6,10 @@
 node_modules/
 platforms/
 hooks/
-conodes/
+/conodes/
 old.dedis/
 dedis/
 
 package-lock.json
-
+popcoins_app
+app/pages/parties/parties-page.css

@@ -1,0 +1,40 @@
+<Page
+        class="page"
+        navigatingTo="onNavigatingTo"
+        xmlns:nsListView="nativescript-ui-listview"
+        xmlns:nsFloatingButton="nativescript-floatingactionbutton"
+        xmlns="http://schemas.nativescript.org/tns.xsd">
+
+    <ActionBar class="action-bar">
+        <Label class="action-bar-title" text="Badges"></Label>
+    </ActionBar>
+
+    <GridLayout class="page-content" rows="auto,*">
+        <Label text="To get badges, you must visit a party."
+               textWrap="true"
+               class="empty-list-label"
+               row="0"
+               margin="20%"
+               visibility="{{ isEmpty ? 'visible' : 'collapse' }}"
+        />
+
+        <ListView items="{{ items }}" itemTap="partyTapped" class="list-group" row="1">
+            <ListView.itemTemplate>
+                <StackLayout orientation="horizontal" class="basic-list-decorated">
+
+                    <StackLayout padding="10%">
+                        <Label text="{{ 'Badge #' + index }}" class="h3"
+                               textWrap="true" stretch="aspectFill" textTransform="uppercase"/>
+                    </StackLayout>
+                    <StackLayout padding="10%">
+                        <Label text="{{ name }}" class="h3" textWrap="true"
+                               textTransform="uppercase"/>
+                        <Label text="{{ datetime }}" textWrap="true" fontSize="15%"/>
+                        <Label text="{{ location }}" textWrap="true" fontSize="15%"
+                               textTransform="capitalize"/>
+                    </StackLayout>
+                </StackLayout>
+            </ListView.itemTemplate>
+        </ListView>
+    </GridLayout>
+</Page>

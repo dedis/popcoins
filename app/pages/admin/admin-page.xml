@@ -1,0 +1,42 @@
+<!--
+This is the page that is presented in the 'Search' tab.
+Feel free to customize layouts and components to change how the tab view looks.
+-->
+<Page
+        class="page"
+        loaded="onNavigatingTo"
+        unloaded="onNavigatedFrom"
+        xmlns="http://schemas.nativescript.org/tns.xsd">
+    <!--actionBarHidden="true"-->
+
+    <ActionBar class="action-bar" actionBarHidden="true">
+        <NavigationButton text="Go Back" android.systemIcon="ic_menu_back" tap="onBack"/>
+        <Label class="action-bar-title" text="PopCoins"></Label>
+    </ActionBar>
+
+    <StackLayout>
+        <SegmentedBar loaded="sbLoaded" class="m-5" selectedIndex="0">
+            <SegmentedBar.items>
+                <SegmentedBarItem title="Coupons"/>
+                <SegmentedBarItem title="New Parties"/>
+                <SegmentedBarItem title="Conodes"/>
+            </SegmentedBar.items>
+        </SegmentedBar>
+
+        <StackLayout>
+            <Frame defaultPage="pages/admin/coupons/admin-coupons-page"
+                   visibility="{{ (prop == 0) ? 'visible' : 'collapsed' }}"/>
+        </StackLayout>
+
+        <StackLayout>
+            <Frame defaultPage="pages/admin/parties/admin-parties-page"
+                   visibility="{{ (prop == 1) ? 'visible' : 'collapsed' }}"/>
+        </StackLayout>
+
+        <StackLayout>
+            <Frame defaultPage="pages/admin/conodes/conodes-page"
+                   visibility="{{ (prop == 2) ? 'visible' : 'collapsed' }}"/>
+        </StackLayout>
+
+    </StackLayout>
+</Page>

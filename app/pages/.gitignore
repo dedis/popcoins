@@ -1,0 +1,15 @@
+admin/admin-view-model.js
+admin/admin-page.js
+parties/parties-view-model.js
+parties/home-item-detail/home-item-detail-page.js
+parties/parties-page.js
+parties/shared/item.js
+apps/apps-page.js
+apps/coins/coins-page.js
+apps/coins/coins-view-model.js
+apps/coupons/coupons-page.js
+apps/coupons/coupons-view-model.js
+apps/apps-view-model.js
+badges/badges-view-model.js
+badges/shared/item.js
+badges/badges-page.js

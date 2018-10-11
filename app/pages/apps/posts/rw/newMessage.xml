@@ -1,0 +1,78 @@
+<Page
+        class="page"
+        loaded="onLoaded"
+        xmlns:nsDataForm="nativescript-ui-dataform"
+        shownModally="onShownModally">
+
+    <ActionBar class="action-bar">
+        <Label class="action-bar-title" text="Creating new message"/>
+    </ActionBar>
+
+    <!--<GridLayout class="page-content" rows="auto,*,*"-->
+    <!--columns="*,*,*">-->
+    <StackLayout class="page">
+        <Label height="10%"/>
+        <Label class="label-title" text="Create new message"/>
+
+        <nsDataForm:RadDataForm
+                id="messageForm"
+                source="{{ newMessage }}">
+            <nsDataForm:RadaForm.properties>
+                <nsDataForm:EntityProperty name="subject" index="0" displayName="Subject:">
+                    <nsDataForm:EntityProperty.editor>
+                        <nsDataForm:PropertyEditor type="Text">
+                            <nsDataForm:PropertyEditor.propertyEditorStyle>
+                                <nsDataForm:PropertyEditorStyle labelPosition="Left" labelWidth="80"
+                                                                labelTextColor="#226622"/>
+                            </nsDataForm:PropertyEditor.propertyEditorStyle>
+                        </nsDataForm:PropertyEditor>
+                    </nsDataForm:EntityProperty.editor>
+                </nsDataForm:EntityProperty>
+
+                <nsDataForm:EntityProperty name="text" index="1">
+                    <nsDataForm:EntityProperty.editor>
+                        <nsDataForm:PropertyEditor type="MultilineText">
+                            <nsDataForm:PropertyEditor.propertyEditorStyle>
+                                <nsDataForm:PropertyEditorStyle labelPosition="Left" labelWidth="80"
+                                                                labelTextColor="#226622"
+                                                                height="200"/>
+                            </nsDataForm:PropertyEditor.propertyEditorStyle>
+                        </nsDataForm:PropertyEditor>
+                    </nsDataForm:EntityProperty.editor>
+                </nsDataForm:EntityProperty>
+
+                <nsDataForm:EntityProperty name="balance" index="2">
+                    <nsDataForm:EntityProperty.editor>
+                        <nsDataForm:PropertyEditor type="Number">
+                            <nsDataForm:PropertyEditor.propertyEditorStyle>
+                                <nsDataForm:PropertyEditorStyle labelPosition="Left" labelWidth="80"
+                                                                labelTextColor="#226622"/>
+                            </nsDataForm:PropertyEditor.propertyEditorStyle>
+                        </nsDataForm:PropertyEditor>
+                    </nsDataForm:EntityProperty.editor>
+                </nsDataForm:EntityProperty>
+
+                <nsDataForm:EntityProperty name="reward" index="3">
+                    <nsDataForm:EntityProperty.editor>
+                        <nsDataForm:PropertyEditor type="Number">
+                            <nsDataForm:PropertyEditor.propertyEditorStyle>
+                                <nsDataForm:PropertyEditorStyle labelPosition="Left" labelWidth="80"
+                                                                labelTextColor="#226622"
+                                                                height="200"/>
+                            </nsDataForm:PropertyEditor.propertyEditorStyle>
+                        </nsDataForm:PropertyEditor>
+                    </nsDataForm:EntityProperty.editor>
+                </nsDataForm:EntityProperty>
+
+                <nsDataForm:EntityProperty name="_observers" hidden="true"/>
+                <nsDataForm:EntityProperty name="_map" hidden="true"/>
+            </nsDataForm:RadaForm.properties>
+        </nsDataForm:RadDataForm>
+
+        <Button text="Add" tap="addManual"/>
+        <Button text="Cancel" tap="onCancel"/>
+
+    </StackLayout>
+
+
+</Page>

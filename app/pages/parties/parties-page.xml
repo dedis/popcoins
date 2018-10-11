@@ -1,0 +1,44 @@
+<!--
+This is the page that is presented in the 'Home' tab.
+Feel free to customize layouts and components to change how the tab view looks.
+-->
+<Page
+        class="page"
+        navigatingTo="onNavigatingTo"
+        xmlns:nsFloatingButton="nativescript-floatingactionbutton"
+        xmlns="http://schemas.nativescript.org/tns.xsd">
+
+    <ActionBar class="action-bar">
+        <Label class="action-bar-title" text="Upcoming Parties"></Label>
+        <ActionItem tap="onReload"
+                    ios.systemIcon="13" ios.position="right"
+                    icon="res://ic_reload_white" android.position="actionBar"/>
+                    <!--android:icon="res://ic_reload_white" android.position="actionBar"/>-->
+        <ActionItem tap="addParty"
+                    ios.systemIcon="4" ios.position="right"
+                    icon="res://ic_add_white" android.position="actionBar"/>
+    </ActionBar>
+
+    <StackLayout>
+        <GridLayout id="grid-layout" row="0"
+                    rows="auto,auto, *" columns="*, *" backgroundColor="white"
+                    class="basic-list-decorated">
+            <StackLayout row="0" col="0" padding="10%">
+                <Label text="{{ party.config.name }}" class="h3" textWrap="true"
+                       textTransform="uppercase"/>
+                <Label text="{{ party.config.datetime }}" textWrap="true" fontSize="15%"/>
+                <Label text="{{ party.config.location }}" textWrap="true" fontSize="15%"
+                       textTransform="capitalize"/>
+            </StackLayout>
+            <StackLayout row="1" col="0">
+                <Label text="{{ 'party.config.status' }}" style="text-align:center;" class="h4"
+                       textWrap="true" paddingTop="10%" stretch="aspectFill" textTransform="uppercase"/>
+            </StackLayout>
+            <StackLayout class="status-text" rowSpan="2" col="1">
+                <Image src="{{ qrcode }}"
+                visibility="visible" stretch="aspectFill"/>
+                visibility="visible" width="60%" height="60%" stretch="aspectFill"/>
+            </StackLayout>
+        </GridLayout>
+    </StackLayout>
+</Page>

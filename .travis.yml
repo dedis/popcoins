@@ -1,62 +1,60 @@
 matrix:
   include:
-  - stage: Build
-    os: osx
-    env:
-    - BuildiOS="11"
-    - Xcode="9.2"
-    osx_image: xcode9.2
-    language: node_js
-    node_js: '8'
-    jdk: oraclejdk8
-    # LTS code name carbon => 8.x series. See https://github.com/nodejs/Release#lts_schedule
-    before_install: nvm install --lts=carbon
-    script:
-    - make
-    - tns build ios
-  - language: android
-    env:
-    - BuildAndroid="27"
-    os: linux
-    jdk: oraclejdk8
-    # LTS code name carbon => 8.x series. See https://github.com/nodejs/Release#lts_schedule
-    before_install: nvm install --lts=carbon
-    script:
-    - make
-    - tns prepare android --release
-    - tns build android --env.aot --env.uglify --env.snapshot
-    # Find the previous one, remove, post the new one.
-    - last=`curl -f -s "https://dashboard.applivery.com/api/builds/app/5b4489e0b5676eb6414b0580" -H "Authorization:$APPLIVERY_API_KEY" | jq -r '.response[] | select(.versionName == "From Travis")| select(.so == "android") | ._id'`
-    - /bin/echo "The last Android build is: $last"
-    - curl -f "https://dashboard.applivery.com/api/builds/$last" -X DELETE -H "Authorization:$APPLIVERY_API_KEY" || true
-    - curl -f "https://dashboard.applivery.com/api/builds" -X POST -H "Authorization:$APPLIVERY_API_KEY"
-      -F app="5b4489e0b5676eb6414b0580" -F versionName="From Travis" -F os="android"
-      -F notes="Built from branch $TRAVIS_BRANCH, commit $TRAVIS_COMMIT."
-      -F package=@"platforms/android/app/build/outputs/apk/debug/app-debug.apk"
+    - stage: Build
+      os: osx
+      env:
+        - BuildiOS="11"
+        - Xcode="9.2"
+      osx_image: xcode9.2
+      language: node_js
+      node_js: '8'
+      jdk: oraclejdk8
+      # LTS code name carbon => 8.x series. See https://github.com/nodejs/Release#lts_schedule
+      before_install: nvm install --lts=carbon
+      script:
+        - pod repo update
+        - make
+        - tns build ios
+    - language: android
+      env:
+        - BuildAndroid="27"
+      os: linux
+      jdk: oraclejdk8
+      # LTS code name carbon => 8.x series. See https://github.com/nodejs/Release#lts_schedule
+      before_install: nvm install --lts=carbon
+      script:
+        - make
+        - tns prepare android --release
+        - tns build android --env.aot --env.uglify --env.snapshot
+        # Find the previous one, remove, post the new one.
+        - last=`curl -f -s "https://dashboard.applivery.com/api/builds/app/5b4489e0b5676eb6414b0580" -H "Authorization:$APPLIVERY_API_KEY" | jq -r '.response[] | select(.versionName == "From Travis")| select(.so == "android") | ._id' | head`
+        - echo "The last Android build is - $last"
+        - curl -f "https://dashboard.applivery.com/api/builds/$last" -X DELETE -H "Authorization:$APPLIVERY_API_KEY" || true
+        - curl -f "https://dashboard.applivery.com/api/builds" -X POST -H "Authorization:$APPLIVERY_API_KEY" -F app="5b4489e0b5676eb6414b0580" -F versionName="From Travis" -F os="android" -F notes="Built from branch $TRAVIS_BRANCH, commit $TRAVIS_COMMIT." -F package=@"platforms/android/app/build/outputs/apk/debug/app-debug.apk"
 
 android:
   components:
-  - tools
-  - platform-tools
-  - build-tools-27.0.3
-  - android-27
-  - extra-android-m2repository
+    - tools
+    - platform-tools
+    - build-tools-27.0.3
+    - android-27
+    - extra-android-m2repository
   
 before_cache:
-- rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
 
 cache:
   directories:
-  - ".nvm"
-  - "$HOME/.gradle/caches/"
-  - "$HOME/.gradle/wrapper/"
+    - ".nvm"
+    - "$HOME/.gradle/caches/"
+    - "$HOME/.gradle/wrapper/"
   
 install:
-- echo no | npm install -g nativescript@4.2.3
-- node --version
-- tns --version
-- tns usage-reporting disable
-- tns error-reporting disable
+  - echo no | npm install -g nativescript@4.2.3
+  - node --version
+  - tns --version
+  - tns usage-reporting disable
+  - tns error-reporting disable
 
 notifications:
   email: false

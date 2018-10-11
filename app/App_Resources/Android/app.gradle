@@ -1,17 +1,16 @@
-dependencies {
-  compile 'com.android.support:recyclerview-v7:22.2.0'
-}
+// Add your native dependencies here:
 
-android {
-  defaultConfig {
+// Uncomment to add recyclerview-v7 dependency
+//dependencies {
+//	implementation 'com.android.support:recyclerview-v7:+'
+//}
+
+android {  
+  defaultConfig {  
     generatedDensities = []
     applicationId = "ch.epfl.popcoins"
+  }  
+  aaptOptions {  
+    additionalParameters "--no-version-vectors"  
   }
-  aaptOptions {
-    additionalParameters "--no-version-vectors"
-  }
-}
-
-configurations {
-    compile.exclude group: 'com.google.zxing'
-}
+} 
