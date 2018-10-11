@@ -1,7 +1,5 @@
-import {NavigatedData, Page} from "ui/page";
+import {EventData, NavigatedData, Page, View} from "ui/page";
 import * as Dialog from "tns-core-modules/ui/dialogs";
-
-import * as view from "./parties-view-model";
 
 import * as Badge from "~/lib/pop/Badge";
 import Log from "~/lib/Log";
@@ -9,16 +7,30 @@ import * as Scan from "../../lib/Scan";
 import * as Convert from "~/lib/Convert";
 import * as RequestPath from "~/lib/network/RequestPath";
 import {fromObject} from "tns-core-modules/data/observable";
+import {ItemEventData} from "tns-core-modules/ui/list-view";
 
-let page;
+let view: View = undefined;
 
 export function onNavigatingTo(args: NavigatedData) {
-    page = <Page>args.object;
-    page.bindingContext = fromObject({
+    Log.print("navigating to: parties-page");
+    view = <View>args.object;
+    view.bindingContext = fromObject({
         party: undefined,
+        config: {},
         qrcode: undefined
     });
     return loadParties();
+}
+
+function updateView(party: Badge.Badge) {
+    if (party) {
+        view.bindingContext.config = party.config;
+        view.bindingContext.qrcode = party.qrcodePublic();
+        view.bindingContext.party = party;
+    } else {
+        view.bindingContext.party = undefined;
+        view.bindingContext.config = {};
+    }
 }
 
 function loadParties() {
@@ -29,8 +41,7 @@ function loadParties() {
         .then(upcoming => {
             Object.values(upcoming).forEach(party => {
                 if (party.state() == Badge.STATE_PUBLISH) {
-                    page.bindingContext.party = party;
-                    page.bindingContext.qrcode = party.qrcodePublic();
+                    updateView(party);
                 }
             });
         })
@@ -71,8 +82,7 @@ export function addParty() {
             newParty.attendeesAdd([newParty.keypair.public]);
             return newParty.save()
                 .then(() => {
-                    page.bindingContext.party = newParty;
-                    page.bindingContext.qrcode = newParty.qrcodePublic();
+                    updateView(newParty);
                 })
                 .catch(error => {
                     Dialog.alert({
@@ -92,6 +102,46 @@ export function addParty() {
                 throw new Error(err);
             })
         })
+}
+
+export function partyTap(args: EventData) {
+    if (!view.bindingContext.party) {
+        return;
+    }
+
+    const actionShare = "Share party-definition";
+    const actionDelete = "Delete party";
+
+    return Dialog.action({
+        message: "What do you want to do?",
+        cancelButtonText: "Cancel",
+        actions: [actionShare, actionDelete]
+    }).then(result => {
+        switch (result) {
+            case actionShare:
+                view.showModal("pages/common/qr-code/qr-code-page", {
+                    textToShow: Convert.objectToJson({
+                        id: view.bindingContext.party.config.hashStr(),
+                        omniledgerId: RequestPath.OMNILEDGER_INSTANCE_ID,
+                        address: view.bindingContext.party.linkedConode.tcpAddr
+                    }),
+                    title: "Party information",
+                }, () => {
+                }, true);
+                break;
+            case actionDelete:
+                return Dialog.confirm("Do you really want to delete that party?")
+                    .then(del => {
+                        if (del) {
+                            view.bindingContext.party.remove();
+                        }
+                        updateView(undefined);
+                    })
+                    .catch(err => {
+                        Log.rcatch(err);
+                    });
+        }
+    })
 }
 
 export function onReload() {

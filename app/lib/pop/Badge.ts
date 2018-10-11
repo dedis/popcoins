@@ -9,6 +9,7 @@ const OmniledgerRPC = require("../cothority/omniledger/OmniledgerRPC");
 const Darc = require("../cothority/omniledger/darc");
 import * as Identity from "./../cothority/identity";
 import {Buffer} from "buffer/";
+
 const PlatformModule = require("tns-core-modules/platform");
 const ZXing = require("nativescript-zxing");
 const QRGenerator = new ZXing();
@@ -38,9 +39,10 @@ import {ImageSource, fromNativeSource} from "tns-core-modules/image-source";
  * TODO: add more than one configuration.
  */
 
-// List is all the Wallets that have been loaded from disk.
-export let List: object = {};
-export let Upcoming: object = {};
+// List is all the Wallets that have been loaded from disk. It's sorted to have the latest party
+// at the beginning of the array.
+export let List: Badge[] = [];
+export let Upcoming: Badge[] = [];
 
 export const STATE_CONFIG = 1;
 export const STATE_PUBLISH = 2;
@@ -95,7 +97,11 @@ export class Badge {
      * Adds the current wallet to the list.
      */
     addToList() {
-        List[this._config.hashStr()] = this;
+        List.push(this);
+        // Sort in reverse order, so that the most recent party gets index 0.
+        List.sort((a,b)=>{
+            return Date.parse(b.config.datetime) - Date.parse(a.config.datetime);
+        })
     }
 
     /**
@@ -231,9 +237,14 @@ export class Badge {
      * Remove will delete the party from the list of available parties.
      */
     remove() {
-        delete List[this._config.hashStr()];
-        return FileIO.rmrf(FileIO.join(FilePaths.WALLET_PATH,
-            "wallet_" + this._config.hashStr()));
+        let i = List.indexOf(this);
+        if (i >= 0){
+            List.splice(i, 1);
+            return FileIO.rmrf(FileIO.join(FilePaths.WALLET_PATH,
+                "wallet_" + this._config.hashStr()));
+        } else {
+            throw new Error("Didn't find this Badge in List");
+        }
     }
 
     /**
@@ -516,7 +527,7 @@ export class Badge {
         return this._coinInstance.transfer(amount, accountId, signer);
     }
 
-    qrcodePublic(){
+    qrcodePublic() {
         let pubBase64 = Buffer.from(this.keypair.public.marshalBinary()).toString('base64');
         let text = " { \"public\" :  \"" + pubBase64 + "\"}";
         let sideLength = PlatformModule.screen.mainScreen.widthPixels / 4;
@@ -537,10 +548,10 @@ export class Badge {
         // Only load from disk if not done yet.
         return Promise.resolve()
             .then(() => {
-                if (Object.keys(List).length == 0) {
+                if (List.length == 0) {
                     return this.loadNewVersions()
                 }
-                return Object.values(List);
+                return List;
             })
     }
 
@@ -550,14 +561,14 @@ export class Badge {
      */
     static updateAll(): Promise<Badge[]> {
         return Promise.all(
-            Object.values(List).map(badge=>{
+            List.map(badge => {
                 return badge.update()
-                    .catch(err=>{
+                    .catch(err => {
                         Log.catch(err, "while updating badge: " + badge.config.name);
                     })
             })
-        ).then(()=>{
-            return Object.values(List);
+        ).then(() => {
+            return List;
         })
     }
 
@@ -602,7 +613,7 @@ export class Badge {
                 return this.loadFromFile(fileName);
             })
         ).then(() => {
-            return Object.values(List);
+            return List;
         })
     }
 

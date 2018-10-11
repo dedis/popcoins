@@ -27,7 +27,7 @@ function onLoaded(args) {
     pageObject = page.page;
 
     Timer.setTimeout(() => {
-        let wallets = Object.values(Wallet.List);
+        let wallets = Wallet.List;
         if (wallets.length > 0) {
             party = wallets[0];
             conode = party.config.roster.identities[0];

@@ -36,7 +36,7 @@ function onNavigatingTo(args) {
     viewModel.partyListDescriptions.splice(0);
 
     if (page) {
-        Timer.setTimeout(() => {
+        timerId = Timer.setTimeout(() => {
             return loadParties()
                 .then(() => {
                     // Poll the status every 5s
@@ -44,6 +44,9 @@ function onNavigatingTo(args) {
                         Log.print("Reloading statuses in admin-parties");
                         return reloadStatuses();
                     }, 5000)
+                })
+                .catch(err => {
+                    Log.catch(err);
                 })
         }, 100);
     }
@@ -62,9 +65,11 @@ function onNavigatedFrom() {
 function loadParties() {
     return Promise.resolve()
         .then(() => {
-            Log.lvl1("getting all wallets:", Object.keys(Badge.List));
+            Log.lvl1("getting all wallets:", Badge.List.map(b => {
+                return b.config.name
+            }));
             viewModel.partyListDescriptions.splice(0);
-            Object.values(Badge.List).forEach(wallet => {
+            Badge.List.forEach(wallet => {
                 if (wallet.linkedConode) {
                     viewModel.partyListDescriptions.push(getViewModel(wallet));
                 }
@@ -304,7 +309,7 @@ function addParty() {
         })
         .then(result => {
             if (result === "Configure a new party") {
-                Log.lvl2("configuring a new party", wallet);
+                Log.lvl2("configuring a new party", wallet.config.name);
                 return Frame.topmost().navigate({
                     moduleName: "pages/admin/parties/config/config-page",
                     context: {
