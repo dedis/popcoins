@@ -52,12 +52,12 @@ function Socket(addr, service) {
 
             const responseModel = this.protobuf.lookup(response);
             if (responseModel === undefined) {
-                console.log("failed to find " + response);
+                Log.error("failed to find " + response);
                 reject(new Error("Model " + response + " not found"));
             }
 
             let timerId = Timer.setTimeout(() => {
-                console.log("timeout - retrying");
+                Log.error("timeout - retrying");
                 retry = true;
                 ws.close();
             }, 5000);
@@ -65,7 +65,7 @@ function Socket(addr, service) {
             ws.on('open', () => {
                 const errMsg = requestModel.verify(data);
                 if (errMsg) {
-                    console.log("couldn't verify data:", errMsg);
+                    Log.error("couldn't verify data:", errMsg);
                     reject(new Error(errMsg));
                 }
                 const message = requestModel.create(data);
@@ -80,9 +80,9 @@ function Socket(addr, service) {
                     protoMessage = responseModel.decode(buffer);
                     ws.close();
                 } catch (err) {
-                    console.log("got message with length", buffer.length);
-                    console.dir("unmarshalling into", responseModel);
-                    console.log("error while decoding:", err, "buffer is:", Buffer.from(buffer).toString("hex"));
+                    Log.lvl2("got message with length", buffer.length);
+                    Log.lvl2("unmarshalling into", responseModel);
+                    Log.catch(err, "error while decoding, buffer is:", Buffer.from(buffer).toString("hex"));
                     ws.close();
                     reject(err);
                 }
@@ -146,30 +146,26 @@ class RosterSocket {
             shuffle(addresses);
 
             // try first the last good server we know
-            console.dir(addresses);
             if (that.lastGoodServer) {
                 delete addresses[addresses.findIndex(addr => {
                     return addr == that.lastGoodServer;
                 })];
                 addresses.unshift(that.lastGoodServer);
             }
-            console.dir(addresses);
 
             for (let i = 0; i < addresses.length; i++) {
                 const addr = addresses[i];
-                if (addr == undefined){
+                if (addr == undefined) {
                     continue;
                 }
                 try {
                     const socket = new Socket(addr, service);
-                    console.log("RosterSocket: trying out index " + i + " at address " + addr + "/" + service);
+                    Log.lvl2("RosterSocket: trying out index " + i + " at address " + addr + "/" + service);
                     const socketResponse = yield socket.send(request, response, data);
                     that.lastGoodServer = addr;
                     return socketResponse;
                 } catch (err) {
-                    console.error("rostersocket: " + err);
-                    // continue;
-                    throw new Error(err);
+                    Log.rcatch(err, "rostersocket");
                 }
             }
             throw new Error("no conodes are available or all conodes returned an error");
@@ -216,14 +212,12 @@ class LeaderSocket {
                     );
                     const reply = yield socket.send(request, response, data);
                     return Promise.resolve(reply);
-                } catch (e) {
-                    console.error("error sending request: ", e.message);
-                    lastErr = e
+                } catch (err) {
+                    Log.catch(err, "error sending request: ");
+                    lastErr = err
                 }
             }
-            return Promise.reject(
-                new Error("couldn't send request after 3 attempts: " + lastErr.message)
-            );
+            throw new Error("couldn't send request after 3 attempts: " + lastErr.message);
         });
         return fn();
     }

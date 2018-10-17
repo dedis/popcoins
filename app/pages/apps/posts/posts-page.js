@@ -55,38 +55,28 @@ function onUnloaded() {
 
 function messageTapped(args) {
     let msg = viewModel.messageList.getItem(args.index);
-    Log.lvl2("Tapped message is:", msg);
-    party
-        .getPartyInstance()
-        .then(pi => {
-            let ourCoinsId = pi.getAccountInstanceId(party._keypair.public);
-            return msgService.readMessage(msg.id, pi.instanceId, ourCoinsId);
-        })
-        .then(response => {
-            return Promise.resolve()
-                .then(() => {
-                    if (response.rewarded) {
-                        return Dialog.alert({
-                            title: "Got coins",
-                            message: "You got coins: " + msg.reward,
-                            okButtonText: "Confirm"
-                        });
-                    }
+    let response = undefined;
+    Log.lvl2("Tapped message is:", msg.title);
+    return msgService.readMessage(msg.id)
+        .then(r => {
+            response = r;
+            if (response.rewarded) {
+                return Dialog.alert({
+                    title: "Got coins",
+                    message: "You got coins: " + msg.reward,
+                    okButtonText: "Confirm"
                 })
-                .then(() => {
-                    return response;
-                });
+            }
         })
-        .then(response => {
+        .then(() => {
             return Dialog.alert({
                 title: response.message.subject,
                 message: response.message.text,
                 okButtonText: "Confirm"
-            }).then(() => {
-                return updateMessages();
-            });
-        })
-        .catch(error => {
+            })
+        }).then(() => {
+            return updateMessages();
+        }).catch(error => {
             Dialog.alert({
                 title: "Error while reading",
                 message: error,
@@ -99,7 +89,7 @@ function updateMessages() {
 
     return Promise.resolve()
         .then(() => {
-            if (conode === undefined || msgService === undefined ) {
+            if (conode === undefined || msgService === undefined) {
                 return Dialog.alert({
                     title: "No token",
                     message:

@@ -1,5 +1,5 @@
 const PopPartyInstance = require("./PopPartyInstance");
-const CoinsInstance = require("./CoinsInstance");
+const CoinInstance = require("./CoinInstance");
 
 module.exports.PopPartyInstance = PopPartyInstance;
-module.exports.CoinsInstance = CoinsInstance;
+module.exports.CoinInstance = CoinInstance;

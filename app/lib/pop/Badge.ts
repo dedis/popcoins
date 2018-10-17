@@ -15,7 +15,7 @@ const ZXing = require("nativescript-zxing");
 const QRGenerator = new ZXing();
 // let ServerIdentity = Identity.ServerIdentity;
 
-import CoinInstance = require("../cothority/omniledger/contracts/CoinsInstance");
+import CoinInstance = require("../cothority/omniledger/contracts/CoinInstance");
 import PopPartyInstance = require("../cothority/omniledger/contracts/PopPartyInstance");
 
 const FilePaths = require("../FilePaths");
@@ -75,7 +75,7 @@ export class Badge {
 
     /**
      * This returns the coin instance, if it is already created. It might be null!
-     * @returns {null|CoinsInstance}
+     * @returns {null|CoinInstance}
      */
     get coinInstance() {
         return this._coinInstance;
@@ -224,7 +224,7 @@ export class Badge {
      */
     static loadNewVersions(): Promise<Array<Badge>> {
         const fileNames = [];
-        FileIO.forEachFolderElement(FilePaths.WALLET_PATH, function(partyFolder) {
+        FileIO.forEachFolderElement(FilePaths.WALLET_PATH, function (partyFolder) {
             if (partyFolder.name.startsWith("wallet_")) {
                 Log.lvl2("found wallet-dir: ", partyFolder.name);
                 fileNames.push(FileIO.join(FilePaths.WALLET_PATH, partyFolder.name, FilePaths.WALLET_FINAL));
@@ -291,6 +291,7 @@ export class Badge {
                 Log.catch(err, "couldn't load file", fileName);
             });
     }
+
     _config: Configuration;
     _keypair: any;
     _finalStatement: any;
@@ -465,14 +466,14 @@ export class Badge {
             case STATE_TOKEN:
                 return this.getPartyInstance(true)
                     .then((pi) => {
-                        this.finalStatement.attendees = pi.finalStatement.attendees.map((att)=>{
+                        this.finalStatement.attendees = pi.finalStatement.attendees.map((att) => {
                             let p = CurveEd25519.point();
                             p.unmarshalBinary(new Uint8Array(Object.values(att)));
                             return p;
                         });
                     })
                     .then(() => {
-                        return this.getCoinInstance(true)
+                        return this.getCoinInstance(true);
                     })
                     .then((ci) => {
                         this._balance = ci.balance;
@@ -645,7 +646,7 @@ export class Badge {
                 }
                 return this._partyInstance;
             })
-            .then((ppi)=>{
+            .then((ppi) => {
                 return ppi;
             });
     }
@@ -744,11 +745,19 @@ export class Badge {
             throw new Error("Cannot transfer coins before it's a token");
         }
         let accountId = dest;
-        if (isPub) {
-            accountId = this._partyInstance.getAccountInstanceId(dest);
-        }
-        const signer = Darc.SignerEd25519.fromByteArray(this._keypair.private.marshalBinary());
-        return this._coinInstance.transfer(amount, accountId, signer);
+        return Promise.resolve()
+            .then(() => {
+                if (this._partyInstance == undefined || this._coinInstance == undefined) {
+                    return this.getCoinInstance(true);
+                }
+            })
+            .then(() => {
+                if (isPub) {
+                    accountId = this._partyInstance.getAccountInstanceId(dest);
+                }
+                const signer = Darc.SignerEd25519.fromByteArray(this._keypair.private.marshalBinary());
+                return this._coinInstance.transfer(amount, accountId, signer);
+            });
     }
 
     qrcodePublic() {
@@ -804,7 +813,7 @@ export class MigrateFrom {
         // Get all filenames for the old structures and the keypairs
         const attInfos = [];
         const keyPairs = [];
-        FileIO.forEachFolderElement(FilePaths.POP_ATT_PATH, function(partyFolder) {
+        FileIO.forEachFolderElement(FilePaths.POP_ATT_PATH, function (partyFolder) {
             attInfos.push(FileIO.join(FilePaths.POP_ATT_PATH, partyFolder.name, FilePaths.POP_ATT_INFOS));
             keyPairs.push(FileIO.join(FilePaths.POP_ATT_PATH, partyFolder.name, FilePaths.KEY_PAIR));
         });
@@ -846,7 +855,7 @@ export class MigrateFrom {
             // And if all wallets are correctly saved, delete the old data.
             Log.lvl2("deleting all old folders");
             const fileNames = [];
-            FileIO.forEachFolderElement(FilePaths.POP_ATT_PATH, function(partyFolder) {
+            FileIO.forEachFolderElement(FilePaths.POP_ATT_PATH, function (partyFolder) {
                 fileNames.push(FileIO.join(FilePaths.POP_ATT_PATH, partyFolder.name, FilePaths.POP_ATT_INFOS));
             });
             return Promise.all(
@@ -888,7 +897,6 @@ export class MigrateFrom {
                 return PopPartyInstance.fromInstanceId(ol, instanceIdBuffer);
             })
             .then((inst) => {
-                // console.dir("got poppartyinstance", inst);
                 const config = Configuration.fromPopPartyInstance(inst);
                 const wallet = new Badge(config);
                 if (inst.attendees !== undefined && inst.attendees.length > 0) {

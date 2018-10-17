@@ -4,12 +4,13 @@ const root = require("../../protobuf").root;
 const Argument = require("../Argument");
 const Instruction = require("../Instruction");
 const ClientTransaction = require("../ClientTransaction");
+const Signature = require("../darc/Signature");
 const Log = require("../../../Log");
 const Buffer = require("buffer/").Buffer;
 
-class CoinsInstance {
+class CoinInstance {
     /**
-     * Creates a new CoinsInstance
+     * Creates a new CoinInstance
      * @param {OmniledgerRPC} ol - the OmniLedger instance
      * @param {Uint8Array} instanceId - id of the instance
      * @param {Instance} [instance] - the complete instance
@@ -57,16 +58,16 @@ class CoinsInstance {
     }
 
     /**
-     * Creates a new instance of CoinsInstance and contact the  omniledger to try
+     * Creates a new instance of CoinInstance and contact the  omniledger to try
      * to update the data
      *
      * @param {OmniledgerRPC} ol - the omniledger instance
      * @param {Uint8Array} instanceId - the instance ID of the contract instance
-     * @return {Promise<CoinsInstance>} - a promise that complete when the data
+     * @return {Promise<CoinInstance>} - a promise that complete when the data
      * have been updated
      */
     static fromInstanceId(ol, instanceId) {
-        return new CoinsInstance(ol, instanceId).update();
+        return new CoinInstance(ol, instanceId).update();
     }
 
     /**
@@ -95,7 +96,6 @@ class CoinsInstance {
             invoke
         );
 
-        console.dir("darcid is:", this._instance.darcId);
         inst.signBy(this._instance.darcId, [signer]);
         const trans = new ClientTransaction([inst]);
 
@@ -105,7 +105,7 @@ class CoinsInstance {
     /**
      * Update the data of this instance
      *
-     * @return {Promise<CoinsInstance>} - a promise that resolves once the data
+     * @return {Promise<CoinInstance>} - a promise that resolves once the data
      * are up-to-date
      */
     update() {
@@ -124,4 +124,4 @@ class CoinsInstance {
     }
 }
 
-module.exports = CoinsInstance;
+module.exports = CoinInstance;

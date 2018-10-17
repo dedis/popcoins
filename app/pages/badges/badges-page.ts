@@ -13,20 +13,25 @@ export function onNavigatingTo(args: NavigatedData) {
     page = <Page>args.object;
     page.bindingContext = BadgesViewModel;
 
-    return loadParties();
+    return showBadges(Badge.Badge.loadAll())
+        .then(()=>{
+            setTimeout(()=>{
+                showBadges(Badge.Badge.updateAll())
+                    .catch(err =>{
+                        Log.catch(err);
+                    })
+            }, 100);
+        });
 }
 
-function loadParties() {
+function showBadges(badges: Promise<Array<Badge.Badge>>): Promise<any> {
     Log.lvl1("Loading parties");
-    page.bindingContext.items.splice(0);
 
     return Badge.Badge.loadAll()
-        .then(() =>{
-            return Badge.Badge.updateAll();
-        })
         .then((badges) => {
+            page.bindingContext.items.splice(0);
             page.bindingContext.isEmpty = true;
-            Object.values(badges).forEach((badge: any, index: number) => {
+            badges.forEach((badge: any, index: number) => {
                 if (badge.state() === Badge.STATE_TOKEN) {
                     page.bindingContext.items.push({
                         party: badge,
