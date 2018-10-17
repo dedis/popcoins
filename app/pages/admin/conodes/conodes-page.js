@@ -24,7 +24,6 @@ let timerId = undefined;
 let pageObject = undefined;
 
 function onNavigatingTo(args) {
-    Log.print("conodes: navigatingTo");
     if (args) {
         page = args.object;
 
@@ -37,22 +36,21 @@ function onNavigatingTo(args) {
         viewModel.set('isRosterEmpty', viewModel.rosterModule.list.length === 0);
     });
 
+    // DEBUG
     if (page) {
         Timer.setTimeout(() => {
             return loadConodeList()
                 .then(() => {
-                    // Poll the statuses every 2s
+                    // Poll the statuses every 1m
                     timerId = Timer.setInterval(() => {
-                        Log.print("Reloading conodes list");
                         loadConodeList();
-                    }, 2000)
+                    }, 60000)
                 })
         }, 100);
     }
 }
 
 function onNavigatedFrom() {
-    Log.print("conodes: navigatedFrom");
     // remove polling when page is leaved
     Timer.clearInterval(timerId);
 }

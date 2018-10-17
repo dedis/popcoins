@@ -19,7 +19,18 @@ const CothorityMessages = require("./network/cothority-messages");
 const KeyPair = require('./crypto/KeyPair');
 
 /**
- * This singleton is the user of the app. It contains everything needed that is general, app-wide or does not belong to any precise subpart.
+ * This class holds a user in the system and has the following fields:
+ * - cothority - everything with regard to services of the cothority
+ *   - linkedConode - reference to a conode that has our conode-public key stored
+ *   - Array<Conode> - all known conodes
+ * - keys - a map that holds the following keys:
+ *   - conode - keypair used to authenticate to our linked conode
+ *   - byzcoin - keypair used in darcs for byzcoin
+ *   - personhood - keypair used when signing up for a personhood party
+ * - identity - a map to different parts of our real-world identity
+ *   - name - full name, if set
+ *   - pseudo - pseudonym used in services
+ *   - email - eventually an email
  */
 
 /**

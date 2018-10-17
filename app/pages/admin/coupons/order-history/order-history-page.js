@@ -25,13 +25,13 @@ function onLoaded(args) {
 
     page.bindingContext = viewModel;
 
-    if (context.bar === undefined) {
+    if (context.coupon === undefined) {
         throw new Error("A service should be given in the context");
-    } else if (!(context.bar instanceof Coupon)) {
+    } else if (!(context.coupon instanceof Coupon)) {
         throw new Error("Service given in context should be an instance of Service")
     }
 
-    bar = context.bar;
+    bar = context.coupon;
 
     let countLabel = page.getViewById("count");
     // Without this the text is not vertically centered in is own view

@@ -5,6 +5,7 @@
 
 
     <GridLayout class="page-content" rows="auto, *" columns="*">
+        <Label text="space"/>
         <Label id="page-name" text="{{ title }}"/>
         <Label vertical-align="center" tap="onDone" class="nav-buttons" text="&#xff060;" color="white" row="0" column="0" topMargin="5%"/>
         <Image id="image" stretch="aspectFit" tap="copyToClipboard" row="1" column="0" />

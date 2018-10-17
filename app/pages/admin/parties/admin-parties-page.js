@@ -27,7 +27,6 @@ let page = undefined;
 let timerId = undefined;
 
 function onNavigatingTo(args) {
-    Log.print("navigatingto");
     if (args) {
         page = args.object;
         page.bindingContext = viewModel;
@@ -35,13 +34,13 @@ function onNavigatingTo(args) {
 
     viewModel.partyListDescriptions.splice(0);
 
+    // DEBUG
     if (page) {
         timerId = Timer.setTimeout(() => {
             return loadParties()
                 .then(() => {
                     // Poll the status every 5s
                     timerId = Timer.setInterval(() => {
-                        Log.print("Reloading statuses in admin-parties");
                         return reloadStatuses();
                     }, 5000)
                 })
@@ -53,7 +52,6 @@ function onNavigatingTo(args) {
 }
 
 function onNavigatedFrom() {
-    Log.print("navigatedFrom");
     // remove polling when page is leaved
     Timer.clearInterval(timerId);
 }
@@ -114,7 +112,8 @@ function reloadStatuses() {
     return Promise.all(
         viewModel.partyListDescriptions.map(model => {
             newView.push(getViewModel(model.party));
-            if (model.party.state() == Badge.STATE_CONFIG) {
+            if (model.party.state() == Badge.STATE_CONFIG ||
+                model.party.state() == Badge.STATE_TOKEN) {
                 return
             }
             return model.party.update()

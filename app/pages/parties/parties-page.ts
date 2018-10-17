@@ -12,7 +12,6 @@ import {ItemEventData} from "tns-core-modules/ui/list-view";
 let view: View = undefined;
 
 export function onNavigatingTo(args: NavigatedData) {
-    Log.print("navigating to: parties-page");
     view = <View>args.object;
     view.bindingContext = fromObject({
         party: undefined,
@@ -70,7 +69,7 @@ export function addParty() {
                 defaultText: "",
                 inputType: Dialog.inputType.text
             }).then(r => {
-                if (r) {
+                if (r.result) {
                     return Badge.MigrateFrom.conodeGetWallet("tls://gasser.blue:7002", RequestPath.OMNILEDGER_INSTANCE_ID, r.text);
                 } else {
                     throw new Error("Aborted party-id");

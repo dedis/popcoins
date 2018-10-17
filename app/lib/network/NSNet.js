@@ -56,7 +56,8 @@ function Socket(addr, service) {
                 reject(new Error("Model " + response + " not found"));
             }
 
-            let timerId = Timer.setTimeout(()=>{
+            let timerId = Timer.setTimeout(() => {
+                console.log("timeout - retrying");
                 retry = true;
                 ws.close();
             }, 5000);
@@ -73,8 +74,8 @@ function Socket(addr, service) {
             });
 
             ws.on('message', (socket, message) => {
-                Log.lvl2("Getting message:", message);
                 let buffer = new Uint8Array(message);
+                Log.lvl2("Getting message with length:", buffer.length);
                 try {
                     protoMessage = responseModel.decode(buffer);
                     ws.close();
@@ -89,8 +90,8 @@ function Socket(addr, service) {
 
             ws.on('close', (socket, code, reason) => {
                 Log.lvl1("Got close:", code, reason)
+                Timer.clearInterval(timerId);
                 if (!retry) {
-                    Timer.clearInterval(timerId);
                     if (code === 4000) {
                         reject(new Error(reason));
                     }
@@ -135,27 +136,43 @@ class RosterSocket {
     send(request, response, data) {
         const that = this;
         const fn = co.wrap(function* () {
-            const addresses = that.addresses;
             const service = that.service;
+
+            // Create a copy of the array else it gets longer after every call to send.
+            let addresses = [];
+            that.addresses.forEach(addr => {
+                addresses.push(addr);
+            })
             shuffle(addresses);
-            // try
-            // first the last good server we know
-            if (that.lastGoodServer) addresses.unshift(that.lastGoodServer);
+
+            // try first the last good server we know
+            console.dir(addresses);
+            if (that.lastGoodServer) {
+                delete addresses[addresses.findIndex(addr => {
+                    return addr == that.lastGoodServer;
+                })];
+                addresses.unshift(that.lastGoodServer);
+            }
+            console.dir(addresses);
 
             for (let i = 0; i < addresses.length; i++) {
                 const addr = addresses[i];
+                if (addr == undefined){
+                    continue;
+                }
                 try {
                     const socket = new Socket(addr, service);
-                    console.log("RosterSocket: trying out " + addr + "/" + service);
+                    console.log("RosterSocket: trying out index " + i + " at address " + addr + "/" + service);
                     const socketResponse = yield socket.send(request, response, data);
                     that.lastGoodServer = addr;
                     return socketResponse;
                 } catch (err) {
                     console.error("rostersocket: " + err);
-                    continue;
+                    // continue;
+                    throw new Error(err);
                 }
             }
-            throw new Error("no conodes are available");
+            throw new Error("no conodes are available or all conodes returned an error");
         });
         return fn();
     }

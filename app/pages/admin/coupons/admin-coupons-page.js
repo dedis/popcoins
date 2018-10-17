@@ -14,7 +14,7 @@ const Log = lib.Log.default;
 const Badge = lib.pop.Badge;
 
 const viewModel = ObservableModule.fromObject({
-    barListDescriptions: new ObservableArray(),
+    couponListDescriptions: new ObservableArray(),
     isLoading: false,
     isEmpty: true
 });
@@ -33,18 +33,18 @@ function loadCoupons() {
     viewModel.isLoading = true;
 
     // Bind isEmpty to the length of the array
-    viewModel.barListDescriptions.on(ObservableArray.changeEvent, () => {
-        viewModel.set('isEmpty', viewModel.barListDescriptions.length === 0);
+    viewModel.couponListDescriptions.on(ObservableArray.changeEvent, () => {
+        viewModel.set('isEmpty', viewModel.couponListDescriptions.length === 0);
     });
 
-    let bar = undefined;
-    viewModel.barListDescriptions.splice(0);
-    FileIO.forEachFolderElement(FilePaths.COUPON_PATH, function (barFolder) {
-        bar = new Coupon(barFolder.name);
+    let coupon = undefined;
+    viewModel.couponListDescriptions.splice(0);
+    FileIO.forEachFolderElement(FilePaths.COUPON_PATH, function (couponFolder) {
+        coupon = new Coupon(couponFolder.name);
         // Observables have to be nested to reflect changes
-        viewModel.barListDescriptions.push(ObservableModule.fromObject({
-            bar: bar,
-            desc: bar.getConfigModule(),
+        viewModel.couponListDescriptions.push(ObservableModule.fromObject({
+            coupon: coupon,
+            desc: coupon.getConfigModule(),
         }));
     });
     viewModel.isLoading = false;
@@ -52,7 +52,7 @@ function loadCoupons() {
 
 function couponTapped(args) {
     const index = args.index;
-    const bar = viewModel.barListDescriptions.getItem(index).bar;
+    const coupon = viewModel.couponListDescriptions.getItem(index).coupon;
     const USER_CANCELED = "USER_CANCELED_STRING";
     const actionShare = "Share coupon";
     const actionRequest = "Scan request";
@@ -66,7 +66,7 @@ function couponTapped(args) {
             switch (result) {
                 case actionShare:
                     return pageObject.showModal("pages/common/qr-code/qr-code-page", {
-                        textToShow: bar.getConfigString(),
+                        textToShow: coupon.getConfigString(),
                         title: "Coupon information",
                     }, () => {
                         return Frame.topmost().navigate({
@@ -79,51 +79,52 @@ function couponTapped(args) {
                         .then(signatureJson => {
                             const signature = Convert.jsonToObject(signatureJson);
                             const sig = Convert.hexToByteArray(signature.signature);
-                            let message = bar.getSigningData();
+                            let message = coupon.getSigningData();
                             message.nonce = Convert.hexToByteArray(signature.nonce);
-                            // This is strange - the scan module returns the value, but the rest of the ui is
-                            // not really updated yet...
-                            setTimeout(() => {
-                                return bar.registerClient(sig, message)
-                                    .then(() => {
-                                        return bar.addOrderToHistory(new Date(Date.now()));
-                                    }).then(() => {
-                                        // Alert is shown in the modal page if not enclosed in setTimeout
+                            return coupon.registerClient(sig, message)
+                                .then(() => {
+                                    return coupon.addOrderToHistory(new Date(Date.now()));
+                                }).then(() => {
+                                    // Alert is shown in the modal page if not enclosed in setTimeout
+                                    setTimeout(() => {
+                                        // There is a strange mis-communication between the scan module and the
+                                        // main UI - it doesn't work without a setTimeout.
                                         return Dialog.alert({
                                             title: "Success !",
                                             message: "The item is delivered !",
                                             okButtonText: "Great"
                                         });
-                                    }).catch(error => {
-                                        if (error === USER_CANCELED) {
-                                            return Promise.resolve();
-                                        }
-                                        Log.catch(error);
+                                    }, 100);
+                                }).catch(error => {
+                                    if (error === USER_CANCELED) {
+                                        return Promise.resolve();
+                                    }
 
-                                        // Alert is shown in the modal page if not enclosed in setTimeout
+                                    // Alert is shown in the modal page if not enclosed in setTimeout
+                                    setTimeout(() => {
+                                        // There is a strange mis-communication between the scan module and the
+                                        // main UI - it doesn't work without a setTimeout.
                                         return Dialog.alert({
                                             title: "Error",
                                             message: error,
                                             okButtonText: "Ok"
-                                        }).then(() => {
-                                            return Promise.reject(error);
                                         });
-                                    })
-                            }, 100);
+                                    }, 100);
+
+                                    Log.rcatch(error);
+                                })
                         });
                     break;
-                case
-                actionOrders:
+                case actionOrders:
                     return Frame.topmost().navigate({
                         moduleName: "pages/admin/coupons/order-history/order-history-page",
                         context: {
-                            bar: bar,
+                            coupon: coupon,
                         }
                     });
                     break;
-                case
-                actionDelete:
-                    return bar.remove()
+                case actionDelete:
+                    return coupon.remove()
                         .then(() => {
                             return loadCoupons();
                         })
@@ -145,8 +146,8 @@ function couponTapped(args) {
 
 function deleteCoupon(args) {
     console.dir(args.object.bindingContext);
-    const bar = args.object.bindingContext.bar;
-    return bar.remove()
+    const coupon = args.object.bindingContext.coupon;
+    return coupon.remove()
         .then(() => {
             return loadCoupons();
         })

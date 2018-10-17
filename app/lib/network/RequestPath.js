@@ -3,12 +3,15 @@ module.exports = {
     /**
      * @file File containing different available paths for the Cothority.
      */
-    OMNILEDGER_INSTANCE_ID: "0ec0129a820a2f6e8dd16f15660cf563f2a1bfc29dc0efd9291169696cfd7af5",
+    // gasser.blue bc id
+    // OMNILEDGER_INSTANCE_ID: "0ec0129a820a2f6e8dd16f15660cf563f2a1bfc29dc0efd9291169696cfd7af5",
+    OMNILEDGER_INSTANCE_ID: "983537f186b46023032e37215f40a126220b5ad6632d130d828811e3e5eb2f77",
 
     /**
      * Making the party more userfriendly, but more dependant on dedis. Which is OK for the moment...
      */
-    DEDIS_CONODES: ["gasser.blue:7002", "gasser.blue:7004", "gasser.blue:7006"],
+    DEDIS_CONODES: ["10.0.0.1:7002", "10.0.0.1:7004", "10.0.0.1:7006"],
+    // DEDIS_CONODES: ["gasser.blue:7002", "gasser.blue:7004", "gasser.blue:7006"],
 // DEDIS_CONODES: ["conode.dedis.ch:7770", "gasser.blue:7770", "dedis.nella.org:6879"],
 // If this is set to true, loading a party from disk will ignore the omniledger-id stored.
 // This covers a bug where the omniledger-id is sometimes not correctly loaded.

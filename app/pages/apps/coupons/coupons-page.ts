@@ -40,7 +40,7 @@ function updateCoupons() {
         coupons.push(c);
         // Observables have to be nested to reflect changes
         view.bindingContext.items.push(fromObject({
-            bar: c,
+            coupon: c,
             desc: c.getConfigModule(),
         }));
     });

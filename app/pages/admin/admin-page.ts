@@ -11,17 +11,14 @@ let page: Page = undefined;
 let segBar: SegmentedBar = undefined;
 
 export function onNavigatingTo(args: NavigatedData) {
-    Log.print("admin: navigationTo");
     page = <Page>args.object;
     page.bindingContext = new AdminViewModel();
-    Log.print("segBar is:", segBar.selectedIndex);
     page.bindingContext.set("prop", segBar.selectedIndex);
     partiesTo();
     conodesTo();
 }
 
 export function onNavigatedFrom(args: NavigatedData) {
-    Log.print("admin: navigatedFrom");
     partiesFrom();
     conodesFrom();
 }
@@ -33,7 +30,6 @@ export function onBack() {
 export function sbLoaded(args:NavigatedData) {
     // handle selected index change
     segBar = <SegmentedBar>args.object;
-    Log.print("sb: ", segBar.selectedIndex);
     segBar.on("selectedIndexChange", selectedIndexChange);
 }
 

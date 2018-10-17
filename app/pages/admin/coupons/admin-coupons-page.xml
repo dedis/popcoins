@@ -17,7 +17,7 @@
                visibility="{{ isEmpty ? 'visible' : 'collapsed' }}"
         />
 
-        <nsListView:RadListView items="{{ barListDescriptions }}" itemTap="couponTapped"
+        <nsListView:RadListView items="{{ couponListDescriptions }}" itemTap="couponTapped"
                                 row="1" id="listView">
             <nsListView:RadListView.itemTemplate>
                 <GridLayout rows="*,*" columns="*, auto" backgroundColor="white"
