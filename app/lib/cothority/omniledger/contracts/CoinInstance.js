@@ -99,7 +99,7 @@ class CoinInstance {
         inst.signBy(this._instance.darcId, [signer]);
         const trans = new ClientTransaction([inst]);
 
-        return this._ol.sendTransactionAndWait(trans, 10);
+        return this._ol.sendTransactionAndWait(trans, 3);
     }
 
     /**
