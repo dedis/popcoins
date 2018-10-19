@@ -19,19 +19,12 @@ import { Label } from "tns-core-modules/ui/label";
 let Convert = lib.Convert;
 
 let page: Page = undefined;
-let pageObject = undefined;
 let party: Badge.Badge = undefined;
-let progress = 0;
 
 export function onNavigatingTo(args: NavigatedData) {
     Log.lvl1("getting to badges");
     page = <Page>args.object;
     page.bindingContext = CoinsViewModel;
-    // page.getViewById("progress_bar").domNode.attributes["width"] = "20%";
-    // setInterval(()=>{
-    //     setProgress("Total progress: " + progress, progress);
-    //     progress = (progress + 10) % 100;
-    // }, 200);
     return showParties(Badge.Badge.loadAll())
         .then(() => {
             setTimeout(() => {
@@ -44,7 +37,6 @@ function setProgress(text: string = "", width: number = 0) {
     if (width == 0) {
         CoinsViewModel.set("networkStatus", undefined);
     } else {
-        Log.print("setting progress to", text, width);
         page.getViewById("progress_bar").setInlineStyle("width:" + width + "%;");
         (<Label>page.getViewById("progress_text")).text = text;
     }
@@ -153,6 +145,5 @@ export function onReload() {
 }
 
 export function cancelNetwork() {
-    Log.print("cancelling network");
     setProgress();
 }

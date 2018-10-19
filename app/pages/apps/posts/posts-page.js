@@ -11,8 +11,8 @@ const Messages = lib.pop.Messages;
 
 const viewModel = ObservableModule.fromObject({
     messageList: new ObservableArray(),
-    isLoading: false,
-    isEmpty: true
+    isEmpty: true,
+    networkStatus: undefined
 });
 
 let page = undefined;
@@ -26,6 +26,7 @@ function onLoaded(args) {
     page.bindingContext = viewModel;
     pageObject = page.page;
 
+    setProgress();
     Timer.setTimeout(() => {
         let wallets = Wallet.List;
         if (wallets.length > 0) {
@@ -53,13 +54,25 @@ function onUnloaded() {
     // Timer.clearInterval(timerId);
 }
 
+function setProgress(text, width) {
+    if (width == 0 || !width) {
+        viewModel.set("networkStatus", undefined);
+    } else {
+        Log.print("setting progress to", text, width);
+        pageObject.getViewById("progress_bar").setInlineStyle("width:" + width + "%;");
+        pageObject.getViewById("progress_text").text = text;
+    }
+}
+
 function messageTapped(args) {
     let msg = viewModel.messageList.getItem(args.index);
     let response = undefined;
     Log.lvl2("Tapped message is:", msg.title);
+    setProgress("Fetching message", 20)
     return msgService.readMessage(msg.id)
         .then(r => {
             response = r;
+            setProgress();
             if (response.rewarded) {
                 return Dialog.alert({
                     title: "Got coins",
@@ -77,6 +90,7 @@ function messageTapped(args) {
         }).then(() => {
             return updateMessages();
         }).catch(error => {
+            setProgress();
             Dialog.alert({
                 title: "Error while reading",
                 message: error,
@@ -86,7 +100,6 @@ function messageTapped(args) {
 }
 
 function updateMessages() {
-
     return Promise.resolve()
         .then(() => {
             if (conode === undefined || msgService === undefined) {
@@ -97,7 +110,7 @@ function updateMessages() {
                     okButtonText: "Continue"
                 });
             }
-            viewModel.isLoading = true;
+            setProgress("Fetching List of Messages", 70);
             pageObject.getViewById("listView").refresh();
 
             return msgService.fetchListMessages(0, 10)
@@ -116,11 +129,11 @@ function updateMessages() {
                 })
                 .catch(error => {
                     Log.catch(error, "error");
-                    viewModel.isLoading = false;
+                    setProgress();
                 });
         })
         .then(() => {
-            viewModel.isLoading = false;
+            setProgress();
             pageObject.getViewById("listView").refresh();
         })
         .catch(error => {
@@ -194,15 +207,17 @@ function addNewMessage(arg) {
                     "sending coins to message-account",
                     msgService.serviceAccountId
                 );
-                viewModel.isLoading = true;
+                setProgress("Sending coins to service", 30);
                 pageObject.getViewById("listView").refresh();
                 return party
                     .transferCoin(arg.balance, msgService.serviceAccountId)
                     .then(() => {
                         Log.lvl2("Sending message");
+                        setProgress("Sending message", 70)
                         return msgService.sendMessage(arg);
                     })
                     .then(() => {
+                        setProgress();
                         return Dialog.alert({
                             title: "Message sent",
                             message:
@@ -218,7 +233,7 @@ function addNewMessage(arg) {
                     })
                     .catch(error => {
                         Log.catch(error, "while sending messages");
-                        viewModel.isLoading = false;
+                        setProgress();
                         pageObject.getViewById("listView").refresh();
                         return Dialog.alert({
                             title: "while sending",
@@ -233,6 +248,11 @@ function addNewMessage(arg) {
 function onNavigatingTo(args) {
     page = args.object.page;
 }
+
+
+module.exports.cancelNetwork = function() {
+    setProgress();
+};
 
 module.exports.onBack = function () {
     Frame.topmost().goBack();
