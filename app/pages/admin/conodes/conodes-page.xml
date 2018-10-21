@@ -1,8 +1,6 @@
 <Page
         actionBarHidden="true"
         class="page"
-        navigatingTo="onNavigatingTo"
-        navigatedFrom="onNavigatedFrom"
         xmlns:nsFloatingButton="nativescript-floatingactionbutton"
         xmlns:nsListView="nativescript-ui-listview"
         xmlns="http://www.nativescript.org/tns.xsd">

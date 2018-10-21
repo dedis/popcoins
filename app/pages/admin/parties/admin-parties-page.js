@@ -7,6 +7,7 @@ const ObservableArray = require("data/observable-array").ObservableArray;
 const Kyber = require("@dedis/kyber-js");
 const CurveEd25519 = new Kyber.curve.edwards25519.Curve;
 
+const gData = require("~/app").gData;
 const lib = require("~/lib");
 const Badge = lib.pop.Badge;
 const Configuration = lib.pop.Configuration.default;
@@ -23,35 +24,30 @@ const viewModel = Observable.fromObject({
     loaded: false,
 });
 
-let page = undefined;
+let view = undefined;
 let timerId = undefined;
 
-function onNavigatingTo(args) {
-    if (args) {
-        page = args.object;
-        page.bindingContext = viewModel;
-    }
+// Use onFocus here because it comes from the SegmentBar event simulation in admin-pages.
+function onFocus(v) {
+    view = v;
+    view.bindingContext = viewModel;
 
     viewModel.partyListDescriptions.splice(0);
 
-    // DEBUG
-    if (page) {
-        timerId = Timer.setTimeout(() => {
-            return loadParties()
-                .then(() => {
-                    // Poll the status every 5s
-                    timerId = Timer.setInterval(() => {
-                        return reloadStatuses();
-                    }, 5000)
-                })
-                .catch(err => {
-                    Log.catch(err);
-                })
-        }, 100);
-    }
+    return loadParties()
+        .then(() => {
+            // Poll the status every 5s
+            timerId = Timer.setInterval(() => {
+                return reloadStatuses();
+            }, 5000)
+        })
+        .catch(err => {
+            Log.catch(err);
+        })
 }
 
-function onNavigatedFrom() {
+// Use onBlur here because it comes from the SegmentBar event simulation in admin-pages.
+function onBlur() {
     // remove polling when page is leaved
     Timer.clearInterval(timerId);
 }
@@ -63,11 +59,11 @@ function onNavigatedFrom() {
 function loadParties() {
     return Promise.resolve()
         .then(() => {
-            Log.lvl1("getting all wallets:", Badge.List.map(b => {
+            Log.lvl1("getting all wallets:", gData.parties.map(b => {
                 return b.config.name
             }));
             viewModel.partyListDescriptions.splice(0);
-            Badge.List.forEach(wallet => {
+            gData.parties.forEach(wallet => {
                 if (wallet.linkedConode) {
                     viewModel.partyListDescriptions.push(getViewModel(wallet));
                 }
@@ -75,6 +71,9 @@ function loadParties() {
 
             viewModel.isEmpty = viewModel.partyListDescriptions.length == 0;
             viewModel.isLoading = false;
+        })
+        .catch(err => {
+            Log.catch(err);
         })
 }
 
@@ -339,8 +338,8 @@ function addParty() {
 }
 
 module.exports = {
-    onNavigatingTo: onNavigatingTo,
-    onNavigatedFrom: onNavigatedFrom,
+    onFocus,
+    onBlur,
     partyTapped,
     addParty,
 }

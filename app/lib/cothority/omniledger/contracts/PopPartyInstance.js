@@ -78,9 +78,11 @@ class PopPartyInstance {
             "FinalStatement",
             marshal
         );
+        let nonce = new Uint8Array(32);
+        crypto.randomFill(nonce);
         const inst = Instruction.createInvokeInstruction(
             this._instanceId,
-            new Uint8Array(32),
+            nonce,
             0,
             1,
             invoke

@@ -31,6 +31,7 @@
     "nativescript-theme-core": "~1.0.4",
     "nativescript-ui-dataform": "^3.7.3",
     "nativescript-ui-listview": "^3.7.1",
+    "nativescript-unit-test-runner": "^0.3.4",
     "nativescript-websockets": "^1.5.2",
     "nativescript-zxing": "^1.5.7",
     "protobufjs": "^6.8.8",
@@ -44,6 +45,11 @@
     "uuid": "^3.3.2"
   },
   "devDependencies": {
+    "@types/jasmine": "^2.8.9",
+    "jasmine-core": "3.2.1",
+    "karma": "3.0.0",
+    "karma-jasmine": "1.1.2",
+    "karma-nativescript-launcher": "0.4.0",
     "nativescript-dev-sass": "~1.6.0",
     "nativescript-dev-typescript": "~0.7.0",
     "nativescript-dev-webpack": "~0.16.0",

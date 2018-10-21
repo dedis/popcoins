@@ -7,6 +7,7 @@ const ClientTransaction = require("../ClientTransaction");
 const Signature = require("../darc/Signature");
 const Log = require("../../../Log");
 const Buffer = require("buffer/").Buffer;
+const crypto = require("crypto-browserify");
 
 class CoinInstance {
     /**
@@ -88,9 +89,11 @@ class CoinInstance {
         args.push(new Argument("destination", to));
 
         let invoke = new Invoke("transfer", args);
+        let nonce = new Uint8Array(32);
+        crypto.randomFill(nonce);
         let inst = Instruction.createInvokeInstruction(
             this._instanceId,
-            new Uint8Array(32),
+            nonce,
             0,
             1,
             invoke

@@ -23,7 +23,8 @@ const FileIO = require("../FileIO");
 const Convert = require("../Convert");
 const RequestPath = require("../network/RequestPath");
 const DecodeType = require("../network/DecodeType");
-const Net = require("../network/NSNet");
+import * as Net from "../network/NSNet";
+
 const Token = require("./Token");
 const FinalStatement = require("./FinalStatement");
 const KeyPair = require("../crypto/KeyPair");
@@ -32,25 +33,58 @@ import { fromNativeSource, ImageSource } from "tns-core-modules/image-source";
 import Log from "../Log";
 import Configuration from "./Configuration";
 
-/**
- * Badge holds one or more configurations, final statements, and keypairs and lets the user and the organizer
- * use them.
- *
- * TODO: add more than one configuration.
- */
-
-// List is all the Wallets that have been loaded from disk. It's sorted to have the latest party
-// at the beginning of the array.
-export let List: Array<Badge> = [];
-export let Upcoming: Array<Badge> = [];
-
 export const STATE_CONFIG = 1;
 export const STATE_PUBLISH = 2;
 export const STATE_FINALIZING = 3;
 export const STATE_FINALIZED = 4;
 export const STATE_TOKEN = 5;
 
+/**
+ * Badge holds one or more configurations, final statements, and keypairs and lets the user and the organizer
+ * use them.
+ */
 export class Badge {
+    _config: Configuration;
+    _keypair: any;
+    _finalStatement: any;
+    _token: any;
+    _omniledgerID: any;
+    _omniledgerRPC: any;
+    _partyInstanceId: any;
+    _partyInstance: any;
+    _coinInstance: any;
+    _balance: any;
+    _previous: any;
+    _linkedConode: any;
+
+    /**
+     * The constructor creates the basic wallet element given a configuration. It will create a random keypair and
+     * is ready to be promoted to a published, then finalized and tokenized wallet.
+     *
+     * @param config
+     * @return {Promise<Wallet>}
+     */
+    constructor(config) {
+        this._config = config;
+        this._keypair = new KeyPair();
+        this._finalStatement = null;
+        this._token = null;
+        this._omniledgerID = Convert.hexToByteArray(RequestPath.OMNILEDGER_INSTANCE_ID);
+        this._omniledgerRPC = null;
+        this._partyInstanceId = null;
+        this._partyInstance = null;
+        this._coinInstance = null;
+        this._balance = -1;
+        // If previous is not null, then it points to the id of the previous party
+        // that must be finalized. this will mean that this party will use the same
+        // public key as the previous party and only be shown once in the token
+        // list.
+        this._previous = null;
+        // linkedConode can be null in the case of an attendee. For an
+        // organizer, it will point to the conode where the public key
+        // of the User-class is stored.
+        this._linkedConode = null;
+    }
 
     /**
      * Creates an omniledgerRPC that can be used to access the party and the coin instance.
@@ -171,28 +205,8 @@ export class Badge {
         // Only load from disk if not done yet.
         return Promise.resolve()
             .then(() => {
-                if (List.length == 0) {
-                    return this.loadNewVersions();
-                }
-                return List;
+                return this.loadNewVersions();
             });
-    }
-
-    /**
-     * updateAll calls 'update' on all Badges stored in 'List'.
-     * @return {Promise<Array<Badge>>}
-     */
-    static updateAll(): Promise<Array<Badge>> {
-        return Promise.all(
-            List.map((badge) => {
-                return badge.update()
-                    .catch((err) => {
-                        Log.catch(err, "while updating badge: " + badge.config.name);
-                    });
-            })
-        ).then(() => {
-            return List;
-        });
     }
 
     /**
@@ -235,8 +249,8 @@ export class Badge {
                 Log.lvl2("reading wallet from: " + fileName);
                 return this.loadFromFile(fileName);
             })
-        ).then(() => {
-            return List;
+        ).then((parties) => {
+            return parties;
         });
     }
 
@@ -283,66 +297,12 @@ export class Badge {
                 if (object.balance) {
                     wallet._balance = parseInt(object.balance);
                 }
-                wallet.addToList();
                 Log.lvl1("loaded wallet:", wallet.config.name);
                 return wallet;
             })
             .catch((err) => {
                 Log.catch(err, "couldn't load file", fileName);
             });
-    }
-
-    _config: Configuration;
-    _keypair: any;
-    _finalStatement: any;
-    _token: any;
-    _omniledgerID: any;
-    _omniledgerRPC: any;
-    _partyInstanceId: any;
-    _partyInstance: any;
-    _coinInstance: any;
-    _balance: any;
-    _previous: any;
-    _linkedConode: any;
-
-    /**
-     * The constructor creates the basic wallet element given a configuration. It will create a random keypair and
-     * is ready to be promoted to a published, then finalized and tokenized wallet.
-     *
-     * @param config
-     * @return {Promise<Wallet>}
-     */
-    constructor(config) {
-        this._config = config;
-        this._keypair = new KeyPair();
-        this._finalStatement = null;
-        this._token = null;
-        this._omniledgerID = Convert.hexToByteArray(RequestPath.OMNILEDGER_INSTANCE_ID);
-        this._omniledgerRPC = null;
-        this._partyInstanceId = null;
-        this._partyInstance = null;
-        this._coinInstance = null;
-        this._balance = -1;
-        // If previous is not null, then it points to the id of the previous party
-        // that must be finalized. this will mean that this party will use the same
-        // public key as the previous party and only be shown once in the token
-        // list.
-        this._previous = null;
-        // linkedConode can be null in the case of an attendee. For an
-        // organizer, it will point to the conode where the public key
-        // of the User-class is stored.
-        this._linkedConode = null;
-    }
-
-    /**
-     * Adds the current wallet to the list.
-     */
-    addToList() {
-        List.push(this);
-        // Sort in reverse order, so that the most recent party gets index 0.
-        List.sort((a, b) => {
-            return Date.parse(b.config.datetime) - Date.parse(a.config.datetime);
-        });
     }
 
     /**
@@ -481,20 +441,6 @@ export class Badge {
                     });
             default:
                 throw new Error("Badge is in unknown state");
-        }
-    }
-
-    /**
-     * Remove will delete the party from the list of available parties.
-     */
-    remove() {
-        const i = List.indexOf(this);
-        if (i >= 0) {
-            List.splice(i, 1);
-            return FileIO.rmrf(FileIO.join(FilePaths.WALLET_PATH,
-                "wallet_" + this._config.hashStr()));
-        } else {
-            throw new Error("Didn't find this Badge in List");
         }
     }
 

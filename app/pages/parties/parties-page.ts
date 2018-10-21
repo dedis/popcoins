@@ -8,6 +8,7 @@ import * as Convert from "~/lib/Convert";
 import * as RequestPath from "~/lib/network/RequestPath";
 import {fromObject} from "tns-core-modules/data/observable";
 import {ItemEventData} from "tns-core-modules/ui/list-view";
+import { gData } from "~/app";
 
 let view: View = undefined;
 
@@ -81,6 +82,7 @@ export function addParty() {
             newParty.attendeesAdd([newParty.keypair.public]);
             return newParty.save()
                 .then(() => {
+                    gData.addParty(newParty);
                     updateView(newParty);
                 })
                 .catch(error => {

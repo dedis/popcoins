@@ -5,6 +5,7 @@ import { BadgesViewModel } from "./badges-view-model";
 
 import { Log } from "~/lib/Log";
 import * as Badge from "~/lib/pop/Badge";
+import { gData } from "~/app";
 
 let page: Page;
 const pageObject = undefined;
@@ -16,7 +17,7 @@ export function onNavigatingTo(args: NavigatedData) {
     return showBadges(Badge.Badge.loadAll())
         .then(()=>{
             setTimeout(()=>{
-                showBadges(Badge.Badge.updateAll())
+                showBadges(gData.updateAllBadges())
                     .catch(err =>{
                         Log.catch(err);
                     })
@@ -74,7 +75,7 @@ export function partyTapped(args) {
                 })
                     .then((del) => {
                         if (del) {
-                            return party.remove()
+                            return gData.removeBadge(party)
                                 .then(() => {
                                     page.bindingContext.items.splice(index, 1);
 

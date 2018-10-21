@@ -1,9 +1,11 @@
 const Frame = require("ui/frame");
+var getViewById = require("tns-core-modules/ui/core/view").getViewById;
 
 const Dialog = require("ui/dialogs");
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
 
+const gData = require("~/app").default;
 const lib = require("~/lib");
 const Convert = lib.Convert;
 const Scan = lib.Scan;
@@ -19,14 +21,20 @@ const viewModel = ObservableModule.fromObject({
     isEmpty: true
 });
 
+let view = undefined;
 let page = undefined;
-let pageObject = undefined;
 
-function onLoaded(args) {
-    page = args.object;
-    pageObject = args.object.page;
-    page.bindingContext = viewModel;
+// Use onFocus here because it comes from the SegmentBar event simulation in admin-pages.
+function onFocus(v) {
+    view = v;
+
+    page = view.page;
+    view.bindingContext = viewModel;
     loadCoupons();
+}
+
+// Use onBlur here because it comes from the SegmentBar event simulation in admin-pages.
+function onBlur(v){
 }
 
 function loadCoupons() {
@@ -65,7 +73,7 @@ function couponTapped(args) {
     }).then(result => {
             switch (result) {
                 case actionShare:
-                    return pageObject.showModal("pages/common/qr-code/qr-code-page", {
+                    return page.showModal("pages/common/qr-code/qr-code-page", {
                         textToShow: coupon.getConfigString(),
                         title: "Coupon information",
                     }, () => {
@@ -165,8 +173,7 @@ function deleteCoupon(args) {
 }
 
 function addCoupon() {
-    let badges = Badge.List;
-    if (badges.length == 0) {
+    if (gData.badges.length == 0) {
         return Dialog.alert({
             title: "No group available",
             message: "You didn't participate to any party. Please do so to have a group to which you can get items !",
@@ -179,7 +186,10 @@ function addCoupon() {
     }
 }
 
-module.exports.onLoaded = onLoaded;
-module.exports.couponTapped = couponTapped;
-module.exports.deleteCoupon = deleteCoupon;
-module.exports.addCoupon = addCoupon;
+module.exports = {
+    onFocus,
+    onBlur,
+    couponTapped,
+    deleteCoupon,
+    addCoupon
+}

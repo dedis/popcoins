@@ -56,6 +56,7 @@ export class LogC {
             }
             const file = method[1].replace(/^.*\/|\)$/g, "");
 
+            // @ts-ignore
             return (method[0] + " - " + file).padEnd(40);
         } catch (e) {
             return this.printCaller(new Error("Couldn't get stack - " + err), i + 2);

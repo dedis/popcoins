@@ -4,9 +4,9 @@ const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const Timer = require("tns-core-modules/timer");
 
-const lib = require("../../../lib");
+const gData = require("~/app").gData;
+const lib = require("~/lib");
 const Log = lib.Log.default;
-const Wallet = lib.pop.Badge;
 const Messages = lib.pop.Messages;
 
 const viewModel = ObservableModule.fromObject({
@@ -26,11 +26,13 @@ function onLoaded(args) {
     page.bindingContext = viewModel;
     pageObject = page.page;
 
+    Log.print("Gdata is:", gData);
+
     setProgress();
     Timer.setTimeout(() => {
-        let wallets = Wallet.List;
-        if (wallets.length > 0) {
-            party = wallets[0];
+        let badges = gData.badges;
+        if (badges.length > 0) {
+            party = badges[0];
             conode = party.config.roster.identities[0];
             viewModel.isEmpty = false;
             return party

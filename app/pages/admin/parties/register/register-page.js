@@ -10,7 +10,8 @@ const CurveEd25519 = new Kyber.curve.edwards25519.Curve;
 const HashJs = require("hash.js");
 const Buffer = require("buffer/").Buffer;
 
-const lib = require("../../../../lib");
+const gData = require("~/app").gData;
+const lib = require("~/lib");
 const Convert = lib.Convert;
 const Scan = lib.Scan;
 const User = lib.User;
@@ -99,6 +100,10 @@ function addManual() {
         .then(() => {
             return Party.save();
         })
+        .then(()=>{
+            gData.addParty(Party);
+            return Party;
+        })
         .catch(error => {
             console.log(error);
             console.log(error.stack);
@@ -131,6 +136,7 @@ function addScan() {
             return Party.save();
         })
         .then(() => {
+            gData.addParty(Party);
             return returnText;
         })
         .catch(error => {

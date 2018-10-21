@@ -4,8 +4,8 @@ Feel free to customize layouts and components to change how the tab view looks.
 -->
 <Page
         class="page"
-        loaded="onNavigatingTo"
-        unloaded="onNavigatedFrom"
+        navigatedTo="onNavigatingTo"
+        navigatedFrom="onNavigatedFrom"
         xmlns="http://schemas.nativescript.org/tns.xsd">
     <!--actionBarHidden="true"-->
 
@@ -25,17 +25,20 @@ Feel free to customize layouts and components to change how the tab view looks.
 
         <StackLayout>
             <Frame defaultPage="pages/admin/coupons/admin-coupons-page"
-                   visibility="{{ (prop == 0) ? 'visible' : 'collapsed' }}"/>
+                   visibility="{{ (prop == 0) ? 'visible' : 'collapsed' }}"
+                   id="frameCoupons"/>
         </StackLayout>
 
         <StackLayout>
             <Frame defaultPage="pages/admin/parties/admin-parties-page"
-                   visibility="{{ (prop == 1) ? 'visible' : 'collapsed' }}"/>
+                   visibility="{{ (prop == 1) ? 'visible' : 'collapsed' }}"
+                   id="frameParties"/>
         </StackLayout>
 
         <StackLayout>
             <Frame defaultPage="pages/admin/conodes/conodes-page"
-                   visibility="{{ (prop == 2) ? 'visible' : 'collapsed' }}"/>
+                   visibility="{{ (prop == 2) ? 'visible' : 'collapsed' }}"
+                   id="frameConodes"/>
         </StackLayout>
 
     </StackLayout>

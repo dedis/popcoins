@@ -15,6 +15,7 @@ let Scan = lib.Scan;
 import Log from "~/lib/Log";
 import * as Badge from "~/lib/pop/Badge";
 import { Label } from "tns-core-modules/ui/label";
+import { gData } from "~/app";
 
 let Convert = lib.Convert;
 
@@ -28,7 +29,7 @@ export function onNavigatingTo(args: NavigatedData) {
     return showParties(Badge.Badge.loadAll())
         .then(() => {
             setTimeout(() => {
-                showParties(Badge.Badge.updateAll());
+                showParties(gData.updateAllBadges());
             }, 100);
         });
 }
@@ -127,7 +128,7 @@ export function sendCoins(args) {
 
 function updateCoins() {
     setProgress("Updating coins", 50);
-    return showParties(Badge.Badge.updateAll())
+    return showParties(gData.updateAllBadges())
         .then(() => {
             setProgress();
         })
