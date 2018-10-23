@@ -122,7 +122,7 @@ export function partyTap(args: EventData) {
                 return Dialog.confirm("Do you really want to delete that party?")
                     .then(del => {
                         if (del) {
-                            view.bindingContext.party.remove();
+                            gData.removeBadge(view.bindingContext.party);
                         }
                         updateView(undefined);
                     })

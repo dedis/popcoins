@@ -67,6 +67,7 @@ function setProgress(text, width) {
 }
 
 function messageTapped(args) {
+    Log.print("mt:", args);
     let msg = viewModel.messageList.getItem(args.index);
     let response = undefined;
     Log.lvl2("Tapped message is:", msg.title);
@@ -74,7 +75,7 @@ function messageTapped(args) {
     return msgService.readMessage(msg.id)
         .then(r => {
             response = r;
-            setProgress();
+            setProgress("Done", 100);
             if (response.rewarded) {
                 return Dialog.alert({
                     title: "Got coins",
@@ -219,7 +220,7 @@ function addNewMessage(arg) {
                         return msgService.sendMessage(arg);
                     })
                     .then(() => {
-                        setProgress();
+                        setProgress("Done", 100);
                         return Dialog.alert({
                             title: "Message sent",
                             message:
@@ -251,18 +252,17 @@ function onNavigatingTo(args) {
     page = args.object.page;
 }
 
-
-module.exports.cancelNetwork = function() {
-    setProgress();
-};
-
-module.exports.onBack = function () {
-    Frame.topmost().goBack();
-};
-
-module.exports.onLoaded = onLoaded;
-module.exports.messageTapped = messageTapped;
-module.exports.onUnloaded = onUnloaded;
-module.exports.addMessage = addMessage;
-module.exports.onNavigatingTo = onNavigatingTo;
-module.exports.updateMessages = updateMessages;
+module.exports = {
+    onLoaded,
+    messageTapped,
+    onUnloaded,
+    addMessage,
+    onNavigatingTo,
+    updateMessages,
+    cancelNetwork: function () {
+        setProgress();
+    },
+    onBack: function () {
+        Frame.topmost().goBack();
+    },
+}

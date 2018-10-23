@@ -134,7 +134,7 @@ class Messages {
         return FileIO.getStringOf(this.fileName)
             .then(file => {
                 let object = Convert.jsonToObject(file);
-                Log.llvl3("converting file to messages:", object);
+                Log.lvl3("converting file to messages:", object);
                 this._sentMessages = object.sentMessages;
                 this._readMessages = object.readMessages;
             })
