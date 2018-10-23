@@ -16,7 +16,8 @@ const Crypto = require("./crypto/Crypto");
 const RequestPath = require("./network/RequestPath");
 const DecodeType = require("./network/DecodeType");
 const CothorityMessages = require("./network/cothority-messages");
-const KeyPair = require('./crypto/KeyPair');
+const KeyPair = require("./crypto/KeyPair");
+const Defaults = require("./Defaults");
 
 /**
  * This class holds a user in the system and has the following fields:
@@ -347,8 +348,8 @@ class User {
         return Promise.resolve()
             .then(() => {
                 if (this.roster.identities === undefined || this.roster.identities.length == 0) {
-                    Log.lvl1("Creating test identities", RequestPath.DEDIS_CONODES);
-                    return Promise.all(RequestPath.DEDIS_CONODES.map(address => {
+                    Log.lvl1("Creating test identities", Defaults.DEDIS_CONODES);
+                    return Promise.all(Defaults.DEDIS_CONODES.map(address => {
                         return Net.getServerIdentityFromAddress("tls://" + address)
                             .then(server => {
                                 this.addServer(server);

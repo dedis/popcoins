@@ -5,7 +5,7 @@ Learn more about the TabView component in this documentation article:
 http://docs.nativescript.org/cookbook/ui/tab-view
 -->
 <Page actionBarHidden="true">
-    <TabView androidTabsPosition="bottom" androidOffscreenTabLimit="0" selectedIndex="2" loaded="onAppsTap">
+    <TabView androidTabsPosition="bottom" androidOffscreenTabLimit="0" selectedIndex="2">
         <TabViewItem title="Parties" ios:iconSource="res://tabIcons/search" android:iconSource="res://search">
             <Frame defaultPage="pages/parties/parties-page" loaded="onLoaded" unloaded="onUnLoaded"/>
         </TabViewItem>
@@ -14,8 +14,7 @@ http://docs.nativescript.org/cookbook/ui/tab-view
             <Frame defaultPage="pages/badges/badges-page" loaded="onLoaded" unloaded="onUnLoaded"/>
         </TabViewItem>
 
-        <TabViewItem title="Apps" ios:iconSource="res://tabIcons/home" android:iconSource="res://home"
-                     tap="onAppsTap">
+        <TabViewItem title="Apps" ios:iconSource="res://tabIcons/home" android:iconSource="res://home">
             <Frame defaultPage="pages/apps/apps-page" loaded="onLoaded" unloaded="onUnLoaded"/>
             <!--<Frame defaultPage="pages/apps/posts/posts-page"></Frame>-->
             <!--<Frame defaultPage="pages/apps/coins/coins-page"></Frame>-->

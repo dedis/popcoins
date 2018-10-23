@@ -10,6 +10,7 @@ module.exports = {
     // Packages in this directory
     Convert: require("./Convert"),
     Coupon: require("./Coupon"),
+    Defaults: require("./Defaults"),
     FileIO: require("./FileIO"),
     FilePaths: require("./FilePaths"),
     Helper: require("./Helper"),

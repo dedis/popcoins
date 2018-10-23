@@ -9,6 +9,7 @@ const CurveEd25519 = new Kyber.curve.edwards25519.Curve;
 
 const gData = require("~/app").gData;
 const lib = require("~/lib");
+const Defaults = lib.Defaults;
 const Badge = lib.pop.Badge;
 const Configuration = lib.pop.Configuration.default;
 const User = lib.User;
@@ -280,7 +281,7 @@ function addParty() {
     let date = new Date();
     let name = "";
     let location = "";
-    if (RequestPath.PREFILL_PARTY) {
+    if (Defaults.PREFILL_PARTY) {
         name = "test " + date.getHours() + ":" + date.getMinutes();
         location = "testing-land";
     }

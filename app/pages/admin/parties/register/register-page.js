@@ -12,12 +12,12 @@ const Buffer = require("buffer/").Buffer;
 
 const gData = require("~/app").gData;
 const lib = require("~/lib");
+const Defaults = lib.Defaults;
 const Convert = lib.Convert;
 const Scan = lib.Scan;
 const User = lib.User;
 const Log = lib.Log.default;
 const Badge = lib.pop.Badge;
-const RequestPath = lib.network.RequestPath;
 
 let viewModel = undefined;
 let Party = undefined;
@@ -255,7 +255,7 @@ function addNewKey() {
 function shareToAttendee() {
     let info = {
         id: Party.config.hashStr(),
-        omniledgerId: RequestPath.OMNILEDGER_INSTANCE_ID,
+        omniledgerId: Defaults.OMNILEDGER_INSTANCE_ID,
         address: Party.linkedConode.tcpAddr
     };
     pageObject.showModal("pages/common/qr-code/qr-code-page", {

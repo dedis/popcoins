@@ -9,6 +9,7 @@ const OmniledgerRPC = require("../cothority/omniledger/OmniledgerRPC");
 const Darc = require("../cothority/omniledger/darc");
 import {Buffer} from "buffer/";
 import * as Identity from "./../cothority/identity";
+import * as Defaults from "../Defaults";
 
 const PlatformModule = require("tns-core-modules/platform");
 const ZXing = require("nativescript-zxing");
@@ -69,7 +70,7 @@ export class Badge {
         this._keypair = new KeyPair();
         this._finalStatement = null;
         this._token = null;
-        this._omniledgerID = Convert.hexToByteArray(RequestPath.OMNILEDGER_INSTANCE_ID);
+        this._omniledgerID = Convert.hexToByteArray(Defaults.OMNILEDGER_INSTANCE_ID);
         this._omniledgerRPC = null;
         this._partyInstanceId = null;
         this._partyInstance = null;
@@ -94,7 +95,7 @@ export class Badge {
         if (this._omniledgerRPC != null) {
             return this._omniledgerRPC;
         }
-        this._omniledgerID = Convert.hexToByteArray(RequestPath.OMNILEDGER_INSTANCE_ID);
+        this._omniledgerID = Convert.hexToByteArray(Defaults.OMNILEDGER_INSTANCE_ID);
         if (this._omniledgerID == null) {
             throw new Error("don't have omniledgerID");
         }
@@ -557,7 +558,7 @@ export class Badge {
         const cothoritySocketPop = new Net.RosterSocket(this.config.roster, RequestPath.POP);
         const message = {
             partyid: this.config.hash(),
-            omniledgerID: Convert.hexToByteArray(RequestPath.OMNILEDGER_INSTANCE_ID)
+            omniledgerID: Convert.hexToByteArray(Defaults.OMNILEDGER_INSTANCE_ID)
         };
         return cothoritySocketPop.send(RequestPath.POP_GET_INSTANCE_ID, RequestPath.POP_GET_INSTANCE_ID_REPLY, message)
             .then((reply) => {
