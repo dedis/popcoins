@@ -34,16 +34,11 @@ function onFocus(v) {
 
     viewModel.partyListDescriptions.splice(0);
 
-    return loadParties()
-        .then(() => {
-            // Poll the status every 5s
-            timerId = Timer.setInterval(() => {
-                return reloadStatuses();
-            }, 5000)
-        })
-        .catch(err => {
-            Log.catch(err);
-        })
+    loadParties();
+    // Poll the status every 5s
+    timerId = Timer.setInterval(() => {
+        return reloadStatuses();
+    }, 5000)
 }
 
 // Use onBlur here because it comes from the SegmentBar event simulation in admin-pages.
@@ -57,24 +52,18 @@ function onBlur() {
  * disk/sd-card/whatever. Else it will only return the cached list of wallets.
  */
 function loadParties() {
-    return Promise.resolve()
-        .then(() => {
-            Log.lvl1("getting all wallets:", gData.parties.map(b => {
-                return b.config.name
-            }));
-            viewModel.partyListDescriptions.splice(0);
-            gData.parties.forEach(wallet => {
-                if (wallet.linkedConode) {
-                    viewModel.partyListDescriptions.push(getViewModel(wallet));
-                }
-            })
+    Log.lvl1("getting all new parties:", gData.parties.map(b => {
+        return b.config.name
+    }));
+    viewModel.partyListDescriptions.splice(0);
+    gData.parties.forEach(wallet => {
+        if (wallet.linkedConode) {
+            viewModel.partyListDescriptions.push(getViewModel(wallet));
+        }
+    });
 
-            viewModel.isEmpty = viewModel.partyListDescriptions.length == 0;
-            viewModel.isLoading = false;
-        })
-        .catch(err => {
-            Log.catch(err);
-        })
+    viewModel.isEmpty = viewModel.partyListDescriptions.length == 0;
+    viewModel.isLoading = false;
 }
 
 /**

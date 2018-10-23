@@ -10,7 +10,6 @@ Feel free to customize layouts and components to change how the tab view looks.
     <!--actionBarHidden="true"-->
 
     <ActionBar class="action-bar" actionBarHidden="true">
-        <NavigationButton text="Go Back" android.systemIcon="ic_menu_back" tap="onBack"/>
         <Label class="action-bar-title" text="PopCoins"></Label>
     </ActionBar>
 

@@ -5,7 +5,7 @@ const Dialog = require("ui/dialogs");
 const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
 
-const gData = require("~/app").default;
+const gData = require("~/app").gData;
 const lib = require("~/lib");
 const Convert = lib.Convert;
 const Scan = lib.Scan;

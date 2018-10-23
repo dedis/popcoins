@@ -1,11 +1,11 @@
 import * as Dialog from "tns-core-modules/ui/dialogs";
-import { topmost } from "tns-core-modules/ui/frame";
-import { NavigatedData, Page } from "ui/page";
-import { BadgesViewModel } from "./badges-view-model";
+import {topmost} from "tns-core-modules/ui/frame";
+import {NavigatedData, Page} from "ui/page";
+import {BadgesViewModel} from "./badges-view-model";
 
-import { Log } from "~/lib/Log";
+import {Log} from "~/lib/Log";
 import * as Badge from "~/lib/pop/Badge";
-import { gData } from "~/app";
+import {gData} from "~/app";
 
 let page: Page;
 const pageObject = undefined;
@@ -14,40 +14,32 @@ export function onNavigatingTo(args: NavigatedData) {
     page = <Page>args.object;
     page.bindingContext = BadgesViewModel;
 
-    return showBadges(Badge.Badge.loadAll())
-        .then(()=>{
-            setTimeout(()=>{
-                showBadges(gData.updateAllBadges())
-                    .catch(err =>{
-                        Log.catch(err);
-                    })
-            }, 100);
-        });
+    showBadges(Promise.resolve(gData.badges));
+
+    setTimeout(() => {
+        showBadges(gData.updateAllBadges());
+    }, 100);
 }
 
-function showBadges(badges: Promise<Array<Badge.Badge>>): Promise<any> {
+function showBadges(badges: Promise<Array<Badge.Badge>>) {
     Log.lvl1("Loading parties");
 
-    return Badge.Badge.loadAll()
-        .then((badges) => {
-            page.bindingContext.items.splice(0);
-            page.bindingContext.isEmpty = true;
-            badges.forEach((badge: any, index: number) => {
-                if (badge.state() === Badge.STATE_TOKEN) {
-                    page.bindingContext.items.push({
-                        party: badge,
-                        name: badge.config.name,
-                        datetime: badge.config.datetime,
-                        location: badge.config.location,
-                        index: index + 1
-                    });
-                    page.bindingContext.isEmpty = false;
-                }
-            });
-        })
-        .catch((err) => {
-            Log.catch(err);
+    badges.then(badges => {
+        page.bindingContext.items.splice(0);
+        page.bindingContext.isEmpty = true;
+        badges.forEach((badge: any, index: number) => {
+            if (badge.state() === Badge.STATE_TOKEN) {
+                page.bindingContext.items.push({
+                    party: badge,
+                    name: badge.config.name,
+                    datetime: badge.config.datetime,
+                    location: badge.config.location,
+                    index: index + 1
+                });
+                page.bindingContext.isEmpty = false;
+            }
         });
+    });
 }
 
 export function partyTapped(args) {

@@ -8,7 +8,7 @@ import * as Convert from "~/lib/Convert";
 import * as RequestPath from "~/lib/network/RequestPath";
 import {fromObject} from "tns-core-modules/data/observable";
 import {ItemEventData} from "tns-core-modules/ui/list-view";
-import { gData } from "~/app";
+import {gData} from "~/app";
 
 let view: View = undefined;
 
@@ -34,20 +34,9 @@ function updateView(party: Badge.Badge) {
 }
 
 function loadParties() {
-    return Badge.Badge.loadAll()
-    // .then(wallets => {
-    //     return Badge.fetchUpcoming(wallets)
-    // })
-        .then(upcoming => {
-            Object.values(upcoming).forEach(party => {
-                if (party.state() == Badge.STATE_PUBLISH) {
-                    updateView(party);
-                }
-            });
-        })
-        .catch(err => {
-            Log.catch(err);
-        });
+    gData.parties.forEach(party => {
+        updateView(party);
+    })
 }
 
 export function addParty() {

@@ -2,7 +2,7 @@ const Dialog = require("ui/dialogs");
 const Observable = require("tns-core-modules/data/observable");
 const topmost = require("ui/frame").topmost;
 
-const gData = require("~/app").default;
+const gData = require("~/app").gData;
 const lib = require("~/lib");
 const Log = lib.Log.default;
 const Badge = lib.pop.Badge;
@@ -39,12 +39,7 @@ function onNavigatingTo(args) {
     pageObject = page.page;
     page.bindingContext = viewModel;
 
-    partyArray = [];
-    gData.parties.forEach(b =>{
-        if (b.state() === Badge.STATE_TOKEN){
-            partyArray.push(b);
-        }
-    });
+    partyArray = gData.badges;
     if (partyArray.length == 0){
         return Dialog.alert("No finalized badge available")
             .then(()=>{

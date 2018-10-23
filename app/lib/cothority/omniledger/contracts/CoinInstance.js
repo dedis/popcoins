@@ -89,8 +89,7 @@ class CoinInstance {
         args.push(new Argument("destination", to));
 
         let invoke = new Invoke("transfer", args);
-        let nonce = new Uint8Array(32);
-        crypto.randomFill(nonce);
+        let nonce = crypto.randomBytes(32);
         let inst = Instruction.createInvokeInstruction(
             this._instanceId,
             nonce,

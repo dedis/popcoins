@@ -100,8 +100,7 @@ function addManual() {
         .then(() => {
             return Party.save();
         })
-        .then(()=>{
-            gData.addParty(Party);
+        .then(() => {
             return Party;
         })
         .catch(error => {
@@ -136,7 +135,6 @@ function addScan() {
             return Party.save();
         })
         .then(() => {
-            gData.addParty(Party);
             return returnText;
         })
         .catch(error => {
@@ -278,18 +276,12 @@ function deleteParty() {
             "are you sure?",
         okButtonText: "Yes, delete",
         cancelButtonText: "No, keep"
+    }).then(del => {
+        if (del) {
+            gData.removeBadge(Party);
+            topmost().goBack();
+        }
     })
-        .then(del => {
-            if (del) {
-                return Party.remove()
-                    .then(() => {
-                        topmost().goBack();
-                    })
-                    .catch(err => {
-                        Log.catch(err);
-                    })
-            }
-        })
 }
 
 function keyTapped(arg) {
@@ -301,14 +293,16 @@ function keyTapped(arg) {
     }, true);
 }
 
-module.exports.keyTapped = keyTapped;
-module.exports.deleteParty = deleteParty;
-module.exports.onLoaded = onLoaded;
-module.exports.addManual = addManual;
-module.exports.addScan = addScan;
-module.exports.finalize = finalize;
-module.exports.deleteattendee = deleteAttendee;
-module.exports.onSwipeCellStarted = onSwipeCellStarted;
-module.exports.addNewKey = addNewKey;
-module.exports.goBack = goBack;
-module.exports.shareToAttendee = shareToAttendee;
+module.exports = {
+    keyTapped,
+    deleteParty,
+    onLoaded,
+    addManual,
+    addScan,
+    finalize,
+    deleteAttendee,
+    onSwipeCellStarted,
+    addNewKey,
+    goBack,
+    shareToAttendee
+};

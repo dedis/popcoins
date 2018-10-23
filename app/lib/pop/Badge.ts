@@ -7,7 +7,7 @@ const Schnorr = Kyber.sign.schnorr;
 const HashJs = require("hash.js");
 const OmniledgerRPC = require("../cothority/omniledger/OmniledgerRPC");
 const Darc = require("../cothority/omniledger/darc");
-import { Buffer } from "buffer/";
+import {Buffer} from "buffer/";
 import * as Identity from "./../cothority/identity";
 
 const PlatformModule = require("tns-core-modules/platform");
@@ -29,7 +29,7 @@ const Token = require("./Token");
 const FinalStatement = require("./FinalStatement");
 const KeyPair = require("../crypto/KeyPair");
 
-import { fromNativeSource, ImageSource } from "tns-core-modules/image-source";
+import {fromNativeSource, ImageSource} from "tns-core-modules/image-source";
 import Log from "../Log";
 import Configuration from "./Configuration";
 
@@ -250,7 +250,9 @@ export class Badge {
                 return this.loadFromFile(fileName);
             })
         ).then((parties) => {
-            return parties;
+            return parties.filter(p => {
+                return p !== undefined
+            });
         });
     }
 
@@ -853,5 +855,3 @@ export class MigrateFrom {
             });
     }
 }
-
-Badge.loadAll();

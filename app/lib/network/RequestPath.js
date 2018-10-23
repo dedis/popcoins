@@ -5,7 +5,10 @@ module.exports = {
      */
     // gasser.blue bc id
     // OMNILEDGER_INSTANCE_ID: "0ec0129a820a2f6e8dd16f15660cf563f2a1bfc29dc0efd9291169696cfd7af5",
-    OMNILEDGER_INSTANCE_ID: "983537f186b46023032e37215f40a126220b5ad6632d130d828811e3e5eb2f77",
+    // ineiti's personal mac
+    // OMNILEDGER_INSTANCE_ID: "983537f186b46023032e37215f40a126220b5ad6632d130d828811e3e5eb2f77",
+    // ineiti's working mac
+    OMNILEDGER_INSTANCE_ID: "214dccabf9d4bb1eb64926a4a1b16bd35f9a904d4873dcfdf597a073aa22ba09",
 
     /**
      * Making the party more userfriendly, but more dependant on dedis. Which is OK for the moment...

@@ -60,7 +60,7 @@ function Socket(addr, service) {
                 Log.error("timeout - retrying");
                 retry = true;
                 ws.close();
-            }, 5000);
+            }, 10000);
 
             ws.on('open', () => {
                 const errMsg = requestModel.verify(data);

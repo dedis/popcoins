@@ -48,14 +48,14 @@ function updateCoupons() {
 }
 
 export function addCoupon(args: EventData) {
-    const parties = gData.parties;
-    if (parties.length == 0) {
+    const badges = gData.badges;
+    if (badges.length == 0) {
         return dialogs.alert("Please get a badge first.");
     }
     return Scan.scan()
         .then(resultJSON => {
             const conf = Convert.jsonToObject(resultJSON);
-            return Coupon.createWithConfig(conf.name, conf.frequency, new Date(+conf.date), parties[0])
+            return Coupon.createWithConfig(conf.name, conf.frequency, new Date(+conf.date), badges[0])
         })
         .then(() => {
             updateCoupons();

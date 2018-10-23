@@ -5,6 +5,7 @@ const Invoke = require("../Invoke");
 const Instruction = require("../Instruction");
 const ClientTransaction = require("../ClientTransaction");
 const crypto = require("crypto-browserify");
+const randomFill = require("randomfill");
 
 /**
  * Represents a PoP Party stored on the OmniLedger
@@ -79,7 +80,7 @@ class PopPartyInstance {
             marshal
         );
         let nonce = new Uint8Array(32);
-        crypto.randomFill(nonce);
+        randomFill(nonce);
         const inst = Instruction.createInvokeInstruction(
             this._instanceId,
             nonce,

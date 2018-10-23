@@ -2,7 +2,8 @@ const Dialog = require("ui/dialogs");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const topmost = require("ui/frame").topmost;
 
-const lib = require("../../../../lib");
+const gData = require("~/app").gData;
+const lib = require("~/lib");
 const Convert = lib.Convert;
 const User = lib.User;
 const Net = lib.network.NSNet;
@@ -62,7 +63,7 @@ function proposalTapped(args) {
     let config = new Configuration(p.name, p.datetime, p.location, roster);
     let wallet = new Badge.Badge(config);
     wallet.linkedConode = conode;
-    wallet.addToList();
+    gData.addParty(wallet);
     return wallet.publish(User.getKeyPair().private)
         .then(()=> {
             return wallet.storeAttendees();

@@ -1,9 +1,9 @@
-import { NavigatedData, Page } from "ui/page";
-import { CoinsViewModel } from "./coins-view-model";
+import {NavigatedData, Page} from "ui/page";
+import {CoinsViewModel} from "./coins-view-model";
 import * as Dialog from "tns-core-modules/ui/dialogs";
-import { topmost } from "tns-core-modules/ui/frame";
+import {topmost} from "tns-core-modules/ui/frame";
 
-import { Buffer } from "buffer/";
+import {Buffer} from "buffer/";
 
 const PlatformModule = require("tns-core-modules/platform");
 const ZXing = require("nativescript-zxing");
@@ -14,8 +14,8 @@ let lib = require("../../../lib");
 let Scan = lib.Scan;
 import Log from "~/lib/Log";
 import * as Badge from "~/lib/pop/Badge";
-import { Label } from "tns-core-modules/ui/label";
-import { gData } from "~/app";
+import {Label} from "tns-core-modules/ui/label";
+import {gData} from "~/app";
 
 let Convert = lib.Convert;
 
@@ -26,7 +26,7 @@ export function onNavigatingTo(args: NavigatedData) {
     Log.lvl1("getting to badges");
     page = <Page>args.object;
     page.bindingContext = CoinsViewModel;
-    return showParties(Badge.Badge.loadAll())
+    return showParties(Promise.resolve(gData.badges))
         .then(() => {
             setTimeout(() => {
                 showParties(gData.updateAllBadges());
