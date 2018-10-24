@@ -19,40 +19,34 @@ const viewModel = Observable.fromObject({
     })
 });
 
-let page = undefined;
+let view = undefined;
 let timerId = undefined;
-let pageObject = undefined;
+let page = undefined;
 
-function onNavigatingTo(args) {
-    Log.print("conodes: navigatingTo");
-    if (args) {
-        page = args.object;
-
-        page.bindingContext = viewModel;
-        pageObject = args.object.page;
-    }
+// Use onFocus here because it comes from the SegmentBar event simulation in admin-pages.
+function onFocus(p) {
+    view = p;
+    view.bindingContext = viewModel;
+    page = view.page;
 
     // Bind isEmpty to the length of the array
     viewModel.rosterModule.list.on(ObservableArray.changeEvent, () => {
         viewModel.set('isRosterEmpty', viewModel.rosterModule.list.length === 0);
     });
 
-    if (page) {
-        Timer.setTimeout(() => {
-            return loadConodeList()
-                .then(() => {
-                    // Poll the statuses every 2s
-                    timerId = Timer.setInterval(() => {
-                        Log.print("Reloading conodes list");
-                        loadConodeList();
-                    }, 2000)
-                })
-        }, 100);
-    }
+    Timer.setTimeout(() => {
+        return loadConodeList()
+            .then(() => {
+                // Poll the statuses every 1m
+                timerId = Timer.setInterval(() => {
+                    loadConodeList();
+                }, 60000)
+            })
+    }, 100);
 }
 
-function onNavigatedFrom() {
-    Log.print("conodes: navigatedFrom");
+// Use onBlur here because it comes from the SegmentBar event simulation in admin-pages.
+function onBlur() {
     // remove polling when page is leaved
     Timer.clearInterval(timerId);
 }
@@ -75,7 +69,7 @@ function loadConodeList() {
                 });
                 viewModel.isRosterEmpty = false;
             });
-            pageObject.getViewById("listView").refresh();
+            page.getViewById("listView").refresh();
         });
 }
 
@@ -150,7 +144,7 @@ function addConode() {
                         return User.addServer(conode);
                     });
             } else if (result === undefined) {
-                pageObject.showModal("pages/admin/conodes/add-manual/add-manual",
+                page.showModal("pages/admin/conodes/add-manual/add-manual",
                     undefined, addManualCallBack, true);
                 return Promise.resolve();
             } else {
@@ -176,9 +170,9 @@ function addConode() {
 }
 
 module.exports = {
-    loadConodeList: loadConodeList,
-    conodeTapped: conodeTapped,
-    addConode: addConode,
-    onNavigatingTo: onNavigatingTo,
-    onNavigatedFrom: onNavigatedFrom
+    loadConodeList,
+    conodeTapped,
+    addConode,
+    onFocus,
+    onBlur
 }

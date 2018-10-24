@@ -3,16 +3,15 @@ import * as Dialog from "tns-core-modules/ui/dialogs";
 
 import * as Badge from "~/lib/pop/Badge";
 import Log from "~/lib/Log";
-import * as Scan from "../../lib/Scan";
+import * as Scan from "~/lib/Scan";
 import * as Convert from "~/lib/Convert";
-import * as RequestPath from "~/lib/network/RequestPath";
 import {fromObject} from "tns-core-modules/data/observable";
-import {ItemEventData} from "tns-core-modules/ui/list-view";
+import {gData} from "~/app";
+import * as Defaults from "~/lib/Defaults";
 
 let view: View = undefined;
 
 export function onNavigatingTo(args: NavigatedData) {
-    Log.print("navigating to: parties-page");
     view = <View>args.object;
     view.bindingContext = fromObject({
         party: undefined,
@@ -34,20 +33,9 @@ function updateView(party: Badge.Badge) {
 }
 
 function loadParties() {
-    return Badge.Badge.loadAll()
-    // .then(wallets => {
-    //     return Badge.fetchUpcoming(wallets)
-    // })
-        .then(upcoming => {
-            Object.values(upcoming).forEach(party => {
-                if (party.state() == Badge.STATE_PUBLISH) {
-                    updateView(party);
-                }
-            });
-        })
-        .catch(err => {
-            Log.catch(err);
-        });
+    gData.parties.forEach(party => {
+        updateView(party);
+    })
 }
 
 export function addParty() {
@@ -70,8 +58,8 @@ export function addParty() {
                 defaultText: "",
                 inputType: Dialog.inputType.text
             }).then(r => {
-                if (r) {
-                    return Badge.MigrateFrom.conodeGetWallet("tls://gasser.blue:7002", RequestPath.OMNILEDGER_INSTANCE_ID, r.text);
+                if (r.result) {
+                    return Badge.MigrateFrom.conodeGetWallet("tls://gasser.blue:7002", Defaults.OMNILEDGER_INSTANCE_ID, r.text);
                 } else {
                     throw new Error("Aborted party-id");
                 }
@@ -82,6 +70,7 @@ export function addParty() {
             newParty.attendeesAdd([newParty.keypair.public]);
             return newParty.save()
                 .then(() => {
+                    gData.addParty(newParty);
                     updateView(newParty);
                 })
                 .catch(error => {
@@ -122,7 +111,7 @@ export function partyTap(args: EventData) {
                 view.showModal("pages/common/qr-code/qr-code-page", {
                     textToShow: Convert.objectToJson({
                         id: view.bindingContext.party.config.hashStr(),
-                        omniledgerId: RequestPath.OMNILEDGER_INSTANCE_ID,
+                        omniledgerId: Defaults.OMNILEDGER_INSTANCE_ID,
                         address: view.bindingContext.party.linkedConode.tcpAddr
                     }),
                     title: "Party information",
@@ -133,7 +122,7 @@ export function partyTap(args: EventData) {
                 return Dialog.confirm("Do you really want to delete that party?")
                     .then(del => {
                         if (del) {
-                            view.bindingContext.party.remove();
+                            gData.removeBadge(view.bindingContext.party);
                         }
                         updateView(undefined);
                     })

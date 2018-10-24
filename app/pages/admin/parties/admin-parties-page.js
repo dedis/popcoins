@@ -7,7 +7,9 @@ const ObservableArray = require("data/observable-array").ObservableArray;
 const Kyber = require("@dedis/kyber-js");
 const CurveEd25519 = new Kyber.curve.edwards25519.Curve;
 
+const gData = require("~/app").gData;
 const lib = require("~/lib");
+const Defaults = lib.Defaults;
 const Badge = lib.pop.Badge;
 const Configuration = lib.pop.Configuration.default;
 const User = lib.User;
@@ -23,37 +25,25 @@ const viewModel = Observable.fromObject({
     loaded: false,
 });
 
-let page = undefined;
+let view = undefined;
 let timerId = undefined;
 
-function onNavigatingTo(args) {
-    Log.print("navigatingto");
-    if (args) {
-        page = args.object;
-        page.bindingContext = viewModel;
-    }
+// Use onFocus here because it comes from the SegmentBar event simulation in admin-pages.
+function onFocus(v) {
+    view = v;
+    view.bindingContext = viewModel;
 
     viewModel.partyListDescriptions.splice(0);
 
-    if (page) {
-        timerId = Timer.setTimeout(() => {
-            return loadParties()
-                .then(() => {
-                    // Poll the status every 5s
-                    timerId = Timer.setInterval(() => {
-                        Log.print("Reloading statuses in admin-parties");
-                        return reloadStatuses();
-                    }, 5000)
-                })
-                .catch(err => {
-                    Log.catch(err);
-                })
-        }, 100);
-    }
+    loadParties();
+    // Poll the status every 5s
+    timerId = Timer.setInterval(() => {
+        return reloadStatuses();
+    }, 5000)
 }
 
-function onNavigatedFrom() {
-    Log.print("navigatedFrom");
+// Use onBlur here because it comes from the SegmentBar event simulation in admin-pages.
+function onBlur() {
     // remove polling when page is leaved
     Timer.clearInterval(timerId);
 }
@@ -63,21 +53,18 @@ function onNavigatedFrom() {
  * disk/sd-card/whatever. Else it will only return the cached list of wallets.
  */
 function loadParties() {
-    return Promise.resolve()
-        .then(() => {
-            Log.lvl1("getting all wallets:", Badge.List.map(b => {
-                return b.config.name
-            }));
-            viewModel.partyListDescriptions.splice(0);
-            Badge.List.forEach(wallet => {
-                if (wallet.linkedConode) {
-                    viewModel.partyListDescriptions.push(getViewModel(wallet));
-                }
-            })
+    Log.lvl1("getting all new parties:", gData.parties.map(b => {
+        return b.config.name
+    }));
+    viewModel.partyListDescriptions.splice(0);
+    gData.parties.forEach(wallet => {
+        if (wallet.linkedConode) {
+            viewModel.partyListDescriptions.push(getViewModel(wallet));
+        }
+    });
 
-            viewModel.isEmpty = viewModel.partyListDescriptions.length == 0;
-            viewModel.isLoading = false;
-        })
+    viewModel.isEmpty = viewModel.partyListDescriptions.length == 0;
+    viewModel.isLoading = false;
 }
 
 /**
@@ -114,7 +101,8 @@ function reloadStatuses() {
     return Promise.all(
         viewModel.partyListDescriptions.map(model => {
             newView.push(getViewModel(model.party));
-            if (model.party.state() == Badge.STATE_CONFIG) {
+            if (model.party.state() == Badge.STATE_CONFIG ||
+                model.party.state() == Badge.STATE_TOKEN) {
                 return
             }
             return model.party.update()
@@ -229,60 +217,62 @@ function verifyLinkToConode() {
                 })
             }
         }).then(() => {
-                return Dialog.action({
-                    message: "Choose a Conode",
-                    cancelButtonText: "Cancel",
-                    actions: conodesNames
-                }).then(result => {
-                    if (result !== "Cancel") {
-                        index = conodesNames.indexOf(result);
-                        Log.lvl2("index is:", index);
-                        return User.sendLinkRequest(conodes[index], "")
-                    }
-                }).catch(error => {
-                    Log.rcatch(error);
-                }).then(result => {
-                    Log.lvl2("Prompting for pin");
-                    if (result.alreadyLinked !== undefined && result.alreadyLinked) {
-                        Log.lvl2("Already linked");
-                        return Promise.resolve(conodes[index])
-                    }
-                    return Dialog.prompt({
-                        title: "Requested PIN",
-                        message: "Please look up the PIN in the server log",
-                        okButtonText: "Link",
-                        cancelButtonText: "Cancel",
-                        defaultText: "",
-                        inputType: Dialog.inputType.text
-                    }).then(result => {
-                        if (result.result) {
-                            if (result.text === "") {
-                                return Promise.reject("PIN should not be empty");
+            return Dialog.action({
+                message: "Choose a Conode",
+                cancelButtonText: "Cancel",
+                actions: conodesNames
+            }).then(result => {
+                if (result == "Cancel") {
+                    throw new Error("Cancelled choice of conode");
+                } else {
+                    index = conodesNames.indexOf(result);
+                    Log.lvl2("index is:", index);
+                    return User.sendLinkRequest(conodes[index], "")
+                        .catch(error => {
+                            Log.rcatch(error);
+                        }).then(result => {
+                            Log.lvl2("Prompting for pin");
+                            if (result.alreadyLinked !== undefined && result.alreadyLinked) {
+                                Log.lvl2("Already linked");
+                                return Promise.resolve(conodes[index])
                             }
-                            return User.sendLinkRequest(conodes[index], result.text)
-                                .then(() => {
-                                    return Promise.resolve(conodes[index]);
-                                });
-                        } else {
-                            return Promise.reject(CANCELED_BY_USER);
-                        }
-                    });
-                }).catch(error => {
-                    Log.catch(error, "error while setting up pin");
+                            return Dialog.prompt({
+                                title: "Requested PIN",
+                                message: "Please look up the PIN in the server log",
+                                okButtonText: "Link",
+                                cancelButtonText: "Cancel",
+                                defaultText: "",
+                                inputType: Dialog.inputType.text
+                            }).then(result => {
+                                if (result.result) {
+                                    if (result.text === "") {
+                                        return Promise.reject("PIN should not be empty");
+                                    }
+                                    return User.sendLinkRequest(conodes[index], result.text)
+                                        .then(() => {
+                                            return Promise.resolve(conodes[index]);
+                                        });
+                                } else {
+                                    return Promise.reject(CANCELED_BY_USER);
+                                }
+                            });
+                        }).catch(error => {
+                            Log.catch(error, "error while setting up pin");
 
-                    if (error !== CANCELED_BY_USER) {
-                        return Dialog.alert({
-                            title: "Error",
-                            message: "An unexpected error occurred. Please try again. - " + error,
-                            okButtonText: "Ok"
-                        }).then(() => {
-                            throw new Error("Couldn't setup pin: " + error);
-                        });
-                    }
-                    return Promise.reject(error);
-                });
-            }
-        )
+                            if (error !== CANCELED_BY_USER) {
+                                return Dialog.alert({
+                                    title: "Error",
+                                    message: "An unexpected error occurred. Please try again. - " + error,
+                                    okButtonText: "Ok"
+                                }).then(() => {
+                                    throw new Error("Couldn't setup pin: " + error);
+                                });
+                            }
+                            return Promise.reject(error);
+                        })
+                }
+            })
+        })
 }
 
 
@@ -291,7 +281,7 @@ function addParty() {
     let date = new Date();
     let name = "";
     let location = "";
-    if (RequestPath.PREFILL_PARTY) {
+    if (Defaults.PREFILL_PARTY) {
         name = "test " + date.getHours() + ":" + date.getMinutes();
         location = "testing-land";
     }
@@ -338,8 +328,8 @@ function addParty() {
 }
 
 module.exports = {
-    onNavigatingTo: onNavigatingTo,
-    onNavigatedFrom: onNavigatedFrom,
+    onFocus,
+    onBlur,
     partyTapped,
     addParty,
 }

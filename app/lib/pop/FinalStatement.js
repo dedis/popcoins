@@ -50,7 +50,7 @@ class FinalStatement {
 
     /**
      * Creates a new final statement from a proto-file.
-     * @param proto
+     * @param proto {ArrayBuffer}
      * @returns {FinalStatement}
      */
     static fromProto(proto) {

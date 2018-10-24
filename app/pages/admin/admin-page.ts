@@ -1,45 +1,85 @@
-import {topmost} from "ui/frame";
-import {NavigatedData, Page} from "ui/page";
-import {AdminViewModel} from "./admin-view-model";
+import { topmost, ViewBase } from "ui/frame";
+import { NavigatedData, Page } from "ui/page";
+import { AdminViewModel } from "./admin-view-model";
 import Log from "../../lib/Log";
-import {SelectedIndexChangedEventData} from "tns-core-modules/ui/tab-view";
-import {SegmentedBar} from "tns-core-modules/ui/segmented-bar";
-import {onNavigatingTo as partiesTo, onNavigatedFrom as partiesFrom} from "~/pages/admin/parties/admin-parties-page";
-import {onNavigatingTo as conodesTo, onNavigatedFrom as conodesFrom} from "~/pages/admin/conodes/conodes-page";
+import { SelectedIndexChangedEventData } from "tns-core-modules/ui/tab-view";
+import { SegmentedBar } from "tns-core-modules/ui/segmented-bar";
+import * as Parties from "~/pages/admin/parties/admin-parties-page";
+import * as Conodes from "~/pages/admin/conodes/conodes-page";
+import * as Coupons from "~/pages/admin/coupons/admin-coupons-page";
+
+// These calls are used to simulate navigatingTo and navigatingFrom for the
+// SegmentedBar, which do not support these events on the views.
+let calls = {
+    to: {
+        coupons: Coupons.onFocus,
+        parties: Parties.onFocus,
+        conodes: Conodes.onFocus
+    },
+    from: {
+        coupons: Coupons.onBlur,
+        parties: Parties.onBlur,
+        conodes: Conodes.onBlur
+    }
+};
 
 let page: Page = undefined;
 let segBar: SegmentedBar = undefined;
 
 export function onNavigatingTo(args: NavigatedData) {
-    Log.print("admin: navigationTo");
     page = <Page>args.object;
     page.bindingContext = new AdminViewModel();
-    Log.print("segBar is:", segBar.selectedIndex);
     page.bindingContext.set("prop", segBar.selectedIndex);
-    partiesTo();
-    conodesTo();
+    // Workaround for slow building of UI first time. If onFocus is called
+    // too fast, the UI is not set up yet, and there will be no `ViewBase`.
+    setTimeout(()=>{
+        callNavigating(segBar.selectedIndex, calls.to);
+    }, 500);
 }
 
 export function onNavigatedFrom(args: NavigatedData) {
-    Log.print("admin: navigatedFrom");
-    partiesFrom();
-    conodesFrom();
+    callNavigating(segBar.selectedIndex, calls.from);
 }
 
 export function onBack() {
     topmost().goBack();
 }
 
-export function sbLoaded(args:NavigatedData) {
+export function sbLoaded(args: NavigatedData) {
     // handle selected index change
     segBar = <SegmentedBar>args.object;
-    Log.print("sb: ", segBar.selectedIndex);
     segBar.on("selectedIndexChange", selectedIndexChange);
 }
 
 export function selectedIndexChange(sbargs: SelectedIndexChangedEventData) {
     const page = (<SegmentedBar>sbargs.object).page;
     const vm = page.bindingContext;
+    const oldIndex = vm.get("prop");
+    callNavigating(oldIndex, calls.from);
     const selectedIndex = (<SegmentedBar>sbargs.object).selectedIndex;
+    callNavigating(selectedIndex, calls.to);
     vm.set("prop", selectedIndex);
+}
+
+function callNavigating(index: number, call: any) {
+    switch (index) {
+        case 0:
+            page.getViewById("frameCoupons").eachChild(child => {
+                call.coupons(child);
+                return true;
+            });
+            break;
+        case 1:
+            page.getViewById("frameParties").eachChild(child => {
+                call.parties(child);
+                return true;
+            });
+            break;
+        case 2:
+            page.getViewById("frameConodes").eachChild(child => {
+                call.conodes(child);
+                return true;
+            });
+            break;
+    }
 }

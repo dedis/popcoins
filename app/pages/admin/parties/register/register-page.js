@@ -10,13 +10,14 @@ const CurveEd25519 = new Kyber.curve.edwards25519.Curve;
 const HashJs = require("hash.js");
 const Buffer = require("buffer/").Buffer;
 
-const lib = require("../../../../lib");
+const gData = require("~/app").gData;
+const lib = require("~/lib");
+const Defaults = lib.Defaults;
 const Convert = lib.Convert;
 const Scan = lib.Scan;
 const User = lib.User;
 const Log = lib.Log.default;
 const Badge = lib.pop.Badge;
-const RequestPath = lib.network.RequestPath;
 
 let viewModel = undefined;
 let Party = undefined;
@@ -98,6 +99,9 @@ function addManual() {
         })
         .then(() => {
             return Party.save();
+        })
+        .then(() => {
+            return Party;
         })
         .catch(error => {
             console.log(error);
@@ -251,7 +255,7 @@ function addNewKey() {
 function shareToAttendee() {
     let info = {
         id: Party.config.hashStr(),
-        omniledgerId: RequestPath.OMNILEDGER_INSTANCE_ID,
+        omniledgerId: Defaults.OMNILEDGER_INSTANCE_ID,
         address: Party.linkedConode.tcpAddr
     };
     pageObject.showModal("pages/common/qr-code/qr-code-page", {
@@ -272,18 +276,12 @@ function deleteParty() {
             "are you sure?",
         okButtonText: "Yes, delete",
         cancelButtonText: "No, keep"
+    }).then(del => {
+        if (del) {
+            gData.removeBadge(Party);
+            topmost().goBack();
+        }
     })
-        .then(del => {
-            if (del) {
-                return Party.remove()
-                    .then(() => {
-                        topmost().goBack();
-                    })
-                    .catch(err => {
-                        Log.catch(err);
-                    })
-            }
-        })
 }
 
 function keyTapped(arg) {
@@ -295,14 +293,16 @@ function keyTapped(arg) {
     }, true);
 }
 
-module.exports.keyTapped = keyTapped;
-module.exports.deleteParty = deleteParty;
-module.exports.onLoaded = onLoaded;
-module.exports.addManual = addManual;
-module.exports.addScan = addScan;
-module.exports.finalize = finalize;
-module.exports.deleteattendee = deleteAttendee;
-module.exports.onSwipeCellStarted = onSwipeCellStarted;
-module.exports.addNewKey = addNewKey;
-module.exports.goBack = goBack;
-module.exports.shareToAttendee = shareToAttendee;
+module.exports = {
+    keyTapped,
+    deleteParty,
+    onLoaded,
+    addManual,
+    addScan,
+    finalize,
+    deleteAttendee,
+    onSwipeCellStarted,
+    addNewKey,
+    goBack,
+    shareToAttendee
+};

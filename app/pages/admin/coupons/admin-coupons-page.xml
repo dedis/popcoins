@@ -1,7 +1,6 @@
 <Page
         actionBarHidden="true"
         class="page"
-        loaded="onLoaded"
         xmlns:nsListView="nativescript-ui-listview"
         xmlns:nsFloatingButton="nativescript-floatingactionbutton"
         xmlns="http://www.nativescript.org/tns.xsd">
@@ -17,7 +16,7 @@
                visibility="{{ isEmpty ? 'visible' : 'collapsed' }}"
         />
 
-        <nsListView:RadListView items="{{ barListDescriptions }}" itemTap="couponTapped"
+        <nsListView:RadListView items="{{ couponListDescriptions }}" itemTap="couponTapped"
                                 row="1" id="listView">
             <nsListView:RadListView.itemTemplate>
                 <GridLayout rows="*,*" columns="*, auto" backgroundColor="white"
@@ -30,7 +29,7 @@
         </nsListView:RadListView>
 
         <nsFloatingButton:fab tap="addCoupon"
-                              row="1"
+                              rowSpan="2"
                               icon="res://ic_add_white"
                               rippleColor="#f1f1f1"
                               class="fab-button"/>

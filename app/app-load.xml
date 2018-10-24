@@ -1,0 +1,12 @@
+<Page class="page"
+      loaded="onLoaded"
+      xmlns:nsListView="nativescript-ui-listview"
+      xmlns="http://www.nativescript.org/tns.xsd">
+
+    <nsListView:RadListView items="{{ updateActions }}" id="listView">
+        <nsListView:RadListView.itemTemplate>
+            <Label class="list-title" text="{{ description }}" textWrap="true" margin="5"/>
+        </nsListView:RadListView.itemTemplate>
+    </nsListView:RadListView>
+
+</Page>

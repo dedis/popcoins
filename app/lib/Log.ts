@@ -1,43 +1,41 @@
-const util = require('util');
+const util = require("util");
 const application = require("application");
-import {Buffer} from "buffer/";
+import { Buffer } from "buffer/";
 
-let defaultLvl = 2;
+const defaultLvl = 2;
 
-let lvlStr = ["E ", "W ", "I ", "!4", "!3", "!2", "!1", "P ", " 1", " 2", " 3", " 4"]
+const lvlStr = ["E ", "W ", "I ", "!4", "!3", "!2", "!1", "P ", " 1", " 2", " 3", " 4"];
 
 export class LogC {
     _lvl: number;
 
     constructor(lvl) {
-        if (lvl !== undefined) {
-            this._lvl = lvl;
-        } else {
-            this._lvl = defaultLvl;
-        }
+        this._lvl = lvl === undefined ? defaultLvl : lvl;
     }
 
     joinArgs(args) {
-        return args.map(a => {
-            if (typeof a == "string") {
+        return args.map((a) => {
+            if (typeof a === "string") {
                 return a;
             }
             try {
                 // return JSON.stringify(a, undefined, 4);
-                let type:string = typeof a;
+                let type: string = typeof a;
                 if (a === Object(a)) {
                     if (a.constructor) {
                         type = a.constructor.name;
                     }
-                } else if (type == "o") {
+                } else if (type === "o") {
                     console.dir(a);
                 }
-                if (type == "Uint8Array") {
-                    return "{" + type + "}: " + Buffer.from(a).toString('hex');
+                if (type === "Uint8Array") {
+                    return "{" + type + "}: " + Buffer.from(a).toString("hex");
                 }
+
                 return "{" + type + "}: " + util.inspect(a);
             } catch (e) {
                 console.log("error while inspecting:", e);
+
                 return a;
             }
         }).join(" ");
@@ -45,18 +43,20 @@ export class LogC {
 
     printCaller(err, i) {
         try {
-            let stack = err.stack.split('\n')
+            const stack = err.stack.split("\n");
             let method = [];
             if (application.android) {
-                method = stack[i].trim().replace(/^at */, '').split("(");
+                method = stack[i].trim().replace(/^at */, "").split("(");
             } else {
                 method = stack[i - 1].trim().split("@");
-                if (method.length == 1) {
+                if (method.length === 1) {
                     method.push(method[0]);
                     method[0] = "?";
                 }
             }
-            let file = method[1].replace(/^.*\/|\)$/g, '');
+            const file = method[1].replace(/^.*\/|\)$/g, "");
+
+            // @ts-ignore
             return (method[0] + " - " + file).padEnd(40);
         } catch (e) {
             return this.printCaller(new Error("Couldn't get stack - " + err), i + 2);
@@ -75,47 +75,47 @@ export class LogC {
     }
 
     lvl1(...args) {
-        this.printLvl(1, args)
+        this.printLvl(1, args);
     }
 
     lvl2(...args) {
-        this.printLvl(2, args)
+        this.printLvl(2, args);
     }
 
     lvl3(...args) {
-        this.printLvl(3, args)
+        this.printLvl(3, args);
     }
 
     lvl4(...args) {
-        this.printLvl(4, args)
+        this.printLvl(4, args);
     }
 
     llvl1(...args) {
-        this.printLvl(-1, args)
+        this.printLvl(-1, args);
     }
 
     llvl2(...args) {
-        this.printLvl(-2, args)
+        this.printLvl(-2, args);
     }
 
     llvl3(...args) {
-        this.printLvl(-3, args)
+        this.printLvl(-3, args);
     }
 
     llvl4(...args) {
-        this.printLvl(-4, args)
+        this.printLvl(-4, args);
     }
 
     info(...args) {
-        this.printLvl(-5, args)
+        this.printLvl(-5, args);
     }
 
     warn(...args) {
-        this.printLvl(-6, args)
+        this.printLvl(-6, args);
     }
 
     error(...args) {
-        this.printLvl(-7, args)
+        this.printLvl(-7, args);
     }
 
     catch(e, ...args) {
@@ -134,7 +134,7 @@ export class LogC {
         }
         console.log("C : " + this.printCaller(e, 1) + " -> (" + errMsg + ") " +
             this.joinArgs(args));
-        throw new Error(errMsg.replace(/Error: /, ''));
+        throw new Error(errMsg.replace(/Error: /, ""));
     }
 
     set lvl(l) {
@@ -144,7 +144,7 @@ export class LogC {
     get lvl() {
         return this._lvl;
     }
-};
+}
 
-let Log = new LogC(2);
+export let Log = new LogC(2);
 export default Log;

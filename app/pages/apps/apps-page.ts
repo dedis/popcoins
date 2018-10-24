@@ -6,13 +6,11 @@ import {topmost} from "tns-core-modules/ui/frame";
 import Log from "../../lib/Log";
 
 export function onNavigatingTo(args: NavigatedData) {
-    Log.print("apps: navigatingTo");
     const page = <Page>args.object;
     page.bindingContext = new AppsViewModel();
 }
 
 export function onNavigatedFrom(args: NavigatedData){
-    Log.print("apps: navigatedFrom");
 }
 
 export function goCoupons(args: GestureEventData) {

@@ -15,6 +15,7 @@ let FileIO = lib.FileIO;
 let FilePaths = lib.FilePaths;
 import Log from "~/lib/Log";
 import {ItemEventData} from "tns-core-modules/ui/list-view";
+import {gData} from "~/app";
 
 let view: View = undefined;
 let coupons: any[] = undefined;
@@ -40,21 +41,21 @@ function updateCoupons() {
         coupons.push(c);
         // Observables have to be nested to reflect changes
         view.bindingContext.items.push(fromObject({
-            bar: c,
+            coupon: c,
             desc: c.getConfigModule(),
         }));
     });
 }
 
 export function addCoupon(args: EventData) {
-    const parties = Badge.List;
-    if (parties.length == 0) {
+    const badges = gData.badges;
+    if (badges.length == 0) {
         return dialogs.alert("Please get a badge first.");
     }
     return Scan.scan()
         .then(resultJSON => {
             const conf = Convert.jsonToObject(resultJSON);
-            return Coupon.createWithConfig(conf.name, conf.frequency, new Date(+conf.date), parties[0])
+            return Coupon.createWithConfig(conf.name, conf.frequency, new Date(+conf.date), badges[0])
         })
         .then(() => {
             updateCoupons();
@@ -76,7 +77,7 @@ export function couponTapped(args: ItemEventData) {
     }).then(result => {
         switch (result) {
             case actionRequest:
-                const parties = Badge.List;
+                const parties = gData.badges;
                 if (parties.length == 0) {
                     return dialogs.alert("Please get a badge first.");
                 }

@@ -14,57 +14,63 @@ let lib = require("../../../lib");
 let Scan = lib.Scan;
 import Log from "~/lib/Log";
 import * as Badge from "~/lib/pop/Badge";
+import {Label} from "tns-core-modules/ui/label";
+import {gData} from "~/app";
 
 let Convert = lib.Convert;
 
 let page: Page = undefined;
-let pageObject = undefined;
 let party: Badge.Badge = undefined;
 
 export function onNavigatingTo(args: NavigatedData) {
     Log.lvl1("getting to badges");
     page = <Page>args.object;
     page.bindingContext = CoinsViewModel;
-    setTimeout(() => {
-        return loadParties();
-    }, 100);
+    return showParties(Promise.resolve(gData.badges))
+        .then(() => {
+            setTimeout(() => {
+                showParties(gData.updateAllBadges());
+            }, 100);
+        });
 }
 
-function loadParties() {
-    Log.lvl1("Loading parties");
-    return Badge.Badge.loadAll()
-        .then(badges => {
-            return Badge.Badge.updateAll();
-        })
-        .then(badges => {
-            Object.values(badges).forEach((b: any, index: number) => {
-                if (b.state() == Badge.STATE_TOKEN) {
-                    return b.getCoinInstance(true)
-                        .then(ci => {
-                            party = b;
-                            page.bindingContext.balance = ci.balance;
-                            let pubBase64 = Buffer.from(b.keypair.public.marshalBinary()).toString('base64');
-                            let text = " { \"public\" :  \"" + pubBase64 + "\"}";
-                            let sideLength = PlatformModule.screen.mainScreen.widthPixels / 4;
-                            const qrcode = QRGenerator.createBarcode({
-                                encode: text,
-                                format: ZXing.QR_CODE,
-                                height: sideLength,
-                                width: sideLength
-                            });
-                            page.bindingContext.qrcode = ImageSource.fromNativeSource(qrcode);
-                        })
-                }
-            });
-        })
-        .catch(err => {
-            Log.catch(err);
+function setProgress(text: string = "", width: number = 0) {
+    if (width == 0) {
+        CoinsViewModel.set("networkStatus", undefined);
+    } else {
+        page.getViewById("progress_bar").setInlineStyle("width:" + width + "%;");
+        (<Label>page.getViewById("progress_text")).text = text;
+    }
+}
+
+function showParties(badges: Promise<Array<Badge.Badge>>) {
+    Log.lvl1("Showing parties");
+    return badges.then(badges => {
+        badges.forEach((b: Badge.Badge) => {
+            if (b.state() == Badge.STATE_TOKEN) {
+                party = b;
+                page.bindingContext.balance = b.balance;
+                let pubBase64 = Buffer.from(b.keypair.public.marshalBinary()).toString('base64');
+                let text = " { \"public\" :  \"" + pubBase64 + "\"}";
+                let sideLength = PlatformModule.screen.mainScreen.widthPixels / 4;
+                const qrcode = QRGenerator.createBarcode({
+                    encode: text,
+                    format: ZXing.QR_CODE,
+                    height: sideLength,
+                    width: sideLength
+                });
+                page.bindingContext.qrcode = ImageSource.fromNativeSource(qrcode);
+                // Take first badge that is in STATE_TOKEN
+                return;
+            }
         });
+    }).catch(err => {
+        Log.catch(err);
+    });
 }
 
 export function sendCoins(args) {
     let amount = undefined;
-    const USER_WRONG_INPUT = "USER_WRONG_INPUT";
 
     return Dialog.prompt({
         title: "Amount",
@@ -78,48 +84,57 @@ export function sendCoins(args) {
         }
         amount = Number(r.text);
         if (isNaN(amount) || !(Number.isInteger(amount))) {
-            return Promise.reject(USER_WRONG_INPUT)
-        }
-        return Scan.scan()
-    }).then(publicKeyJson => {
-        const publicKeyObject = Convert.jsonToObject(publicKeyJson);
-        page.bindingContext.isLoading = true;
-        return party.transferCoin(amount, Convert.base64ToByteArray(publicKeyObject.public), true);
-    }).then(() => {
-        page.bindingContext.isLoading = false;
-        return Dialog.alert({
-            title: "Success !",
-            message: "" + amount + " PoP-Coins have been transferred",
-            okButtonText: "Ok"
-        });
-    }).then(() => {
-        return updateCoins();
-    }).catch(err => {
-        page.bindingContext.isLoading = false;
-        if (err === "Cancelled") {
-            return Promise.resolve()
-        } else if (err === USER_WRONG_INPUT) {
             return Dialog.alert({
                 title: "Wrong input",
                 message: "You can only enter an integer number. Please try again.",
                 okButtonText: "Ok"
+            }).then(() => {
+                throw new Error("wrong input");
             });
-
         }
-
-        console.log("wrong number:", err.stack);
-        return Promise.reject(err)
-    })
+        return Scan.scan()
+            .catch(err => {
+                Log.rcatch(err);
+            })
+            .then(publicKeyJson => {
+                const publicKeyObject = Convert.jsonToObject(publicKeyJson);
+                setProgress("Transferring coin", 20);
+                return party.transferCoin(amount, Convert.base64ToByteArray(publicKeyObject.public), true)
+                    .then(() => {
+                        setProgress("Updating coins", 100);
+                        return updateCoins();
+                    })
+                    .then(() => {
+                        setProgress();
+                        return Dialog.alert({
+                            title: "Success !",
+                            message: "" + amount + " PoP-Coins have been transferred",
+                            okButtonText: "Ok"
+                        });
+                    })
+                    .catch((err) => {
+                        setProgress();
+                        return Dialog.alert({
+                            title: "Network Error",
+                            message: "Couldn't update coins: " + err,
+                            okButtonText: "Ok"
+                        }).then(() => {
+                            Log.rcatch(err);
+                        });
+                    });
+            });
+    });
 }
 
 function updateCoins() {
-    if (party) {
-        return party.getCoinInstance(true)
-            .then(ci => {
-                page.bindingContext.balance = ci.balance;
-            });
-    }
-    return Promise.resolve();
+    setProgress("Updating coins", 50);
+    return showParties(gData.updateAllBadges())
+        .then(() => {
+            setProgress();
+        })
+        .catch(() => {
+            setProgress();
+        });
 }
 
 export function onBack() {
@@ -128,4 +143,8 @@ export function onBack() {
 
 export function onReload() {
     return updateCoins();
+}
+
+export function cancelNetwork() {
+    setProgress();
 }

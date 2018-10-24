@@ -4,7 +4,9 @@ const topmost = Frame.topmost;
 const Observable = require("tns-core-modules/data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
 
-const lib = require("../../../../lib");
+const gData = require("~/app").gData;
+const lib = require("~/lib");
+const Data = lib.Data;
 const Convert = lib.Convert;
 const Scan = lib.Scan;
 const FileIO = lib.FileIO;
@@ -267,12 +269,12 @@ function save() {
                 return WalEdit.save()
                     .catch(err => {
                         Log.catch(err, "couldn't save: ");
-                    })
+                    });
             } else {
                 return Promise.resolve()
                     .then(() => {
-                        WalEdit.addToList();
-                    })
+                        gData.addParty(WalEdit);
+                    });
             }
         })
         .then(() => {

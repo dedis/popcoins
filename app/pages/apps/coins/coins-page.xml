@@ -24,10 +24,10 @@ Feel free to customize layouts and components to change how the tab view looks.
                margin="20%"
                visibility="{{ qrcode == undefined ? 'visible' : 'collapse' }}"
         />
-
+        <GridLayout rows="*, auto" row="1" tap="cancelNetwork">
             <GridLayout id="grid-layout" rows="auto,auto,auto" columns="*, *"
                         backgroundColor="white"
-                        row="1"
+                        rowSpan="2"
                         visibility="{{ qrcode ? 'visible' : 'collapse' }}"
                         class="basic-list-decorated">
                 <Button text="Send" tap="sendCoins" row="0" col="0"/>
@@ -47,8 +47,18 @@ Feel free to customize layouts and components to change how the tab view looks.
                 <StackLayout class="status-text" row="1" rowSpan="2" col="1">
                     <Image src="{{ qrcode }}"
                            visibility="visible" stretch="aspectFill"/>
-                    <!--visibility="visible" width="60%" height="60%" stretch="aspectFill"/>-->
                 </StackLayout>
             </GridLayout>
+            <StackLayout row="0" backgroundColor="gray"
+                         style="{{ networkStatus ? 'opacity:0.5;' : 'opacity:0;' }}"/>
+            <GridLayout rows="auto"
+                        row="1"
+                        visibility="{{ networkStatus ? 'visible' : 'collapse'}}">
+                <Label row="0" text="{{ networkStatus }}" class="label-title"
+                       id="progress_text"/>
+                <Label row="0" width="100%" backgroundColor="blue" style="horizontal-align:left; opacity:0.5;"
+                       id="progress_bar"/>
+            </GridLayout>
+        </GridLayout>
     </StackLayout>
 </Page>

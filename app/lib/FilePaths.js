@@ -12,6 +12,12 @@ module.exports = {
     FILES_DIR: "shared/res/files",
 
     /**
+     * Data structure files that define the current configuration
+     * of the app.
+     */
+    DATA_VERSION: "shared/res/files/data/version",
+
+    /**
      * PoP Files
      */
     POP_FINAL_STATEMENTS: "shared/res/files/pop/final_statements.json",
@@ -27,22 +33,16 @@ module.exports = {
     POP_ATT_INFOS: "party_informations.json",
 
     /**
-     * CISC Files
-     */
-    CISC_PATH: "shared/res/files/cisc",
-    CISC_IDENTITY_LINK: "identity_link.json",
-    CISC_NAME: "name.json",
-
-    /**
      * USER files
      */
     USER_PATH: "shared/res/files/user",
     POP_ORG_PATH: "shared/res/files/pop/org",
     POP_ORG_CONODE: "conode.json",
+
     /**
-     * BEERCOIN Files
+     * COUPON Files
      */
-    COUPON_PATH: "shared/res/files/beercoin",
+    COUPON_PATH: "shared/res/files/coupon",
     COUPON_BAR_CONFIG: "bar_config.json",
     COUPON_LINKED_FINALS: "final_statements.json",
     COUPON_CHECKED_CLIENTS: "checked_clients.json",

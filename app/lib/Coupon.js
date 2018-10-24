@@ -14,7 +14,7 @@ const Log = require("~/lib/Log").default;
 const RingSig = require("~/lib/crypto/RingSig");
 
 /**
- * @param {string} [dirname] - directory of the bar data (directory is created if non existent).
+ * @param {string} [dirname] - directory of the coupon data (directory is created if non existent).
  *  If no directory is specified, a unique random directory name is generated
  **/
 class Coupon {
@@ -54,14 +54,14 @@ class Coupon {
     }
 
     /**
-     * Load everything that is related to this bar in memory :
+     * Load everything that is related to this coupon in memory :
      *  - The already check clients
      *  - The linked final statements
      *  - The configuration
      * @return {Promise<>}
      */
     load() {
-        const promises = [this.loadConfig(), this.loadFinalStatements(), this.loadOrderHistory()];
+        const promises = [this.loadConfig(), this.loadOrderHistory()];
 
         return Promise.all(promises)
             .then(() => {
@@ -147,25 +147,6 @@ class Coupon {
     }
 
     /**
-     * Load the final statements in memory
-     * @return {Promise<void>} - a promise that gets resolved once the final statements are loaded
-     */
-    loadFinalStatements() {
-        return FileIO.getStringOf(FileIO.join(FilesPath.COUPON_PATH, this._dirname, FilesPath.COUPON_LINKED_FINALS))
-            .then(finalStatementJson => {
-
-                this._finalStatement = Convert.jsonToObject(finalStatementJson);
-                this._finalStatement.attendees.forEach(attendee => {
-                    let publicKey = Suite.point();
-                    publicKey.unmarshalBinary(new Uint8Array(Object.values(attendee)));
-                    this._anonymitySet.add(publicKey)
-                });
-
-                return Promise.resolve();
-            })
-    }
-
-    /**
      * Load the order history in memory
      * @return {Promise} - a promise that gets resolved once the history is loaded
      */
@@ -203,7 +184,7 @@ class Coupon {
     }
 
     /**
-     * Save the current bar configuration on the disk
+     * Save the current coupon configuration on the disk
      *
      * @return {Promise} - a promise that gets solved once the config is saved on the disk
      */
@@ -256,7 +237,7 @@ class Coupon {
     }
 
     /**
-     * Check if a specific tag has already been registered to this bar
+     * Check if a specific tag has already been registered to this coupon
      *
      * @param tag {Uint8Array} - the tag to be checked
      * @return {boolean} - true if this client already came here
@@ -265,8 +246,7 @@ class Coupon {
         if (!(tag instanceof Uint8Array)) {
             throw "tag must be an Uint8Array";
         }
-
-        return this._checkedClients.findIndex(cl =>{
+        return this._checkedClients.findIndex(cl => {
             return Buffer.compare(Buffer.from(cl), Buffer.from(tag)) == 0;
         }) >= 0;
     }
@@ -297,6 +277,9 @@ class Coupon {
     resetOrderHistory() {
         const history = this.getOrderHistoryModule();
         history.splice(0);
+        this._checkedClients = [];
+        this.saveCheckedClients();
+        this.saveHistory();
 
         return this.saveHistory();
     }
@@ -376,13 +359,13 @@ class Coupon {
     }
 
     /**
-     * Create a new bar and save it locally
+     * Create a new coupon and save it locally
      *
-     * @param {String} name - the name of the bar
+     * @param {String} name - the name of the coupon
      * @param {String} frequency - the frequency at which clients can have a beer. Should be a member of Frequencies enum
      * @param {Date} date - when the frequencies align
      * @param {Badge} b - the linked final statement to get the allowed clients
-     * @return {Promise<Coupon>} - a promise that gets solved when the bar is correctly saved on the disk
+     * @return {Promise<Coupon>} - a promise that gets solved when the coupon is correctly saved on the disk
      */
     static createWithConfig(name, frequency, date, b) {
         if (typeof name !== "string") {
@@ -430,7 +413,7 @@ class Coupon {
 
     /**
      * Completely remove the Bar from disk
-     * @returns {Promise} a promise that gets resolved once the bar is deleted
+     * @returns {Promise} a promise that gets resolved once the coupon is deleted
      */
     remove() {
         return FileIO.removeFolder(FileIO.join(FilesPath.COUPON_PATH, this._dirname));
@@ -439,7 +422,7 @@ class Coupon {
 }
 
 /**
- * Enumerate the different possible frequency for a bar
+ * Enumerate the different possible frequency for a coupon
  * @readonly
  * @enum {string}
  */
