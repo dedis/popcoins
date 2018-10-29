@@ -4,22 +4,25 @@ import { AdminViewModel } from "./admin-view-model";
 import Log from "../../lib/Log";
 import { SelectedIndexChangedEventData } from "tns-core-modules/ui/tab-view";
 import { SegmentedBar } from "tns-core-modules/ui/segmented-bar";
-import * as Parties from "~/pages/admin/parties/admin-parties-page";
-import * as Conodes from "~/pages/admin/conodes/conodes-page";
-import * as Coupons from "~/pages/admin/coupons/admin-coupons-page";
+import * as Parties       from "~/pages/admin/parties/admin-parties-page";
+import * as Conodes       from "~/pages/admin/conodes/conodes-page";
+import * as Coupons       from "~/pages/admin/coupons/admin-coupons-page";
+import * as ByzCoin          from "~/pages/admin/byzcoin/byzcoin-page"
 
 // These calls are used to simulate navigatingTo and navigatingFrom for the
 // SegmentedBar, which do not support these events on the views.
 let calls = {
     to: {
-        coupons: Coupons.onFocus,
-        parties: Parties.onFocus,
-        conodes: Conodes.onFocus
+        coupons   : Coupons.onFocus,
+        parties   : Parties.onFocus,
+        conodes   : Conodes.onFocus,
+        darc      : ByzCoin.onFocus 
     },
     from: {
-        coupons: Coupons.onBlur,
-        parties: Parties.onBlur,
-        conodes: Conodes.onBlur
+        coupons   : Coupons.onBlur,
+        parties   : Parties.onBlur,
+        conodes   : Conodes.onBlur,
+        darc      : ByzCoin.onBlur
     }
 };
 
@@ -78,6 +81,12 @@ function callNavigating(index: number, call: any) {
         case 2:
             page.getViewById("frameConodes").eachChild(child => {
                 call.conodes(child);
+                return true;
+            });
+            break;
+        case 3:
+            page.getViewById("frameByzCoin").eachChild(child => {
+                call.darc(child);
                 return true;
             });
             break;

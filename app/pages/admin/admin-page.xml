@@ -14,11 +14,12 @@ Feel free to customize layouts and components to change how the tab view looks.
     </ActionBar>
 
     <StackLayout>
-        <SegmentedBar loaded="sbLoaded" class="m-5" selectedIndex="0" id="segment-admin">
+        <SegmentedBar loaded="sbLoaded" class="m-6" selectedIndex="0" id="segment-admin">
             <SegmentedBar.items>
                 <SegmentedBarItem title="Coupons"/>
                 <SegmentedBarItem title="New Parties"/>
                 <SegmentedBarItem title="Conodes"/>
+                <SegmentedBarItem title="ByzCoin"/>
             </SegmentedBar.items>
         </SegmentedBar>
 
@@ -38,6 +39,12 @@ Feel free to customize layouts and components to change how the tab view looks.
             <Frame defaultPage="pages/admin/conodes/conodes-page"
                    visibility="{{ (prop == 2) ? 'visible' : 'collapsed' }}"
                    id="frameConodes"/>
+        </StackLayout>
+
+        <StackLayout>
+            <Frame defaultPage="pages/admin/byzcoin/byzcoin-page"
+                   visibility="{{ (prop == 3) ? 'visible' : 'collapsed' }}"
+                   id="frameByzCoin"/>
         </StackLayout>
 
     </StackLayout>

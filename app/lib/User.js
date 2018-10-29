@@ -18,6 +18,7 @@ const DecodeType = require("./network/DecodeType");
 const CothorityMessages = require("./network/cothority-messages");
 const KeyPair = require("./crypto/KeyPair");
 const Defaults = require("./Defaults");
+const Dialog = require("ui/dialogs");
 
 /**
  * This class holds a user in the system and has the following fields:
@@ -220,6 +221,22 @@ class User {
             }
         })
         return this.setRoster(this._roster, true);
+    }
+
+    removeDarc(darc){
+      Dialog.alert({
+          title: "Deleting DARC",
+          message: "This is not implemented yet",
+          okButtonText: "Ok I'm sorry"
+      });
+    }
+
+    removeBCConfig(){
+      Dialog.alert({
+          title: "Deleting ByzCoin Config",
+          message: "This is not implemented yet",
+          okButtonText: "Ok I'm sorry"
+      });
     }
     /**
      * Substracts the roster given as parameter from the users roster.
