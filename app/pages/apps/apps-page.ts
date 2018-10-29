@@ -28,3 +28,9 @@ export function goCoins(args: GestureEventData) {
         moduleName: "pages/apps/coins/coins-page",
     })
 }
+
+export function goSignatures(args: GestureEventData) {
+    return args.view.page.frame.navigate({
+        moduleName: "pages/apps/signatures/signatures-page",
+    })
+}

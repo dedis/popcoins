@@ -35,3 +35,4 @@ export function showParty(party: Badge) {
     }));
     model.set("party", party);
 }
+exports.showParty = showParty;

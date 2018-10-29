@@ -89,3 +89,4 @@ export function partyTapped(args) {
         }
     });
 }
+exports.partyTapped = partyTapped;

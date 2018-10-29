@@ -122,6 +122,12 @@ ActionBar .action-bar-title {
   border-left-color: $accent-dark;
 }
 
+.basic-list-decorated-accent {
+  @extend .basic-list-decorated;
+  border-left-color: $night-dark;
+  background-color: $background-dark;
+}
+
 .basic-list > * {
   margin-top: 2;
   margin-bottom: 2;

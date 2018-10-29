@@ -1,0 +1,49 @@
+<Page
+        actionBarHidden="true"
+        class="page"
+        xmlns:nsFloatingButton="nativescript-floatingactionbutton"
+        xmlns:nsListView="nativescript-ui-listview"
+        xmlns="http://www.nativescript.org/tns.xsd">
+
+    <GridLayout class="page-content" rows="auto,auto,*" margin="2%">
+        <Label text="You don't have any DARC. Feel free to add one !"
+               textWrap="true"
+               class="empty-list-label"
+               row="0"
+               width="80%"
+               height="30%"
+               margin="30%"
+               visibility="{{ isRosterEmpty ? 'visible' : 'collapsed' }}"
+        />
+
+        <nsListView:RadListView items="{{ baseRosterModule.list }}" itemTap="adminTapped"
+                                id="listView" row="1">
+            <nsListView:RadListView.itemTemplate>
+                <GridLayout class="basic-list-decorated-accent" id="grid-layout-conode-stats" rows="*,*" columns="*,auto">
+                    <Label class="list-title" text="{{ description }}" row="0" colSpan="2" textWrap="true"/>
+                    <Label text="{{ id }}" row="1" col="0" textWrap="true"/>
+                    <Label text="{{ status }}" row="1" col="1" textWrap="true"/>
+                </GridLayout>
+            </nsListView:RadListView.itemTemplate>
+        </nsListView:RadListView>
+
+        <nsListView:RadListView items="{{ rosterModule.list }}" itemTap="conodeTapped"
+                                id="listView" row="2">
+            <nsListView:RadListView.itemTemplate>
+                <GridLayout class="basic-list-decorated" id="grid-layout-conode-stats" rows="*,*" columns="*,auto">
+                    <Label class="list-title" text="{{ description }}" row="0" colSpan="2" textWrap="true"/>
+                    <Label text="{{ id }}" row="1" col="0" textWrap="true"/>
+                    <Label text="{{ status }}" row="1" col="1" textWrap="true"/>
+                </GridLayout>
+            </nsListView:RadListView.itemTemplate>
+        </nsListView:RadListView>
+
+        <nsFloatingButton:fab tap="addConode"
+                              rowSpan="3"
+                              icon="res://ic_add_white"
+                              rippleColor="#f1f1f1"
+                              class="fab-button"/>
+
+        <ActivityIndicator busy="{{ rosterModule.isLoading }}" colSpan="2" rowSpan="3"/>
+    </GridLayout>
+</Page>
