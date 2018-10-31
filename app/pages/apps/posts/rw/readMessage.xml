@@ -25,7 +25,7 @@
     </ActionBar>
 
     <GridLayout class="page-content" rows="*" columns="*,*,auto">
-        <Label text="You don't have any party. Start by creating one !"
+        <Label text="You don't have a party yet. Start by creating one."
                textWrap="true"
                class="empty-list-label"
                colSpan="3"

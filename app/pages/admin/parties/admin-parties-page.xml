@@ -6,7 +6,7 @@
         xmlns="http://www.nativescript.org/tns.xsd">
 
     <GridLayout class="page-content" rows="auto, *" margin="2%">
-        <Label text="You don't have any party. Start by creating one !"
+        <Label text="You don't have a party yet. Start by creating one."
                textWrap="true"
                class="empty-list-label"
                row="0"

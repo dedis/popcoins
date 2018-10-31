@@ -302,9 +302,9 @@ class Coupon {
 
         const verifyInfo = RingSig.Verify(Suite, nonce, [...this._anonymitySet], scope, signature);
         if (!verifyInfo.valid) {
-            return Promise.reject("You are not part of the right group !")
+            return Promise.reject("You are not part of the right group.")
         } else if (this.isAlreadyChecked(verifyInfo.tag)) {
-            return Promise.reject("You already redeemed this coupon! Please come back later")
+            return Promise.reject("You already redeemed this coupon. Please come back later.")
         }
 
         this._checkedClients.push(verifyInfo.tag);

@@ -68,7 +68,7 @@ function addConode() {
     let actions = ["Scan QR", "Enter manually", "Chose from list"];
     let cancel = "Cancel";
     return Dialog.action({
-        message: "How would you like to add the new organizer ?",
+        message: "How would you like to add the new organizer?",
         cancelButtonText: cancel,
         actions: actions
     }).then(result => {
@@ -88,7 +88,7 @@ function conodeTapped(args) {
     const index = args.index;
     const remove = "Remove this conode";
     return Dialog.action({
-        message: "What do you want to do ?",
+        message: "What do you want to do?",
         cancelButtonText: "Cancel",
         actions: [remove]
     }).then(result => {

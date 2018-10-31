@@ -16,7 +16,6 @@ clean-install: clean
 # This is where we apply patches needed to the modules that we depend on.
 apply-patches: init-npm
 	patch -p0 < nodeify_temporary_patch.patch
-	patch -p0 < websockets_temporary_patch.patch
 
 init-npm:
 	$(npm) install

@@ -147,7 +147,7 @@ function partyTapped(args) {
     }
     return Dialog.action({
         title: "Party",
-        message: "What do you want to do ?",
+        message: "What do you want to do?",
         cancelButtonText: "Cancel",
         actions: actions
     }).then(result => {
@@ -292,7 +292,7 @@ function addParty() {
         .then((result) => {
             wallet.linkedConode = result;
             return Dialog.action({
-                message: "You are linked to your conode ! What do you want to do ?",
+                message: "You are linked to your conode! What do you want to do?",
                 cancelButtonText: "Cancel",
                 actions: ["Configure a new party", "List the proposals"]
             })

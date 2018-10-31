@@ -67,7 +67,7 @@ function couponTapped(args) {
     const actionOrders = "Show orders history"
     const actionDelete = "Delete coupon";
     return Dialog.action({
-        message: "What do you want to do ?",
+        message: "What do you want to do?",
         cancelButtonText: "Cancel",
         actions: [actionShare, actionRequest, actionOrders, actionDelete]
     }).then(result => {
@@ -98,8 +98,8 @@ function couponTapped(args) {
                                         // There is a strange mis-communication between the scan module and the
                                         // main UI - it doesn't work without a setTimeout.
                                         return Dialog.alert({
-                                            title: "Success !",
-                                            message: "The item is delivered !",
+                                            title: "Success",
+                                            message: "The item is delivered!",
                                             okButtonText: "Great"
                                         });
                                     }, 100);
@@ -176,7 +176,7 @@ function addCoupon() {
     if (gData.badges.length == 0) {
         return Dialog.alert({
             title: "No group available",
-            message: "You didn't participate to any party. Please do so to have a group to which you can get items !",
+            message: "You haven't participated in a party yet.",
             okButtonText: "Ok"
         });
     } else {

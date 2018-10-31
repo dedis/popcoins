@@ -58,8 +58,8 @@ function goBack() {
 
 function clear() {
     Dialog.confirm({
-        title: "Be careful !",
-        message: "Every orders in this history will be deleted ! Are you sure you want to continue ?",
+        title: "Be careful!",
+        message: "Every order in this history will be deleted! Are you sure you want to continue?",
         okButtonText: "Yes",
         cancelButtonText: "No"
     }).then(result => {

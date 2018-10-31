@@ -107,7 +107,7 @@ export function sendCoins(args) {
                     .then(() => {
                         setProgress();
                         return Dialog.alert({
-                            title: "Success !",
+                            title: "Success",
                             message: "" + amount + " PoP-Coins have been transferred",
                             okButtonText: "Ok"
                         });
