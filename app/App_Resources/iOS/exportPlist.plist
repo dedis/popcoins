@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+        <key>teamID</key>
+        <string>XCDPYM6LY4</string>
+        <key>method</key>
+        <string>enterprise</string>
+	<key>provisioningProfiles</key>
+        <dict>
+          <key>ch.epfl.popcoins</key>
+          <string>DEDIS Lab Popcoins In-House</string>
+        </dict>
+</dict>
+</plist>
