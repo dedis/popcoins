@@ -13,3 +13,12 @@ dedis/
 package-lock.json
 popcoins_app
 app/pages/parties/parties-page.css
+app/app-load.js
+app/app.js
+app/pages/badges/badges-page.js
+app/pages/badges/badges-view-model.js
+app/pages/parties/home-item-detail/home-item-detail-page.js
+app/pages/parties/parties-page.js
+app/pages/parties/parties-view-model.js
+app/pages/parties/shared/item.js
+app/tests/lib/DataTest.js
