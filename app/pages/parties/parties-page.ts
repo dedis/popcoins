@@ -46,24 +46,28 @@ export function addParty() {
                 infos.omniledgerId, infos.id);
         })
         .catch(error => {
-            return Dialog.prompt({
-                // This is for the iOS simulator that doesn't have a
-                // camera - in the simulator it's easy to copy/paste the
-                // party-id, whereas on a real phone you wouldn't want
-                // to do that.
-                title: "Party-ID",
-                message: "Couldn't scan party-id. Please enter party-id manually.",
-                okButtonText: "Join Party",
-                cancelButtonText: "Quit",
-                defaultText: "",
-                inputType: Dialog.inputType.text
-            }).then(r => {
-                if (r.result) {
-                    return Badge.MigrateFrom.conodeGetWallet("tls://gasser.blue:7002", Defaults.OMNILEDGER_INSTANCE_ID, r.text);
-                } else {
-                    throw new Error("Aborted party-id");
-                }
-            })
+            if (Defaults.DEBUG_MODE) {
+                return Dialog.prompt({
+                    // This is for the iOS simulator that doesn't have a
+                    // camera - in the simulator it's easy to copy/paste the
+                    // party-id, whereas on a real phone you wouldn't want
+                    // to do that.
+                    title: "Party-ID",
+                    message: "Couldn't scan party-id. Please enter party-id manually.",
+                    okButtonText: "Join Party",
+                    cancelButtonText: "Quit",
+                    defaultText: "",
+                    inputType: Dialog.inputType.text
+                }).then(r => {
+                    if (r.result) {
+                        return Badge.MigrateFrom.conodeGetWallet("tls://gasser.blue:7002", Defaults.OMNILEDGER_INSTANCE_ID, r.text);
+                    } else {
+                        throw new Error("Aborted party-id");
+                    }
+                })
+            } else {
+                Log.rcatch(error, "couldn't scan party");
+            }
 
         })
         .then(newParty => {

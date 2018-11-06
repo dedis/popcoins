@@ -46,7 +46,13 @@ function setProgress(text: string = "", width: number = 0) {
 function showParties(badges: Promise<Array<Badge.Badge>>) {
     Log.lvl1("Showing parties");
     return badges.then(badges => {
+        party = undefined;
+        page.bindingContext.qrcode = undefined;
         badges.forEach((b: Badge.Badge) => {
+            if (party != undefined){
+                // Only take first badge into account
+                return;
+            }
             if (b.state() == Badge.STATE_TOKEN) {
                 party = b;
                 page.bindingContext.balance = b.balance;
@@ -83,10 +89,10 @@ export function sendCoins(args) {
             throw new Error("Cancelled");
         }
         amount = Number(r.text);
-        if (isNaN(amount) || !(Number.isInteger(amount))) {
+        if (isNaN(amount) || !(Number.isInteger(amount)) || amount <= 0) {
             return Dialog.alert({
                 title: "Wrong input",
-                message: "You can only enter an integer number. Please try again.",
+                message: "You can only enter an integer number > 0. Please try again.",
                 okButtonText: "Ok"
             }).then(() => {
                 throw new Error("wrong input");

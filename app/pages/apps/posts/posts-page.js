@@ -31,7 +31,11 @@ function onLoaded(args) {
     setProgress();
     Timer.setTimeout(() => {
         let badges = gData.badges;
+        Log.print("setting viewModel.isEmpty = true");
+        viewModel.isEmpty = true;
+        viewModel.messageList.splice(0);
         if (badges.length > 0) {
+            Log.print("found badges");
             party = badges[0];
             conode = party.config.roster.identities[0];
             viewModel.isEmpty = false;
@@ -47,6 +51,10 @@ function onLoaded(args) {
                 .then(() => {
                     return updateMessages();
                 });
+        } else {
+            conode = undefined;
+            party = undefined;
+            viewModel.isEmpty = true;
         }
     }, 100)
 }
@@ -173,13 +181,15 @@ function addNewMessage(arg) {
         if (arg.reward < 0) {
             return Dialog.alert({
                 title: "Hacker",
-                message: "Nice try - but Jeff was there before you and it got fixed..."
+                message: "Nice try - but Jeff was there before you and it got fixed...",
+                okButtonText: "Understood",
             });
         }
         if (arg.reward > arg.balance) {
             return Dialog.alert({
                 title: "Reward > Balance",
-                message: "Please enter a reward that is smaller than the balance."
+                message: "Please enter a reward that is smaller than the balance.",
+                okButtonText: "OK",
             });
         }
         return Promise.resolve(() => {
@@ -202,7 +212,8 @@ function addNewMessage(arg) {
                     return Dialog.alert({
                         title: "Balance is not high enough",
                         message:
-                            "Please top up your account or make smaller balance in message"
+                            "Please top up your account or make smaller balance in message",
+                        okButtonText: "OK",
                     });
                 }
 
@@ -240,7 +251,8 @@ function addNewMessage(arg) {
                         pageObject.getViewById("listView").refresh();
                         return Dialog.alert({
                             title: "while sending",
-                            message: "couldn't send message: " + error
+                            message: "couldn't send message: " + error,
+                            okButtonText: "OK",
                         });
                     });
             }

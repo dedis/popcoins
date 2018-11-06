@@ -34,7 +34,7 @@ function onFocus(v) {
 }
 
 // Use onBlur here because it comes from the SegmentBar event simulation in admin-pages.
-function onBlur(v){
+function onBlur(v) {
 }
 
 function loadCoupons() {
@@ -45,17 +45,35 @@ function loadCoupons() {
         viewModel.set('isEmpty', viewModel.couponListDescriptions.length === 0);
     });
 
-    let coupon = undefined;
+    let coupons = [];
     viewModel.couponListDescriptions.splice(0);
     FileIO.forEachFolderElement(FilePaths.COUPON_PATH, function (couponFolder) {
-        coupon = new Coupon(couponFolder.name);
-        // Observables have to be nested to reflect changes
-        viewModel.couponListDescriptions.push(ObservableModule.fromObject({
-            coupon: coupon,
-            desc: coupon.getConfigModule(),
-        }));
+        coupons.push(new Coupon(couponFolder.name)
+            .catch(err =>{
+                Log.catch(err);
+                return null;
+            }));
     });
-    viewModel.isLoading = false;
+    return Promise.all(coupons)
+        .then(coupons => {
+            viewModel.isLoading = false;
+            coupons.forEach(coupon => {
+                Log.print("Got coupon:", coupon);
+                if (coupon) {
+                    Log.print("showAdmin is:", coupon.getConfigModule());
+                    if (coupon.getConfigModule().showAdmin) {
+                        // Observables have to be nested to reflect changes
+                        viewModel.couponListDescriptions.push(ObservableModule.fromObject({
+                            coupon: coupon,
+                            desc: coupon.getConfigModule(),
+                        }));
+                    }
+                }
+            });
+        })
+        .catch(() => {
+            viewModel.isLoading = false;
+        });
 }
 
 function couponTapped(args) {

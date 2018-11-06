@@ -28,7 +28,7 @@ Feel free to customize layouts and components to change how the tab view looks.
         />
 
         <GridLayout id="grid-layout" row="0"
-                    rows="auto,auto, *" columns="*, *" backgroundColor="white"
+                    rows="auto,auto,*" columns="*, *" backgroundColor="white"
                     tap="partyTap"
                     visibility="{{ party == undefined ? 'collapse' : 'visible' }}"
                     class="basic-list-decorated">

@@ -32,9 +32,13 @@ link: start-dev
 clean:
 	rm -rf node_modules platforms hooks
 
-# build: start-dev
-build:
+release-android:
 	if [ ! "$$DEDIS_ANDROID_PASS" ]; then echo "Please set DEDIS_ANDROID_PASS"; exit 1; fi
 	tns build android --key-store-path dedis-development.jks --key-store-password $$DEDIS_ANDROID_PASS \
 	    --key-store-alias popcoins --key-store-alias-password $$DEDIS_ANDROID_PASS --release
 	echo "Build successful - apk is at platforms/android/app/build/outputs/apk/release/app-release.ap"
+
+release-ios: clean
+	tns prepare ios --release
+	xcodebuild -workspace platforms/ios/popcoins.xcworkspace -scheme popcoins -archivePath platforms/ios/builds/popcoins.xcarchive archive
+	xcodebuild -exportArchive -exportOptionsPlist app/App_Resources/iOS/exportPlist.plist -archivePath platforms/ios/builds/popcoins.xcarchive -exportPath platforms/ios/builds

@@ -25,7 +25,9 @@ Feel free to customize layouts and components to change how the tab view looks.
                visibility="{{ isEmpty ? 'visible' : 'collapse' }}"
         />
 
-        <ListView items="{{ items }}" itemTap="couponTapped" class="list-group" row="1">
+        <ListView items="{{ items }}" itemTap="couponTapped" class="list-group" row="1"
+                  visibility="{{ isEmpty ? 'collapse' : 'visible' }}"
+        >
             <ListView.itemTemplate>
                 <StackLayout orientation="horizontal" class="basic-list-decorated">
                     <StackLayout>
