@@ -75,7 +75,7 @@ export class Badge {
         this._partyInstanceId = null;
         this._partyInstance = null;
         this._coinInstance = null;
-        this._balance = -1;
+        this._balance = "n/a";
         // If previous is not null, then it points to the id of the previous party
         // that must be finalized. this will mean that this party will use the same
         // public key as the previous party and only be shown once in the token
@@ -377,7 +377,7 @@ export class Badge {
             Log.lvl3("saving linked conode:", this._linkedConode);
             infos.linkedConode = Convert.serverIdentityToJson(this._linkedConode);
         }
-        if (this._balance != -1) {
+        if (this._balance != "n/a") {
             infos.balance = "" + this._balance;
         }
 

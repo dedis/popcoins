@@ -19,6 +19,7 @@ const RingSig = require("~/lib/crypto/RingSig");
  **/
 class Coupon {
     constructor(dirname) {
+        Log.print("dirname is:", dirname);
         if (typeof dirname !== "string") {
             throw new Error("dirname should be of type string or undefined");
         }
@@ -26,14 +27,16 @@ class Coupon {
         this._config = Observable.fromObject({
             name: "",
             frequency: "",
-            date: new Date(Date.now())
+            date: new Date(Date.now()),
+            showAdmin: false,
         });
         this._checkedClients = [];
         this._finalStatement = undefined;
         this._anonymitySet = new Set();
         this._orderHistory = new ObservableArray();
 
-        this.load();
+        Log.print("loading");
+        return this.load();
     }
 
     /**
@@ -68,6 +71,9 @@ class Coupon {
                 // needs to be done after, as the period may need to be reset (thus we check the config before)
                 return this.loadCheckedClients();
             })
+            .then(()=>{
+                return this;
+            })
             .catch(error => {
                 Log.catch(error);
 
@@ -80,8 +86,10 @@ class Coupon {
      * @return {Promise<void>} - a promise that gets resolved once the configuration is loaded
      */
     loadConfig() {
+        Log.print("loadConfig");
         return FileIO.getStringOf(FileIO.join(FilesPath.COUPON_PATH, this._dirname, FilesPath.COUPON_BAR_CONFIG))
             .then(configJson => {
+                Log.print("found file");
                 const config = Convert.jsonToObject(configJson);
                 const configModule = this.getConfigModule();
                 const ONE_DAY = 24 * 60 * 60 * 1000;
@@ -89,12 +97,14 @@ class Coupon {
                 configModule.name = config.name;
                 configModule.frequency = config.frequency;
                 configModule.date = new Date(parseInt(config.date)); // + permforms the conversion to Int
+                // config.showAdmin can also be undefined, so make sure it's a boolean
+                configModule.showAdmin = config.showAdmin == true;
 
-
-                Log.lvl3("val 1 = " + Date.now());
-                Log.lvl3("val 2 = " + configModule.date);
-                Log.lvl3("json = " + configJson);
-                Log.lvl3(config);
+                Log.lvl2("val 1 = " + Date.now());
+                Log.lvl2("val 2 = " + configModule.date);
+                Log.lvl2("json = " + configJson);
+                Log.lvl2(config);
+                Log.lvl2(configModule);
 
                 let numberOfDay = Math.floor((Date.now() - configModule.date.getTime()) / ONE_DAY);
                 let maxDays;
@@ -112,15 +122,12 @@ class Coupon {
                     default:
                         throw "Date is not valid"
                 }
-
-
                 Log.lvl1("nb of day =" + numberOfDay);
                 Log.lvl1("max days =" + maxDays);
 
                 if (numberOfDay >= maxDays) {
                     return this.resetPeriod()
                 }
-
 
                 return Promise.resolve();
             })
@@ -202,7 +209,8 @@ class Coupon {
         let currentConfig = this.getConfigModule();
         return Coupon.getConfigStringJson(currentConfig.name,
             currentConfig.frequency,
-            currentConfig.date);
+            currentConfig.date,
+            currentConfig.showAdmin);
     }
 
     /**
@@ -212,11 +220,12 @@ class Coupon {
      * @param date {Date}
      * @returns {string}
      */
-    static getConfigStringJson(name, frequency, date) {
+    static getConfigStringJson(name, frequency, date, showAdmin = false) {
         return Convert.objectToJson({
             name: name,
             frequency: frequency,
-            date: date.getTime()
+            date: date.getTime(),
+            showAdmin: showAdmin,
         })
     }
 

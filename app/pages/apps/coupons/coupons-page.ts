@@ -7,12 +7,13 @@ import * as dialogs from "tns-core-modules/ui/dialogs";
 
 let lib = require("~/lib");
 import * as Badge from "~/lib/pop/Badge";
+
 let Scan = lib.Scan;
 let Convert = lib.Convert;
 let RingSig = lib.crypto.RingSig;
-let Coupon = lib.Coupon;
 let FileIO = lib.FileIO;
 let FilePaths = lib.FilePaths;
+let Coupon = lib.Coupon;
 import Log from "~/lib/Log";
 import {ItemEventData} from "tns-core-modules/ui/list-view";
 import {gData} from "~/app";
@@ -24,7 +25,8 @@ export function onNavigatingTo(args: NavigatedData) {
     view = <View>args.object;
 
     view.bindingContext = fromObject({
-        items: new ObservableArray()
+        items: new ObservableArray(),
+        isEmpty: true,
     });
     return updateCoupons();
 }
@@ -36,15 +38,35 @@ export function onBack() {
 function updateCoupons() {
     view.bindingContext.items.splice(0);
     coupons = [];
-    return FileIO.forEachFolderElement(FilePaths.COUPON_PATH, function (barFolder) {
-        let c = new Coupon(barFolder.name);
-        coupons.push(c);
-        // Observables have to be nested to reflect changes
-        view.bindingContext.items.push(fromObject({
-            coupon: c,
-            desc: c.getConfigModule(),
-        }));
-    });
+    view.bindingContext.isEmpty = true;
+    if (gData.badges.length > 0) {
+        let cs: any[] = [];
+        FileIO.forEachFolderElement(FilePaths.COUPON_PATH, function (barFolder) {
+            Log.print("loading coupon", barFolder.name);
+            cs.push(new Coupon(barFolder.name)
+                .catch(err => {
+                    Log.catch(err);
+                    return null;
+                }));
+        });
+        return Promise.all(cs)
+            .then(cs => {
+                cs.forEach((c: any) => {
+                    Log.print("Found coupon:", c);
+                    if (!c) {
+                        Log.print("invalid coupon");
+                        return;
+                    }
+                    coupons.push(c);
+                    view.bindingContext.isEmpty = false;
+                    // Observables have to be nested to reflect changes
+                    view.bindingContext.items.push(fromObject({
+                        coupon: c,
+                        desc: c.getConfigModule(),
+                    }));
+                });
+            });
+    }
 }
 
 export function addCoupon(args: EventData) {

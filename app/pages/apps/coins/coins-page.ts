@@ -46,7 +46,13 @@ function setProgress(text: string = "", width: number = 0) {
 function showParties(badges: Promise<Array<Badge.Badge>>) {
     Log.lvl1("Showing parties");
     return badges.then(badges => {
+        party = undefined;
+        page.bindingContext.qrcode = undefined;
         badges.forEach((b: Badge.Badge) => {
+            if (party != undefined){
+                // Only take first badge into account
+                return;
+            }
             if (b.state() == Badge.STATE_TOKEN) {
                 party = b;
                 page.bindingContext.balance = b.balance;

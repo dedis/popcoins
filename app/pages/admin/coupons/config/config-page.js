@@ -40,13 +40,16 @@ function onNavigatingTo(args) {
     page.bindingContext = viewModel;
 
     partyArray = gData.badges;
-    if (partyArray.length == 0){
-        return Dialog.alert("No finalized badge available")
-            .then(()=>{
-                goBack();
-            });
+    if (partyArray.length == 0) {
+        return Dialog.alert({
+            title: "Error",
+            message: "No finalized badge available",
+            okButtonText: "OK",
+        }).then(() => {
+            goBack();
+        });
     }
-    partyNames = partyArray.map(b =>{
+    partyNames = partyArray.map(b => {
         return b.config.name;
     });
     dataForm.name = "";
@@ -58,17 +61,22 @@ function onNavigatingTo(args) {
  * Save the config back to the file
  */
 function save() {
-    let party = partyArray.find(p =>{
+    let party = partyArray.find(p => {
         return p.config.name == dataForm.final_statement;
     })
-    if (party == undefined){
+    if (party == undefined) {
         Log.error("didn't find chosen party - hoping the final_statement has the correct one");
         party = partyArray[dataForm.final_statement];
     }
+    Log.print(dataForm.name, dataForm.frequency);
     Coupon.createWithConfig(dataForm.name, dataForm.frequency, new Date(Date.now()), party)
-        .then(() => {
-            goBack();
-            return Promise.resolve()
+        .then(coupon => {
+            Log.print("new coupon:", coupon);
+            coupon._config.showAdmin = true;
+            return coupon.saveConfig();
+        })
+        .then(()=>{
+            return goBack();
         })
         .catch(error => {
             Log.catch(error);
