@@ -1,4 +1,7 @@
 const root = require("../../protobuf/index.js").root;
+const shajs = require('sha.js');
+const lib = require("../../../../lib");
+const Log = lib.Log.default;
 
 /**
  * Darc stands for distributed access right control. It provides a powerful access control policy that supports logical
@@ -24,6 +27,10 @@ class Darc {
     this._prevID = prevID;
     this._rules = rules;
     this._signatures = signatures;
+    this._id = 0;
+    if (this._version == 0) {
+      this._baseID = this.getID();
+    }
   }
 
   /**
@@ -63,6 +70,42 @@ class Darc {
     let darcProto = darcModel.decode(buf);
 
     return Darc.fromProtoBuf(darcProto);
+  }
+
+  static createDarcWithOwner(owner) {
+     let rules = new Map();
+     rules.set("_sign", owner);
+     rules.set("invoke:evolve", owner);
+     return new Darc(0, "", 0, 0, rules, []);
+  }
+
+  getID() {
+    if (this._id == 0) {
+      let sha = shajs('sha256').update(this._version).update(this._description).update(this._baseID).update(this._prevID);
+      Log.print("Before for : " + sha.digest('hex'));
+      for (var [rule, expr] of this._rules) {
+        sha = sha.update(rule);
+        Log.print("Step : " + sha.digest('hex'));
+        sha = sha.update(expr);
+        Log.print("Step II : " + sha.digest('hex'));
+      }
+      Log.print("After for : " + sha.digest('hex'));
+      this._id = sha.digest('hex');
+    }
+    Log.print("ID : " + this._id + "\n");
+    return this._id;
+  }
+
+  getIDString() {
+    return "darc:" + this.getID();
+  }
+
+  getBaseIDString() {
+    return "darc:" + this._baseID;
+  }
+
+  getPrevIDString() {
+    return "darc:" + this._prevID;
   }
 }
 

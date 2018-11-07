@@ -60,4 +60,10 @@ module.exports = {
      * Message files
      */
     MESSAGES_PATH: "shared/res/files/messages",
+
+    /**
+     * ByzCoin Files
+     */
+    DARCS: "darcs.json",
+    BCCONFIG: "bcconfig.json",
 }

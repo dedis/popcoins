@@ -19,6 +19,7 @@ const CothorityMessages = require("./network/cothority-messages");
 const KeyPair = require("./crypto/KeyPair");
 const Defaults = require("./Defaults");
 const Dialog = require("ui/dialogs");
+const Darc = require("./cothority/omniledger/darc/Darc.js");
 
 /**
  * This class holds a user in the system and has the following fields:
@@ -52,6 +53,7 @@ class User {
         this.load().catch(err=>{
             Log.rcatch(err);
         })
+        this._darcs = [];
     }
 
     /**
@@ -221,14 +223,6 @@ class User {
             }
         })
         return this.setRoster(this._roster, true);
-    }
-
-    removeDarc(darc){
-      Dialog.alert({
-          title: "Deleting DARC",
-          message: "This is not implemented yet",
-          okButtonText: "Ok I'm sorry"
-      });
     }
 
     removeBCConfig(){
@@ -460,7 +454,7 @@ class User {
             this._keyPair = new KeyPair();
             return this._keyPair.save(FilePaths.KEY_PAIR);
         }).then(() => {
-            return Promise.resolve(this._keypair);
+            return Promise.resolve(this._keyPair);
         });
     }
 
@@ -549,6 +543,63 @@ class User {
                 }
                 return Promise.reject(error);
             });
+    }
+
+    addDarc(darc){
+      this._darcs.push(darc);
+      this.saveDarcs();
+    }
+
+    removeDarc(baseID){
+        Log.print("removing darc : " + baseID);
+        for (i = this._darcs.length - 1; i >= 0 ; i--) {
+          if (this._darcs[i]._baseID == baseID) {
+            Log.print("confirming rm darc : " + this._darcs[i]._baseID);
+            this._darcs.splice(i, 1);
+          }
+        }
+        this.saveDarcs();
+    }
+
+    loadDarcs(){
+      return 0;
+      return FileIO.getStringOf(FilePaths.DARCS)
+          .then(jsonDarcs => {
+              if (jsonDarcs.length > 0) {
+                  return JSON.parse(jsonDarcs);
+              } else {
+                  return [];
+              }
+          })
+          .then(darcs => {
+              this._darcs = darcs;
+          })
+    }
+
+    saveDarcs(){
+      return 0;
+      let toWrite = "";
+      if (this._darcs.length > 0) {
+          try {
+              toWrite = JSON.stringify(this._darcs);
+          } catch(e){
+              Log.catch(e, "cannot convert");
+          }
+      }
+      Log.print("writing darcs:", toWrite);
+
+      return FileIO.writeStringTo(FilePaths.DARCS, toWrite)
+          .catch((error) => {
+              Log.rcatch(error, "error while setting darcs:");
+          })
+          .then(() => {
+              Log.print("saved darcs to:", FilePaths.DARCS);
+          });
+    }
+
+    getDarcs(){
+        this.loadDarcs();
+        return this._darcs;
     }
 }
 
