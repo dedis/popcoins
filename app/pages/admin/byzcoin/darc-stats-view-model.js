@@ -2,6 +2,7 @@ const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const StatusExtractor = require("~/lib/network/StatusExtractor");
 const Helper = require("~/lib/Helper");
+const Darc = require("../../../lib/cothority/omniledger/darc/Darc.js");
 
 const viewModel = ObservableModule.fromObject({
   statsList: new ObservableArray()
@@ -23,35 +24,37 @@ function setUpDarcStatsList() {
    * Loads the stats into the list.
    * @param conodeStatus - the conode to fetch stats from
    */
-  myStatsList.load = function (darcStatus) {
+  myStatsList.load = function (darc) {
     let stat = {
       title: "",
       info: ""
     };
 
     stat.title = "Description";
-    stat.info = "Test DARC";
+    stat.info = darc._description;
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
     stat.title = "BaseID (hex)";
-    stat.info = "darc:hexadecimalid";
+    stat.info = darc.getBaseIDString();
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
     stat.title = "ID (hex)";
-    stat.info = "darc:hexadecimalid";
+    stat.info = darc.getIDString();;
+    pushStat(viewModel.statsList, Helper.deepCopy(stat));
+
+    stat.title = "PrevID (hex)";
+    stat.info = darc.getPrevIDString();;
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
     stat.title = "Depth";
-    stat.info = "1";
+    stat.info = darc._version;
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
-    stat.title = "_sign";
-    stat.info = "ed25519:ownerkey";
-    pushStat(viewModel.statsList, Helper.deepCopy(stat));
-
-    stat.title = "_evolve";
-    stat.info = "ed25519:ownerkey & ed25519:adminkey";
-    pushStat(viewModel.statsList, Helper.deepCopy(stat));
+    for (var [rule, expr] of darc._rules) {
+      stat.title = rule;
+      stat.info = expr;
+      pushStat(viewModel.statsList, Helper.deepCopy(stat));
+    }
   };
 
   /**

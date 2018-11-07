@@ -11,6 +11,7 @@ const Helper = lib.Helper;
 const User = lib.User;
 const Convert = lib.Convert;
 const Log = lib.Log.default;
+const Darc = require("../../../lib/cothority/omniledger/darc/Darc.js");
 
 const viewModel = Observable.fromObject({
     isRosterEmpty: true,
@@ -37,15 +38,7 @@ function onFocus(p) {
         viewModel.set('isRosterEmpty', viewModel.rosterModule.list.length === 0);
     });
 
-    Timer.setTimeout(() => {
-        return loadConodeList()
-            .then(() => {
-                // Poll the statuses every 1m
-                timerId = Timer.setInterval(() => {
-                    loadConodeList();
-                }, 60000)
-            })
-    }, 100);
+    Timer.setTimeout(() => loadDarcList());
 }
 
 // Use onBlur here because it comes from the SegmentBar event simulation in admin-pages.
@@ -59,29 +52,33 @@ function onDrawerButtonTap(args) {
     sideDrawer.showDrawer();
 }
 
-function loadConodeList() {
-    return User.getRosterStatus()
-        .then(status => {
-            viewModel.baseRosterModule.list.splice(0);
-            viewModel.baseRosterModule.list.push({
-              description: "ByzCoin Config",
-              id:          "bc:hexadecimalid",
-              status:      "Roster",
-            });
-            viewModel.baseRosterModule.list.push({
-              description: "Pending Signature Requests",
-              id:          "ed25519:mypublickey",
-              status:      "1",
-            });
-            viewModel.rosterModule.list.splice(0);
-            viewModel.isRosterEmpty = true;
-            viewModel.rosterModule.list.push({
-              description: "Test DARC",
-              id:          "darc:hexadecimalid",
-              status:      "1",
-            });
-            page.getViewById("listView").refresh();
-        });
+function loadDarcList() {
+    const darcs = User.getDarcs();
+    viewModel.baseRosterModule.list.splice(0);
+    viewModel.baseRosterModule.list.push({
+      description: "ByzCoin Config",
+      id:          "bc:hexadecimalid",
+      status:      "Roster",
+    });
+    viewModel.baseRosterModule.list.push({
+      description: "Pending Signature Requests",
+      id:          "ed25519:mypublickey",
+      status:      "1",
+    });
+
+    viewModel.rosterModule.list.splice(0);
+    viewModel.isRosterEmpty = true;
+
+    for (i = 0; i < darcs.length; i++) {
+      viewModel.rosterModule.list.push({
+        description: darcs[i]._description,
+        id:          darcs[i].getBaseIDString(),
+        status:      darcs[i]._version,
+      });
+    }
+
+
+    page.getViewById("listView").refresh();
 }
 
 function adminTapped(args) {
@@ -94,28 +91,19 @@ function adminTapped(args) {
     }
 }
 
-function conodeTapped(args) {
+function darcTapped(args) {
   const index = args.index;
-  let conodeAndStatusPair = User._statusList[index];
-  if (conodeAndStatusPair !== undefined) {
-    Frame.topmost().navigate({
-      moduleName: "pages/admin/byzcoin/darc-stats-page",
-      bindingContext: conodeAndStatusPair
-    });
-  } else {
-    return Dialog.alert({
-      title: "No Status for this DARC",
-      message: "Please check your conodes information and try to reload.",
-      okButtonText: "Ok"
-    });
-  }
+  Frame.topmost().navigate({
+    moduleName: "pages/admin/byzcoin/darc-stats-page",
+    bindingContext: index
+  });
 }
 
-function addConode() {
-  Dialog.alert({
-      title: "Adding a new DARC",
-      message: "This is not implemented yet",
-      okButtonText: "Ok I'm sorry"
+function newDarc() {
+  User.loadKeyPair().then(kp => {
+    User.addDarc(Darc.createDarcWithOwner(kp.public.pick().string()));
+    User.addDarc(Darc.createDarcWithOwner("Alice"));
+    onFocus(view);
   });
 }
 
@@ -138,10 +126,10 @@ function displayPendingRequests(args) {
 }
 
 module.exports = {
-    loadConodeList,
+    loadDarcList,
     adminTapped,
-    conodeTapped,
-    addConode,
+    darcTapped,
+    newDarc,
     onFocus,
     onBlur
 }
