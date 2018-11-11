@@ -85,9 +85,9 @@ function adminTapped(args) {
     const index = args.index;
 
     if (index == 0) {
-      displayByzCoinInfo(args);
+      displayByzCoinInfo();
     } else if (index == 1) {
-      displayPendingRequests(args);
+      displayPendingRequests();
     }
 }
 
@@ -107,21 +107,17 @@ function newDarc() {
   });
 }
 
-function displayByzCoinInfo(args) {
-  const index = args.index;
-  let conodeAndStatusPair = User._statusList[index];
+function displayByzCoinInfo() {
   Frame.topmost().navigate({
       moduleName: "pages/admin/byzcoin/bc-stats-page",
-      bindingContext: conodeAndStatusPair
+      bindingContext: ""
   });
 }
 
-function displayPendingRequests(args) {
-  const index = args.index;
-  let conodeAndStatusPair = User._statusList[index];
+function displayPendingRequests() {
   Frame.topmost().navigate({
       moduleName: "pages/admin/byzcoin/signatures/signatures-page",
-      bindingContext: conodeAndStatusPair
+      bindingContext: ""
   });
 }
 
