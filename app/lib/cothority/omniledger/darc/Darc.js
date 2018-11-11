@@ -82,14 +82,10 @@ class Darc {
   getID() {
     if (this._id == 0) {
       let sha = shajs('sha256').update(this._version).update(this._description).update(this._baseID).update(this._prevID);
-      Log.print("Before for : " + sha.digest('hex'));
       for (var [rule, expr] of this._rules) {
         sha = sha.update(rule);
-        Log.print("Step : " + sha.digest('hex'));
         sha = sha.update(expr);
-        Log.print("Step II : " + sha.digest('hex'));
       }
-      Log.print("After for : " + sha.digest('hex'));
       this._id = sha.digest('hex');
     }
     Log.print("ID : " + this._id + "\n");
@@ -106,6 +102,20 @@ class Darc {
 
   getPrevIDString() {
     return "darc:" + this._prevID;
+  }
+
+  evolve() {
+    this._version++;
+    this._id = 0;
+    return this;
+  }
+
+  getRule(index) {
+    let i = 0;
+    for (var [rule, expr] of this._rules) {
+      if (i == index) return [rule, expr];
+      i++;
+    }
   }
 }
 
