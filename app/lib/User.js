@@ -19,7 +19,8 @@ const CothorityMessages = require("./network/cothority-messages");
 const KeyPair = require("./crypto/KeyPair");
 const Defaults = require("./Defaults");
 const Dialog = require("ui/dialogs");
-const Darc = require("./cothority/omniledger/darc/Darc.js");
+const Darc = require("../lib/cothority/omniledger/darc/Darc.js");
+const Config = require("./cothority/omniledger/Config.js");
 
 /**
  * This class holds a user in the system and has the following fields:
@@ -54,6 +55,7 @@ class User {
             Log.rcatch(err);
         })
         this._darcs = [];
+        this._config = null;
     }
 
     /**
@@ -225,12 +227,19 @@ class User {
         return this.setRoster(this._roster, true);
     }
 
+    setBCConfig(config) {
+        if (!(config instanceof Config)) {
+          throw new Error("config not of type Config")
+        }
+        this._config = config;
+        this.saveBCConfig();
+    }
+
     removeBCConfig(){
-      Dialog.alert({
-          title: "Deleting ByzCoin Config",
-          message: "This is not implemented yet",
-          okButtonText: "Ok I'm sorry"
-      });
+      this._config = null;
+      this._darcs.splice(0, this._darcs.length);
+      this.saveBCConfig();
+      this.saveDarcs();
     }
     /**
      * Substracts the roster given as parameter from the users roster.
@@ -562,7 +571,6 @@ class User {
     }
 
     loadDarcs(){
-      return 0;
       return FileIO.getStringOf(FilePaths.DARCS)
           .then(jsonDarcs => {
               if (jsonDarcs.length > 0) {
@@ -572,16 +580,20 @@ class User {
               }
           })
           .then(darcs => {
-              this._darcs = darcs;
-          })
+              var tab = [];
+              for (var i = 0 ; i < darcs.length ; i++) {
+                  tab.push(Darc.createDarcFromJSON(darcs[i]));
+              }
+              return tab;
+          });
+
     }
 
     saveDarcs(){
-      return 0;
       let toWrite = "";
       if (this._darcs.length > 0) {
           try {
-              toWrite = JSON.stringify(this._darcs);
+              toWrite = JSON.stringify(this._darcs.map(d => d.adaptForJSON()));
           } catch(e){
               Log.catch(e, "cannot convert");
           }
@@ -598,8 +610,52 @@ class User {
     }
 
     getDarcs(){
-        this.loadDarcs();
-        return this._darcs;
+        return this.loadDarcs().then(tab => {
+          this._darcs = tab;
+          return this._darcs;
+        }).catch(err => Log.print(err));
+    }
+
+    saveBCConfig(){
+      let toWrite = "";
+      if (this._config != null) {
+          try {
+              toWrite = JSON.stringify(this._config);
+          } catch(e){
+              Log.catch(e, "cannot convert");
+          }
+      }
+      Log.print("writing bcconfig:", toWrite);
+
+      return FileIO.writeStringTo(FilePaths.BCCONFIG, toWrite)
+          .catch((error) => {
+              Log.rcatch(error, "error while setting bcconfig:");
+          })
+          .then(() => {
+              Log.print("saved config to:", FilePaths.BCCONFIG);
+          });
+    }
+
+    loadBCConfig(){
+      return FileIO.getStringOf(FilePaths.BCCONFIG)
+          .then(json => {
+              if (json.length > 0) {
+                  return JSON.parse(json);
+              } else {
+                  return [];
+              }
+          })
+          .then(elems => {
+              if (elems.length == 0) return null;
+              else return new Config(elems._blockInterval, elems._roster);
+          });
+    }
+
+    getBCConfig(){
+      return this.loadBCConfig().then(cfg => {
+        this._config = cfg;
+        return this._config;
+      }).catch(err => Log.print(err));
     }
 }
 

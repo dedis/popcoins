@@ -3,6 +3,7 @@ const ObservableArray = require("data/observable-array").ObservableArray;
 const StatusExtractor = require("~/lib/network/StatusExtractor");
 const Helper = require("~/lib/Helper");
 const Darc = require("../../../lib/cothority/omniledger/darc/Darc.js");
+const Log  = require("../../../lib/Log").default;
 
 const viewModel = ObservableModule.fromObject({
   statsList: new ObservableArray()
@@ -29,6 +30,8 @@ function setUpDarcStatsList() {
       title: "",
       info: ""
     };
+
+    Log.print(darc);
 
     stat.title = "Description";
     stat.info = darc._description;

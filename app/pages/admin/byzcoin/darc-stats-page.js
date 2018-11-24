@@ -17,11 +17,12 @@ let pageObject = undefined;
 function onLoaded(args) {
     const page = args.object;
     pageObject = page.page;
-    darc = User.getDarcs()[page.bindingContext];
-    page.bindingContext = darcStatsViewModel;
-
-    myStatsList.empty();
-    myStatsList.load(darc);
+    User.getDarcs().then(darcs => {
+      darc = darcs[page.bindingContext];
+      page.bindingContext = darcStatsViewModel;
+      myStatsList.empty();
+      myStatsList.load(darc);
+    });
 }
 
 /**

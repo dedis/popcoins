@@ -2,15 +2,21 @@ const ObservableModule = require("data/observable");
 const ObservableArray = require("data/observable-array").ObservableArray;
 const StatusExtractor = require("~/lib/network/StatusExtractor");
 const Helper = require("~/lib/Helper");
+const User = require("~/lib/User");
+const Log = require("~/lib/Log").default;
 
 const viewModel = ObservableModule.fromObject({
+  isBCConfigDefined: false,
   statsList: new ObservableArray()
 });
 
 function BCStatsViewModel() {
   setUpBCStatsList();
-
   return viewModel;
+}
+
+function setDefined(defined) {
+  viewModel.isBCConfigDefined = defined;
 }
 
 /**
@@ -23,27 +29,24 @@ function setUpBCStatsList() {
    * Loads the stats into the list.
    * @param conodeStatus - the conode to fetch stats from
    */
-  myStatsList.load = function (bcStatus) {
-    let stat = {
-      title: "",
-      info: ""
-    };
+  myStatsList.load = function (cfg) {
 
-    stat.title = "Roster";
-    stat.info = "RosterDesc";
-    pushStat(viewModel.statsList, Helper.deepCopy(stat));
+    if (cfg != null) {
+      viewModel.isBCConfigDefined = true;
 
-    stat.title = "ByzCoin ID (hex)";
-    stat.info = "bc:hexadecimalid";
-    pushStat(viewModel.statsList, Helper.deepCopy(stat));
+      let stat = {
+        title: "",
+        info: ""
+      };
 
-    stat.title = "Genesis Darc";
-    stat.info = "darc:hexadecimalid";
-    pushStat(viewModel.statsList, Helper.deepCopy(stat));
+      stat.title = "Block Interval";
+      stat.info = cfg._blockInterval;
+      pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
-    stat.title = "Admin Identity";
-    stat.info = "ed25519:hexadecimalpublickey";
-    pushStat(viewModel.statsList, Helper.deepCopy(stat));
+      stat.title = "Roster";
+      stat.info = cfg._roster;
+      pushStat(viewModel.statsList, Helper.deepCopy(stat));
+    } else viewModel.isBCConfigDefined = false;
   };
 
   /**
@@ -68,3 +71,4 @@ function pushStat(list, statToAdd) {
 }
 
 module.exports = BCStatsViewModel;
+module.exports.setDefined = setDefined;
