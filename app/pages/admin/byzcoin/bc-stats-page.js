@@ -6,20 +6,22 @@ const myStatsList = bcStatsViewModel.statsList;
 const lib = require("../../../lib");
 const User = lib.User;
 const Convert = lib.Convert;
+const Config = require("../../../lib/cothority/omniledger/Config.js");
+const Log = require("~/lib/Log").default;
 
-let bc = undefined;
-let bcStatus = undefined;
 let pageObject = undefined;
 
 function onLoaded(args) {
     const page = args.object;
     pageObject = page.page;
-    bc = page.bindingContext.bc;
-    bcStatus = page.bindingContext;
-    page.bindingContext = bcStatsViewModel;
 
-    myStatsList.empty();
-    myStatsList.load(bcStatus);
+    Log.print("Loading page");
+
+    User.getBCConfig().then(cfg => {
+      page.bindingContext = bcStatsViewModel;
+      myStatsList.empty();
+      myStatsList.load(cfg);
+    }).catch(err => Log.print(err));
 }
 
 /**
@@ -41,10 +43,21 @@ function goBack() {
 }
 
 function deleteConfig() {
-    return User.removeBCConfig()
+    User.removeBCConfig();
+    BCStatsViewModel.setDefined(false);
+    myStatsList.empty();
+    myStatsList.load(User._config);
+}
+
+function addBCConfig() {
+    User.setBCConfig(new Config(1, null));
+    BCStatsViewModel.setDefined(true);
+    myStatsList.empty();
+    myStatsList.load(User._config);
 }
 
 module.exports.onLoaded = onLoaded;
 module.exports.displayQrOfBC = displayQrOfBC;
 module.exports.goBack = goBack;
 module.exports.deleteConfig = deleteConfig;
+module.exports.addBCConfig = addBCConfig;
