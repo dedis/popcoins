@@ -120,8 +120,11 @@ export class LogC {
 
     catch(e, ...args) {
         let errMsg = e;
-        if (e.message) {
-            errMsg = e.message;
+        if (e.stack) {
+          errMsg = e.stack;
+        }
+        else if (e.message) {
+          errMsg = e.message;
         }
         console.log("C : " + this.printCaller(e, 1) + " -> (" + errMsg + ") " +
             this.joinArgs(args));
