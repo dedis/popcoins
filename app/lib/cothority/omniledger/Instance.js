@@ -20,9 +20,9 @@ class Instance {
     if (!proof.matches()) {
       throw "This is a proof of absence";
     }
-    const contractId = Array.from(proof.values[1]).map(c => String.fromCharCode(c)).join("");
+    const contractId = proof.stateChangeBody.contractID
 
-    return new Instance(proof.key, contractId, proof.values[2], proof.values[0]);
+    return new Instance(proof.key, contractId, proof.stateChangeBody.darcID, proof.stateChangeBody.value);
   }
 
   /**

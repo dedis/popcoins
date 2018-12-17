@@ -8,52 +8,55 @@ const User = lib.User;
 const Convert = lib.Convert;
 const Config = require("../../../lib/cothority/omniledger/Config.js");
 const Log = require("~/lib/Log").default;
+const Scan = lib.Scan;
 
 let pageObject = undefined;
 
 function onLoaded(args) {
-    const page = args.object;
-    pageObject = page.page;
+  const page = args.object;
+  pageObject = page.page;
 
-    Log.print("Loading page");
+  Log.print("Loading page");
 
-    User.getBCConfig().then(cfg => {
-      page.bindingContext = bcStatsViewModel;
-      myStatsList.empty();
-      myStatsList.load(cfg);
-    }).catch(err => Log.print(err));
+  User.getBCConfig().then(cfg => {
+    page.bindingContext = bcStatsViewModel;
+    myStatsList.empty();
+    myStatsList.load(cfg);
+  }).catch(err => Log.print(err));
 }
 
 /**
  * Changes the frame to the QR displaying of the conodes.
  */
 function displayQrOfBC() {
-    pageObject.showModal("pages/common/qr-code/qr-code-page", {
-        textToShow: "bcconfig",
-        title: "ByzCoin Configuration"
-    }, () => {
-    }, true);
+  pageObject.showModal("pages/common/qr-code/qr-code-page", {
+    textToShow: JSON.stringify("\"ByzCoinID\":\"" + User._config._byzcoinID.toString() + "\""),
+    title: "ByzCoin Configuration"
+  }, () => {}, true);
 }
 
 /**
  * Go back to the previous page
  */
 function goBack() {
-    topmost().goBack();
+  topmost().goBack();
 }
 
 function deleteConfig() {
-    User.removeBCConfig();
-    BCStatsViewModel.setDefined(false);
-    myStatsList.empty();
-    myStatsList.load(User._config);
+  User.removeBCConfig();
+  BCStatsViewModel.setDefined(false);
+  myStatsList.empty();
+  myStatsList.load(User._config);
 }
 
 function addBCConfig() {
-    User.setBCConfig(new Config(1, null));
-    BCStatsViewModel.setDefined(true);
-    myStatsList.empty();
-    myStatsList.load(User._config);
+  Scan.scan().then(string => {
+    User.scanBCConfig(string).then(() => {
+      BCStatsViewModel.setDefined(true);
+      myStatsList.empty();
+      myStatsList.load(User._config);
+    })
+  }).catch(err => Log.print(err));
 }
 
 module.exports.onLoaded = onLoaded;

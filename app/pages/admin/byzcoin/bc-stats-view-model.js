@@ -29,7 +29,7 @@ function setUpBCStatsList() {
    * Loads the stats into the list.
    * @param conodeStatus - the conode to fetch stats from
    */
-  myStatsList.load = function (cfg) {
+  myStatsList.load = function(cfg) {
 
     if (cfg != null) {
       viewModel.isBCConfigDefined = true;
@@ -39,20 +39,24 @@ function setUpBCStatsList() {
         info: ""
       };
 
-      stat.title = "Block Interval";
-      stat.info = cfg._blockInterval;
+      stat.title = "ByzCoin ID";
+      stat.info = cfg._byzcoinID;
       pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
-      stat.title = "Roster";
-      stat.info = cfg._roster;
-      pushStat(viewModel.statsList, Helper.deepCopy(stat));
+      try {
+        for (var si of cfg.roster.identities) {
+          stat.title = si.tcpAddr;
+          stat.info = si.public;
+          pushStat(viewModel.statsList, Helper.deepCopy(stat));
+        }
+      } catch (ignore) {}
     } else viewModel.isBCConfigDefined = false;
   };
 
   /**
    * Empties the list of stats.
    */
-  myStatsList.empty = function () {
+  myStatsList.empty = function() {
     while (myStatsList.length) {
       myStatsList.pop();
     }

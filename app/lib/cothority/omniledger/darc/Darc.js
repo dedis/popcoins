@@ -1,6 +1,7 @@
 const root = require("../../protobuf/index.js").root;
 const crypto = require('crypto-browserify');
 const Log = require("../../../../lib/Log").default;
+const Convert = require("~/lib/Convert");
 
 /**
  * Darc stands for distributed access right control. It provides a powerful access control policy that supports logical
@@ -73,25 +74,46 @@ class Darc {
     return Darc.fromProtoBuf(darcProto);
   }
 
+  static spawnDarcWithOwner(gdarc, owner) {
+    if (gdarc == null) {
+      return null
+    } else {
+      Log.print("Spawning new DARC from :")
+      Log.print(gdarc._baseID)
+      const d = Darc.createDarcWithOwner(owner)
+      d._prevID = gdarc._baseID
+      return d
+    }
+  }
+
   static createDarcWithOwner(owner) {
     const nonce = Math.floor(Math.random() * 0xffffffff);
-     console.dir(new Map().set.toString());
-     var rules = new Map();
-     rules.set("_sign", owner);
-     rules.set("invoke:evolve", owner);
-     let darc = new Darc(0, "DARC #" + nonce.toString(16), 0, 0, rules, []);
-     return darc;
+    console.dir(new Map().set.toString());
+    var rules = new Map();
+    rules.set("_sign", owner);
+    rules.set("invoke:evolve", owner);
+    let darc = new Darc(0, "DARC #" + nonce.toString(16), 0, 0, rules, []);
+    return darc;
   }
 
   static createDarcFromJSON(d) {
-    let version = d._version  !== undefined   ? d._version        : 0 ;
-    let desc = d._description !== undefined   ? d._description    : "";
-    let bid  = d._baseID      !== undefined   ? d._baseID         : 0 ;
-    let pid  = d._prevID      !== undefined   ? d._prevID         : 0 ;
-    let rules = d._rules     instanceof Array ? new Map(d._rules) : new Map();
-    let sigs = d._signatures instanceof Array ? d._signatures     : [];
+    Log.print(d._version);
+    let version = d._version !== undefined ? d._version : 0;
+    let desc = d._description !== undefined ? d._description : "";
+    let bid = d._baseID !== undefined ? d._baseID : 0;
+    let pid = d._prevID !== undefined ? d._prevID : 0;
+    let rules = d._rules instanceof Array ? new Map(d._rules) : new Map();
+    let sigs = d._signatures instanceof Array ? d._signatures : [];
 
     return new Darc(version, desc, bid, pid, rules, sigs);
+  }
+
+  static createDarcFromByzCoin(d) {
+    const rules = new Map()
+    for (var e of d._rules.get("list")) {
+      rules.set(e.action, String.fromCharCode.apply(null, e.expr.slice(8)))
+    }
+    return new Darc(d._version.toNumber(), String.fromCharCode.apply(null, d._description), d._baseID, Convert.byteArrayToHex(d._prevID), rules, d._signatures)
   }
 
   getID() {
@@ -122,7 +144,8 @@ class Darc {
     return "darc:" + this._prevID;
   }
 
-  evolve() {
+  evolve(pubk, func) {
+    func(this)
     this._version++;
     this._id = 0;
     return this;
@@ -138,8 +161,8 @@ class Darc {
 
   adaptForJSON() {
     var rules = [];
-    for (var [r,e] of this._rules) {
-      rules.push([r,e]);
+    for (var [r, e] of this._rules) {
+      rules.push([r, e]);
     }
     return new Darc(this._version, this._description, this._baseID, this._prevID, rules, this._signatures);
   }

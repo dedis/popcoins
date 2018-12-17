@@ -14,13 +14,13 @@ const Darc = require("../../../lib/cothority/omniledger/darc/Darc.js");
 const User = lib.User;
 
 const viewModel = Observable.fromObject({
-    isRosterEmpty: true,
-    rosterModule: Observable.fromObject({
-        list: new ObservableArray()
-    }),
-    baseRosterModule: Observable.fromObject({
-        list: new ObservableArray()
-    })
+  isRosterEmpty: true,
+  rosterModule: Observable.fromObject({
+    list: new ObservableArray()
+  }),
+  baseRosterModule: Observable.fromObject({
+    list: new ObservableArray()
+  })
 });
 
 let view = undefined;
@@ -29,66 +29,66 @@ let page = undefined;
 
 // Use onFocus here because it comes from the SegmentBar event simulation in admin-pages.
 function onFocus(p) {
-    view = p;
-    view.bindingContext = viewModel;
-    page = view.page;
+  view = p;
+  view.bindingContext = viewModel;
+  page = view.page;
 
-    // Bind isEmpty to the length of the array
-    viewModel.rosterModule.list.on(ObservableArray.changeEvent, () => {
-        viewModel.set('isRosterEmpty', viewModel.rosterModule.list.length === 0);
-    });
+  // Bind isEmpty to the length of the array
+  viewModel.rosterModule.list.on(ObservableArray.changeEvent, () => {
+    viewModel.set('isRosterEmpty', viewModel.rosterModule.list.length === 0);
+  });
 
-    Timer.setTimeout(() => loadDarcList());
+  Timer.setTimeout(() => loadDarcList());
 }
 
 // Use onBlur here because it comes from the SegmentBar event simulation in admin-pages.
 function onBlur() {
-    // remove polling when page is leaved
-    Timer.clearInterval(timerId);
+  // remove polling when page is leaved
+  Timer.clearInterval(timerId);
 }
 
 function onDrawerButtonTap(args) {
-    const sideDrawer = Frame.topmost().getViewById("sideDrawer");
-    sideDrawer.showDrawer();
+  const sideDrawer = Frame.topmost().getViewById("sideDrawer");
+  sideDrawer.showDrawer();
 }
 
 function loadDarcList() {
-    User.getBCConfig().then(cfg => User.getDarcs().then(darcs => {
-      viewModel.baseRosterModule.list.splice(0);
-      viewModel.baseRosterModule.list.push({
-        description: "ByzCoin Config",
-        id:          (User._config != null) ? User._config._roster : "BC Config not set",
-        status:      (User._config != null) ? User._config._blockInterval : "0",
+  User.getBCConfig().then(cfg => User.getDarcs().then(darcs => {
+    viewModel.baseRosterModule.list.splice(0);
+    viewModel.baseRosterModule.list.push({
+      description: "ByzCoin Config",
+      id: (User._config != null) ? User._config._roster : "BC Config not set",
+      status: (User._config != null) ? User._config._byzcoinID : "0",
+    });
+    viewModel.baseRosterModule.list.push({
+      description: "Pending Signature Requests",
+      id: User.getKeyPair().public.string(),
+      status: "1",
+    });
+
+    viewModel.rosterModule.list.splice(0);
+    viewModel.isRosterEmpty = true;
+
+    for (i = 0; i < darcs.length; i++) {
+      viewModel.rosterModule.list.push({
+        description: darcs[i]._description,
+        id: darcs[i].getBaseIDString(),
+        status: darcs[i]._version,
       });
-      viewModel.baseRosterModule.list.push({
-        description: "Pending Signature Requests",
-        id:          User.getKeyPair().public.string(),
-        status:      "1",
-      });
+    }
 
-      viewModel.rosterModule.list.splice(0);
-      viewModel.isRosterEmpty = true;
-
-      for (i = 0; i < darcs.length; i++) {
-        viewModel.rosterModule.list.push({
-          description: darcs[i]._description,
-          id:          darcs[i].getBaseIDString(),
-          status:      darcs[i]._version,
-        });
-      }
-
-      page.getViewById("listView").refresh();
-    })).catch(err => Log.print("err"));
+    page.getViewById("listView").refresh();
+  })).catch(err => Log.print("err"));
 }
 
 function adminTapped(args) {
-    const index = args.index;
+  const index = args.index;
 
-    if (index == 0) {
-      displayByzCoinInfo();
-    } else if (index == 1) {
-      displayPendingRequests();
-    }
+  if (index == 0) {
+    displayByzCoinInfo();
+  } else if (index == 1) {
+    displayPendingRequests();
+  }
 }
 
 function darcTapped(args) {
@@ -101,9 +101,37 @@ function darcTapped(args) {
 
 function newDarc() {
   if (User._config != null) {
-    kp = User.getKeyPair();
-    User.addDarc(Darc.createDarcWithOwner(kp.public.string()));
-    onFocus(view);
+    Dialog.confirm({
+      title: "Adding DARC",
+      message: "How do you want to add a new DARC?",
+      okButtonText: "From an existing one (QR Code)",
+      cancelButtonText: "Spawn a new DARC",
+      neutralButtonText: "Cancel"
+    }).then(function(r) {
+      if (r == true) {
+        Scan.scan().then(str => {
+          User.scanDarc(str) //.then(() => {
+          BCStatsViewModel.setDefined(true);
+          myStatsList.empty();
+          myStatsList.load(User._config);
+          //})
+          //}).catch(err => Log.print(err));
+        })
+      } else if (r == false) {
+        kp = User.getKeyPair();
+        const d = Darc.spawnDarcWithOwner(User.getGeneratingDarc(), kp.public.string())
+        if (d == null) {
+          Dialog.alert({
+            title: "Error",
+            message: "None of your DARCs has the right to spawn:darc",
+            okButtonText: "OK"
+          });
+        } else {
+          User.addDarc(d);
+        }
+      }
+      onFocus(view);
+    }).catch(err => Log.print(err));
   } else {
     Dialog.alert({
       title: "Error",
@@ -115,23 +143,23 @@ function newDarc() {
 
 function displayByzCoinInfo() {
   Frame.topmost().navigate({
-      moduleName: "pages/admin/byzcoin/bc-stats-page",
-      bindingContext: ""
+    moduleName: "pages/admin/byzcoin/bc-stats-page",
+    bindingContext: ""
   });
 }
 
 function displayPendingRequests() {
   Frame.topmost().navigate({
-      moduleName: "pages/admin/byzcoin/signatures/signatures-page",
-      bindingContext: ""
+    moduleName: "pages/admin/byzcoin/signatures/signatures-page",
+    bindingContext: ""
   });
 }
 
 module.exports = {
-    loadDarcList,
-    adminTapped,
-    darcTapped,
-    newDarc,
-    onFocus,
-    onBlur
+  loadDarcList,
+  adminTapped,
+  darcTapped,
+  newDarc,
+  onFocus,
+  onBlur
 }

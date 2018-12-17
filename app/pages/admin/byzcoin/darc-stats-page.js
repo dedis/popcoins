@@ -15,92 +15,113 @@ let darcStatus = undefined;
 let pageObject = undefined;
 
 function onLoaded(args) {
-    const page = args.object;
-    pageObject = page.page;
-    User.getDarcs().then(darcs => {
-      darc = darcs[page.bindingContext];
-      page.bindingContext = darcStatsViewModel;
-      myStatsList.empty();
-      myStatsList.load(darc);
-    });
+  const page = args.object;
+  pageObject = page.page;
+  User.getDarcs().then(darcs => {
+    darc = darcs[page.bindingContext];
+    page.bindingContext = darcStatsViewModel;
+    myStatsList.empty();
+    myStatsList.load(darc);
+  });
 }
 
 /**
  * Changes the frame to the QR displaying of the conodes.
  */
 function displayQrOfDarc() {
-    pageObject.showModal("pages/common/qr-code/qr-code-page", {
-        textToShow: darc.getBaseIDString(),
-        title: darc._description
-    }, () => {
-    }, true);
+  pageObject.showModal("pages/common/qr-code/qr-code-page", {
+    textToShow: JSON.stringify(darc.adaptForJSON()),
+    title: darc._description
+  }, () => {}, true);
 }
 
 /**
  * Go back to the previous page
  */
 function goBack() {
-    topmost().goBack();
+  topmost().goBack();
 }
 
 function deleteDarc() {
-    User.removeDarc(darc._baseID);
-    goBack();
+  User.removeDarc(darc._baseID);
+  goBack();
 }
 
 function infoTapped(args) {
-    const index = args.index;
+  const index = args.index;
 
-    switch (index) {
-      case 0:
-        Dialog.prompt({
-          title: "Edit Description",
-          okButtonText: "OK",
-          cancelButtonText: "Cancel",
-          defaultText: darc._description
-        }).then(function (r) {
-          if (r.result) darc.evolve()._description = r.text;
-          myStatsList.empty();
-          myStatsList.load(darc);
-        });
-        break;
-      case 1:
-      case 2:
-      case 3:
-      case 4:
-        Dialog.alert({
-            title: "Error",
-            message: "This field is not editable",
-            okButtonText: "Ok"
-        });
-        break;
-      default:
-        [rule, expr] = darc.getRule(index - 5);
-        Dialog.prompt({
-          title: "Edit Rule",
-          message: rule,
-          okButtonText: "OK",
-          cancelButtonText: "Cancel",
-          neutralButtonText: "Delete Rule",
-          defaultText: expr
-        }).then(function (r) {
-          if (r.result) darc.evolve()._rules.set(rule, r.text);
-          if (r.result == undefined) {
-            if (rule == "_sign" || rule == "invoke:evolve") {
+  switch (index) {
+    case 0:
+      Dialog.prompt({
+        title: "Edit Description",
+        okButtonText: "OK",
+        cancelButtonText: "Cancel",
+        defaultText: darc._description
+      }).then(function(r) {
+        if (r.result) {
+          if (User.evolveDarc(darc, d => d._description = r.text) == null) {
+            Dialog.alert({
+              title: "Error",
+              message: "You do not have the right to evolve this DARC",
+              okButtonText: "Ok"
+            });
+          }
+        }
+        myStatsList.empty();
+        myStatsList.load(darc);
+      });
+      break;
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+      Dialog.alert({
+        title: "Error",
+        message: "This field is not editable",
+        okButtonText: "Ok"
+      });
+      break;
+    default:
+      [rule, expr] = darc.getRule(index - 5);
+      Dialog.prompt({
+        title: "Edit Rule",
+        message: rule,
+        okButtonText: "OK",
+        cancelButtonText: "Cancel",
+        neutralButtonText: "Delete Rule",
+        defaultText: expr
+      }).then(function(r) {
+        if (r.result) {
+          if (User.evolveDarc(darc, d => d._rules.set(rule, r.text)) == null) {
+            Dialog.alert({
+              title: "Error",
+              message: "You do not have the right to evolve this DARC",
+              okButtonText: "Ok"
+            });
+          }
+        }
+        if (r.result == undefined) {
+          if (rule == "_sign" || rule == "invoke:evolve") {
+            Dialog.alert({
+              title: "Error",
+              message: "This rule cannot be deleted",
+              okButtonText: "Ok"
+            });
+          } else {
+            if (User.evolveDarc(darc, d => d._rules.delete(rule)) == null) {
               Dialog.alert({
-                  title: "Error",
-                  message: "This rule cannot be deleted",
-                  okButtonText: "Ok"
+                title: "Error",
+                message: "You do not have the right to evolve this DARC",
+                okButtonText: "Ok"
               });
-            } else {
-              darc.evolve()._rules.delete(rule);
             }
           }
-          myStatsList.empty();
-          myStatsList.load(darc);
-        });
+        }
+        myStatsList.empty();
+        myStatsList.load(darc);
+      });
       break;
-    }
+  }
 }
 
 function newRule() {
@@ -110,17 +131,24 @@ function newRule() {
     okButtonText: "Next",
     cancelButtonText: "Cancel",
     defaultText: ""
-  }).then(function (r1) {
+  }).then(function(r1) {
     if (r1.result) {
       Dialog.prompt({
         title: "Add Rule",
-        message: "Please enter the expression",
+        message: "Please enter the expression (leave blank for current user)",
         okButtonText: "OK",
         cancelButtonText: "Cancel",
         defaultText: ""
-      }).then(function (r2) {
+      }).then(function(r2) {
         if (r2.result) {
-          darc.evolve()._rules.set(r1.text, r2.text);
+          if (r2.text == "") r2.text = User.getKeyPair().public.string()
+          if (User.evolveDarc(darc, d => d._rules.set(r1.text, r2.text)) == null) {
+            Dialog.alert({
+              title: "Error",
+              message: "You do not have the right to evolve this DARC",
+              okButtonText: "Ok"
+            });
+          }
           myStatsList.empty();
           myStatsList.load(darc);
         }

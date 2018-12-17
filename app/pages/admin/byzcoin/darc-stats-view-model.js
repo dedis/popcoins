@@ -31,8 +31,6 @@ function setUpDarcStatsList() {
       info: ""
     };
 
-    Log.print(darc);
-
     stat.title = "Description";
     stat.info = darc._description;
     pushStat(viewModel.statsList, Helper.deepCopy(stat));
