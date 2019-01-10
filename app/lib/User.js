@@ -501,6 +501,7 @@ class User {
    * @returns {Promise} - a promise that gets resolved once the complete roster is loaded into memory
    */
   loadRoster() {
+    return EMPTY_ROSTER
     return FileIO.getStringOf(FilePaths.ROSTER)
       .then(jsonRoster => {
         if (jsonRoster.length > 0) {
