@@ -144,11 +144,12 @@ class Darc {
     return "darc:" + this._prevID;
   }
 
-  evolve(pubk, func) {
-    func(this)
-    this._version++;
-    this._id = 0;
-    return this;
+  evolve(func) {
+    const evolution = Object.assign({}, this)
+    func(evolution)
+    evolution._version++;
+    evolution._id = 0;
+    return evolution;
   }
 
   getRule(index) {

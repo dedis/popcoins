@@ -565,11 +565,33 @@ class User {
 
   /**
    * Adds a DARC to the list of DARCs saved locally
+   * If a DARC with the same BaseID exists, it will be overwriten if its version number is lower; otherwise nothing happens
    * @param {Darc} darc - The DARC to be added
    */
   addDarc(darc) {
-    this._darcs.push(darc);
-    this.saveDarcs();
+    const d = this.getDarc(darc.baseID)
+    if (d == null) {
+      this._darcs.push(darc);
+      this.saveDarcs();
+    } else if (d._version < darc._version) {
+      this.removeDarc(d._baseID)
+      this._darcs.push(darc);
+      this.saveDarcs();
+    }
+  }
+
+  /**
+   * Gets the DARC that has this baseID
+   * @param {Uint8Array} baseID - the BaseID of the DARC to be found
+   * @returns {Darc} - the DARC which BaseID has been given ; null if no DARC has this BaseID
+   */
+  getDarc(baseID) {
+    for (i = this._darcs.length - 1; i >= 0; i--) {
+      if (this._darcs[i]._baseID == baseID) {
+        return this._darcs[i]
+      }
+    }
+    return null
   }
 
   /**
@@ -768,9 +790,12 @@ class User {
   evolveDarc(darc, func) {
     if (darc._rules.get("invoke:evolve").includes(this.getKeyPair().public.string())) return null
     else {
-      darc.evolve(this.getKeyPair().public, func)
-      this.saveDarcs()
-      return darc
+      evolution = darc.evolve(func)
+
+      //Insert transaction code here. If it fails it should ignore further lines
+
+      this.addDarc(evolution)
+      return evolution
     }
   }
 }
