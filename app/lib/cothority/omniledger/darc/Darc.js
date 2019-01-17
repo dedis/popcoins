@@ -74,6 +74,11 @@ class Darc {
     return Darc.fromProtoBuf(darcProto);
   }
 
+  /**
+   * Creates a DARC object using the specified string as a representation of the owner's public keys
+   * @param {string} owner - A string hexadecimal representation of the owner's public key
+   * @return {Darc} - The created DARC
+   */
   static createDarcWithOwner(owner) {
     const nonce = Math.floor(Math.random() * 0xffffffff);
     console.dir(new Map().set.toString());
@@ -84,6 +89,11 @@ class Darc {
     return darc;
   }
 
+  /**
+   * Creates a DARC from the parsed object from its JSON representation
+   * @param {Object} d - The object parsed from the JSON representation of the Darc
+   * @returns {Darc} - The created DARC
+   */
   static createDarcFromJSON(d) {
     Log.print(d._version);
     let version = d._version !== undefined ? d._version : 0;
@@ -96,6 +106,11 @@ class Darc {
     return new Darc(version, desc, bid, pid, rules, sigs);
   }
 
+  /**
+   * Creates a DARC from its representation retrieved from ByzCoin service
+   * @param {Object} d - The object retrieved from ByzCoin representing a DARC
+   * @returns {Darc} - The created DARC
+   */
   static createDarcFromByzCoin(d) {
     const rules = new Map()
     for (var e of d._rules.get("list")) {
@@ -104,6 +119,10 @@ class Darc {
     return new Darc(d._version.toNumber(), String.fromCharCode.apply(null, d._description), d._baseID, Convert.byteArrayToHex(d._prevID), rules, d._signatures)
   }
 
+  /**
+   * Gets the ID of the DARC, or computes it if it does not exist yet
+   * @returns {Uint8Array} - The ID of the DARC
+   */
   getID() {
     if (this._id == 0) {
       const sha = crypto.createHash('sha256');
@@ -120,24 +139,46 @@ class Darc {
     return this._id;
   }
 
+  /**
+   * Returns a string representation of the ID of the DARC
+   * @return {string} - String representation of the ID of the DARC
+   */
   getIDString() {
     return "darc:" + this.getID();
   }
 
+  /**
+   * Returns a string representation of the BaseID of the DARC
+   * @return {string} - String representation of the BaseID of the DARC
+   */
   getBaseIDString() {
     return "darc:" + this._baseID;
   }
 
+  /**
+   * Returns a string representation of the PrevID of the DARC
+   * @return {string} - String representation of the PrevID of the DARC
+   */
   getPrevIDString() {
     return "darc:" + this._prevID;
   }
 
+  /**
+   * Returns a copy of this DARC that has been evolved and applied changes specified in func
+   * @param {Function : {Darc} => ()} func - The function to be applied to the darc during the evolution
+   * @returns An evolved clone of this DARC
+   */
   evolve(func) {
     const d = new Darc(this._version + 1, this._description, this._baseID, this._prevID, this._rules, this._signatures)
     func(d)
     return d
   }
 
+  /**
+   * Returns a Rule of this DARC from this index
+   * @param {int} index
+   * @returns {[string, string]} - The rule at index of this DARC
+   */
   getRule(index) {
     let i = 0;
     for (var [rule, expr] of this._rules) {
@@ -146,6 +187,10 @@ class Darc {
     }
   }
 
+  /**
+   * Returns a object that is a stringifiable representation of this DARC
+   * @returns {Object} - stringifiable representation of this DARC
+   */
   adaptForJSON() {
     var rules = [];
     for (var [r, e] of this._rules) {

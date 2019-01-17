@@ -798,6 +798,11 @@ class User {
     }
   }
 
+  /**
+   * Spawns a DARC, using any DARC on which the user has the right to spawn:darc as the Generating Darc
+   * @throws Error if the user does not have any DARC with the right to spawn:darc
+   * @returns {Darc} - The newly spawned DARC
+   */
   spawnDarc() {
     const gdarc = this.getGeneratingDarc()
     if (gdarc == null) {
