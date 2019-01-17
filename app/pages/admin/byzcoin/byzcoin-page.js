@@ -110,27 +110,21 @@ function newDarc() {
     }).then(function(r) {
       if (r == true) {
         Scan.scan().then(str => {
-          User.scanDarc(str) //.then(() => {
-          BCStatsViewModel.setDefined(true);
-          myStatsList.empty();
-          myStatsList.load(User._config);
-          //})
-          //}).catch(err => Log.print(err));
+          User.scanDarc(str)
+          onFocus(view)
         })
       } else if (r == false) {
-        kp = User.getKeyPair();
-        const d = Darc.spawnDarcWithOwner(User.getGeneratingDarc(), kp.public.string())
-        if (d == null) {
+        try {
+          User.spawnDarc()
+          onFocus(view)
+        } catch (err) {
           Dialog.alert({
             title: "Error",
-            message: "None of your DARCs has the right to spawn:darc",
+            message: err.message,
             okButtonText: "OK"
           });
-        } else {
-          User.addDarc(d);
         }
       }
-      onFocus(view);
     }).catch(err => Log.print(err));
   } else {
     Dialog.alert({

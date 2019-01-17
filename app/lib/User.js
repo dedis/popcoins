@@ -501,7 +501,6 @@ class User {
    * @returns {Promise} - a promise that gets resolved once the complete roster is loaded into memory
    */
   loadRoster() {
-    return EMPTY_ROSTER
     return FileIO.getStringOf(FilePaths.ROSTER)
       .then(jsonRoster => {
         if (jsonRoster.length > 0) {
@@ -569,7 +568,7 @@ class User {
    * @param {Darc} darc - The DARC to be added
    */
   addDarc(darc) {
-    const d = this.getDarc(darc.baseID)
+    const d = this.getDarc(darc._baseID)
     if (d == null) {
       this._darcs.push(darc);
       this.saveDarcs();
@@ -581,7 +580,7 @@ class User {
   }
 
   /**
-   * Gets the DARC that has this baseID
+   * Gets a DARC that has this baseID
    * @param {Uint8Array} baseID - the BaseID of the DARC to be found
    * @returns {Darc} - the DARC which BaseID has been given ; null if no DARC has this BaseID
    */
@@ -788,14 +787,33 @@ class User {
    * @returns {Darc} - The evolved DARC - or null if User does not have the rights to evolve the DARC
    */
   evolveDarc(darc, func) {
-    if (darc._rules.get("invoke:evolve").includes(this.getKeyPair().public.string())) return null
+    if (!darc._rules.get("invoke:evolve").includes(this.getKeyPair().public.string())) return null
     else {
-      evolution = darc.evolve(func)
+      const evolution = darc.evolve(func)
 
       //Insert transaction code here. If it fails it should ignore further lines
 
       this.addDarc(evolution)
       return evolution
+    }
+  }
+
+  spawnDarc() {
+    const gdarc = this.getGeneratingDarc()
+    if (gdarc == null) {
+      throw new Error("None of your DARC has the right to spawn:darc")
+    } else {
+      Log.print("Spawning new DARC from :")
+      Log.print(gdarc._baseID)
+      const d = Darc.createDarcWithOwner(this.getKeyPair().public.string())
+      d._prevID = gdarc._baseID
+
+      Log.print(d.adaptForJSON())
+
+      //Insert transaction code here. If it fails it should ignore further lines
+
+      this.addDarc(d)
+      return d
     }
   }
 }

@@ -74,18 +74,6 @@ class Darc {
     return Darc.fromProtoBuf(darcProto);
   }
 
-  static spawnDarcWithOwner(gdarc, owner) {
-    if (gdarc == null) {
-      return null
-    } else {
-      Log.print("Spawning new DARC from :")
-      Log.print(gdarc._baseID)
-      const d = Darc.createDarcWithOwner(owner)
-      d._prevID = gdarc._baseID
-      return d
-    }
-  }
-
   static createDarcWithOwner(owner) {
     const nonce = Math.floor(Math.random() * 0xffffffff);
     console.dir(new Map().set.toString());
@@ -145,11 +133,9 @@ class Darc {
   }
 
   evolve(func) {
-    const evolution = Object.assign({}, this)
-    func(evolution)
-    evolution._version++;
-    evolution._id = 0;
-    return evolution;
+    const d = new Darc(this._version + 1, this._description, this._baseID, this._prevID, this._rules, this._signatures)
+    func(d)
+    return d
   }
 
   getRule(index) {

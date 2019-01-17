@@ -65,6 +65,8 @@ function infoTapped(args) {
               message: "You do not have the right to evolve this DARC",
               okButtonText: "Ok"
             });
+          } else {
+            goBack()
           }
         }
         myStatsList.empty();
@@ -98,6 +100,8 @@ function infoTapped(args) {
               message: "You do not have the right to evolve this DARC",
               okButtonText: "Ok"
             });
+          } else {
+            goBack()
           }
         }
         if (r.result == undefined) {
@@ -114,6 +118,8 @@ function infoTapped(args) {
                 message: "You do not have the right to evolve this DARC",
                 okButtonText: "Ok"
               });
+            } else {
+              goBack()
             }
           }
         }
@@ -148,6 +154,8 @@ function newRule() {
               message: "You do not have the right to evolve this DARC",
               okButtonText: "Ok"
             });
+          } else {
+            goBack()
           }
           myStatsList.empty();
           myStatsList.load(darc);

@@ -12,7 +12,7 @@ export let OMNILEDGER_INSTANCE_ID = "0ec0129a820a2f6e8dd16f15660cf563f2a1bfc29dc
 
 // export let DEDIS_CONODES = ["10.0.0.1:7002", "10.0.0.1:7004", "10.0.0.1:7006"];
 // export let DEDIS_CONODES = ["gasser.blue:7002", "gasser.blue:7004", "gasser.blue:7006"];
-export let DEDIS_CONODES  = ["192.168.42.71:7002", "192.168.42.71:7004", "192.168.42.71:7006"]
+export let DEDIS_CONODES  = ["192.168.43.91:7002", "192.168.43.91:7004", "192.168.43.91:7006"]
 // export let DEDIS_CONODES = ["conode.dedis.ch:7770", "gasser.blue:7770", "dedis.nella.org:6879"];
 
 // If this is set to true, loading a party from disk will ignore the omniledger-id stored.

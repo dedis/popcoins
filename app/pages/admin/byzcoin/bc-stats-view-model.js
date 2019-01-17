@@ -39,7 +39,7 @@ function setUpBCStatsList() {
         info: ""
       };
 
-      stat.title = "ByzCoin ID";
+      stat.title = "ByzCoin ID (base64)";
       stat.info = cfg._byzcoinID;
       pushStat(viewModel.statsList, Helper.deepCopy(stat));
 
