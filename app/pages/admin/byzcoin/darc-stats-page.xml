@@ -1,0 +1,38 @@
+<Page class="page"
+      loaded="onLoaded"
+      xmlns:nsFloatingButton="nativescript-floatingactionbutton">
+
+    <ActionBar class="action-bar">
+        <NavigationButton text="Go Back" android:icon="res://ic_arrow_back" tap="goBack"/>
+        <Label class="action-bar-title" text="DARC Stats"/>
+        <ActionItem tap="deleteDarc"
+                    android:icon="res://ic_delete_white"
+                    ios.systemIcon="16" ios.position="right"
+                    text="Delete" android.position="actionBar"/>
+        <ActionItem tap="displayQrOfDarc"
+                    android:icon="res://ic_share_white"
+                    ios.systemIcon="9" ios.position="right"
+                    text="QR" android.position="actionBar"/>
+    </ActionBar>
+
+    <GridLayout rows="*, auto" columns="*">
+
+        <ListView items="{{ statsList, statsList }}" row="0" itemTap="infoTapped">
+            <ListView.itemTemplate>
+                <GridLayout class="basic-list" rows="auto,auto" columns="*">
+                    <Label class="list-title" text="{{ info.title }}" textAlignment="left" textWrap="true" row="0"/>
+                    <Label text="{{ info.info }}" textAlignment="left" textWrap="true" row="1"/>
+                </GridLayout>
+            </ListView.itemTemplate>
+        </ListView>
+
+
+        <nsFloatingButton:fab tap="newRule"
+                              rowSpan="1"
+                              icon="res://ic_add_white"
+                              rippleColor="#f1f1f1"
+                              class="fab-button"/>
+    </GridLayout>
+
+
+</Page>

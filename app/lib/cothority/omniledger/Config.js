@@ -8,19 +8,19 @@ const identity = require("../identity");
 class Config {
   /**
    * Creates a config from knwon informations
-   * @param {number} blockInterval
+   * @param {number} byzcoinID
    * @param {Roster} roster that hosts the OMniLedger
    */
-  constructor(blockInterval, roster) {
-    this._blockInterval = blockInterval;
+  constructor(byzcoinID, roster) {
+    this._byzcoinID = byzcoinID;
     this._roster = roster;
   }
 
   /**
    * @return {number} - the blockinterval used
    */
-  get blockInterval() {
-    return this._blockInterval;
+  get byzcoinID() {
+    return this._byzcoinID;
   }
 
   /**
@@ -42,7 +42,7 @@ class Config {
     const configModel = root.lookup("ChainConfig");
     let config = configModel.decode(buf);
 
-    return new Config(config.blockinterval, identity.Roster.fromProtobuf(config.roster, false));
+    return new Config(config.byzcoinID, identity.Roster.fromProtobuf(config.roster, false));
   }
 
   /**
@@ -54,7 +54,7 @@ class Config {
   equals(config) {
     if (config === undefined) return false;
     if (!(config instanceof Config)) return false;
-    return this._blockInterval === config.blockInterval;
+    return this._byzcoinID === config.byzcoinID;
   }
 }
 
